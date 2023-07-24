@@ -22,6 +22,16 @@ visuallyImpairedCommentary = "NAR qad"
 
 def InitUsageConfig():
 	config.usage = ConfigSubsection()
+	config.usage.dns = ConfigSelection(default="dhcp-router", choices=[
+		("dhcp-router", _("DHCP Router")),
+		("staticip", _("Static IP Router")),
+		("google", _("Google DNS")),
+		("quad9security", _("Quad9 Security")),
+		("quad9nosecurity", _("Quad9 No Security")),
+		("cloudflare", _("Cloudflare")),
+		("opendns", _("OpenDNS")),
+		("opendns-2", _("OpenDNS-2"))
+	])
 	config.usage.subnetwork = ConfigYesNo(default=True)
 	config.usage.subnetwork_cable = ConfigYesNo(default=True)
 	config.usage.subnetwork_terrestrial = ConfigYesNo(default=True)
