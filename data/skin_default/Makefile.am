@@ -26,6 +26,7 @@ dist_install_DATA = \
 	celserviceeventprogressbar.png \
 	div-h.png \
 	div-v.png \
+	div-h-fhd.png \
 	epg_more.png \
 	epg_next.png \
 	epg_now.png \
@@ -46,6 +47,7 @@ dist_install_DATA = \
 	progress_big.png \
 	progress_medium.png \
 	progress_small.png \
+	rc_circle.png
 	rcold.png \
 	rc.png \
 	rc0.png \
@@ -61,4 +63,11 @@ dist_install_DATA = \
 	timeline.png \
 	unhandled-key.png \
 	volume.png \
-	wizard.png
+	wizard.png \
+	yellow_circle23x23.png \
+	style4.jpg \
+	style4hd.jpg \
+	style5.jpg \
+	style5hd.jpg \
+	style6.jpg \
+	style6hd.jpg
