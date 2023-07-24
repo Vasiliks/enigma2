@@ -1,4 +1,4 @@
-SUBDIRS = countries display fonts extensions keymaps skin_default rc_models hw_info
+SUBDIRS = countries display fonts extensions keymaps skin_default rc_models hw_info VirtualKeyBoard_Icons
 
 dist_pkgdata_DATA = \
 	black.mvi \
@@ -19,7 +19,9 @@ dist_pkgdata_DATA = \
 	skin_subtitles.xml \
 	startwizard.xml \
 	unicable.xml \
-	userinterfacepositionerwizard.xml
+	hd-testcard.mvi \
+	userinterfacepositionerwizard.xml \
+	lcd_picon_default.png
 
 iso-639-3.pck: $(srcdir)/iso-639-3.tab
 	python3 $(srcdir)/convert-iso-639-3.py $< $@
