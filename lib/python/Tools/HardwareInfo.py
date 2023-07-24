@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-from Tools.Directories import SCOPE_SKIN, resolveFilename
+from os.path import join
+from Tools.Directories import SCOPE_SKINS, resolveFilename
 
 hw_info = None
 
 
 class HardwareInfo:
-	device_name = _("unavailable")
+	device_name = None
 	device_brandname = None
 	device_model = None
+	device_brand = None
 	device_version = ""
 	device_revision = ""
 	device_hdmi = False
@@ -17,42 +18,53 @@ class HardwareInfo:
 		if hw_info:
 			return
 		hw_info = self
-
 		print("[HardwareInfo] Scanning hardware info")
 		# Version
 		try:
 			self.device_version = open("/proc/stb/info/version").read().strip()
 		except:
 			pass
-
 		# Revision
 		try:
 			self.device_revision = open("/proc/stb/info/board_revision").read().strip()
 		except:
 			pass
-
 		# Name ... bit odd, but history prevails
 		try:
 			self.device_name = open("/proc/stb/info/model").read().strip()
 		except:
 			pass
-
 		# Brandname ... bit odd, but history prevails
 		try:
 			self.device_brandname = open("/proc/stb/info/brandname").read().strip()
 		except:
 			pass
-
 		# Model
-		try:
-			self.device_model = open("/proc/stb/info/model").read().strip()
-		except:
-			pass
-
-		# standard values
-		self.device_model = self.device_model or self.device_name
-		self.device_hw = self.device_model
-		self.machine_name = self.device_model
+		for line in open((resolveFilename(SCOPE_SKINS, 'hw_info/hw_info.cfg')), 'r'):
+			if not line.startswith('#') and not line.isspace():
+				l = line.strip().replace('\t', ' ')
+				if ' ' in l:
+					infoFname, prefix = l.split()
+				else:
+					infoFname = l
+					prefix = ""
+				try:
+					self.device_model = prefix + open("/proc/stb/info/" + infoFname).read().strip()  # this variable starts machine you can also use proc boxtype
+					break
+				except:
+					pass
+			self.device_model = self.device_model or self.device_name
+			self.device_hw = self.device_model
+			self.machine_name = self.device_model
+		if self.device_model.startswith(("et9", "et4", "et5", "et6", "et7")):
+			self.machine_name = "%sx00" % self.device_model[:3]
+		elif self.device_model == "et11000":
+			self.machine_name = "et1x000"
+		elif self.device_brandname == "Zgemma":
+			self.device_model = self.device_name
+			self.machine_name = self.device_name
+		else:
+			self.machine_name = self.device_model
 
 		if self.device_revision:
 			self.device_string = "%s (%s-%s)" % (self.device_model, self.device_revision, self.device_version)
@@ -60,10 +72,8 @@ class HardwareInfo:
 			self.device_string = "%s (%s)" % (self.device_model, self.device_version)
 		else:
 			self.device_string = self.device_hw
-
 		# only some early DMM boxes do not have HDMI hardware
-		self.device_hdmi =  getHaveHDMI() == "True"
-
+		self.device_hdmi = self.device_model not in ("dm800", "dm8000")
 		print("[HardwareInfo] Detected: " + self.get_device_string())
 
 	def get_device_name(self):
