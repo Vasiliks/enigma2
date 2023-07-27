@@ -47,7 +47,7 @@ dist_install_DATA = \
 	progress_big.png \
 	progress_medium.png \
 	progress_small.png \
-	rc_circle.png
+	rc_circle.png \
 	rcold.png \
 	rc.png \
 	rc0.png \
