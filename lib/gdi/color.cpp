@@ -1,29 +1,29 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
-
+	
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
-
+ 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -49,28 +49,28 @@ int convertSetupColor2RGB(const unsigned char r, const unsigned char g, const un
 
 int convertSetupAlpha2Alpha(unsigned char alpha)
 {
-	if(alpha == 0)
+	if(alpha == 0) 
 		return 0xFF;
-	else if(alpha >= 100)
+	else if(alpha >= 100) 
 		return 0;
-
+	
 	int a = 100 - alpha;
 	int ret = a * 0xFF / 100;
-
+	
 	return ret;
 }
 
 uint8_t limitChar(int c)
 {
 	uint8_t ret;
-
-	if (c < 0)
+	
+	if (c < 0) 
 		ret = 0;
-	else if (c > 0xFF)
+	else if (c > 0xFF) 
 		ret = 0xFF;
-	else
+	else 
 		ret = (uint8_t)c;
-
+	
 	return ret;
 }
 
@@ -189,13 +189,13 @@ void Rgb2Hsv(RgbColor *rgb, HsvColor *hsv)
 	float f_H = 0;
 	float f_S = 0;
 
-	if (fabsf(delta) < FLT_EPSILON)
-	{
+	if (fabsf(delta) < FLT_EPSILON) 
+	{ 
 		//gray
 		f_S = 0;
 		f_H = 0;
-	}
-	else
+	} 
+	else 
 	{
 		f_S = (delta / max);
 		if (f_R >= max)
@@ -216,11 +216,11 @@ void Rgb2Hsv(RgbColor *rgb, HsvColor *hsv)
 
 uint32_t* gradientColorToTransparent(const gRGB &grad_col, uint32_t *gradientBuf, int bSize, int /*mode*/, int /*intensity*/)
 {
-	if (gradientBuf == NULL)
+	if (gradientBuf == NULL) 
 	{
 		gradientBuf = (uint32_t*) malloc(bSize * sizeof(uint32_t));
-
-		if (gradientBuf == NULL)
+		
+		if (gradientBuf == NULL) 
 		{
 			return NULL;
 		}
@@ -228,7 +228,7 @@ uint32_t* gradientColorToTransparent(const gRGB &grad_col, uint32_t *gradientBuf
 
 	uint32_t col = grad_col.argb();
 	col^=0xFF000000;
-
+	
 	memset((void*)gradientBuf, '\0', bSize * sizeof(uint32_t));
 
 	int start_box = 0;
@@ -237,7 +237,7 @@ uint32_t* gradientColorToTransparent(const gRGB &grad_col, uint32_t *gradientBuf
 	uint8_t tr_max = 0x20;
 	float factor = (float)(tr_min - tr_max) / (float)(end_box - start_box);
 
-	for (int i = start_box; i < end_box; i++)
+	for (int i = start_box; i < end_box; i++) 
 	{
 
 		uint8_t tr = limitChar((int)(factor * (float)i + tr_max) + 1);
@@ -256,11 +256,11 @@ uint32_t* gradientColorToTransparent(const gRGB &grad_col, uint32_t *gradientBuf
 
 uint32_t* gradientOneColor(const gRGB &grad_col, uint32_t *gradientBuf, int bSize, int mode, int intensity, uint8_t v_min, uint8_t v_max, uint8_t s)
 {
-	if (gradientBuf == NULL)
+	if (gradientBuf == NULL) 
 	{
 		gradientBuf = (uint32_t*) malloc(bSize * sizeof(uint32_t));
-
-		if (gradientBuf == NULL)
+		
+		if (gradientBuf == NULL) 
 		{
 			return NULL;
 		}
@@ -268,7 +268,7 @@ uint32_t* gradientOneColor(const gRGB &grad_col, uint32_t *gradientBuf, int bSiz
 
 	uint32_t col = grad_col.argb();
 	col^=0xFF000000;
-
+	
 	memset((void*)gradientBuf, '\0', bSize * sizeof(uint32_t));
 
 	HsvColor hsv;
@@ -278,15 +278,15 @@ uint32_t* gradientOneColor(const gRGB &grad_col, uint32_t *gradientBuf, int bSiz
 	uint8_t tr = SysColor2Hsv(col, &hsv);
 	bool noSaturation = (hsv.s <= (float)0.05);
 
-	if (intensity == INT_EXTENDED)
+	if (intensity == INT_EXTENDED) 
 	{
 		min_v   = v_min;
 		max_v   = v_max;
 		col_s   = s;
 	}
-	else
+	else 
 	{
-		switch (intensity)
+		switch (intensity) 
 		{
 			case INT_LIGHT:
 				min_v   = 0x40;
@@ -301,7 +301,7 @@ uint32_t* gradientOneColor(const gRGB &grad_col, uint32_t *gradientBuf, int bSiz
 		}
 	}
 
-	switch (mode)
+	switch (mode) 
 	{
 		case DARK2LIGHT:
 		case DARK2LIGHT2DARK:
@@ -322,7 +322,7 @@ uint32_t* gradientOneColor(const gRGB &grad_col, uint32_t *gradientBuf, int bSiz
 	int v  = start_v; int v_ = v;
 	float factor_v = ((float)end_v - (float)v) / (float)bSize1;
 
-	for (int i = 0; i < bSize1; i++)
+	for (int i = 0; i < bSize1; i++) 
 	{
 		v = v_ + (int)(factor_v * (float)i);
 		hsv.v = (float)limitChar(v) / (float)255;
@@ -330,10 +330,10 @@ uint32_t* gradientOneColor(const gRGB &grad_col, uint32_t *gradientBuf, int bSiz
 		gradientBuf[i] = Hsv2SysColor(&hsv, tr);
 	}
 
-	if ((mode == DARK2LIGHT2DARK) || (mode == LIGHT2DARK2LIGHT))
+	if ((mode == DARK2LIGHT2DARK) || (mode == LIGHT2DARK2LIGHT)) 
 	{
 		bSize1 = bSize - bSize1;
-		for (int i = 0; i < bSize1; i++)
+		for (int i = 0; i < bSize1; i++) 
 		{
 			v = v_ + (int)(factor_v * (float)i);
 			hsv.v = (float)limitChar(v) / (float)255;

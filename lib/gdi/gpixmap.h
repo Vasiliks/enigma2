@@ -74,7 +74,6 @@ struct gRGB
 	{
 		value = val;
 	}
-	gRGB& operator=(const gRGB&) = default;
 	bool operator < (const gRGB &c) const
 	{
 		if (b < c.b)

@@ -115,14 +115,12 @@ int ePixmap::event(int event, void *data, void *data2)
 		if (m_pixmap)
 		{
 			int flags = 0;
-			if (m_alphatest == 0)
-				flags = 0;
-			else if (m_alphatest == 1)
+			if (m_alphatest == 1)
 				flags = gPainter::BT_ALPHATEST;
 			else if (m_alphatest == 2)
 				flags = gPainter::BT_ALPHABLEND;
-			if (m_scale)
-				flags |= gPainter::BT_SCALE;
+
+			flags |= m_scale;
 			painter.blit(m_pixmap, eRect(ePoint(0, 0), s), eRect(), flags);
 		}
 
@@ -148,7 +146,7 @@ int ePixmap::event(int event, void *data, void *data2)
 		return 0;
 	case evtChangedSize:
 		checkSize();
-			/* fall trough. */
+		[[fallthrough]];
 	default:
 		return eWidget::event(event, data, data2);
 	}

@@ -6,12 +6,8 @@
 #include <lib/gdi/color.h>
 #include <byteswap.h>
 
-#ifdef __GLIBC__
 #ifndef BYTE_ORDER
 #error "no BYTE_ORDER defined!"
-#endif
-#else
-#define BYTE_ORDER __BYTE_ORDER
 #endif
 
 /* surface acceleration threshold: do not attempt to accelerate surfaces smaller than the threshold (measured in bytes) */
@@ -90,6 +86,8 @@ static void adjustBlitThreshold(unsigned int cputime, int area)
 
 #endif
 #endif
+
+#define ALPHA_TEST_MASK 0xFF000000
 
 gLookup::gLookup()
 	:size(0), lookup(0)
@@ -398,7 +396,7 @@ static inline void blit_8i_to_32_at(uint32_t *dst, const uint8_t *src, const uin
 {
 	while (width--)
 	{
-		if (!(pal[*src] & 0x80000000))
+		if (!(pal[*src]&0x80000000))
 		{
 			src++;
 			dst++;
@@ -417,7 +415,7 @@ static inline void blit_8i_to_16_at(uint16_t *dst, const uint8_t *src, const uin
 {
 	while (width--)
 	{
-		if (!(pal[*src] & 0x80000000))
+		if (!(pal[*src]&0x80000000))
 		{
 			src++;
 			dst++;
@@ -605,8 +603,8 @@ void gPixmap::blit(const gPixmap &src, const eRect &_pos, const gRegion &clip, i
 	{
 		ASSERT(src.size().width());
 		ASSERT(src.size().height());
-		scale_x = pos.size().width() * FIX / src.size().width();
-		scale_y = pos.size().height() * FIX / src.size().height();
+		scale_x = pos.size().width() * FIX / src.size().width(); //NOSONAR
+		scale_y = pos.size().height() * FIX / src.size().height(); //NOSONAR
 		if (flag & blitKeepAspectRatio)
 		{
 			if (scale_x > scale_y)
@@ -685,7 +683,9 @@ void gPixmap::blit(const gPixmap &src, const eRect &_pos, const gRegion &clip, i
 
 //		eDebug("[gPixmap] srcarea after scale: %d %d %d %d",
 //			srcarea.x(), srcarea.y(), srcarea.width(), srcarea.height());
-
+#ifdef FORCE_NO_ACCELNEVER
+		accel = false;
+#else
 		if (accel)
 		{
 			if (srcarea.surface() * src.surface->bypp < accelerationthreshold)
@@ -701,10 +701,13 @@ void gPixmap::blit(const gPixmap &src, const eRect &_pos, const gRegion &clip, i
 				/* alpha blending is requested */
 				if (gAccel::getInstance()->hasAlphaBlendingSupport())
 				{
-#ifndef FORCE_ALPHABLENDING_ACCELERATION
+#ifdef FORCE_ALPHABLENDING_ACCELERATION
 					/* Hardware alpha blending is broken on the few
 					 * boxes that support it, so only use it
 					 * when scaling */
+
+					accel = true;
+#else
 					if (flag & blitScale)
 						accel = true;
 					else if (flag & blitAlphaTest) /* Alpha test only on 8-bit */
@@ -723,6 +726,7 @@ void gPixmap::blit(const gPixmap &src, const eRect &_pos, const gRegion &clip, i
 
 #ifdef GPIXMAP_CHECK_THRESHOLD
 		accel = (surface->data_phys && src.surface->data_phys);
+#endif
 #endif
 
 #ifdef GPIXMAP_DEBUG
@@ -942,8 +946,7 @@ void gPixmap::blit(const gPixmap &src, const eRect &_pos, const gRegion &clip, i
 						} else
 							*dst++=*src++;
 					}
-				}
-				else if (flag & blitAlphaBlend)
+				} else if (flag & blitAlphaBlend)
 				{
 					int width = area.width();
 					gRGB *src = (gRGB*)srcptr;
