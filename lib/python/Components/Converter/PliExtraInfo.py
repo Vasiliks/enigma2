@@ -6,9 +6,8 @@ from Components.config import config
 from Tools.Transponder import ConvertToHumanReadable
 from Tools.GetEcmInfo import GetEcmInfo
 from Components.Converter.Poll import Poll
-from Components.SystemInfo import SystemInfo
 from skin import parameters
-from os.path import isfile
+import os
 
 caid_data = (
 	("0x0100", "0x01ff", "Seca", "S", True),
@@ -49,11 +48,11 @@ codec_data = {
 	14: "DIVX 4",
 	15: "DIVX 5",
 	16: "AVS",
+	17: "N/A 17",
 	18: "VP6",
 	19: "N/A 19",
 	20: "N/A 20",
 	21: "SPARK",
-	40: "AVS2",
 }
 
 # Dynamic range ("gamma") value to text
@@ -129,7 +128,7 @@ class PliExtraInfo(Poll, Converter):
 				"ResolutionString",
 			),
 			"TransponderInfo": (
-				( # not feraw
+				(  # not feraw
 					"StreamURLInfo",
 				),
 				(  # feraw and "DVB-T" not in feraw.get("tuner_type", "")
@@ -223,17 +222,17 @@ class PliExtraInfo(Poll, Converter):
 	def createCryptoBar(self, info):
 		res = ""
 		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
-		colors = parameters.get("PliExtraInfoColors", (0x0000FF00, 0x00FFFF00, 0x007F7F7F, 0x00FFFFFF)) # "found", "not found", "available", "default" colors
+		colors = parameters.get("PliExtraInfoColors", (0x0000FF00, 0x00FFFF00, 0x007F7F7F, 0x00FFFFFF))  # "found", "not found", "available", "default" colors
 
 		for caid_entry in caid_data:
 			if int(caid_entry[0], 16) <= int(self.current_caid, 16) <= int(caid_entry[1], 16):
-				color = "\c%08x" % colors[0] # green
+				color = "\c%08x" % colors[0]  # green
 			else:
-				color = "\c%08x" % colors[2] # grey
+				color = "\c%08x" % colors[2]  # grey
 				try:
 					for caid in available_caids:
 						if int(caid_entry[0], 16) <= caid <= int(caid_entry[1], 16):
-							color = "\c%08x" % colors[1] # yellow
+							color = "\c%08x" % colors[1]  # yellow
 				except:
 					pass
 
@@ -242,7 +241,7 @@ class PliExtraInfo(Poll, Converter):
 					res += " "
 				res += color + caid_entry[3]
 
-		res += "\c%08x" % colors[3] # white (this acts like a color "reset" for following strings
+		res += "\c%08x" % colors[3]  # white (this acts like a color "reset" for following strings
 		return res
 
 	def createCryptoSpecial(self, info):
@@ -258,60 +257,29 @@ class PliExtraInfo(Poll, Converter):
 		return ""
 
 	def createResolution(self, info):
-		xres = info.getInfo(iServiceInformation.sVideoWidth)
-		if not xres or xres == -1:
-			if isfile("/proc/stb/vmpeg/0/xres"):
-				print("[PliExtraInfo] Read /proc/stb/vmpeg/0/xres")
-				f = open("/proc/stb/vmpeg/0/xres", "r")
-				try:
-					xres = int(f.read(), 16)
-				except:
-					print("[PliExtraInfo] Read /proc/stb/vmpeg/0/xres failed.")
-			elif isfile("/sys/class/video/frame_width"):
-				print("[PliExtraInfo] Read /sys/class/video/frame_width")
-				f = open("/sys/class/video/frame_width", "r")
-				try:
-					xres = int(f.read())
-				except:
-					print("[PliExtraInfo] Read /sys/class/video/frame_width failed")
-		yres = info.getInfo(iServiceInformation.sVideoHeight)
-		if not yres:
-			if isfile("/proc/stb/vmpeg/0/yres"):
-				print("[PliExtraInfo] Read /proc/stb/vmpeg/0/yres")
-				f = open("/proc/stb/vmpeg/0/yres", "r")
-				try:
-					yres = int(f.read(), 16)
-				except:
-					print("[PliExtraInfo] Read /proc/stb/vmpeg/0/yres failed.")
-			elif isfile("/sys/class/video/frame_height"):
-				print("[PliExtraInfo] Read /sys/class/video/frame_height")
-				f = open("/sys/class/video/frame_height", "r")
-				try:
-					yres = int(f.read())
-				except:
-					print("[PliExtraInfo] Read /sys/class/video/frame_height failed")
-		mode = ("i", "p", " ")[info.getInfo(iServiceInformation.sProgressive)]
-		if not mode:
-			try:
-				print("[PliExtraInfo] Read /proc/stb/vmpeg/0/progressive")
-				mod = open("/proc/stb/vmpeg/0/progressive", "r")
-				if BoxInfo.getItem("AmlogicFamily"):
-					mode = "p" if int(mod.read()) else "i"
-				else:
-					mode = "p" if int(mod.read(), 16) else "i"
-			except:
-				print("[PliExtraInfo] Read /proc/stb/vmpeg/0/progressive failed.")
-		fps = (info.getInfo(iServiceInformation.sFrameRate) + 500) // 1000
-		if not fps or fps == -1:
-			try:
-				if isfile("/proc/stb/vmpeg/0/framerate"):
-					print("[PliExtraInfo] Read /proc/stb/vmpeg/0/framerate")
-					fps = (int(open("/proc/stb/vmpeg/0/framerate", "r").read()) + 500) // 1000
-				elif isfile("/proc/stb/vmpeg/0/fallback_framerate"):
-					print("[PliExtraInfo] Read /proc/stb/vmpeg/0/fallback_framerate")
-					fps = (int(open("/proc/stb/vmpeg/0/fallback_framerate", "r").read()) + 0) // 1000
-			except:
-				print("[PliExtraInfo] Read framerate failed.")
+		try:
+			yres = int(open("/proc/stb/vmpeg/0/yres", "r").read(), 16)
+			if yres > 4096 or yres == 0:
+				return ""
+		except:
+			return ""
+		try:
+			xres = int(open("/proc/stb/vmpeg/0/xres", "r").read(), 16)
+			if xres > 4096 or xres == 0:
+				return ""
+		except:
+			return ""
+		mode = ""
+		try:
+			mode = "p" if int(open("/proc/stb/vmpeg/0/progressive", "r").read(), 16) else "i"
+		except:
+			pass
+		fps = ""
+		try:
+			fps = str((int(open("/proc/stb/vmpeg/0/framerate", "r").read()) + 500) // 1000)
+		except:
+			pass
+
 		return "%sx%s%s%s" % (xres, yres, mode, fps)
 
 	def createGamma(self, info):
@@ -607,7 +575,7 @@ class PliExtraInfo(Poll, Converter):
 				if request_selected:
 					if int(caid_entry[0], 16) <= int(current_caid, 16) <= int(caid_entry[1], 16):
 						return True
-				else: # request available
+				else:  # request available
 					try:
 						for caid in available_caids:
 							if int(caid_entry[0], 16) <= caid <= int(caid_entry[1], 16):
