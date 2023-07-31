@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from Screens.ChannelSelection import ChannelSelection, BouquetSelector, SilentBouquetSelector
-
-from Components.ActionMap import ActionMap, HelpableActionMap
-from Components.ActionMap import NumberActionMap
+from Components.ActionMap import ActionMap, HelpableActionMap, HelpableNumberActionMap, NumberActionMap
 from Components.Harddisk import harddiskmanager
 from Components.Input import Input
 from Components.Label import Label
@@ -12,14 +10,13 @@ from Components.ServiceEventTracker import ServiceEventTracker
 from Components.Sources.ServiceEvent import ServiceEvent
 from Components.ServiceList import refreshServiceList
 from Components.Sources.Boolean import Boolean
-from Components.config import config, ConfigBoolean, ConfigClock, KEY_RIGHT
+from Components.config import config, ConfigBoolean, ConfigClock, ACTIONKEY_RIGHT
 from Components.SystemInfo import BoxInfo, SystemInfo, BRAND, MODEL, PLATFORM
 from Components.UsageConfig import preferredInstantRecordPath, defaultMoviePath
 from Components.VolumeControl import VolumeControl
 from Components.Sources.StaticText import StaticText
 from Screens.EpgSelection import EPGSelection
 from Plugins.Plugin import PluginDescriptor
-
 from Screens.Screen import Screen
 from Screens.ScreenSaver import InfoBarScreenSaver
 from Screens import Standby
@@ -41,7 +38,7 @@ from ServiceReference import ServiceReference, isPlayableForCur, hdmiInServiceRe
 from Tools.ASCIItranslit import legacyEncode
 from Tools.Directories import fileExists, getRecordingFilename, moveFiles
 from Tools.Notifications import AddPopup, AddNotificationWithCallback, current_notifications, lock, notificationAdded, notifications, RemovePopup
-
+from keyids import KEYFLAGS, KEYIDS, KEYIDNAMES
 from enigma import eTimer, eServiceCenter, eDVBServicePMTHandler, iServiceInformation, iPlayableService, eServiceReference, eEPGCache, eActionMap, getDesktop, eDVBDB
 
 from time import time, localtime, strftime
@@ -55,6 +52,8 @@ from RecordTimer import RecordTimerEntry, RecordTimer, findSafeRecordPath
 
 # hack alert!
 from Screens.Menu import MainMenu, mdom
+
+MODULE_NAME = __name__.split(".")[-1]
 
 
 def isStandardInfoBar(self):
@@ -220,17 +219,32 @@ class InfoBarUnhandledKey:
 		eActionMap.getInstance().bindAction('', maxsize, self.actionB) #lowest prio
 		self.flags = (1 << 1)
 		self.uflags = 0
+		self.sibIgnoreKeys = (
+			KEYIDS["KEY_VOLUMEDOWN"], KEYIDS["KEY_VOLUMEUP"],
+			KEYIDS["KEY_EXIT"], KEYIDS["KEY_OK"],
+			KEYIDS["KEY_UP"], KEYIDS["KEY_DOWN"],
+			KEYIDS["KEY_CHANNELUP"], KEYIDS["KEY_CHANNELDOWN"],
+			KEYIDS["KEY_NEXT"], KEYIDS["KEY_PREVIOUS"]
+		)
 
-	#this function is called on every keypress!
+	# This function is called on every keypress!
 	def actionA(self, key, flag):
-		self.unhandledKeyDialog.hide()
+		print("[InfoBarGenerics] Key: %s (%s) KeyID='%s'." % (key, KEYFLAGS.get(flag, _("Unknown")), KEYIDNAMES.get(key, _("Unknown"))))
+		if flag != 2: # Don't hide on repeat.
+			self.unhandledKeyDialog.hide()
+			if self.closeSIB(key) and self.secondInfoBarScreen and self.secondInfoBarScreen.shown:
+				self.secondInfoBarScreen.hide()
+				self.secondInfoBarWasShown = False
 		if flag != 4:
-			if self.flags & (1 << 1):
+			if flag == 0:
 				self.flags = self.uflags = 0
 			self.flags |= (1 << flag)
-			if flag == 1: # break
+			if flag == 1 or flag == 3:  # Break and Long.
 				self.checkUnusedTimer.start(0, True)
 		return 0
+
+	def closeSIB(self, key):
+		return True if key >= 12 and key not in self.sibIgnoreKeys else False  # (114, 115, 174, 352, 103, 108, 402, 403, 407, 412)
 
 	#this function is only called when no other action has handled this key
 	def actionB(self, key, flag):
@@ -265,17 +279,16 @@ class InfoBarShowHide(InfoBarScreenSaver):
 	FLAG_CENTER_DVB_SUBS = 2048
 
 	def __init__(self):
-		self["ShowHideActions"] = ActionMap(["InfobarShowHideActions"],
-			{
-				"toggleShow": self.okButtonCheck,
-				"hide": self.keyHide,
-				"toggleShowLong": self.toggleShowLong,
-				"hideLong": self.hideLong,
-			}, 1) # lower prio to make it possible to override ok and cancel..
+		self["ShowHideActions"] = HelpableActionMap(self, ["InfobarShowHideActions"], {
+			"toggleShow": (self.okButtonCheck, _("Toggle display of the InfoBar")),
+			"hide": (self.keyHide, _("Hide the InfoBar")),
+			"toggleShowLong": (self.toggleShowLong, _("Toggle display of the second InfoBar")),
+			"hideLong": (self.hideLong, _("Hide the second InfoBar"))
+		}, prio=1, description=_("InfoBar Show/Hide Actions"))  # lower prio to make it possible to override ok and cancel..
 
 		self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
-				iPlayableService.evStart: self.serviceStarted,
-			})
+			iPlayableService.evStart: self.serviceStarted,
+		})
 
 		InfoBarScreenSaver.__init__(self)
 		self.__state = self.STATE_SHOWN
@@ -638,22 +651,21 @@ class NumberZap(Screen):
 		if config.misc.numzap_picon.value:
 			self.skinName = ["NumberZapPicon", "NumberZap"]
 
-		self["actions"] = NumberActionMap(["SetupActions", "ShortcutActions"],
-			{
-				"cancel": self.quit,
-				"ok": self.keyOK,
-				"blue": self.keyBlue,
-				"1": self.keyNumberGlobal,
-				"2": self.keyNumberGlobal,
-				"3": self.keyNumberGlobal,
-				"4": self.keyNumberGlobal,
-				"5": self.keyNumberGlobal,
-				"6": self.keyNumberGlobal,
-				"7": self.keyNumberGlobal,
-				"8": self.keyNumberGlobal,
-				"9": self.keyNumberGlobal,
-				"0": self.keyNumberGlobal
-			})
+		self["actions"] = HelpableNumberActionMap(self, ["SetupActions", "ShortcutActions"], {
+			"cancel": (self.quit, _("Cancel selection")),
+			"ok": (self.keyOK, _("Select/Zap to selected service")),
+			"blue": (self.keyBlue, _("Toggle service name display")),
+			"1": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"2": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"3": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"4": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"5": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"6": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"7": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"8": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"9": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"0": (self.keyNumberGlobal, _("Digit entry for service selection"))
+		}, prio=0, description=_("Service Selection/Zap Actions"))
 
 		self.Timer = eTimer()
 		self.Timer.callback.append(self.keyOK)
@@ -665,19 +677,18 @@ class InfoBarNumberZap:
 	""" Handles an initial number for NumberZapping """
 
 	def __init__(self):
-		self["NumberActions"] = NumberActionMap(["NumberActions"],
-			{
-				"1": self.keyNumberGlobal,
-				"2": self.keyNumberGlobal,
-				"3": self.keyNumberGlobal,
-				"4": self.keyNumberGlobal,
-				"5": self.keyNumberGlobal,
-				"6": self.keyNumberGlobal,
-				"7": self.keyNumberGlobal,
-				"8": self.keyNumberGlobal,
-				"9": self.keyNumberGlobal,
-				"0": self.keyNumberGlobal,
-			})
+		self["NumberActions"] = HelpableNumberActionMap(self, ["NumberActions"], {
+			"1": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"2": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"3": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"4": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"5": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"6": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"7": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"8": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"9": (self.keyNumberGlobal, _("Digit entry for service selection")),
+			"0": (self.keyNumberGlobal, _("Digit entry for service selection"))
+		}, prio=0, description=_("Service Zap Actions"))
 
 	def keyNumberGlobal(self, number):
 		seekable = self.getSeek()
@@ -771,23 +782,30 @@ class InfoBarChannelSelection:
 	channelChange actions which open the channelSelection dialog """
 
 	def __init__(self):
-		#instantiate forever
+		# instantiate forever
 		self.servicelist = self.session.instantiateDialog(ChannelSelection)
+		self.onClose.append(self.__onClose)
 
 		if config.misc.initialchannelselection.value:
 			self.onShown.append(self.firstRun)
 
-		self["ChannelSelectActions"] = HelpableActionMap(self, ["InfobarChannelSelection"],
-			{
-				"keyUp": (self.keyUpCheck, self.getKeyUpHelptext),
-				"keyDown": (self.keyDownCheck, self.getKeyDownHelpText),
-				"keyLeft": (self.keyLeftCheck, self.getKeyLeftHelptext),
-				"keyRight": (self.keyRightCheck, self.getKeyRightHelptext),
-				"historyBack": (self.historyBack, _("Switch to previous channel in history")),
-				"historyNext": (self.historyNext, _("Switch to next channel in history")),
-				"keyChannelUp": (self.keyChannelUpCheck, self.getKeyChannelUpHelptext),
-				"keyChannelDown": (self.keyChannelDownCheck, self.getKeyChannelDownHelptext),
-			})
+		self["ChannelSelectActions"] = HelpableActionMap(self, "InfobarChannelSelection", {
+			"keyUp": (self.keyUpCheck, self.getKeyUpHelptext),
+			"keyDown": (self.keyDownCheck, self.getKeyDownHelpText),
+			"keyLeft": (self.keyLeftCheck, self.getKeyLeftHelptext),
+			"keyRight": (self.keyRightCheck, self.getKeyRightHelptext),
+			"historyBack": (self.historyBack, _("Switch to previous channel in history")),
+			"historyNext": (self.historyNext, _("Switch to next channel in history")),
+			"keyChannelUp": (self.keyChannelUpCheck, self.getKeyChannelUpHelptext),
+			"keyChannelDown": (self.keyChannelDownCheck, self.getKeyChannelDownHelptext),
+			"openSatellitesList": (self.openSatellitesList, _("Open satellites list")),
+		}, prio=0, description=_("Service Selection Actions"))
+		self.onClose.append(self.__onClose)
+
+	def __onClose(self):
+		if self.servicelist:
+			self.servicelist.doClose()
+			self.servicelist = None
 
 	def showTvChannelList(self, zap=False):
 		self.servicelist.setModeTv()
@@ -1002,10 +1020,9 @@ class InfoBarMenu:
 	""" Handles a menu action, to open the (main) menu """
 
 	def __init__(self):
-		self["MenuActions"] = HelpableActionMap(self, ["InfobarMenuActions"],
-			{
-				"mainMenu": (self.mainMenu, _("Enter main menu...")),
-			})
+		self["MenuActions"] = HelpableActionMap(self, ["InfobarMenuActions"], {
+			"mainMenu": (self.mainMenu, _("Open main menu")),
+		}, prio=0, description=_("Menu Actions"))
 		self.session.infobar = None
 
 	def mainMenu(self):
@@ -1027,12 +1044,11 @@ class InfoBarSimpleEventView:
 	""" Opens the Eventview for now/next """
 
 	def __init__(self):
-		self["EPGActions"] = HelpableActionMap(self, ["InfobarEPGActions"],
-			{
-				"showEventInfo": (self.openEventView, _("Show event details")),
-				"showEventInfoSingleEPG": (self.openEventView, _("Show event details")),
-				"showInfobarOrEpgWhenInfobarAlreadyVisible": self.showEventInfoWhenNotVisible,
-			})
+		self["EPGActions"] = HelpableActionMap(self, ["InfobarEPGActions"], {
+			"showEventInfo": (self.openEventView, _("Show event details")),
+			"showEventInfoSingleEPG": (self.openEventView, _("Show event details")),
+			"showInfobarOrEpgWhenInfobarAlreadyVisible": self.showEventInfoWhenNotVisible,
+		}, prio=0, description=_("InfoBar Event View Actions"))
 
 	def showEventInfoWhenNotVisible(self):
 		if self.shown:
@@ -1118,16 +1134,15 @@ class InfoBarEPG:
 		self.eventView = None
 		self.epglist = []
 		self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
-				iPlayableService.evUpdatedEventInfo: self.__evEventInfoChanged,
-			})
+			iPlayableService.evUpdatedEventInfo: self.__evEventInfoChanged,
+		})
 
-		self["EPGActions"] = HelpableActionMap(self, ["InfobarEPGActions"],
-			{
-				"showEventInfo": (self.showDefaultEPG, _("Show EPG...")),
-				"showEventInfoSingleEPG": (self.showSingleEPG, _("Show single service EPG")),
-				"showEventInfoMultiEPG": (self.showMultiEPG, _("Show multi channel EPG")),
-				"showInfobarOrEpgWhenInfobarAlreadyVisible": self.showEventInfoWhenNotVisible,
-			})
+		self["EPGActions"] = HelpableActionMap(self, ["InfobarEPGActions"], {
+			"showEventInfo": (self.showDefaultEPG, _("Show service event information")),
+			"showEventInfoSingleEPG": (self.showSingleEPG, _("Show single service EPG")),
+			"showEventInfoMultiEPG": (self.showMultiEPG, _("Show multi channel EPG")),
+			"showInfobarOrEpgWhenInfobarAlreadyVisible": self.showEventInfoWhenNotVisible,
+		}, prio=0, description=_("InfoBar EPG Actions"))
 
 	def getEPGPluginList(self, getAll=False):
 		pluginlist = [(p.name, boundFunction(self.runPlugin, p), p.description or p.name) for p in plugins.getPlugins(where=PluginDescriptor.WHERE_EVENTINFO)
@@ -1286,11 +1301,14 @@ class InfoBarEPG:
 		plugin(session=self.session, servicelist=self.servicelist)
 
 	def showEventInfoPlugins(self):
-		pluginlist = self.getEPGPluginList()
-		if pluginlist:
-			self.session.openWithCallback(self.EventInfoPluginChosen, ChoiceBox, title=_("Please choose an extension..."), list=pluginlist, skin_name="EPGExtensionsList", reorderConfig="eventinfo_order", windowTitle=_("Events info menu"))
+		if BRAND not in ("xtrend", "odin", "INI", "dags", "GigaBlue", "xp"):
+			pluginlist = self.getEPGPluginList()
+			if pluginlist:
+				self.session.openWithCallback(self.EventInfoPluginChosen, OrderedChoiceBox, text=_("Please choose an extension..."), list=pluginlist, order="eventInfoOrder", skinName="EPGExtensionsList", windowTitle=_("Events Info Menu"))
+			else:
+				self.openSingleServiceEPG()
 		else:
-			self.openSingleServiceEPG()
+			self.openEventView()
 
 	def EventInfoPluginChosen(self, answer):
 		if answer is not None:
@@ -1387,10 +1405,9 @@ class InfoBarRdsDecoder:
 				iPlayableService.evUpdatedRassSlidePic: self.RassSlidePicChanged
 			})
 
-		self["RdsActions"] = ActionMap(["InfobarRdsActions"],
-		{
-			"startRassInteractive": self.startRassInteractive
-		}, -1)
+		self["RdsActions"] = HelpableActionMap(self, "InfobarRdsActions", {
+			"startRassInteractive": (self.startRassInteractive, _("Start RDS interactive"))
+		}, prio=-1, description=_("InfoBar RDS Actions"))
 
 		self["RdsActions"].setEnabled(False)
 
@@ -1461,20 +1478,14 @@ class InfoBarSeek:
 				else:
 					return HelpableActionMap.action(self, contexts, action)
 
-		self["SeekActions"] = InfoBarSeekActionMap(self, actionmap,
-			{
-				"playpauseService": (self.playpauseService, _("Pause/Continue playback")),
-				"pauseService": (self.pauseService, _("Pause playback")),
-				"unPauseService": (self.unPauseService, _("Continue playback")),
-				"okButton": (self.okButton, _("Continue playback")),
-				"seekFwd": (self.seekFwd, _("Seek forward")),
-				"seekFwdManual": (self.seekFwdManual, _("Seek forward (enter time)")),
-				"seekBack": (self.seekBack, _("Seek backward")),
-				"seekBackManual": (self.seekBackManual, _("Seek backward (enter time)")),
-				"jumpPreviousMark": (self.seekPreviousMark, _("Jump to previous marked position")),
-				"jumpNextMark": (self.seekNextMark, _("Jump to next marked position")),
-			}, prio=-1)
-			# give them a little more priority to win over color buttons
+		self["SeekActions"] = InfoBarSeekActionMap(self, actionmap, {
+			"playpauseService": (self.playpauseService, _("Pause/Continue playback")),
+			"pauseService": (self.pauseService, _("Pause playback")),
+			"unPauseService": (self.unPauseService, _("Continue playback")),
+			"okButton": (self.okButton, _("Continue playback")),
+			"seekFwd": (self.seekFwd, _("Seek forward")),
+			"seekBack": (self.seekBack, _("Seek backward")),
+		}, prio=-1, description=_("Playback/Seek Actions"))  # give them a little more priority to win over color buttons
 
 		self["SeekActions"].setEnabled(False)
 
@@ -1905,12 +1916,11 @@ class InfoBarShowMovies:
 	# it calls a not further specified "movie list" on up/down/movieList,
 	# so this is not more than an action map
 	def __init__(self):
-		self["MovieListActions"] = HelpableActionMap(self, ["InfobarMovieListActions"],
-			{
-				"movieList": (self.showMovies, _("Open the movie list")),
-				"up": (self.up, _("Open the movie list")),
-				"down": (self.down, _("Open the movie list"))
-			})
+		self["MovieListActions"] = HelpableActionMap(self, ["InfobarMovieListActions"], {
+			"movieList": (self.showMovies, _("Open the movie list")),
+			"up": (self.up, _("Open the movie list")),
+			"down": (self.down, _("Open the movie list"))
+		}, prio=0, description=_("Movie List Actions"))
 
 # InfoBarTimeshift requires InfoBarSeek, instantiated BEFORE!
 
@@ -1943,24 +1953,22 @@ class InfoBarShowMovies:
 
 class InfoBarTimeshift:
 	def __init__(self):
-		self["TimeshiftActions"] = HelpableActionMap(self, ["InfobarTimeshiftActions"],
-			{
-				"timeshiftStart": (self.startTimeshift, _("Start timeshift")),  # the "yellow key"
-				"timeshiftStop": (self.stopTimeshift, _("Stop timeshift")),      # currently undefined :), probably 'TV'
-				"seekFwdManual": (self.seekFwdManual, _("Seek forward (enter time)")),
-				"seekBackManual": (self.seekBackManual, _("Seek backward (enter time)")),
-				"seekdef:1": (boundFunction(self.seekdef, 1), _("Seek")),
-				"seekdef:3": (boundFunction(self.seekdef, 3), _("Seek")),
-				"seekdef:4": (boundFunction(self.seekdef, 4), _("Seek")),
-				"seekdef:6": (boundFunction(self.seekdef, 6), _("Seek")),
-				"seekdef:7": (boundFunction(self.seekdef, 7), _("Seek")),
-				"seekdef:9": (boundFunction(self.seekdef, 9), _("Seek")),
-			}, prio=0)
-		self["TimeshiftActivateActions"] = ActionMap(["InfobarTimeshiftActivateActions"],
-			{
-				"timeshiftActivateEnd": self.activateTimeshiftEnd, # something like "rewind key"
-				"timeshiftActivateEndAndPause": self.activateTimeshiftEndAndPause  # something like "pause key"
-			}, prio=-1) # priority over record
+		self["TimeshiftActions"] = HelpableActionMap(self, ["InfobarTimeshiftActions"], {
+			"timeshiftStart": (self.startTimeshift, _("Start timeshift")),  # The "YELLOW key".
+			"timeshiftStop": (self.stopTimeshift, _("Stop timeshift")),  # Currently undefined :), probably 'TV'.
+			"seekFwdManual": (self.seekFwdManual, _("Seek forward (enter time)")),
+			"seekBackManual": (self.seekBackManual, _("Seek backward (enter time)")),
+			"seekdef:1": (boundFunction(self.seekdef, 1), _("Seek back short")),
+			"seekdef:3": (boundFunction(self.seekdef, 3), _("Seek forward short")),
+			"seekdef:4": (boundFunction(self.seekdef, 4), _("Seek back medium")),
+			"seekdef:6": (boundFunction(self.seekdef, 6), _("Seek forward medium")),
+			"seekdef:7": (boundFunction(self.seekdef, 7), _("Seek back long")),
+			"seekdef:9": (boundFunction(self.seekdef, 9), _("Seek forward long"))
+		}, prio=0, description=_("Timeshift Actions"))
+		self["TimeshiftActivateActions"] = HelpableActionMap(self, ["InfobarTimeshiftActivateActions"], {
+			"timeshiftActivateEnd": (self.activateTimeshiftEnd, _("End timeshift")),  # Something like "rewind key".
+			"timeshiftActivateEndAndPause": (self.activateTimeshiftEndAndPause, _("Pause and start timeshift"))  # Something like "pause key".
+		}, prio=-1, description=_("Timeshift Actions"))  # Priority over record.
 
 		self["TimeshiftActivateActions"].setEnabled(False)
 		self.ts_rewind_timer = eTimer()
@@ -2103,7 +2111,7 @@ class InfoBarTimeshift:
 			self.setSeekState(self.SEEK_STATE_PAUSE)
 			seekable = self.getSeek()
 			if seekable is not None:
-				seekable.seekTo(-90000) # seek approx. 1 sec before end
+				seekable.seekTo(-90000)  # seek approx. 1 sec before end
 			self.timeshift_was_activated = True
 		if back:
 			self.ts_rewind_timer.start(200, 1)
@@ -2132,7 +2140,7 @@ class InfoBarTimeshift:
 		elif config.recording.filename_composition.value == "long":
 			filename += " - " + info["name"] + " - " + info["description"]
 		else:
-			filename += " - " + info["name"] # standard
+			filename += " - " + info["name"]  # standard
 
 		if config.recording.ascii_filenames.value:
 			filename = legacyEncode(filename)
@@ -2143,7 +2151,7 @@ class InfoBarTimeshift:
 	# same as activateTimeshiftEnd, but pauses afterwards.
 	def activateTimeshiftEndAndPause(self):
 		print("[InfoBarGenerics] activateTimeshiftEndAndPause")
-		#state = self.seekstate
+		# state = self.seekstate
 		self.activateTimeshiftEnd(False)
 
 	def callServiceStarted(self):
@@ -2280,8 +2288,8 @@ class InfoBarExtensions:
 		self.addExtension((lambda: _("Softcam Setup"), self.openSoftcamSetup, lambda: config.misc.softcam_setup.extension_menu.value and SystemInfo["HasSoftcamInstalled"]), "1")
 		self.addExtension((lambda: _("Manually import from fallback tuner"), self.importChannels, lambda: config.usage.remote_fallback_extension_menu.value and config.usage.remote_fallback_import.value))
 		self["InstantExtensionsActions"] = HelpableActionMap(self, ["InfobarExtensions"], {
-				"extensions": (self.showExtensionSelection, _("Show extensions...")),
-		},prio=1, description=_("Extension Actions"))  # Lower priority.
+			"extensions": (self.showExtensionSelection, _("Show extensions")),
+		}, prio=1, description=_("Extension Actions"))  # Lower priority.
 		self.addExtension(extension=self.getOScamInfo, type=InfoBarExtensions.EXTENSION_LIST)
 		self.addExtension(extension=self.getLogManager, type=InfoBarExtensions.EXTENSION_LIST)
 
@@ -2390,7 +2398,7 @@ class InfoBarPlugins:
 			args = inspect.getfullargspec(p.fnc)[0]
 			if len(args) == 1 or len(args) == 2 and isinstance(self, InfoBarChannelSelection):
 				l.append(((boundFunction(self.getPluginName, p.name), boundFunction(self.runPlugin, p), lambda: True), None, p.name))
-		l.sort(key=lambda e: e[2]) # sort by name
+		l.sort(key=lambda e: e[2])  # sort by name
 		return l
 
 	def runPlugin(self, plugin):
@@ -2436,10 +2444,9 @@ class InfoBarPiP:
 		self.lastPiPService = None
 
 		if SystemInfo["PIPAvailable"]:
-			self["PiPActions"] = HelpableActionMap(self, ["InfobarPiPActions"],
-				{
-					"activatePiP": (self.activePiP, self.activePiPName),
-				})
+			self["PiPActions"] = HelpableActionMap(self, ["InfobarPiPActions"], {
+				"activatePiP": (self.activePiP, self.activePiPName),
+			}, prio=0, description=_("PiP Actions"))
 			if self.allowPiP:
 				self.addExtension((self.getShowHideName, self.showPiP, lambda: True), "blue")
 				self.addExtension((self.getMoveName, self.movePiP, self.pipShown), "green")
@@ -2583,10 +2590,9 @@ class InfoBarInstantRecord:
 	start/stop instant records"""
 
 	def __init__(self):
-		self["InstantRecordActions"] = HelpableActionMap(self, ["InfobarInstantRecord"],
-			{
-				"instantRecord": (self.instantRecord, _("Instant recording")),
-			})
+		self["InstantRecordActions"] = HelpableActionMap(self, ["InfobarInstantRecord"], {
+			"instantRecord": (self.instantRecord, _("Instant recording")),
+		}, prio=0, description=_("Recording Actions"))
 		self.SelectedInstantServiceRef = None
 		if isStandardInfoBar(self):
 			self.recording = []
@@ -2666,7 +2672,7 @@ class InfoBarInstantRecord:
 
 	def startInstantRecording(self, limitEvent=""):
 		begin = int(time())
-		end = begin + 3600  # 1h (dummy)
+		end = begin + 3600		# dummy
 		name = _("Instant record")
 		info = {}
 		message = duration_message = ""
@@ -2921,10 +2927,10 @@ class InfoBarInstantRecord:
 
 class InfoBarAudioSelection:
 	def __init__(self):
-		self["AudioSelectionAction"] = HelpableActionMap(self, ["InfobarAudioSelectionActions"],
+		self["AudioSelectionAction"] = HelpableActionMap(self, "InfobarAudioSelectionActions",
 			{
 				"audioSelection": (self.audioSelection, _("Audio options")),
-				"audioSelectionLong": (self.audioSelectionLong, _("Toggle downmix")),
+				"audioSelectionLong": (self.audioSelectionLong, _("Toggle Digital downmix")),
 			}, description=_("Audio track selection, downmix and other audio options"))
 
 	def audioSelection(self):
@@ -2945,16 +2951,14 @@ class InfoBarAudioSelection:
 
 class InfoBarSubserviceSelection:
 	def __init__(self):
-		self["SubserviceSelectionAction"] = HelpableActionMap(self, ["InfobarSubserviceSelectionActions"],
-			{
-				"subserviceSelection": (self.subserviceSelection, _("Subservice list...")),
-			})
-
-		self["SubserviceQuickzapAction"] = HelpableActionMap(self, ["InfobarSubserviceQuickzapActions"],
-			{
-				"nextSubservice": (self.nextSubservice, _("Switch to next sub service")),
-				"prevSubservice": (self.prevSubservice, _("Switch to previous sub service"))
-			}, -10)
+		self["SubserviceSelectionAction"] = HelpableActionMap(self, ["InfobarSubserviceSelectionActions"], {
+			"subserviceSelection": (self.subserviceSelection, _("Subservice list")),
+		}, prio=0, description=_("Sub Service Actions"))
+		self["SubserviceQuickzapAction"] = HelpableActionMap(self, ["InfobarSubserviceQuickzapActions"], {
+			"exit": self.keyHide,
+			"nextSubservice": (self.nextSubservice, _("Switch to next sub service")),
+			"prevSubservice": (self.prevSubservice, _("Switch to previous sub service"))
+		}, prio=-10, description=_("Sub Service Actions"))
 		self["SubserviceQuickzapAction"].setEnabled(False)
 
 		self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
@@ -3073,10 +3077,9 @@ from Components.Sources.HbbtvApplication import HbbtvApplication
 gHbbtvApplication = HbbtvApplication()
 class InfoBarRedButton:
 	def __init__(self):
-		self["RedButtonActions"] = HelpableActionMap(self, ["InfobarRedButtonActions"],
-			{
-				"activateRedButton": (self.activateRedButton, _("Red button...")),
-			})
+		self["RedButtonActions"] = HelpableActionMap(self, ["InfobarRedButtonActions"], {
+			"activateRedButton": (self.activateRedButton, _("Red button...")),
+		}, prio=0, description=_("Red/HbbTV Button Actions"))
 		self["HbbtvApplication"] = gHbbtvApplication
 		self.onHBBTVActivation = []
 		self.onRedButtonActivation = []
@@ -3120,9 +3123,10 @@ class InfoBarRedButton:
 		if info and info.getInfoString(iServiceInformation.sHBBTVUrl) != "":
 			for x in self.onHBBTVActivation:
 				x()
-		elif False: # TODO: other red button services
+		elif False:  # TODO: other red button services
 			for x in self.onRedButtonActivation:
 				x()
+
 
 class InfoBarAspectSelection:
 	STATE_HIDDEN = 0
@@ -3133,7 +3137,6 @@ class InfoBarAspectSelection:
 		self["AspectSelectionAction"] = HelpableActionMap(self, ["InfobarAspectSelectionActions"], {
 			"aspectSelection": (self.ExGreen_toggleGreen, _("Aspect ratio list")),
 		}, prio=0, description=_("Aspect Ratio Actions"))
-
 		self.__ExGreen_state = self.STATE_HIDDEN
 
 	def ExGreen_doAspect(self):
@@ -3151,24 +3154,41 @@ class InfoBarAspectSelection:
 		self.__ExGreen_state = self.STATE_HIDDEN
 
 	def ExGreen_toggleGreen(self, arg=""):
-		print(self.__ExGreen_state)
+		# print("[InfoBarGenerics] DEBUG: Current state %s." % {
+		# 	self.STATE_HIDDEN: "HIDDEN",
+		# 	self.STATE_ASPECT: "ASPECT",
+		# 	self.STATE_RESOLUTION: "RESOLUTION"
+		# }.get(self.__ExGreen_state))
 		if self.__ExGreen_state == self.STATE_HIDDEN:
-			print("[InfoBarGenerics] self.STATE_HIDDEN")
 			self.ExGreen_doAspect()
 		elif self.__ExGreen_state == self.STATE_ASPECT:
-			print("[InfoBarGenerics] self.STATE_ASPECT")
 			self.ExGreen_doResolution()
 		elif self.__ExGreen_state == self.STATE_RESOLUTION:
-			print("[InfoBarGenerics] self.STATE_RESOLUTION")
 			self.ExGreen_doHide()
 
 	def aspectSelection(self):
 		selection = 0
-		tlist = [(_("Resolution"), "resolution"), ("--", ""), (_("4:3 letterbox"), "0"), (_("4:3 panscan"), "1"), (_("16:9"), "2"), (_("16:9 always"), "3"), (_("16:10 letterbox"), "4"), (_("16:10 panscan"), "5"), (_("16:9 letterbox"), "6")]
-		for x in range(len(tlist)):
-			selection = x
+		aspectList = [
+			(_("Resolution"), "resolution"),
+			("--", ""),
+			(_("4:3 Letterbox"), "0"),
+			(_("4:3 PanScan"), "1"),
+			(_("16:9"), "2"),
+			(_("16:9 Always"), "3"),
+			(_("16:10 Letterbox"), "4"),
+			(_("16:10 PanScan"), "5"),
+			(_("16:9 Letterbox"), "6")
+		]
 		keys = ["green", "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-		self.session.openWithCallback(self.aspectSelected, ChoiceBox, title=_("Please select an aspect ratio..."), list=tlist, selection=selection, keys=keys)
+		from Components.AVSwitch import AVSwitch
+		iAVSwitch = AVSwitch()
+		aspect = iAVSwitch.getAspectRatioSetting()
+		selection = 0
+		for item in range(len(aspectList)):
+			if aspectList[item][1] == aspect:
+				selection = item
+				break
+		self.session.openWithCallback(self.aspectSelected, ChoiceBox, text=_("Please select an aspect ratio..."), list=aspectList, keys=keys, selection=selection)
 
 	def aspectSelected(self, aspect):
 		if not aspect is None:
@@ -3186,82 +3206,53 @@ class InfoBarAspectSelection:
 			self.ExGreen_doHide()
 		return
 
+
 class InfoBarResolutionSelection:
 	def __init__(self):
-		return
+		pass
 
 	def resolutionSelection(self):
-		try:
-			print("[InfoBarGenerics] Read /proc/stb/vmpeg/0/xres")
-			xresString = open("/proc/stb/vmpeg/0/xres", "r").read()
-		except:
-			print("[InfoBarGenerics] Error open /proc/stb/vmpeg/0/xres!")
-		try:
-			print("[InfoBarGenerics] Read /proc/stb/vmpeg/0/yres")
-			yresString = open("/proc/stb/vmpeg/0/yres", "r").read()
-		except:
-			print("[InfoBarGenerics] Error open /proc/stb/vmpeg/0/yres!")
-		if brand == "azbox":
-			print("[InfoBarGenerics] Set fpsString to 50000 for azbox to avoid further problems!")
-			fpsString = '50000'
-		else:
-			try:
-				print("[InfoBarGenerics] Read /proc/stb/vmpeg/0/framerate")
-				fpsString = open("/proc/stb/vmpeg/0/framerate", "r").read()
-			except:
-				print("[InfoBarGenerics] Error open /proc/stb/vmpeg/0/framerate!")
-				print("[InfoBarGenerics] Set fpsString to 50000 like azbox to avoid further problems!")
-				fpsString = '50000'
-
-		xres = int(xresString, 16)
-		yres = int(yresString, 16)
-		fps = int(fpsString)
-		fpsFloat = float(fps)
-		fpsFloat = fpsFloat / 1000
-
-		# do we need a new sorting with this way here or should we disable some choices?
-		choices = []
-		if os.path.exists("/proc/stb/video/videomode_choices"):
-			print("[InfoBarGenerics] Read /proc/stb/video/videomode_choices")
-			f = open("/proc/stb/video/videomode_choices")
-			values = f.readline().replace("\n", "").replace("pal ", "").replace("ntsc ", "").split(" ", -1)
-			for x in values:
-				entry = x.replace('i50', 'i@50hz').replace('i60', 'i@60hz').replace('p23', 'p@23.976hz').replace('p24', 'p@24hz').replace('p25', 'p@25hz').replace('p29', 'p@29hz').replace('p30', 'p@30hz').replace('p50', 'p@50hz'), x
-				choices.append(entry)
-			f.close()
-
-		selection = 0
-		tlist = []
-		tlist.append((_("Exit"), "exit"))
-		tlist.append((_("Auto (not available)"), "auto"))
-		tlist.append((_("Video: ") + str(xres) + "x" + str(yres) + "@" + str(fpsFloat) + "hz", ""))
-		tlist.append(("--", ""))
-		if choices != []:
-			for x in choices:
-				tlist.append(x)
-
+		xRes = int(fileReadLine("/proc/stb/vmpeg/0/xres", 0, source=MODULE_NAME), 16)
+		yRes = int(fileReadLine("/proc/stb/vmpeg/0/yres", 0, source=MODULE_NAME), 16)
+		fps = float(fileReadLine("/proc/stb/vmpeg/0/framerate", 50000, source=MODULE_NAME)) / 1000.0
+		resList = []
+		resList.append((_("Exit"), "exit"))
+		resList.append((_("Auto (not available)"), "auto"))
+		resList.append((_("Video: %dx%d@%gHz") % (xRes, yRes, fps), ""))
+		resList.append(("--", ""))
+		# Do we need a new sorting with this way here or should we disable some choices?
+		if exists("/proc/stb/video/videomode_choices"):
+			videoModes = fileReadLine("/proc/stb/video/videomode_choices", "", source=MODULE_NAME)
+			videoModes = videoModes.replace("pal ", "").replace("ntsc ", "").split(" ")
+			for videoMode in videoModes:
+				video = videoMode
+				if videoMode.endswith("23"):
+					video = "%s.976" % videoMode
+				if videoMode[-1].isdigit():
+					video = "%sHz" % videoMode
+				resList.append((video, videoMode))
+		videoMode = fileReadLine("/proc/stb/video/videomode", "Unknown", source=MODULE_NAME)
 		keys = ["green", "yellow", "blue", "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+		selection = 0
+		for item in range(len(resList)):
+			if resList[item][1] == videoMode:
+				selection = item
+				break
+		print("[InfoBarGenerics] Current video mode is %s." % videoMode)
+		self.session.openWithCallback(self.resolutionSelected, ChoiceBox, text=_("Please select a resolution..."), list=resList, keys=keys, selection=selection)
 
-		if os.path.exists("/proc/stb/video/videomode"):
-			print("[InfoBarGenerics] Read /proc/stb/video/videomode")
-			mode = open("/proc/stb/video/videomode").read()[:-1]
-		print(mode)
-		for x in range(len(tlist)):
-			if tlist[x][1] == mode:
-				selection = x
-
-		self.session.openWithCallback(self.ResolutionSelected, ChoiceBox, title=_("Please select a resolution..."), list=tlist, selection=selection, keys=keys)
-
-	def ResolutionSelected(self, Resolution):
-		if not Resolution is None:
-			if isinstance(Resolution[1], str):
-				if Resolution[1] == "exit" or Resolution[1] == "" or Resolution[1] == "auto":
+	def resolutionSelected(self, videoMode):
+		if videoMode is not None:
+			if isinstance(videoMode[1], str):
+				if videoMode[1] == "exit" or videoMode[1] == "" or videoMode[1] == "auto":
 					self.ExGreen_toggleGreen()
-				if Resolution[1] != "auto":
-					print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
-					open("/proc/stb/video/videomode", "w").write(Resolution[1])
-					#from enigma import gMainDC
-					#gMainDC.getInstance().setResolution(-1, -1)
+				if videoMode[1] != "auto":
+					if fileWriteLine("/proc/stb/video/videomode", videoMode[1], source=MODULE_NAME):
+						print("[InfoBarGenerics] New video mode is %s." % videoMode[1])
+					else:
+						print("[InfoBarGenerics] Error: Unable to set new video mode of %s!" % videoMode[1])
+					# from enigma import gMainDC
+					# gMainDC.getInstance().setResolution(-1, -1)
 					self.ExGreen_doHide()
 		else:
 			self.ExGreen_doHide()
@@ -3269,10 +3260,9 @@ class InfoBarResolutionSelection:
 
 class InfoBarTimerButton:
 	def __init__(self):
-		self["TimerButtonActions"] = HelpableActionMap(self, ["InfobarTimerButtonActions"],
-			{
-				"timerSelection": (self.timerSelection, _("Timer selection...")),
-			})
+		self["TimerButtonActions"] = HelpableActionMap(self, ["InfobarTimerButtonActions"], {
+			"timerSelection": (self.timerSelection, _("Timer selection"))
+		}, prio=0, description=_("Timer Actions"))
 
 	def timerSelection(self):
 		from Screens.TimerEdit import TimerEditList
@@ -3294,10 +3284,9 @@ class VideoMode(Screen):
 
 class InfoBarVmodeButton:
 	def __init__(self):
-		self["VmodeButtonActions"] = HelpableActionMap(self, ["InfobarVmodeButtonActions"],
-			{
-				"vmodeSelection": (self.ToggleVideoMode, _("Letterbox zoom")),
-			})
+		self["VmodeButtonActions"] = HelpableActionMap(self, ["InfobarVmodeButtonActions"], {
+			"vmodeSelection": (self.ToggleVideoMode, _("Letterbox zoom")),
+		}, prio=0, description=_("Zoom Actions"))
 		self.VideoMode_window = self.session.instantiateDialog(VideoMode)
 
 	def ToggleVideoMode(self):
@@ -3452,10 +3441,10 @@ class InfoBarCueSheetSupport:
 			# only resume if at least 10 seconds ahead, or <10 seconds before the end.
 			seekable = self.__getSeekable()
 			if seekable is None:
-				return # Should not happen?
+				return  # Should not happen?
 			length = seekable.getLength()
 			if length[0]:
-				length = (-1, 0) #  Set length 0 if error in getLength()
+				length = (-1, 0)  #  Set length 0 if error in getLength()
 			print("[InfoBarGenerics] seekable.getLength() returns:", length)
 			if (last > 900000) and (not length[1] or last < length[1] - 900000):
 				self.resume_point = last
@@ -3686,10 +3675,9 @@ class InfoBarTeletextPlugin:
 			self.teletext_plugin = p
 
 		if self.teletext_plugin is not None:
-			self["TeletextActions"] = HelpableActionMap(self, ["InfobarTeletextActions"],
-				{
-					"startTeletext": (self.startTeletext, _("View teletext..."))
-				})
+			self["TeletextActions"] = HelpableActionMap(self, ["InfobarTeletextActions"], {
+				"startTeletext": (self.startTeletext, _("View teletext"))
+			}, prio=0, description=_("Teletext Actions"))
 		else:
 			print("[InfoBarGenerics] no teletext plugin found!")
 
@@ -3700,11 +3688,10 @@ class InfoBarTeletextPlugin:
 class InfoBarSubtitleSupport:
 	def __init__(self):
 		object.__init__(self)
-		self["SubtitleSelectionAction"] = HelpableActionMap(self, ["InfobarSubtitleSelectionActions"],
-			{
-				"subtitleSelection": (self.subtitleSelection, _("Subtitle selection...")),
-				"subtitleShowHide": (self.toggleSubtitleShown, _("Subtitle show/hide...")),
-			})
+		self["SubtitleSelectionAction"] = HelpableActionMap(self, ["InfobarSubtitleSelectionActions"], {
+			"subtitleSelection": (self.subtitleSelection, _("Subtitle selection")),
+			"subtitleShowHide": (self.toggleSubtitleShown, _("Subtitle show/hide"))
+		}, prio=0, description=_("Subtitle Actions"))
 
 		self.selected_subtitle = None
 
@@ -3828,7 +3815,7 @@ class InfoBarServiceErrorPopupSupport:
 				eDVBServicePMTHandler.eventSOF: None,
 				eDVBServicePMTHandler.eventEOF: None,
 				eDVBServicePMTHandler.eventMisconfiguration: _("Service unavailable!\nCheck tuner configuration!"),
-			}.get(error) #this returns None when the key not exist in the dict
+			}.get(error)  # this returns None when the key not exist in the dict
 
 			if error and not config.usage.hide_zap_errors.value:
 				self.closeNotificationInstantiateDialog()
@@ -3860,7 +3847,7 @@ class InfoBarPowersaver:
 	def inactivityTimeout(self):
 		if config.usage.inactivity_timer_blocktime.value:
 			curtime = localtime(time())
-			if curtime.tm_year > 1970: #check if the current time is valid
+			if curtime.tm_year > 1970:  # check if the current time is valid
 				duration = blocktime = extra_time = False
 				if config.usage.inactivity_timer_blocktime_by_weekdays.value:
 					weekday = curtime.tm_wday
@@ -3972,11 +3959,10 @@ class InfoBarHdmi2:
 				self.addExtension((self.getHDMIInFullScreen, self.HDMIInFull, lambda: True), "blue")
 			if not self.hdmi_enabled_pip:
 				self.addExtension((self.getHDMIInPiPScreen, self.HDMIInPiP, lambda: True), "green")
-		self["HDMIActions"] = HelpableActionMap(self, "InfobarHDMIActions",
-			{
-				"HDMIin": (self.HDMIIn, _("Switch to HDMI in mode")),
-				"HDMIinLong": (self.HDMIInLong, _("Switch to HDMI in mode")),
-			}, prio=2)
+		self["HDMIActions"] = HelpableActionMap(self, ["InfobarHDMIActions"], {
+			"HDMIin": (self.HDMIIn, _("Switch to HDMI-IN mode")),
+			"HDMIinLong": (self.HDMIInLong, _("Switch to HDMI-IN mode")),
+		}, prio=2, description=_("HDMI-IN Actions"))
 
 	def HDMIInLong(self):
 		if self.LongButtonPressed:
@@ -4018,23 +4004,23 @@ class InfoBarHdmi2:
 
 	def HDMIInPiP(self):
 		if platform == "dm4kgen" or model in ("dm7080", "dm820"):
-			f = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "r")
-			check = f.read()
-			f.close()
+			print("[InfoBarGenerics] Read /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+			check = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "r").read()
+
 			if check.startswith("off"):
-				f = open("/proc/stb/audio/hdmi_rx_monitor", "w")
-				f.write("on")
-				f.close()
-				f = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w")
-				f.write("on")
-				f.close()
+				print("[InfoBarGenerics] Write to /proc/stb/audio/hdmi_rx_monitor")
+				open("/proc/stb/audio/hdmi_rx_monitor", "w").write("on")
+				print("[InfoBarGenerics] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+				open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w").write("on")
+
+
 			else:
-				f = open("/proc/stb/audio/hdmi_rx_monitor", "w")
-				f.write("off")
-				f.close()
-				f = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w")
-				f.write("off")
-				f.close()
+				print("[InfoBarGenerics] Write to /proc/stb/audio/hdmi_rx_monitor")
+				open("/proc/stb/audio/hdmi_rx_monitor", "w").write("off")
+				print("[InfoBarGenerics] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+				open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w").write("off")
+
+
 		else:
 			if not hasattr(self.session, 'pip') and not self.session.pipshown:
 				self.hdmi_enabled_pip = True
@@ -4056,47 +4042,37 @@ class InfoBarHdmi2:
 
 	def HDMIInFull(self):
 		if platform == "dm4kgen" or model in ("dm7080", "dm820"):
-			f = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "r")
-			check = f.read()
-			f.close()
+			print("[InfoBarGenerics] Read /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+			check = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "r").read()
+
 			if check.startswith("off"):
-				f = open("/proc/stb/video/videomode", "r")
-				self.oldvideomode = f.read()
-				f.close()
-				f = open("/proc/stb/video/videomode_50hz", "r")
-				self.oldvideomode_50hz = f.read()
-				f.close()
-				f = open("/proc/stb/video/videomode_60hz", "r")
-				self.oldvideomode_60hz = f.read()
-				f.close()
-				f = open("/proc/stb/video/videomode", "w")
-				if HardwareInfo().get_device_model() in ('dm900', 'dm920', 'dreamone', 'dreamtwo'):
-					f.write("1080p")
+				print("[InfoBarGenerics] Read /proc/stb/video/videomode")
+				self.oldvideomode = open("/proc/stb/video/videomode", "r").read()
+				print("[InfoBarGenerics] Read /proc/stb/video/videomode_50hz")
+				self.oldvideomode_50hz = open("/proc/stb/video/videomode_50hz", "r").read()
+				print("[InfoBarGenerics] Read /proc/stb/video/videomode_60hz")
+				self.oldvideomode_60hz = open("/proc/stb/video/videomode_60hz", "r").read()
+				if platform == "dm4kgen":
+					print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
+					open("/proc/stb/video/videomode", "w").write("1080p")
 				else:
-					f.write("720p")
-				f.close()
-				f = open("/proc/stb/audio/hdmi_rx_monitor", "w")
-				f.write("on")
-				f.close()
-				f = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w")
-				f.write("on")
-				f.close()
+					print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
+					open("/proc/stb/video/videomode", "w").write("720p")
+				print("[InfoBarGenerics] Write to /proc/stb/audio/hdmi_rx_monitor")
+				open("/proc/stb/audio/hdmi_rx_monitor", "w").write("on")
+				print("[InfoBarGenerics] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+				open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w").write("on")
 			else:
-				f = open("/proc/stb/audio/hdmi_rx_monitor", "w")
-				f.write("off")
-				f.close()
-				f = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w")
-				f.write("off")
-				f.close()
-				f = open("/proc/stb/video/videomode", "w")
-				f.write(self.oldvideomode)
-				f.close()
-				f = open("/proc/stb/video/videomode_50hz", "w")
-				f.write(self.oldvideomode_50hz)
-				f.close()
-				f = open("/proc/stb/video/videomode_60hz", "w")
-				f.write(self.oldvideomode_60hz)
-				f.close()
+				print("[InfoBarGenerics] Write to /proc/stb/audio/hdmi_rx_monitor")
+				open("/proc/stb/audio/hdmi_rx_monitor", "w").write("off")
+				print("[InfoBarGenerics] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
+				open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w").write("off")
+				print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
+				open("/proc/stb/video/videomode", "w").write(self.oldvideomode)
+				print("[InfoBarGenerics] Write to /proc/stb/video/videomode_50hz")
+				open("/proc/stb/video/videomode_50hz", "w").write(self.oldvideomode_50hz)
+				print("[InfoBarGenerics] Write to /proc/stb/video/videomode_60hz")
+				open("/proc/stb/video/videomode_60hz", "w").write(self.oldvideomode_60hz)
 		else:
 			slist = self.servicelist
 			curref = self.session.nav.getCurrentlyPlayingServiceOrGroup()

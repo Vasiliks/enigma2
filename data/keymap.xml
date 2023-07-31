@@ -35,11 +35,8 @@
 	-->
 
 	<map context="HelpActions">
-		<key id="KEY_EXIT" mapto="cancel" flags="m" />
-		<key id="KEY_OK" mapto="select" flags="m" />
-		<!-- <key id="KEY_HELP" mapto="displayHelp" flags="b" /> -->
+		<key id="KEY_HELP" mapto="displayHelp" flags="m" />
 		<!-- <key id="KEY_HELP" mapto="DISPLAYHELP" flags="b" /> -->
-		<key id="KEY_HELP" mapto="displayHelp" flags="b" />
 		<key id="KEY_HELP" mapto="displayHelpLong" flags="l" />
 		<!-- Keyboard specific buttons -->
 		<key id="KEY_ESC" mapto="cancel" flags="m" />
