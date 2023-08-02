@@ -1124,6 +1124,37 @@ def InitUsageConfig():
 		config.usage.powerLED = ConfigYesNo(default=True)
 		config.usage.powerLED.addNotifier(powerLEDChanged)
 
+	if SystemInfo["StandbyLED"]:
+		def standbyLEDChanged(configElement):
+			if "fp" in SystemInfo["StandbyLED"]:
+				patterns = [PATTERN_OFF, PATTERN_BLINK, PATTERN_ON, PATTERN_BLINK] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
+				ledPatterns.setLedPatterns(0, patterns)
+			else:
+				open(SystemInfo["StandbyLED"], "w").write(configElement.value and "on" or "off")
+		config.usage.standbyLED = ConfigYesNo(default=True)
+		config.usage.standbyLED.addNotifier(standbyLEDChanged)
+
+	if SystemInfo["SuspendLED"]:
+		def suspendLEDChanged(configElement):
+			if "fp" in SystemInfo["SuspendLED"]:
+				open(SystemInfo["SuspendLED"], "w").write(configElement.value and "1" or "0")
+			else:
+				open(SystemInfo["SuspendLED"], "w").write(configElement.value and "on" or "off")
+		config.usage.suspendLED = ConfigYesNo(default=True)
+		config.usage.suspendLED.addNotifier(suspendLEDChanged)
+
+	if SystemInfo["PowerOffDisplay"]:
+		def powerOffDisplayChanged(configElement):
+			open(SystemInfo["PowerOffDisplay"], "w").write(configElement.value and "1" or "0")
+		config.usage.powerOffDisplay = ConfigYesNo(default=True)
+		config.usage.powerOffDisplay.addNotifier(powerOffDisplayChanged)
+
+	if SystemInfo["LCDshow_symbols"]:
+		def lcdShowSymbols(configElement):
+			open(SystemInfo["LCDshow_symbols"], "w").write(configElement.value and "1" or "0")
+		config.usage.lcd_show_symbols = ConfigYesNo(default=True)
+		config.usage.lcd_show_symbols.addNotifier(lcdShowSymbols)
+
 	if SystemInfo["WakeOnLAN"]:
 		f = open(SystemInfo["WakeOnLAN"], "r")
 		status = f.read().strip()
@@ -1142,6 +1173,18 @@ def InitUsageConfig():
 			open(SystemInfo["hasXcoreVFD"], "w").write(not configElement.value and "1" or "0")
 		config.usage.toggle12to8characterVFD = ConfigYesNo(default=False)
 		config.usage.toggle12to8characterVFD.addNotifier(set12to8characterVFD)
+
+	if SystemInfo["LcdLiveTVMode"]:
+		def setLcdLiveTVMode(configElement):
+			open(SystemInfo["LcdLiveTVMode"], "w").write(configElement.value)
+		config.usage.LcdLiveTVMode = ConfigSelection(default="0", choices=[str(x) for x in range(0, 9)])
+		config.usage.LcdLiveTVMode.addNotifier(setLcdLiveTVMode)
+
+	if SystemInfo["LcdLiveDecoder"]:
+		def setLcdLiveDecoder(configElement):
+			open(SystemInfo["LcdLiveDecoder"], "w").write(configElement.value)
+		config.usage.LcdLiveDecoder = ConfigSelection(default="0", choices=[str(x) for x in range(0, 4)])
+		config.usage.LcdLiveDecoder.addNotifier(setLcdLiveDecoder)
 
 	config.usage.boolean_graphic = ConfigSelection(default="true", choices={"false": _("no"), "true": _("yes"), "only_bool": _("yes, but not in multi selections")})
 
@@ -1455,6 +1498,115 @@ def InitUsageConfig():
 		config.misc.zapmode.addNotifier(setZapmode, immediate_feedback=False)
 
 	config.usage.historymode = ConfigSelection(default='1', choices=[('0', _('Just zap')), ('1', _('Show menu'))])
+
+	if SystemInfo["VFD_scroll_repeats"]:
+		def scroll_repeats(el):
+			open(SystemInfo["VFD_scroll_repeats"], "w").write(el.value)
+		choicelist = []
+		for i in range(1, 11, 1):
+			choicelist.append((str(i)))
+		config.usage.vfd_scroll_repeats = ConfigSelection(default="3", choices=choicelist)
+		config.usage.vfd_scroll_repeats.addNotifier(scroll_repeats, immediate_feedback=False)
+
+	if SystemInfo["VFD_scroll_delay"]:
+		def scroll_delay(el):
+			open(SystemInfo["VFD_scroll_delay"], "w").write(el.value)
+		choicelist = []
+		for i in range(0, 1001, 50):
+			choicelist.append((str(i)))
+		config.usage.vfd_scroll_delay = ConfigSelection(default="150", choices=choicelist)
+		config.usage.vfd_scroll_delay.addNotifier(scroll_delay, immediate_feedback=False)
+
+	if SystemInfo["VFD_initial_scroll_delay"]:
+		def initial_scroll_delay(el):
+			open(SystemInfo["VFD_initial_scroll_delay"], "w").write(el.value)
+		choicelist = []
+		for i in range(0, 20001, 500):
+			choicelist.append((str(i)))
+		config.usage.vfd_initial_scroll_delay = ConfigSelection(default="1000", choices=choicelist)
+		config.usage.vfd_initial_scroll_delay.addNotifier(initial_scroll_delay, immediate_feedback=False)
+
+	if SystemInfo["VFD_final_scroll_delay"]:
+		def final_scroll_delay(el):
+			open(SystemInfo["VFD_final_scroll_delay"], "w").write(el.value)
+		choicelist = []
+		for i in range(0, 20001, 500):
+			choicelist.append((str(i)))
+		config.usage.vfd_final_scroll_delay = ConfigSelection(default="1000", choices=choicelist)
+		config.usage.vfd_final_scroll_delay.addNotifier(final_scroll_delay, immediate_feedback=False)
+
+	if SystemInfo["HasBypassEdidChecking"]:
+		def setHasBypassEdidChecking(configElement):
+			open(SystemInfo["HasBypassEdidChecking"], "w").write("00000001" if configElement.value else "00000000")
+		config.av.bypassEdidChecking = ConfigYesNo(default=False)
+		config.av.bypassEdidChecking.addNotifier(setHasBypassEdidChecking)
+
+	if SystemInfo["HasColorspace"]:
+		def setHaveColorspace(configElement):
+			open(SystemInfo["HasColorspace"], "w").write(configElement.value)
+		if SystemInfo["HasColorspaceSimple"]:
+			config.av.hdmicolorspace = ConfigSelection(default="Edid(Auto)", choices={"Edid(Auto)": _("auto"), "Hdmi_Rgb": "RGB", "444": "YCbCr 4:4:4", "422": "YCbCr 4:2:2", "420": "YCbCr 4:2:0"})
+		else:
+			config.av.hdmicolorspace = ConfigSelection(default="auto", choices={"auto": _("auto"), "rgb": "RGB", "420": "4:2:0", "422": "4:2:2", "444": "4:4:4"})
+		config.av.hdmicolorspace.addNotifier(setHaveColorspace)
+
+	if SystemInfo["HasColordepth"]:
+		def setHaveColordepth(configElement):
+			open(SystemInfo["HasColordepth"], "w").write(configElement.value)
+		config.av.hdmicolordepth = ConfigSelection(default="auto", choices={"auto": _("auto"), "8bit": "8bit", "10bit": "10bit", "12bit": "12bit"})
+		config.av.hdmicolordepth.addNotifier(setHaveColordepth)
+
+	if SystemInfo["HasHDMIpreemphasis"]:
+		def setHDMIpreemphasis(configElement):
+			open(SystemInfo["HasHDMIpreemphasis"], "w").write("on" if configElement.value else "off")
+		config.av.hdmipreemphasis = ConfigYesNo(default=False)
+		config.av.hdmipreemphasis.addNotifier(setHDMIpreemphasis)
+
+	if SystemInfo["HasColorimetry"]:
+		def setColorimetry(configElement):
+			open(SystemInfo["HasColorimetry"], "w").write(configElement.value)
+		config.av.hdmicolorimetry = ConfigSelection(default="auto", choices=[("auto", _("auto")), ("bt2020ncl", "BT 2020 NCL"), ("bt2020cl", "BT 2020 CL"), ("bt709", "BT 709")])
+		config.av.hdmicolorimetry.addNotifier(setColorimetry)
+
+	if SystemInfo["HasHdrType"]:
+		def setHdmiHdrType(configElement):
+			open(SystemInfo["HasHdrType"], "w").write(configElement.value)
+		config.av.hdmihdrtype = ConfigSelection(default="auto", choices={"auto": _("auto"), "none": "SDR", "hdr10": "HDR10", "hlg": "HLG", "dolby": "Dolby Vision"})
+		config.av.hdmihdrtype.addNotifier(setHdmiHdrType)
+
+	if SystemInfo["HDRSupport"]:
+		def setHlgSupport(configElement):
+			open("/proc/stb/hdmi/hlg_support", "w").write(configElement.value)
+		config.av.hlg_support = ConfigSelection(default="auto(EDID)",
+			choices=[("auto(EDID)", _("controlled by HDMI")), ("yes", _("force enabled")), ("no", _("force disabled"))])
+		config.av.hlg_support.addNotifier(setHlgSupport)
+
+		def setHdr10Support(configElement):
+			open("/proc/stb/hdmi/hdr10_support", "w").write(configElement.value)
+		config.av.hdr10_support = ConfigSelection(default="auto(EDID)",
+			choices=[("auto(EDID)", _("controlled by HDMI")), ("yes", _("force enabled")), ("no", _("force disabled"))])
+		config.av.hdr10_support.addNotifier(setHdr10Support)
+
+		def setDisable12Bit(configElement):
+			open("/proc/stb/video/disable_12bit", "w").write("on" if configElement.value else "off")
+		config.av.allow_12bit = ConfigYesNo(default=False)
+		config.av.allow_12bit.addNotifier(setDisable12Bit)
+
+		def setDisable10Bit(configElement):
+			open("/proc/stb/video/disable_10bit", "w").write("on" if configElement.value else "off")
+		config.av.allow_10bit = ConfigYesNo(default=False)
+		config.av.allow_10bit.addNotifier(setDisable10Bit)
+
+	if SystemInfo["CanSyncMode"]:
+		def setSyncMode(configElement):
+			print("[UsageConfig] Read /proc/stb/video/sync_mode")
+			open("/proc/stb/video/sync_mode", "w").write(configElement.value)
+		config.av.sync_mode = ConfigSelection(default="slow", choices={
+			"slow": _("Slow motion"),
+			"hold": _("Hold first frame"),
+			"black": _("Black screen")
+		})
+		config.av.sync_mode.addNotifier(setSyncMode)
 
 	config.subtitles = ConfigSubsection()
 	config.subtitles.show = ConfigYesNo(default=True)

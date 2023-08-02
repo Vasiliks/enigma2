@@ -198,6 +198,7 @@ def getHotkeyFunctions():
 	hotkey.functions.append((_("Activate HbbTV (Redbutton)"), "Infobar/activateRedButton", "InfoBar"))
 	if SystemInfo["HasHDMIin"]:
 		hotkey.functions.append((_("Toggle HDMI In"), "Infobar/HDMIIn", "InfoBar"))
+	if SystemInfo["HasHDMIinFHD"]:
 		hotkey.functions.append((_("Toggle HDMI-In full screen"), "Infobar/HDMIInFull", "InfoBar"))
 		hotkey.functions.append((_("Toggle HDMI-In PiP"), "Infobar/HDMIInPiP", "InfoBar"))
 	if SystemInfo["LcdLiveTV"]:
@@ -245,7 +246,7 @@ def getHotkeyFunctions():
 	hotkey.functions.append((_("Harddisk Setup"), "Setup/harddisk", "Setup"))
 	hotkey.functions.append((_("Subtitles Settings"), "Setup/subtitlesetup", "Setup"))
 	hotkey.functions.append((_("Language"), "Module/Screens.LanguageSelection/LanguageSelection", "Setup"))
-	hotkey.functions.append((_("OScam Info"), "Module/Screens.OScamInfo/OscamInfoMenu", "Plugins"))
+	hotkey.functions.append((_("OScam/Ncam Info"), "Module/Screens.OScamInfo/OscamInfoMenu", "Plugins"))
 	hotkey.functions.append((_("Memory Info"), "Module/Screens.About/MemoryInfo", "Setup"))
 	if SystemInfo["canMultiBoot"]:
 		hotkey.functions.append((_("Multiboot image selector"), "Module/Screens.FlashImage/MultibootSelection", "Setup"))
@@ -730,7 +731,7 @@ class InfoBarHotkey:
 			self.showMovies()
 
 	def ToggleLCDLiveTV(self):
-		config.lcd.minitvdisplay.value = not config.lcd.minitvdisplay.value
+		config.lcd.showTv.value = not config.lcd.showTv.value
 
 	def SourceActiveHdmiCec(self):
 		self.setHdmiCec("sourceactive")

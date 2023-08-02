@@ -36,13 +36,14 @@ from Screens.UnhandledKey import UnhandledKey
 from ServiceReference import ServiceReference, isPlayableForCur, hdmiInServiceRef
 
 from Tools.ASCIItranslit import legacyEncode
-from Tools.Directories import fileExists, getRecordingFilename, moveFiles
+from Tools.Directories import fileExists, fileReadLine, getRecordingFilename, moveFiles
 from Tools.Notifications import AddPopup, AddNotificationWithCallback, current_notifications, lock, notificationAdded, notifications, RemovePopup
 from keyids import KEYFLAGS, KEYIDS, KEYIDNAMES
 from enigma import eTimer, eServiceCenter, eDVBServicePMTHandler, iServiceInformation, iPlayableService, eServiceReference, eEPGCache, eActionMap, getDesktop, eDVBDB
 
 from time import time, localtime, strftime
 import os
+from os.path import isfile
 from bisect import insort
 from sys import maxsize
 import itertools
@@ -139,7 +140,7 @@ class whitelist:
 
 
 def reload_whitelist_vbi():
-	whitelist.vbi = [line.strip() for line in open('/etc/enigma2/whitelist_vbi', 'r').readlines()] if os.path.isfile('/etc/enigma2/whitelist_vbi') else []
+	whitelist.vbi = [line.strip() for line in open('/etc/enigma2/whitelist_vbi', 'r').readlines()] if isfile('/etc/enigma2/whitelist_vbi') else []
 
 
 reload_whitelist_vbi()
@@ -153,7 +154,7 @@ def reload_subservice_groupslist(force=False):
 	if subservice.groupslist is None or force:
 		try:
 			groupedservices = "/etc/enigma2/groupedservices"
-			if not os.path.isfile(groupedservices):
+			if not isfile(groupedservices):
 				groupedservices = "/usr/share/enigma2/groupedservices"
 			subservice.groupslist = [list(g) for k, g in itertools.groupby([line.split('#')[0].strip() for line in open(groupedservices).readlines()], lambda x:not x) if not k]
 		except:
@@ -279,16 +280,17 @@ class InfoBarShowHide(InfoBarScreenSaver):
 	FLAG_CENTER_DVB_SUBS = 2048
 
 	def __init__(self):
-		self["ShowHideActions"] = HelpableActionMap(self, ["InfobarShowHideActions"], {
-			"toggleShow": (self.okButtonCheck, _("Toggle display of the InfoBar")),
-			"hide": (self.keyHide, _("Hide the InfoBar")),
-			"toggleShowLong": (self.toggleShowLong, _("Toggle display of the second InfoBar")),
-			"hideLong": (self.hideLong, _("Hide the second InfoBar"))
-		}, prio=1, description=_("InfoBar Show/Hide Actions"))  # lower prio to make it possible to override ok and cancel..
+		self["ShowHideActions"] = ActionMap(["InfobarShowHideActions"],
+			{
+				"toggleShow": self.okButtonCheck,
+				"hide": self.keyHide,
+				"toggleShowLong": self.toggleShowLong,
+				"hideLong": self.hideLong,
+			}, 1) # lower prio to make it possible to override ok and cancel..
 
 		self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
-			iPlayableService.evStart: self.serviceStarted,
-		})
+				iPlayableService.evStart: self.serviceStarted,
+			})
 
 		InfoBarScreenSaver.__init__(self)
 		self.__state = self.STATE_SHOWN
@@ -371,9 +373,13 @@ class InfoBarShowHide(InfoBarScreenSaver):
 		self.doWriteAlpha(config.av.osd_alpha.value)
 
 	def doWriteAlpha(self, value):
-		open("/proc/stb/video/alpha", "w").write(str(value))
-		if value == config.av.osd_alpha.value:
-			self.lastResetAlpha = True
+		if SystemInfo["CanChangeOsdAlpha"]:
+#			print("[InfoBarGenerics] Write to /proc/stb/video/alpha")
+			open("/proc/stb/video/alpha", "w").write(str(value))
+			if value == config.av.osd_alpha.value:
+				self.lastResetAlpha = True
+			else:
+				self.lastResetAlpha = False
 
 	def toggleShowLong(self):
 		if not config.usage.ok_is_channelselection.value:
@@ -784,7 +790,6 @@ class InfoBarChannelSelection:
 	def __init__(self):
 		# instantiate forever
 		self.servicelist = self.session.instantiateDialog(ChannelSelection)
-		self.onClose.append(self.__onClose)
 
 		if config.misc.initialchannelselection.value:
 			self.onShown.append(self.firstRun)
@@ -800,12 +805,6 @@ class InfoBarChannelSelection:
 			"keyChannelDown": (self.keyChannelDownCheck, self.getKeyChannelDownHelptext),
 			"openSatellitesList": (self.openSatellitesList, _("Open satellites list")),
 		}, prio=0, description=_("Service Selection Actions"))
-		self.onClose.append(self.__onClose)
-
-	def __onClose(self):
-		if self.servicelist:
-			self.servicelist.doClose()
-			self.servicelist = None
 
 	def showTvChannelList(self, zap=False):
 		self.servicelist.setModeTv()
@@ -1301,14 +1300,11 @@ class InfoBarEPG:
 		plugin(session=self.session, servicelist=self.servicelist)
 
 	def showEventInfoPlugins(self):
-		if BRAND not in ("xtrend", "odin", "INI", "dags", "GigaBlue", "xp"):
-			pluginlist = self.getEPGPluginList()
-			if pluginlist:
-				self.session.openWithCallback(self.EventInfoPluginChosen, OrderedChoiceBox, text=_("Please choose an extension..."), list=pluginlist, order="eventInfoOrder", skinName="EPGExtensionsList", windowTitle=_("Events Info Menu"))
-			else:
-				self.openSingleServiceEPG()
+		pluginlist = self.getEPGPluginList()
+		if pluginlist:
+			self.session.openWithCallback(self.EventInfoPluginChosen, ChoiceBox, title=_("Please choose an extension..."), list=pluginlist, skin_name="EPGExtensionsList", reorderConfig="eventinfo_order", windowTitle=_("Events info menu"))
 		else:
-			self.openEventView()
+			self.openSingleServiceEPG()
 
 	def EventInfoPluginChosen(self, answer):
 		if answer is not None:
@@ -2288,8 +2284,8 @@ class InfoBarExtensions:
 		self.addExtension((lambda: _("Softcam Setup"), self.openSoftcamSetup, lambda: config.misc.softcam_setup.extension_menu.value and SystemInfo["HasSoftcamInstalled"]), "1")
 		self.addExtension((lambda: _("Manually import from fallback tuner"), self.importChannels, lambda: config.usage.remote_fallback_extension_menu.value and config.usage.remote_fallback_import.value))
 		self["InstantExtensionsActions"] = HelpableActionMap(self, ["InfobarExtensions"], {
-			"extensions": (self.showExtensionSelection, _("Show extensions")),
-		}, prio=1, description=_("Extension Actions"))  # Lower priority.
+				"extensions": (self.showExtensionSelection, _("Show extensions...")),
+		},prio=1, description=_("Extension Actions"))  # Lower priority.
 		self.addExtension(extension=self.getOScamInfo, type=InfoBarExtensions.EXTENSION_LIST)
 		self.addExtension(extension=self.getLogManager, type=InfoBarExtensions.EXTENSION_LIST)
 
@@ -2933,6 +2929,10 @@ class InfoBarAudioSelection:
 				"audioSelectionLong": (self.audioSelectionLong, _("Toggle Digital downmix")),
 			}, description=_("Audio track selection, downmix and other audio options"))
 
+	def yellow_key(self):
+		from Screens.AudioSelection import AudioSelection
+		self.session.openWithCallback(self.audioSelected, AudioSelection, infobar=self)
+
 	def audioSelection(self):
 		from Screens.AudioSelection import AudioSelection
 		self.session.openWithCallback(self.audioSelected, AudioSelection, infobar=self)
@@ -3160,35 +3160,22 @@ class InfoBarAspectSelection:
 		# 	self.STATE_RESOLUTION: "RESOLUTION"
 		# }.get(self.__ExGreen_state))
 		if self.__ExGreen_state == self.STATE_HIDDEN:
+			print("self.STATE_HIDDEN")
 			self.ExGreen_doAspect()
 		elif self.__ExGreen_state == self.STATE_ASPECT:
+			print("self.STATE_ASPECT")
 			self.ExGreen_doResolution()
 		elif self.__ExGreen_state == self.STATE_RESOLUTION:
+			print("self.STATE_RESOLUTION")
 			self.ExGreen_doHide()
 
 	def aspectSelection(self):
 		selection = 0
-		aspectList = [
-			(_("Resolution"), "resolution"),
-			("--", ""),
-			(_("4:3 Letterbox"), "0"),
-			(_("4:3 PanScan"), "1"),
-			(_("16:9"), "2"),
-			(_("16:9 Always"), "3"),
-			(_("16:10 Letterbox"), "4"),
-			(_("16:10 PanScan"), "5"),
-			(_("16:9 Letterbox"), "6")
-		]
+		tlist = [(_("Resolution"), "resolution"), ("--", ""), (_("4:3 letterbox"), "0"), (_("4:3 panscan"), "1"), (_("16:9"), "2"), (_("16:9 always"), "3"), (_("16:10 letterbox"), "4"), (_("16:10 panscan"), "5"), (_("16:9 letterbox"), "6")]
+		for x in range(len(tlist)):
+			selection = x
 		keys = ["green", "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-		from Components.AVSwitch import AVSwitch
-		iAVSwitch = AVSwitch()
-		aspect = iAVSwitch.getAspectRatioSetting()
-		selection = 0
-		for item in range(len(aspectList)):
-			if aspectList[item][1] == aspect:
-				selection = item
-				break
-		self.session.openWithCallback(self.aspectSelected, ChoiceBox, text=_("Please select an aspect ratio..."), list=aspectList, keys=keys, selection=selection)
+		self.session.openWithCallback(self.aspectSelected, ChoiceBox, title=_("Please select an aspect ratio..."), list=tlist, selection=selection, keys=keys)
 
 	def aspectSelected(self, aspect):
 		if not aspect is None:
@@ -3205,7 +3192,6 @@ class InfoBarAspectSelection:
 		else:
 			self.ExGreen_doHide()
 		return
-
 
 class InfoBarResolutionSelection:
 	def __init__(self):
@@ -3239,7 +3225,7 @@ class InfoBarResolutionSelection:
 				selection = item
 				break
 		print("[InfoBarGenerics] Current video mode is %s." % videoMode)
-		self.session.openWithCallback(self.resolutionSelected, ChoiceBox, text=_("Please select a resolution..."), list=resList, keys=keys, selection=selection)
+		self.session.openWithCallback(self.resolutionSelected, ChoiceBox, title=_("Please select a resolution..."), list=resList, keys=keys, selection=selection)
 
 	def resolutionSelected(self, videoMode):
 		if videoMode is not None:
@@ -3247,8 +3233,9 @@ class InfoBarResolutionSelection:
 				if videoMode[1] == "exit" or videoMode[1] == "" or videoMode[1] == "auto":
 					self.ExGreen_toggleGreen()
 				if videoMode[1] != "auto":
-					if fileWriteLine("/proc/stb/video/videomode", videoMode[1], source=MODULE_NAME):
-						print("[InfoBarGenerics] New video mode is %s." % videoMode[1])
+					file = "/sys/class/display/mode" if amlogic else "/proc/stb/video/videomode"
+					if fileWriteLine(file, videoMode[1], source=MODULE_NAME):
+						print("[InfoBarGenerics] New video mode is '%s'." % videoMode[1])
 					else:
 						print("[InfoBarGenerics] Error: Unable to set new video mode of %s!" % videoMode[1])
 					# from enigma import gMainDC
@@ -3954,7 +3941,7 @@ class InfoBarHdmi2:
 		self.hdmi_enabled_full = False
 		self.hdmi_enabled_pip = False
 
-		if SystemInfo["HasHDMIin"]:
+		if SystemInfo["HasHDMIin"] or SystemInfo["HasHDMIinFHD"]:
 			if not self.hdmi_enabled_full:
 				self.addExtension((self.getHDMIInFullScreen, self.HDMIInFull, lambda: True), "blue")
 			if not self.hdmi_enabled_pip:
@@ -4046,18 +4033,26 @@ class InfoBarHdmi2:
 			check = open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "r").read()
 
 			if check.startswith("off"):
-				print("[InfoBarGenerics] Read /proc/stb/video/videomode")
-				self.oldvideomode = open("/proc/stb/video/videomode", "r").read()
+				if isfile("/proc/stb/video/videomode"):
+					print("[InfoBarGenerics] Read /proc/stb/video/videomode")
+					self.oldvideomode = open("/proc/stb/video/videomode", "r").read()
+				elif isfile("/sys/class/display/mode"):
+					print("[InfoBarGenerics] Read /sys/class/display/mode")
+					self.oldvideomode = open("/sys/class/display/mode", "r").read()
 				print("[InfoBarGenerics] Read /proc/stb/video/videomode_50hz")
 				self.oldvideomode_50hz = open("/proc/stb/video/videomode_50hz", "r").read()
 				print("[InfoBarGenerics] Read /proc/stb/video/videomode_60hz")
 				self.oldvideomode_60hz = open("/proc/stb/video/videomode_60hz", "r").read()
-				if platform == "dm4kgen":
-					print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
-					open("/proc/stb/video/videomode", "w").write("1080p")
-				else:
-					print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
-					open("/proc/stb/video/videomode", "w").write("720p")
+				if isfile("/proc/stb/video/videomode"):
+					if platform == "dm4kgen":
+						print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
+						open("/proc/stb/video/videomode", "w").write("1080p")
+					else:
+						print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
+						open("/proc/stb/video/videomode", "w").write("720p")
+				elif isfile("/sys/class/display/mode"):
+					print("[InfoBarGenerics] Write to /sys/class/display/mode")
+					open("/sys/class/display/mode", "w").write("1080p")
 				print("[InfoBarGenerics] Write to /proc/stb/audio/hdmi_rx_monitor")
 				open("/proc/stb/audio/hdmi_rx_monitor", "w").write("on")
 				print("[InfoBarGenerics] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
@@ -4067,8 +4062,12 @@ class InfoBarHdmi2:
 				open("/proc/stb/audio/hdmi_rx_monitor", "w").write("off")
 				print("[InfoBarGenerics] Write to /proc/stb/hdmi-rx/0/hdmi_rx_monitor")
 				open("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", "w").write("off")
-				print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
-				open("/proc/stb/video/videomode", "w").write(self.oldvideomode)
+				if isfile("/proc/stb/video/videomode"):
+					print("[InfoBarGenerics] Write to /proc/stb/video/videomode")
+					open("/proc/stb/video/videomode", "w").write(self.oldvideomode)
+				elif isfile("/sys/class/display/mode"):
+					print("[InfoBarGenerics] Write to /sys/class/display/mode")
+					open("/sys/class/display/mode", "w").write(self.oldvideomode)
 				print("[InfoBarGenerics] Write to /proc/stb/video/videomode_50hz")
 				open("/proc/stb/video/videomode_50hz", "w").write(self.oldvideomode_50hz)
 				print("[InfoBarGenerics] Write to /proc/stb/video/videomode_60hz")

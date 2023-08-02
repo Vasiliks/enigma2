@@ -10,7 +10,7 @@ from Components.config import config
 from Components.AVSwitch import AVSwitch
 from Components.Console import Console
 from Components.ImportChannels import ImportChannels
-from Components.SystemInfo import SystemInfo, MODEL, BRAND, DISPLAYMODEL
+from Components.SystemInfo import SystemInfo, BoxInfo
 from Components.Sources.StreamService import StreamServiceList
 from Components.Task import job_manager
 from Tools.Directories import mediaFilesInUse
@@ -254,13 +254,13 @@ class QuitMainloopScreen(Screen):
 		Screen.__init__(self, session)
 		from Components.Label import Label
 		text = {
-			QUIT_SHUTDOWN: _("Your %s %s is shutting down") % (BRAND, DISPLAYMODEL),
-			QUIT_REBOOT: _("Your %s %s is rebooting") % (BRAND, DISPLAYMODEL),
-			QUIT_RESTART: _("The user interface of your %s %s is restarting") % (BRAND, DISPLAYMODEL),
-			QUIT_UPGRADE_FP: _("Your frontprocessor will be updated\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (BRAND, DISPLAYMODEL),
-			QUIT_DEBUG_RESTART: _("The user interface of your %s %s is restarting in debug mode") % (BRAND, DISPLAYMODEL),
-			QUIT_UPGRADE_PROGRAM: _("Unattended update in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (BRAND, DISPLAYMODEL),
-			QUIT_MANUFACTURER_RESET: _("Manufacturer reset in progress\nPlease wait until your %s %s restarts") % (BRAND, DISPLAYMODEL),
+			QUIT_SHUTDOWN: _("Your %s %s is shutting down"),
+			QUIT_REBOOT: _("Your %s %s is rebooting"),
+			QUIT_RESTART: _("The user interface of your %s %s is restarting"),
+			QUIT_UPGRADE_FP: _("Your frontprocessor will be updated\nPlease wait until your %s %s reboots\nThis may take a few minutes"),
+			QUIT_DEBUG_RESTART: _("The user interface of your %s %s is restarting in debug mode"),
+			QUIT_UPGRADE_PROGRAM: _("Unattended update in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes"),
+			QUIT_MANUFACTURER_RESET: _("Manufacturer reset in progress\nPlease wait until your %s %s restarts"),
 		}.get(retvalue)
 		self["text"] = Label(text)
 
@@ -343,10 +343,9 @@ class TryQuitMainloop(MessageBox):
 				if not inStandby:
 					if os.path.exists("/usr/script/standby_enter.sh"):
 						Console().ePopen("/usr/script/standby_enter.sh")
-					if SystemInfo["HasHDMI-CEC"] and config.hdmicec.enabled.value and ((config.hdmicec.control_tv_standby.value and config.hdmicec.next_boxes_detect.value) or config.hdmicec.handle_deepstandby_events.value != "no"):
-						if config.hdmicec.control_tv_standby.value and config.hdmicec.next_boxes_detect.value:
-							import Components.HdmiCec
-							Components.HdmiCec.hdmi_cec.secondBoxActive()
+					if SystemInfo["HasHDMI-CEC"] and config.hdmicec.enabled.value and config.hdmicec.control_tv_standby.value and config.hdmicec.next_boxes_detect.value:
+						import Components.HdmiCec
+						Components.HdmiCec.hdmi_cec.secondBoxActive()
 						if not hasattr(self, "quitScreen"):
 							self.quitScreen = self.session.instantiateDialog(QuitMainloopScreen)
 							self.quitScreen.show()
@@ -357,20 +356,6 @@ class TryQuitMainloop(MessageBox):
 			elif not inStandby:
 				config.misc.RestartUI.value = True
 				config.misc.RestartUI.save()
-			if SystemInfo["Display"] and SystemInfo["LCDMiniTV"]:
-				mode = "/proc/stb/lcd/mode"
-				if os.path.isfile(mode):
-					print("[Standby] LCDminiTV off")
-					with open(mode, "w") as lcd:
-						lcd.write("0")
-						lcd.close()
-			if MODEL == "vusolo4k":
-				oled_brightness = "/proc/stb/fp/oled_brightness"
-				if os.path.isfile(oled_brightness):
-					print("[Standby] Brightness OLED off")
-					with open(oled_brightness, "w") as oled:
-						oled.write("0")
-						oled.close()
 			self.quitMainloop()
 		else:
 			MessageBox.close(self, True)
@@ -392,8 +377,6 @@ class TryQuitMainloop(MessageBox):
 	def __onHide(self):
 		global inTryQuitMainloop
 		inTryQuitMainloop = False
-	def createSummary(self):  # Suppress the normal MessageBox ScreenSummary screen.
-		return None
 
 
 class SwitchToAndroid(Screen):
