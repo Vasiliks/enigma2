@@ -69,7 +69,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.ServiceEvent" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.ServiceEvent" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -97,7 +97,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.ServiceEvent" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.ServiceEvent" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -245,8 +245,6 @@
 <screen name="MediaPlayerLCDScreen" position="0,0" size="400,240">
 	<ePixmap pixmap="/usr/share/enigma2/display/icon_movieplayer.png" zPosition="1" position="0,5" size="400,100" />
 	<widget name="text1" position="2,110" size="396,55" font="LCD1;52"/>
-	<widget name="text3" position="2,110" size="0,0" font="LCD1;52"/>
-	<widget name="text4" position="2,110" size="0,0" font="LCD1;52"/>
 	<ePixmap pixmap="/usr/share/enigma2/display/progress-lcd1.png" zPosition="1" position="0,167" size="400,14" />
 	<widget source="global.CurrentTime" render="Label" position="0,178" size="400,50" font="LCD1;52" horizontalAlignment="left" verticalAlignment="top" foregroundColor="oled1" backgroundColor="#000000">
 		<convert type="ClockToText">Format:%H:%M:%S</convert>
@@ -441,8 +439,8 @@
 
 <!--MessageBox_summary-->
 <screen name="MessageBox_summary" position="0,0" size="400,240">
-	<widget source="text" render="Label" position="2,10" size="396,165" font="LCD1;44" horizontalAlignment="center" verticalAlignment="top" backgroundColor="oledbackground2" />
-	<widget source="option" render="Label" position="2,178" size="396,44" font="LCD1;44" horizontalAlignment="center" foregroundColor="#FFFFFF" />
+	<widget source="parent.Text" render="Label" position="2,10" size="396,165" font="LCD1;44" horizontalAlignment="center" verticalAlignment="top" backgroundColor="oledbackground2" />
+	<widget source="parent.selectedChoice" conditional="parent.selectedChoice" render="Label" position="2,178" size="396,44" font="LCD1;44" horizontalAlignment="center" foregroundColor="#FFFFFF" />
 	<widget source="session.RecordState" render="FixedLabel" text=" " position="399,239" zPosition="2" size="1,1" font="LCD1;1" horizontalAlignment="left" verticalAlignment="top" foregroundColor="white" backgroundColor="#FF0000">
 		<convert type="ConditionalShowHide">Blink</convert>
 	</widget>
@@ -512,7 +510,7 @@
 	<widget source="parent.summary_job_name" render="Label" position="0,15" size="400,50" font="LCD1;50" horizontalAlignment="center" foregroundColor="oled1" backgroundColor="#000000" />
 	<widget source="parent.summary_job_task" render="Label" position="0,70" size="400,80" font="LCD1;40" horizontalAlignment="center" />
 	<widget source="parent.summary_job_progress" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1"/>
-	<widget source="parent.summary_job_progress" render="Label" position="0,170" size="400,50" font="LCD1;52" horizontalAlignment="center" verticalAlignment="top" foregroundColor="oled1" backgroundColor="#000000">
+	<widget source="parent.summary_job_progress" render="Label" position="0,170" size="400,50" font="LCD1;52" zPosition="1" horizontalAlignment="center" verticalAlignment="top" foregroundColor="oled1" backgroundColor="#000000">
 		<convert type="ProgressToText" />
 	</widget>
 </screen>
@@ -776,7 +774,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 <!--	<widget source="parent.Service" render="LcdPicon" position="0,2" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget> -->
 	<ePixmap pixmap="/usr/share/enigma2/display/progress-lcd2.png" zPosition="1" position="2,80" size="396,3" />
@@ -808,7 +806,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<ePixmap pixmap="/usr/share/enigma2/display/progress-lcd1.png" zPosition="1" position="0,167" size="400,14" />
@@ -834,7 +832,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<ePixmap pixmap="/usr/share/enigma2/display/progress-lcd1.png" zPosition="1" position="0,167" size="400,14" />
@@ -942,7 +940,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -968,7 +966,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -994,7 +992,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1020,7 +1018,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1046,7 +1044,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1072,7 +1070,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1098,7 +1096,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1124,7 +1122,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1150,7 +1148,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1176,7 +1174,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1202,7 +1200,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1228,7 +1226,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1254,7 +1252,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1280,7 +1278,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">
@@ -1306,7 +1304,7 @@
 		<convert type="ServiceName">Name</convert>
 	</widget>
 	<widget source="parent.Service" render="LcdPicon" position="0,0" size="400,170" zPosition="2">
-		<convert type="ServiceName2">Reference</convert>
+		<convert type="ServiceName">Reference</convert>
 		<convert type="ConverterRotator"></convert>
 	</widget>
 	<widget source="parent.Service" render="Progress" pixmap="/usr/share/enigma2/display/progress-lcd1.png" position="0,167" size="400,14" borderWidth="1" zPosition="2" backgroundColor="oledbackground1">

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <skin>
-
 <!--
 ############################################################################################################
 to show the display-skin on some other older OSD-Skins, we need "windowstyle"
@@ -77,7 +76,7 @@ and the display skin will not be displayed
 		<widget source="parent.number_summary" render="Label" position="0,0" size="1,1">
 			<convert type="VfdDisplay">Number;nozero</convert>
 		</widget>
-	</screen>
+	</screen> 
 	<screen name="NumberZapPicon_summary" position="0,0" size="1,1">
 		<widget source="parent.number_summary" render="Label" position="0,0" size="1,1">
 			<convert type="VfdDisplay">Number;nozero</convert>
@@ -97,13 +96,12 @@ and the display skin will not be displayed
 		<panel name="MyClockPanel" />
 		<panel name="MyRecPanel" />
 	</screen>
-	<screen name="MessageBox_summary" position="0,0" size="1,1">
+	<screen name="MessageBoxSummary" position="0,0" size="1,1">
 		<panel name="MyClockPanel" />
 		<panel name="MyRecPanel" />
 	</screen>
-	<screen name="MessageBoxSimple_summary" position="0,0" size="1,1">
-		<panel name="MyClockPanel" />
-		<panel name="MyRecPanel" />
+	<screen name="MessageBoxSimpleSummary" position="0,0" size="1,1">
+		<panel name="MessageBoxSummary" />
 	</screen>
 	<screen name="PluginBrowserSummary" position="0,0" size="1,1">
 		<panel name="MyClockPanel" />
@@ -123,9 +121,6 @@ and the display skin will not be displayed
 
 <!-- MediaPlayer -->
 	<screen name="MediaPlayerLCDScreen" position="0,0" size="1,1">
-		<widget name="text1" position="4,0" size="0,0" font="Regular;16" />
-		<widget name="text3" position="4,36" size="0,0" font="Regular;10" />
-		<widget name="text4" position="4,49" size="0,0" font="Regular;10" />
 		<widget source="session.CurrentService" render="Label" position="0,0" size="1,1">
 			<convert type="ServicePosition">Remaining,7segment</convert>
 		</widget>

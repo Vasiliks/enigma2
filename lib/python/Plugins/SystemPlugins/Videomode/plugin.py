@@ -6,8 +6,9 @@ from Components.ConfigList import ConfigListScreen
 from Components.config import config, ConfigBoolean, ConfigNothing
 from Components.Label import Label
 from Components.Sources.StaticText import StaticText
+from Tools.Directories import isPluginInstalled
 
-from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 
 config.misc.videowizardenabled = ConfigBoolean(default=True)
 
@@ -106,6 +107,8 @@ class VideoSetup(ConfigListScreen, Screen):
 					self.list.append((_("HDR10 support"), config.av.hdr10_support, _("This option allows you to force the HDR10 modes for UHD")))
 					self.list.append((_("Allow 12bit"), config.av.allow_12bit, _("This option allows you to enable or disable the 12 bit color mode")))
 					self.list.append((_("Allow 10bit"), config.av.allow_10bit, _("This option allows you to enable or disable the 10 bit color mode")))
+				if SystemInfo["CanSyncMode"]:
+					self.list.append((_("Video sync mode"), config.av.sync_mode, _("This option allows you to use video sync mode.")))
 
 		if config.av.videoport.value == "Scart":
 			self.list.append((_("Color format"), config.av.colorformat, _("Configure which color format should be used on the SCART output.")))
@@ -150,8 +153,7 @@ class VideoSetup(ConfigListScreen, Screen):
 				self.list.append((_("3D surround speaker position"), config.av.surround_3d_speaker, _("This option allows you to disable or change the virtuell loadspeaker position.")))
 				if SystemInfo["Has3DSurroundSoftLimiter"] and config.av.surround_3d_speaker.value != "disabled":
 					self.list.append((_("3D surround softlimiter"), config.av.surround_softlimiter_3d, _("This option allows you to enable 3D surround softlimiter.")))
-			if SystemInfo["CanAudioDelay"]:
-				self.list.append((_("General audio delay"), config.av.audiodelay, _("This option configures the general audio delay.")))
+
 			if SystemInfo["CanBTAudio"]:
 				self.list.append((_("Enable BT audio"), config.av.btaudio, _("This option allows you to switch audio to BT speakers.")))
 			if SystemInfo["CanBTAudioDelay"]:
@@ -160,11 +162,14 @@ class VideoSetup(ConfigListScreen, Screen):
 		if SystemInfo["CanChangeOsdAlpha"]:
 			self.list.append((_("OSD transparency"), config.av.osd_alpha, _("Configure the transparency of the OSD.")))
 			self.list.append((_("Teletext base visibility"), config.osd.alpha_teletext, _("Base transparency for teletext, more options available within teletext screen.")))
+		if SystemInfo["CanChangeOsdPlaneAlpha"]:
+			self.list.append((_("OSD plane transparency"), config.av.osd_planealpha, _("Configure the transparency of the OSD.")))
 
-		if not isinstance(config.av.scaler_sharpness, ConfigNothing):
+		if not isinstance(config.av.scaler_sharpness, ConfigNothing) and not isPluginInstalled("VideoEnhancement"):
 			self.list.append((_("Scaler sharpness"), config.av.scaler_sharpness, _("Configure the sharpness of the video scaling.")))
 
 		self["config"].list = self.list
+		self["config"].l.setList(self.list)
 
 	def keyLeft(self):
 		ConfigListScreen.keyLeft(self)
@@ -212,20 +217,20 @@ class VideomodeHotplug:
 		self.hw.on_hotplug.remove(self.hotplug)
 
 	def hotplug(self, what):
-		print("[Videomode] hotplug detected on port '%s'" % (what))
+		print("hotplug detected on port '%s'" % (what))
 		port = config.av.videoport.value
 		mode = config.av.videomode[port].value
 		rate = config.av.videorate[mode].value
 
 		if not self.hw.isModeAvailable(port, mode, rate):
-			print("[Videomode] mode %s/%s/%s went away!" % (port, mode, rate))
+			print("mode %s/%s/%s went away!" % (port, mode, rate))
 			modelist = self.hw.getModeList(port)
 			if not len(modelist):
-				print("[Videomode] sorry, no other mode is available (unplug?). Doing nothing.")
+				print("sorry, no other mode is available (unplug?). Doing nothing.")
 				return
 			mode = modelist[0][0]
 			rate = modelist[0][1]
-			print("[Videomode] setting %s/%s/%s" % (port, mode, rate))
+			print("setting %s/%s/%s" % (port, mode, rate))
 			self.hw.setMode(port, mode, rate)
 
 
@@ -233,8 +238,8 @@ hotplug = None
 
 
 def startHotplug():
-	global hotplug, VIDEO
-	hotplug = VideomodeHotplug(VIDEO)
+	global hotplug, video_hw
+	hotplug = VideomodeHotplug(video_hw)
 	hotplug.start()
 
 
@@ -256,7 +261,7 @@ def autostart(reason, session=None, **kwargs):
 
 
 def videoSetupMain(session, **kwargs):
-	session.open(VideoSetup, VIDEO)
+	session.open(VideoSetup, video_hw)
 
 
 def startSetup(menuid):
