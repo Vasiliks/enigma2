@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-from os import path
+from os.path import isfile
 from fcntl import ioctl
 from struct import pack, unpack
 from time import localtime, time, timezone
 from Tools.Directories import fileExists
 from boxbranding import getMachineBuild
+
+INFO_TYPE = "/proc/stb/info/type"
+INFO_SUBTYPE = "/proc/stb/info/subtype"
+
 def getBoxProcType():
 	procmodeltype = "unknown"
 	try:
@@ -38,6 +42,16 @@ def getBoxProc():
 	except IOError:
 		print("[StbHardware] getBoxProc failed!")
 	return procmodel
+
+def getProcInfoTypeTuner():
+	typetuner = ""
+	if isfile(INFO_TYPE):
+		with open(INFO_TYPE, "r") as fd:
+			typetuner = fd.read().split('\n', 1)[0]
+	elif isfile(INFO_SUBTYPE):
+		with open(INFO_SUBTYPE, "r") as fd:
+			typetuner = fd.read().split('\n', 1)[0]
+	return typetuner
 
 def getHWSerial():
 	hwserial = "unknown"
@@ -117,7 +131,7 @@ def setRTCoffset(forsleep=None):
 
 
 def setRTCtime(wutime):
-	if path.exists("/proc/stb/fp/rtc_offset"):
+	if fileExists("/proc/stb/fp/rtc_offset"):
 		setRTCoffset()
 	try:
 		open("/proc/stb/fp/rtc", "w").write(str(wutime))
