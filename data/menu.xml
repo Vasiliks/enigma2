@@ -24,8 +24,10 @@
 			<id val="information"/>
 			<item level="1" text="Service" entryID="service_info_screen"><screen module="ServiceInfo" screen="ServiceInfo"/></item>
 			<item level="0" text="About" entryID="about_screen"><screen module="About"/></item>
+			<item level="0" text="Tuner Information" entryID="device_screen" weight="15"><screen module="About" screen="TunerInformation"/></item>
+			<item level="0" text="Images" entryID="receiver_image_screen" weight="10"><screen module="About" screen="InformationImage"/></item>
 			<item level="0" text="Network" entryID="network_screen"><screen module="About" screen="SystemNetworkInfo"/></item>
-			<item level="0" text="Devices" entryID="device_screen"><screen module="About" screen="Devices"/></item>
+			<item level="0" text="Storage Devices" entryID="device_screen"><screen module="About" screen="Devices"/></item>
 			<item level="0" text="Memory" entryID="memory_screen"><screen module="About" screen="SystemMemoryInfo"/></item>
 			<item level="0" text="Geolocation" entryID="geolocation_screen"><screen module="About" screen="Geolocation"/></item>
 			<item level="2" text="Streaming clients info" entryID="streaming_clients_info_screen"><screen module="StreamingClientsInfo"/></item>

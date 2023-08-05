@@ -1,7 +1,15 @@
-# -*- coding: utf-8 -*-
-from Screens.Screen import Screen
-from six import ensure_str, text_type
+from enigma import eConsoleAppContainer, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
+from os import listdir, popen, remove
+from os.path import getmtime, isfile, join as pathjoin
+from PIL import Image
+import skin
+import os
+import re
+from skin import parameters
+from Screens.HelpMenu import HelpableScreen
+from Screens.Screen import Screen, ScreenSummary
 from Screens.MessageBox import MessageBox
+
 from Components.config import config
 from Components.ActionMap import ActionMap, HelpableActionMap
 from Components.Sources.StaticText import StaticText
@@ -18,22 +26,28 @@ from Components.Pixmap import MultiPixmap, Pixmap
 from Components.Network import iNetwork
 from Components.SystemInfo import BoxInfo, SystemInfo, BRAND, MODEL, DISPLAYMODEL
 
-from Tools.Directories import SCOPE_PLUGINS, resolveFilename, isPluginInstalled, fileExists, pathExists
-from Tools.StbHardware import getFPVersion
+from Tools.Directories import SCOPE_PLUGINS, resolveFilename, fileExists, fileHas, pathExists, fileReadLines, fileWriteLine, isPluginInstalled
 from Tools.Geolocation import geolocation
-from Tools.StbHardware import getFPVersion
-from enigma import eTimer, eLabel, eConsoleAppContainer, getDesktop, eGetEnigmaDebugLvl
-
-from skin import parameters
-
+from Tools.StbHardware import getFPVersion, getProcInfoTypeTuner
+from Tools.LoadPixmap import LoadPixmap
 from time import strftime
 
-from os import listdir, popen, remove
-from os.path import getmtime, isfile, join as pathjoin
-import glob
 
 API_GITHUB = 0
 API_GITLAB = 1
+
+MODULE_NAME = __name__.split(".")[-1]
+
+INFO_COLORS = ["N", "H", "P", "V", "M"]
+INFO_COLOR = {
+	"B": None,
+	"N": 0x00ffffff,  # Normal.
+	"H": 0x00ffffff,  # Headings.
+	"P": 0x00888888,  # Prompts.
+	"V": 0x00888888,  # Values.
+	"M": 0x00ffff00  # Messages.
+}
+
 
 def getTypeTuner():
 	typetuner = {
@@ -48,6 +62,223 @@ def getTypeTuner():
 		return "%s - %s" % (getProcInfoTypeTuner(), typetuner.get(getProcInfoTypeTuner()))
 
 
+class InformationBase(Screen, HelpableScreen):
+	def __init__(self, session):
+		Screen.__init__(self, session, mandatoryWidgets=["information"])
+		HelpableScreen.__init__(self)
+		self.skinName = ["Information"]
+		self["information"] = ScrollLabel()
+		self["key_red"] = StaticText(_("Close"))
+		self["key_green"] = StaticText(_("Refresh"))
+		self["actions"] = HelpableActionMap(self, ["CancelSaveActions", "OkActions", "NavigationActions"], {
+			"cancel": (self.keyCancel, _("Close the screen")),
+			"close": (self.closeRecursive, _("Close the screen and exit all menus")),
+			"save": (self.refreshInformation, _("Refresh the screen")),
+			"ok": (self.refreshInformation, _("Refresh the screen")),
+			"top": (self["information"].moveTop, _("Move to first line / screen")),
+			"pageUp": (self["information"].pageUp, _("Move up a screen")),
+			"up": (self["information"].pageUp, _("Move up a screen")),
+			"down": (self["information"].pageDown, _("Move down a screen")),
+			"pageDown": (self["information"].pageDown, _("Move down a screen")),
+			"bottom": (self["information"].moveBottom, _("Move to last line / screen")),
+			"right": self.displayInformation,
+			"left": self.displayInformation,
+		}, prio=0, description=_("Common Information Actions"))
+		if isfile(resolveFilename(SCOPE_PLUGINS, pathjoin("boxes", "%s.png" % (MODEL)))):
+			self["key_info"] = StaticText(_("INFO"))
+			self["infoActions"] = HelpableActionMap(self, ["InfoActions"], {
+				"info": (self.showReceiverImage, _("Show receiver image(s)"))
+			}, prio=0, description=_("Receiver Information Actions"))
+		colors = parameters.get("InformationColors", (0x00ffffff, 0x00ffffff, 0x00888888, 0x00888888, 0x00ffff00))
+		if len(colors) == len(INFO_COLORS):
+			for index in range(len(colors)):
+				INFO_COLOR[INFO_COLORS[index]] = colors[index]
+		else:
+			print("[Information] Warning: %d colors are defined in the skin when %d were expected!" % (len(colors), len(INFO_COLORS)))
+		self["information"].setText(_("Loading information, please wait..."))
+		self.onInformationUpdated = [self.displayInformation]
+		self.onLayoutFinish.append(self.displayInformation)
+		self.console = Console()
+		self.informationTimer = eTimer()
+		self.informationTimer.callback.append(self.fetchInformation)
+		self.informationTimer.start(25)
+
+	def showReceiverImage(self):
+		self.session.openWithCallback(self.informationWindowClosed, InformationImage)
+
+	def keyCancel(self):
+		self.console.killAll()
+		self.close()
+
+	def closeRecursive(self):
+		self.console.killAll()
+		self.close(True)
+
+	def informationWindowClosed(self, *retVal):
+		if retVal and retVal[0]:
+			self.close(True)
+
+	def fetchInformation(self):
+		self.informationTimer.stop()
+		for callback in self.onInformationUpdated:
+			callback()
+
+	def refreshInformation(self):
+		self.informationTimer.start(25)
+		for callback in self.onInformationUpdated:
+			callback()
+
+	def displayInformation(self):
+		pass
+
+	def getSummaryInformation(self):
+		pass
+
+	def createSummary(self):
+		return InformationSummary
+
+
+def formatLine(style, left, right=None):
+	styleLen = len(style)
+	leftStartColor = "" if styleLen > 0 and style[0] == "B" else "\c%08x" % (INFO_COLOR.get(style[0], "P") if styleLen > 0 else INFO_COLOR["P"])
+	leftEndColor = "" if leftStartColor == "" else "\c%08x" % INFO_COLOR["N"]
+	leftIndent = "    " * int(style[1]) if styleLen > 1 and style[1].isdigit() else ""
+	rightStartColor = "" if styleLen > 2 and style[2] == "B" else "\c%08x" % (INFO_COLOR.get(style[2], "V") if styleLen > 2 else INFO_COLOR["V"])
+	rightEndColor = "" if rightStartColor == "" else "\c%08x" % INFO_COLOR["N"]
+	rightIndent = "    " * int(style[3]) if styleLen > 3 and style[3].isdigit() else ""
+	if right is None:
+		colon = "" if styleLen > 0 and style[0] in ("M", "P", "V") else ""
+		return "%s%s%s%s%s" % (leftIndent, leftStartColor, left, colon, leftEndColor)
+	return "%s%s%s:%s|%s%s%s%s" % (leftIndent, leftStartColor, left, leftEndColor, rightIndent, rightStartColor, right, rightEndColor)
+
+
+class InformationImage(Screen, HelpableScreen):
+	skin = """
+	<screen name="InformationImage" title="Receiver Image" position="center,center" size="950,560">
+		<widget name="name" position="10,10" size="e-20,25" font="Regular;20" horizontalAlignment="center" transparent="1" verticalAlignment="center" />
+		<widget name="image" position="10,45" size="e-20,e-105" alphaTest="blend" scale="1" transparent="1" />
+		<widget source="key_red" render="Label" position="10,e-50" size="180,40" backgroundColor="key_red" conditional="key_red" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+			<convert type="ConditionalShowHide" />
+		</widget>
+		<widget source="key_green" render="Label" position="200,e-50" size="180,40" backgroundColor="key_green" conditional="key_green" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+			<convert type="ConditionalShowHide" />
+		</widget>
+		<widget source="key_yellow" render="Label" position="390,e-50" size="180,40" backgroundColor="key_yellow" conditional="key_yellow" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+			<convert type="ConditionalShowHide" />
+		</widget>
+		<widget source="key_help" render="Label" position="e-90,e-50" size="80,40" backgroundColor="key_back" conditional="key_help" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+			<convert type="ConditionalShowHide" />
+		</widget>
+		<widget source="lab1" render="Label" position="0,0" size="0,0" conditional="lab1" font="Regular;22" transparent="1" />
+		<widget source="lab2" render="Label" position="0,0" size="0,0" conditional="lab2" font="Regular;18" transparent="1" />
+		<widget source="lab3" render="Label" position="0,0" size="0,0" conditional="lab3" font="Regular;18" transparent="1" />
+		<widget source="lab4" render="Label" position="0,0" size="0,0" conditional="lab4" font="Regular;18" transparent="1" />
+		<widget source="lab5" render="Label" position="0,0" size="0,0" conditional="lab5" font="Regular;18" transparent="1" />
+		<widget source="lab6" render="Label" position="0,0" size="0,0" conditional="lab6" font="Regular;18" transparent="1" />
+	</screen>"""
+
+	def __init__(self, session):
+		Screen.__init__(self, session, mandatoryWidgets=["name", "image"])
+		HelpableScreen.__init__(self)
+		self["name"] = Label()
+		self["image"] = Pixmap()
+		self["key_red"] = StaticText(_("Close"))
+		self["key_green"] = StaticText(_("Prev Image"))
+		self["key_yellow"] = StaticText(_("Next Image"))
+		boxes = "Extensions/OpenWebif/public/images/boxes/"
+		remotes = "Extensions/OpenWebif/public/images/remotes/"
+		self["actions"] = HelpableActionMap(self, ["OkCancelActions", "ColorActions"], {
+			"cancel": (self.keyCancel, _("Close the screen")),
+			"close": (self.closeRecursive, _("Close the screen and exit all menus")),
+			"ok": (self.nextImage, _("Show next image")),
+			"red": (self.keyCancel, _("Close the screen")),
+			"green": (self.prevImage, _("Show previous image")),
+			"yellow": (self.nextImage, _("Show next image"))
+		}, prio=0, description=_("Receiver Image Actions"))
+		self.images = (
+			(_("Front"), "%s%s.png", (boxes, MODEL)),
+			(_("Rear"), "%s%s-rear.png", (boxes, MODEL)),
+			(_("Remote Control"), "%s%s.png", (remotes, BoxInfo.getItem("rcname"))),
+			(_("Flashing"), "%s%s-flashing.png", (boxes, MODEL)),
+			(_("Internal"), "%s%s-internal.png", (boxes, MODEL))
+		)
+		self.imageIndex = 0
+		self.widgetContext = None
+		self.onLayoutFinish.append(self.layoutFinished)
+
+	def keyCancel(self):
+		self.close()
+
+	def closeRecursive(self):
+		self.close(True)
+
+	def prevImage(self):
+		self.imageIndex -= 1
+		if self.imageIndex < 0:
+			self.imageIndex = len(self.images) - 1
+		while not isfile(resolveFilename(SCOPE_PLUGINS, self.images[self.imageIndex][1] % self.images[self.imageIndex][2])):
+			self.imageIndex -= 1
+			if self.imageIndex < 0:
+				self.imageIndex = len(self.images) - 1
+				break
+		self.layoutFinished()
+
+	def nextImage(self):
+		self.imageIndex += 1
+		while not isfile(resolveFilename(SCOPE_PLUGINS, self.images[self.imageIndex][1] % self.images[self.imageIndex][2])):
+			self.imageIndex += 1
+			if self.imageIndex >= len(self.images):
+				self.imageIndex = 0
+				break
+		self.layoutFinished()
+
+	def layoutFinished(self):
+		if self.widgetContext is None:
+			self.widgetContext = tuple(self["image"].getPosition() + self["image"].getSize())
+			print(self.widgetContext)
+		self["name"].setText("%s  -  %s %s" % (self.images[self.imageIndex][0], BRAND, DISPLAYMODEL))
+		imagePath = resolveFilename(SCOPE_PLUGINS, self.images[self.imageIndex][1] % self.images[self.imageIndex][2])
+		image = LoadPixmap(imagePath)
+		if image:
+			img = Image.open(imagePath)
+			imageWidth, imageHeight = img.size
+			scale = float(self.widgetContext[2]) / imageWidth if imageWidth >= imageHeight else float(self.widgetContext[3]) / imageHeight
+			sizeW = int(imageWidth * scale)
+			sizeH = int(imageHeight * scale)
+			posX = self.widgetContext[0] + int(self.widgetContext[2] / 2.0 - sizeW / 2.0)
+			posY = self.widgetContext[1] + int(self.widgetContext[3] / 2.0 - sizeH / 2.0)
+			self["image"].instance.move(ePoint(posX, posY))
+			self["image"].instance.resize(eSize(sizeW, sizeH))
+			self["image"].instance.setPixmap(image)
+
+
+def formatLine(style, left, right=None):
+	styleLen = len(style)
+	leftStartColor = "" if styleLen > 0 and style[0] == "B" else "\c%08x" % (INFO_COLOR.get(style[0], "P") if styleLen > 0 else INFO_COLOR["P"])
+	leftEndColor = "" if leftStartColor == "" else "\c%08x" % INFO_COLOR["N"]
+	leftIndent = "    " * int(style[1]) if styleLen > 1 and style[1].isdigit() else ""
+	rightStartColor = "" if styleLen > 2 and style[2] == "B" else "\c%08x" % (INFO_COLOR.get(style[2], "V") if styleLen > 2 else INFO_COLOR["V"])
+	rightEndColor = "" if rightStartColor == "" else "\c%08x" % INFO_COLOR["N"]
+	rightIndent = "    " * int(style[3]) if styleLen > 3 and style[3].isdigit() else ""
+	if right is None:
+		colon = "" if styleLen > 0 and style[0] in ("M", "P", "V") else ""
+		return "%s%s%s%s%s" % (leftIndent, leftStartColor, left, colon, leftEndColor)
+	return "%s%s%s:%s|%s%s%s%s" % (leftIndent, leftStartColor, left, leftEndColor, rightIndent, rightStartColor, right, rightEndColor)
+
+
+class InformationSummary(ScreenSummary):
+	def __init__(self, session, parent):
+		ScreenSummary.__init__(self, session, parent=parent)
+		self.parent = parent
+		self["information"] = StaticText()
+		parent.onInformationUpdated.append(self.updateSummary)
+		# self.updateSummary()
+
+	def updateSummary(self):
+		# print("[Information] DEBUG: Updating summary.")
+		self["information"].setText(self.parent.getSummaryInformation())
+
+
 class About(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
@@ -56,7 +287,7 @@ class About(Screen):
 		self["key_red"] = Button(_("Latest Commits"))
 		self["key_yellow"] = Button(_("Dmesg Info"))
 		self["key_blue"] = Button(_("Memory Info"))
-		hddsplit = parameters.get("AboutHddSplit", 1)
+		hddsplit = skin.parameters.get("AboutHddSplit", 1)
 
 		AboutText = _("Model: ") + BRAND + " " + DISPLAYMODEL + "\n"
 		if MODEL:
@@ -161,45 +392,10 @@ class About(Screen):
 				player = "%s" % servicehisilicon
 			else:
 				player = _("Not installed")
-		AboutText += _("Player: %s") % player + "\n"
+		AboutText += _("Player: %s") % player
 
 		AboutText += "\n"
-		AboutText += _("Uptime: ") + about.getBoxUptime() + "\n"
-
-		self["TunerHeader"] = StaticText(_("Detected NIMs:"))
-		AboutText += "\n"
-		AboutText += _("Detected NIMs:") + "\n"
-
-		nims = nimmanager.nimListCompressed()
-		for count in range(len(nims)):
-			if count < 4:
-				self["Tuner" + str(count)] = StaticText(nims[count])
-			else:
-				self["Tuner" + str(count)] = StaticText("")
-			AboutText += nims[count] + "\n"
-
-		self["HDDHeader"] = StaticText(_("Detected storage devices:"))
-		AboutText += "\n"
-		AboutText += _("Detected HDD:") + "\n"
-
-		hddlist = harddiskmanager.HDDList()
-		hddinfo = ""
-		if hddlist:
-			formatstring = hddsplit and "%s:%s, %.1f %s %s" or "%s\n(%s, %.1f %s %s)"
-			for count in range(len(hddlist)):
-				if hddinfo:
-					hddinfo += "\n"
-				hdd = hddlist[count][1]
-				if int(hdd.free()) > 1024:
-					hddinfo += formatstring % (hdd.model(), hdd.capacity(), hdd.free() / 1024.0, _("GB"), _("free"))
-				else:
-					hddinfo += formatstring % (hdd.model(), hdd.capacity(), hdd.free(), _("MB"), _("free"))
-		else:
-			hddinfo = _("none")
-		self["hddA"] = StaticText(hddinfo)
-		AboutText += hddinfo + "\n\n" + _("Network Info:")
-		for x in about.GetIPsFromNetworkInterfaces():
-			AboutText += "\n" + x[0] + ": " + x[1]
+		AboutText += _("Uptime: ") + about.getBoxUptime()
 
 		self["AboutScrollLabel"] = ScrollLabel(AboutText)
 		self["actions"] = ActionMap(["ColorActions", "SetupActions", "DirectionActions"], {
@@ -225,6 +421,9 @@ class About(Screen):
 	def showTroubleshoot(self):
 		self.session.open(Troubleshoot)
 
+	def doNothing(self):
+		pass
+
 
 class Geolocation(Screen):
 	def __init__(self, session):
@@ -238,71 +437,148 @@ class Geolocation(Screen):
 		try:
 			geolocationData = geolocation.getGeolocationData(fields="continent,country,regionName,city,timezone,currency,lat,lon", useCache=True)
 			continent = geolocationData.get("continent", None)
-			if isinstance(continent, text_type):
-				continent = ensure_str(continent.encode(encoding="UTF-8", errors="ignore"))
+			if isinstance(continent, str):
+				continent = str(continent)
 			if continent != None:
-				GeolocationText += _("Continent: ") + continent + "\n"
+				GeolocationText += _("Continent: ") + "\t" + continent + "\n"
 
 			country = geolocationData.get("country", None)
-			if isinstance(country, text_type):
-				country = ensure_str(country.encode(encoding="UTF-8", errors="ignore"))
+			if isinstance(country, str):
+				country = str(country)
 			if country != None:
-				GeolocationText += _("Country: ") + country + "\n"
+				GeolocationText += _("Country: ") + "\t" + country + "\n"
 
 			state = geolocationData.get("regionName", None)
-			if isinstance(state, text_type):
-				state = ensure_str(state.encode(encoding="UTF-8", errors="ignore"))
+			if isinstance(state, str):
+				state = str(state)
 			if state != None:
-				GeolocationText += _("RegionName: ") + state + "\n"
+				GeolocationText += _("State: ") + "\t" + state + "\n"
 
 			city = geolocationData.get("city", None)
-			if isinstance(city, text_type):
-				city = ensure_str(city.encode(encoding="UTF-8", errors="ignore"))
+			if isinstance(city, str):
+				city = str(city)
 			if city != None:
-				GeolocationText += _("City: ") + city + "\n"
+				GeolocationText += _("City: ") + "\t" + city + "\n"
 
 			GeolocationText += "\n"
 
 			timezone = geolocationData.get("timezone", None)
-			if isinstance(timezone, text_type):
-				timezone = ensure_str(timezone.encode(encoding="UTF-8", errors="ignore"))
+			if isinstance(timezone, str):
+				timezone = str(timezone)
 			if timezone != None:
-				GeolocationText += _("Timezone: ") + timezone + "\n"
+				GeolocationText += _("Timezone: ") + "\t" + timezone + "\n"
 
 			currency = geolocationData.get("currency", None)
-			if isinstance(currency, text_type):
-				currency = ensure_str(currency.encode(encoding="UTF-8", errors="ignore"))
+			if isinstance(currency, str):
+				currency = str(currency)
 			if currency != None:
-				GeolocationText += _("Currency: ") + currency + "\n"
+				GeolocationText += _("Currency: ") + "\t" + currency + "\n"
 
 			GeolocationText += "\n"
 
 			latitude = geolocationData.get("lat", None)
 			if str(float(latitude)) != None:
-				GeolocationText += _("Latitude: ") + str(float(latitude)) + "\n"
+				GeolocationText += _("Latitude: ") + "\t" + str(float(latitude)) + "\n"
 
 			longitude = geolocationData.get("lon", None)
 			if str(float(longitude)) != None:
-				GeolocationText += _("Longitude: ") + str(float(longitude)) + "\n"
+				GeolocationText += _("Longitude: ") + "\t" + str(float(longitude)) + "\n"
 			self["AboutScrollLabel"] = ScrollLabel(GeolocationText)
 		except Exception as err:
 			self["AboutScrollLabel"] = ScrollLabel(_("Requires internet connection"))
 
-		self["actions"] = ActionMap(["ColorActions", "SetupActions", "DirectionActions"], {
+		self["actions"] = ActionMap(["ColorActionsAbout", "SetupActions", "DirectionActions"], {
 			"cancel": self.close,
 			"ok": self.close,
 			"up": self["AboutScrollLabel"].pageUp,
 			"down": self["AboutScrollLabel"].pageDown
 		})
 
+	def doNothing(self):
+		pass
+
+class TunerInformation(InformationBase):
+	def __init__(self, session):
+		InformationBase.__init__(self, session)
+		self.setTitle(_("Tuner Information"))
+		self.skinName.insert(0, "TunerInformation")
+
+	def displayInformation(self):
+		info = []
+		info.append(formatLine("H", _("Detected tuners")))
+		info.append("")
+		nims = nimmanager.nimList()
+		descList = []
+		curIndex = -1
+		if fileExists("/usr/bin/dvb-fe-tool"):
+			import time
+			try:
+				cmd = 'dvb-fe-tool > /tmp/dvbfetool.txt ; dvb-fe-tool -f 1 >> /tmp/dvbfetool.txt ; cat /proc/bus/nim_sockets >> /tmp/dvbfetool.txt'
+				res = Console().ePopen(cmd)
+				time.sleep(0.1)
+			except:
+				pass
+		for count in range(len(nims)):
+			data = nims[count].split(":")
+			idx = data[0].strip("Tuner").strip()
+			desc = data[1].strip()
+			if descList and descList[curIndex]["desc"] == desc:
+				descList[curIndex]["end"] = idx
+			else:
+				descList.append({
+					"desc": desc,
+					"start": idx,
+					"end": idx
+				})
+				curIndex += 1
+			count += 1
+		for count in range(len(descList)):
+			data = descList[count]["start"] if descList[count]["start"] == descList[count]["end"] else ("%s - %s" % (descList[count]["start"], descList[count]["end"]))
+			info.append(formatLine("H", "Tuner %s:" % data))
+			info.append(formatLine("", "%s" % descList[count]["desc"]))
+		info.append(formatLine("H", _("Type Tuner"), "%s" % getTypeTuner())) if getTypeTuner() else ""
+		# info.append("")
+		# info.append(formatLine("H", _("Logical tuners")))  # Each tuner is a listed separately even if the hardware is common.
+		# info.append("")
+		# nims = nimmanager.nimListCompressed()
+		# for count in range(len(nims)):
+		# 	tuner, type = [x.strip() for x in nims[count].split(":", 1)]
+		# 	info.append(formatLine("P1", tuner, type))
+		info.append("")
+		numSlots = 0
+		dvbFeToolTxt = ""
+		nimSlots = nimmanager.getSlotCount()
+		for nim in range(nimSlots):
+			dvbFeToolTxt += eDVBResourceManager.getInstance().getFrontendCapabilities(nim)
+		dvbApiVersion = dvbFeToolTxt.splitlines()[0].replace("DVB API version: ", "").strip()
+		info.append(formatLine("", _("DVB API"), _("New"))) if float(dvbApiVersion) > 5 else info.append(formatLine("", _("DVB API"), _("Old")))
+		info.append(formatLine("", _("DVB API version"), dvbApiVersion))
+		info.append("")
+		info.append(formatLine("", _("Transcoding"), (_("Yes") if BoxInfo.getItem("transcoding") else _("No"))))
+		info.append(formatLine("", _("MultiTranscoding"), (_("Yes") if BoxInfo.getItem("multitranscoding") else _("No"))))
+		info.append("")
+		if fileHas("/tmp/dvbfetool.txt", "Mode 2: DVB-S"):
+			 info.append(formatLine("", _("DVB-S2/C/T2 Combined"), (_("Yes"))))
+
+		info.append(formatLine("", _("DVB-S2X"), (_("Yes") if fileHas("/tmp/dvbfetool.txt", "DVB-S2X") or pathExists("/proc/stb/frontend/0/t2mi") or pathExists("/proc/stb/frontend/1/t2mi") else _("No"))))
+		info.append(formatLine("", _("DVB-S"), (_("Yes") if "DVBS" in dvbFeToolTxt or "DVB-S" in dvbFeToolTxt else _("No"))))
+		info.append(formatLine("", _("DVB-T"), (_("Yes") if "DVBT" in dvbFeToolTxt or "DVB-T" in dvbFeToolTxt else _("No"))))
+		info.append(formatLine("", _("DVB-C"), (_("Yes") if "DVBC" in dvbFeToolTxt or "DVB-C" in dvbFeToolTxt else _("No"))))
+		info.append("")
+		info.append(formatLine("", _("Multistream"), (_("Yes") if "MULTISTREAM" in dvbFeToolTxt else _("No"))))
+		info.append("")
+		info.append(formatLine("", _("ANNEX-A"), (_("Yes") if "ANNEX_A" in dvbFeToolTxt or "ANNEX-A" in dvbFeToolTxt else _("No"))))
+		info.append(formatLine("", _("ANNEX-B"), (_("Yes") if "ANNEX_B" in dvbFeToolTxt or "ANNEX-B" in dvbFeToolTxt else _("No"))))
+		info.append(formatLine("", _("ANNEX-C"), (_("Yes") if "ANNEX_C" in dvbFeToolTxt or "ANNEX-C" in dvbFeToolTxt else _("No"))))
+		self["information"].setText("\n".join(info))
+
 
 class Devices(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
-		screentitle = _("Devices")
+		screentitle = _("Storage Devices")
 		title = screentitle
 		Screen.setTitle(self, title)
-		self["TunerHeader"] = StaticText(_("Detected tuners:"))
 		self["HDDHeader"] = StaticText(_("Detected devices:"))
 		self["MountsHeader"] = StaticText(_("Network servers:"))
 		self["nims"] = StaticText()
@@ -325,9 +601,6 @@ class Devices(Screen):
 		self.mountinfo = ''
 		self["actions"].setEnabled(False)
 		scanning = _("Please wait while scanning for devices...")
-		self["nims"].setText(scanning)
-		for count in (0, 1, 2, 3):
-			self["Tuner" + str(count)].setText(scanning)
 		self["hdd"].setText(scanning)
 		self['mounts'].setText(scanning)
 		self.activityTimer.start(1)
@@ -335,47 +608,6 @@ class Devices(Screen):
 	def populate2(self):
 		self.activityTimer.stop()
 		self.Console = Console()
-		niminfo = ""
-		nims = nimmanager.nimListCompressed()
-		for count in range(len(nims)):
-			if niminfo:
-				niminfo += "\n"
-			niminfo += nims[count]
-		self["nims"].setText(niminfo)
-
-		nims = nimmanager.nimList()
-		if len(nims) <= 4 :
-			for count in (0, 1, 2, 3):
-				if count < len(nims):
-					self["Tuner" + str(count)].setText(nims[count])
-				else:
-					self["Tuner" + str(count)].setText("")
-		else:
-			desc_list = []
-			count = 0
-			cur_idx = -1
-			while count < len(nims):
-				data = nims[count].split(":")
-				idx = data[0].strip('Tuner').strip()
-				desc = data[1].strip()
-				if desc_list and desc_list[cur_idx]['desc'] == desc:
-					desc_list[cur_idx]['end'] = idx
-				else:
-					desc_list.append({'desc' : desc, 'start' : idx, 'end' : idx})
-					cur_idx += 1
-				count += 1
-
-			for count in (0, 1, 2, 3):
-				if count < len(desc_list):
-					if desc_list[count]['start'] == desc_list[count]['end']:
-						text = "Tuner %s: %s" % (desc_list[count]['start'], desc_list[count]['desc'])
-					else:
-						text = "Tuner %s-%s: %s" % (desc_list[count]['start'], desc_list[count]['end'], desc_list[count]['desc'])
-				else:
-					text = ""
-
-				self["Tuner" + str(count)].setText(text)
-
 		self.hddlist = harddiskmanager.HDDList()
 		self.list = []
 		if self.hddlist:
@@ -423,6 +655,9 @@ class Devices(Screen):
 			self["mounts"].setText(_('none'))
 		self["actions"].setEnabled(True)
 
+	def doNothing(self):
+		pass
+
 
 class SystemNetworkInfo(Screen):
 	def __init__(self, session):
@@ -451,8 +686,14 @@ class SystemNetworkInfo(Screen):
 		self["statuspic"].setPixmapNum(1)
 		self["statuspic"].show()
 		self["devicepic"] = MultiPixmap()
-
 		self["AboutScrollLabel"] = ScrollLabel()
+		self["key_red"] = StaticText(_("Close"))
+		self["actions"] = ActionMap(["SetupActions", "ColorActionsAbout", "DirectionActions"], {
+			"cancel": self.close,
+			"ok": self.close,
+			"up": self["AboutScrollLabel"].pageUp,
+			"down": self["AboutScrollLabel"].pageDown,
+		})
 
 		self.iface = None
 		self.createscreen()
@@ -467,13 +708,7 @@ class SystemNetworkInfo(Screen):
 				pass
 			self.resetList()
 			self.onClose.append(self.cleanup)
-		self["key_red"] = StaticText(_("Close"))
-		self["actions"] = ActionMap(["SetupActions", "ColorActions", "DirectionActions"], {
-			"cancel": self.close,
-			"ok": self.close,
-			"up": self["AboutScrollLabel"].pageUp,
-			"down": self["AboutScrollLabel"].pageDown,
-		})
+
 		self.onLayoutFinish.append(self.updateStatusbar)
 
 	def createscreen(self):
@@ -532,33 +767,33 @@ class SystemNetworkInfo(Screen):
 		geolocationData = geolocation.getGeolocationData(fields="isp,org,mobile,proxy,query", useCache=True)
 		isp = geolocationData.get("isp", None)
 		isporg = geolocationData.get("org", None)
-		if isinstance(isp, text_type):
-			isp = ensure_str(isp.encode(encoding="UTF-8", errors="ignore"))
-		if isinstance(isporg, text_type):
-			isporg = ensure_str(isporg.encode(encoding="UTF-8", errors="ignore"))
+		if isinstance(isp, str):
+			isp = str(isp)
+		if isinstance(isporg, str):
+			isporg = str(isporg)
 		self.AboutText += "\n"
 		if isp != None:
 			if isporg != None:
-				self.AboutText += _("ISP: ") + isp + " " + "(" + isporg + ")" + "\n"
+				self.AboutText += _("ISP: ") + "\t" + isp + " " + (isporg) + "\n"
 			else:
-				self.AboutText += _("ISP: ") + isp + "\n"
+				self.AboutText += "\n" + _("ISP: ") + "\t" + isp + "\n"
 
 		mobile = geolocationData.get("mobile", False)
 		if mobile:
-			self.AboutText += _("Mobile: ") + _("Yes") + "\n"
+			self.AboutText += _("Mobile: ") + "\t" + _("Yes") + "\n"
 		else:
-			self.AboutText += _("Mobile: ") + _("No") + "\n"
+			self.AboutText += _("Mobile: ") + "\t" + _("No") + "\n"
 
 		proxy = geolocationData.get("proxy", False)
 		if proxy:
-			self.AboutText += _("Proxy: ") + _("Yes") + "\n"
+			self.AboutText += _("Proxy: ") + "\t" + _("Yes") + "\n"
 		else:
-			self.AboutText += _("Proxy: ") + _("No") + "\n"
+			self.AboutText += _("Proxy: ") + "\t" + _("No") + "\n"
 
 		publicip = geolocationData.get("query", None)
 		if str(publicip) != "":
-			self.AboutText += _("Public IP: ") + str(publicip) + "\n"
-		self.AboutText += "\n"
+			self.AboutText += _("Public IP: ") + "\t" + str(publicip) + "\n" + "\n"
+
 
 		self.console = Console()
 		self.console.ePopen('ethtool %s' % self.iface, self.SpeedFinished)
@@ -571,8 +806,8 @@ class SystemNetworkInfo(Screen):
 				self.AboutText += _("Speed:") + "\t" + speed + _('Mb/s')
 
 		hostname = open('/proc/sys/kernel/hostname').read()
-		self.AboutText += "\n"
-		self.AboutText += _("Hostname:") + "\t" + hostname + "\n"
+		self.AboutText += "\n" + _("Hostname:") + "\t" + hostname + "\n"
+
 		self["AboutScrollLabel"].setText(self.AboutText)
 
 	def cleanup(self):
@@ -654,8 +889,8 @@ class SystemNetworkInfo(Screen):
 						self.AboutText += _('Encryption:') + '\t' + encryption + '\n'
 
 					if ((status[self.iface]["essid"] and status[self.iface]["essid"] == "off") or
-					    not status[self.iface]["accesspoint"] or
-					    status[self.iface]["accesspoint"] == "Not-Associated"):
+						not status[self.iface]["accesspoint"] or
+						status[self.iface]["accesspoint"] == "Not-Associated"):
 						self.LinkState = False
 						self["statuspic"].setPixmapNum(1)
 						self["statuspic"].show()
@@ -714,6 +949,9 @@ class SystemNetworkInfo(Screen):
 		except:
 			pass
 
+	def doNothing(self):
+		pass
+
 
 class SystemMemoryInfo(Screen):
 	def __init__(self, session):
@@ -770,6 +1008,9 @@ class SystemMemoryInfo(Screen):
 
 		self["AboutScrollLabel"].setText(self.AboutText)
 		self["actions"].setEnabled(True)
+
+	def doNothing(self):
+		pass
 
 
 class TranslationInfo(Screen):
@@ -899,12 +1140,15 @@ class CommitInfo(Screen):
 		self.project = self.project != len(self.projects) - 1 and self.project + 1 or 0
 		self.updateCommitLogs()
 
+	def doNothing(self):
+		pass
+
 
 class MemoryInfo(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
 
-		self["actions"] = ActionMap(["SetupActions", "ColorActions"], {
+		self["actions"] = ActionMap(["SetupActions", "ColorActionsAbout"], {
 			"cancel": self.close,
 			"ok": self.getMemoryInfo,
 			"green": self.getMemoryInfo,
@@ -984,7 +1228,8 @@ class MemoryInfoSkinParams(GUIComponent):
 				if attrib == "rowsincolumn":
 					self.rows_in_column = int(value)
 			self.skinAttributes = attribs
-		return GUIComponent.applySkin(self, desktop, screen)
+			applySkin = GUIComponent
+		return applySkin()
 
 	GUI_WIDGET = eLabel
 
@@ -1120,3 +1365,5 @@ class Troubleshoot(Screen):
 	def updateKeys(self):
 		self["key_red"].setText(_("Cancel") if self.commandIndex < self.numberOfCommands else _("Remove all logfiles"))
 		self["key_green"].setText(_("Refresh") if self.commandIndex < self.numberOfCommands else _("Remove this logfile"))
+	def doNothing(self):
+		pass
