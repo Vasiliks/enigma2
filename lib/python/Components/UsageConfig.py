@@ -1,4 +1,5 @@
 from time import mktime
+from skin import parameters
 from Components.Harddisk import harddiskmanager
 from Components.Console import Console
 from Components.config import ConfigSubsection, ConfigDirectory, ConfigYesNo, config, ConfigSelection, ConfigText, ConfigNumber, ConfigSet, ConfigLocations, ConfigSelectionNumber, ConfigClock, ConfigSlider, ConfigEnableDisable, ConfigSubDict, ConfigDictionarySet, ConfigInteger, ConfigPassword, ConfigIP, NoSave, ConfigBoolean
@@ -6,13 +7,12 @@ from Tools.Directories import SCOPE_HDD, SCOPE_TIMESHIFT, defaultRecordingLocati
 from enigma import setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, eDVBDB, Misc_Options, eBackgroundFileEraser, eServiceEvent, eDVBLocalTimeHandler, eEPGCache
 from Components.About import GetIPsFromNetworkInterfaces
 from Components.NimManager import nimmanager
-from Components.Renderer.FrontpanelLed import ledPatterns, PATTERN_ON, PATTERN_OFF, PATTERN_BLINK
 from Components.ServiceList import refreshServiceList
 from Components.SystemInfo import BoxInfo, SystemInfo
 from os import makedirs
 from os.path import exists, islink, join as pathjoin, normpath
 import os
-import skin, locale
+import locale
 from keyids import KEYIDS
 
 
@@ -523,35 +523,6 @@ def InitUsageConfig():
 		("5", _("DVB-T/-S/-C")),
 		("127", _("No priority"))])
 
-	config.usage.frontled_color = ConfigSelection(default="1", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledrec_color = ConfigSelection(default="2", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledstdby_color = ConfigSelection(default="2", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking violet")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledrecstdby_color = ConfigSelection(default="4", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-
 	def remote_fallback_changed(configElement):
 		if configElement.value:
 			configElement.value = "%s%s" % (not configElement.value.startswith("http://") and "http://" or "", configElement.value)
@@ -618,7 +589,7 @@ def InitUsageConfig():
 	config.usage.show_event_progress_in_servicelist.addNotifier(refreshServiceList)
 	config.usage.show_channel_numbers_in_servicelist.addNotifier(refreshServiceList)
 
-	if SystemInfo["7segment"]:
+	if displaytype == "7segment" or "7seg" in displaytype:
 		config.usage.blinking_display_clock_during_recording = ConfigSelection(default="Rec", choices=[
 			("Rec", _("REC")),
 			("RecBlink", _("Blinking REC")),
@@ -955,7 +926,7 @@ def InitUsageConfig():
 	config.usage.time.long.addNotifier(setTimeStyles)
 
 	try:
-		dateEnabled, timeEnabled = skin.parameters.get("AllowUserDatesAndTimes", (0, 0))
+		dateEnabled, timeEnabled = parameters.get("AllowUserDatesAndTimes", (0, 0))
 	except Exception as error:
 		print("[UsageConfig] Error loading 'AllowUserDatesAndTimes' skin parameter! (%s)" % error)
 		dateEnabled, timeEnabled = (0, 0)
@@ -1078,7 +1049,7 @@ def InitUsageConfig():
 	config.usage.time.display.addNotifier(setTimeDisplayStyles)
 
 	try:
-		dateDisplayEnabled, timeDisplayEnabled = skin.parameters.get("AllowUserDatesAndTimesDisplay", (0, 0))
+		dateDisplayEnabled, timeDisplayEnabled = parameters.get("AllowUserDatesAndTimesDisplay", (0, 0))
 	except Exception as error:
 		print("[UsageConfig] Error loading 'AllowUserDatesAndTimesDisplay' display skin parameter! (%s)" % error)
 		dateDisplayEnabled, timeDisplayEnabled = (0, 0)
@@ -1114,48 +1085,6 @@ def InitUsageConfig():
 		config.usage.fanspeed = ConfigSlider(default=127, increment=8, limits=(0, 255))
 		config.usage.fanspeed.addNotifier(fanSpeedChanged)
 
-	if SystemInfo["PowerLED"]:
-		def powerLEDChanged(configElement):
-			if "fp" in SystemInfo["PowerLED"]:
-				open(SystemInfo["PowerLED"], "w").write(configElement.value and "1" or "0")
-				patterns = [PATTERN_ON, PATTERN_ON, PATTERN_OFF, PATTERN_ON] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
-				ledPatterns.setLedPatterns(1, patterns)
-			else:
-				open(SystemInfo["PowerLED"], "w").write(configElement.value and "on" or "off")
-		config.usage.powerLED = ConfigYesNo(default=True)
-		config.usage.powerLED.addNotifier(powerLEDChanged)
-
-	if SystemInfo["StandbyLED"]:
-		def standbyLEDChanged(configElement):
-			if "fp" in SystemInfo["StandbyLED"]:
-				patterns = [PATTERN_OFF, PATTERN_BLINK, PATTERN_ON, PATTERN_BLINK] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
-				ledPatterns.setLedPatterns(0, patterns)
-			else:
-				open(SystemInfo["StandbyLED"], "w").write(configElement.value and "on" or "off")
-		config.usage.standbyLED = ConfigYesNo(default=True)
-		config.usage.standbyLED.addNotifier(standbyLEDChanged)
-
-	if SystemInfo["SuspendLED"]:
-		def suspendLEDChanged(configElement):
-			if "fp" in SystemInfo["SuspendLED"]:
-				open(SystemInfo["SuspendLED"], "w").write(configElement.value and "1" or "0")
-			else:
-				open(SystemInfo["SuspendLED"], "w").write(configElement.value and "on" or "off")
-		config.usage.suspendLED = ConfigYesNo(default=True)
-		config.usage.suspendLED.addNotifier(suspendLEDChanged)
-
-	if SystemInfo["PowerOffDisplay"]:
-		def powerOffDisplayChanged(configElement):
-			open(SystemInfo["PowerOffDisplay"], "w").write(configElement.value and "1" or "0")
-		config.usage.powerOffDisplay = ConfigYesNo(default=True)
-		config.usage.powerOffDisplay.addNotifier(powerOffDisplayChanged)
-
-	if SystemInfo["LCDshow_symbols"]:
-		def lcdShowSymbols(configElement):
-			open(SystemInfo["LCDshow_symbols"], "w").write(configElement.value and "1" or "0")
-		config.usage.lcd_show_symbols = ConfigYesNo(default=True)
-		config.usage.lcd_show_symbols.addNotifier(lcdShowSymbols)
-
 	if SystemInfo["WakeOnLAN"]:
 		f = open(SystemInfo["WakeOnLAN"], "r")
 		status = f.read().strip()
@@ -1168,24 +1097,6 @@ def InitUsageConfig():
 				open(SystemInfo["WakeOnLAN"], "w").write(configElement.value and "on" or "off")
 		config.usage.wakeOnLAN = ConfigYesNo(default=False)
 		config.usage.wakeOnLAN.addNotifier(wakeOnLANChanged)
-
-	if SystemInfo["hasXcoreVFD"]:
-		def set12to8characterVFD(configElement):
-			open(SystemInfo["hasXcoreVFD"], "w").write(not configElement.value and "1" or "0")
-		config.usage.toggle12to8characterVFD = ConfigYesNo(default=False)
-		config.usage.toggle12to8characterVFD.addNotifier(set12to8characterVFD)
-
-	if SystemInfo["LcdLiveTVMode"]:
-		def setLcdLiveTVMode(configElement):
-			open(SystemInfo["LcdLiveTVMode"], "w").write(configElement.value)
-		config.usage.LcdLiveTVMode = ConfigSelection(default="0", choices=[str(x) for x in range(0, 9)])
-		config.usage.LcdLiveTVMode.addNotifier(setLcdLiveTVMode)
-
-	if SystemInfo["LcdLiveDecoder"]:
-		def setLcdLiveDecoder(configElement):
-			open(SystemInfo["LcdLiveDecoder"], "w").write(configElement.value)
-		config.usage.LcdLiveDecoder = ConfigSelection(default="0", choices=[str(x) for x in range(0, 4)])
-		config.usage.LcdLiveDecoder.addNotifier(setLcdLiveDecoder)
 
 	config.usage.boolean_graphic = ConfigSelection(default="true", choices={"false": _("no"), "true": _("yes"), "only_bool": _("yes, but not in multi selections")})
 
@@ -1310,8 +1221,16 @@ def InitUsageConfig():
 	config.misc.epgcachepath.addNotifier(EpgCacheChanged, immediate_feedback = False)
 	config.misc.epgcachefilename.addNotifier(EpgCacheChanged, immediate_feedback = False)
 
-	config.misc.epgratingcountry = ConfigSelection(default="", choices=[("", _("Auto Detect")), ("ETSI", _("Generic")), ("AUS", _("Australia"))])
-	config.misc.epggenrecountry = ConfigSelection(default="", choices=[("", _("Auto Detect")), ("ETSI", _("Generic")), ("AUS", _("Australia"))])
+	config.misc.epgratingcountry = ConfigSelection(default="", choices=[
+		("", _("Auto detect")),
+		("ETSI", _("Generic")),
+		("AUS", _("Australia"))
+	])
+	config.misc.epggenrecountry = ConfigSelection(default="", choices=[
+		("", _("Auto detect")),
+		("ETSI", _("Generic")),
+		("AUS", _("Australia"))
+	])
 
 	config.misc.showradiopic = ConfigYesNo(default=True)
 
@@ -1500,41 +1419,6 @@ def InitUsageConfig():
 
 	config.usage.historymode = ConfigSelection(default='1', choices=[('0', _('Just zap')), ('1', _('Show menu'))])
 
-	if SystemInfo["VFD_scroll_repeats"]:
-		def scroll_repeats(el):
-			open(SystemInfo["VFD_scroll_repeats"], "w").write(el.value)
-		choicelist = []
-		for i in range(1, 11, 1):
-			choicelist.append((str(i)))
-		config.usage.vfd_scroll_repeats = ConfigSelection(default="3", choices=choicelist)
-		config.usage.vfd_scroll_repeats.addNotifier(scroll_repeats, immediate_feedback=False)
-
-	if SystemInfo["VFD_scroll_delay"]:
-		def scroll_delay(el):
-			open(SystemInfo["VFD_scroll_delay"], "w").write(el.value)
-		choicelist = []
-		for i in range(0, 1001, 50):
-			choicelist.append((str(i)))
-		config.usage.vfd_scroll_delay = ConfigSelection(default="150", choices=choicelist)
-		config.usage.vfd_scroll_delay.addNotifier(scroll_delay, immediate_feedback=False)
-
-	if SystemInfo["VFD_initial_scroll_delay"]:
-		def initial_scroll_delay(el):
-			open(SystemInfo["VFD_initial_scroll_delay"], "w").write(el.value)
-		choicelist = []
-		for i in range(0, 20001, 500):
-			choicelist.append((str(i)))
-		config.usage.vfd_initial_scroll_delay = ConfigSelection(default="1000", choices=choicelist)
-		config.usage.vfd_initial_scroll_delay.addNotifier(initial_scroll_delay, immediate_feedback=False)
-
-	if SystemInfo["VFD_final_scroll_delay"]:
-		def final_scroll_delay(el):
-			open(SystemInfo["VFD_final_scroll_delay"], "w").write(el.value)
-		choicelist = []
-		for i in range(0, 20001, 500):
-			choicelist.append((str(i)))
-		config.usage.vfd_final_scroll_delay = ConfigSelection(default="1000", choices=choicelist)
-		config.usage.vfd_final_scroll_delay.addNotifier(final_scroll_delay, immediate_feedback=False)
 
 	if SystemInfo["HasBypassEdidChecking"]:
 		def setHasBypassEdidChecking(configElement):
@@ -1599,26 +1483,43 @@ def InitUsageConfig():
 	if SystemInfo["HasColorimetry"]:
 		def setColorimetry(configElement):
 			open(SystemInfo["HasColorimetry"], "w").write(configElement.value)
-		config.av.hdmicolorimetry = ConfigSelection(default="auto", choices=[("auto", _("auto")), ("bt2020ncl", "BT 2020 NCL"), ("bt2020cl", "BT 2020 CL"), ("bt709", "BT 709")])
+		config.av.hdmicolorimetry = ConfigSelection(default="auto", choices=[
+			("auto", _("Auto")),
+			("bt2020ncl", _("BT 2020 NCL")),
+			("bt2020cl", _("BT 2020 CL")),
+			("bt709", _("BT 709"))
+		])
 		config.av.hdmicolorimetry.addNotifier(setColorimetry)
 
 	if SystemInfo["HasHdrType"]:
 		def setHdmiHdrType(configElement):
 			open(SystemInfo["HasHdrType"], "w").write(configElement.value)
-		config.av.hdmihdrtype = ConfigSelection(default="auto", choices={"auto": _("auto"), "none": "SDR", "hdr10": "HDR10", "hlg": "HLG", "dolby": "Dolby Vision"})
+		config.av.hdmihdrtype = ConfigSelection(default="auto", choices={
+			"auto": _("Auto"),
+			"none": _("SDR"),
+			"hdr10": _("HDR10"),
+			"hlg": _("HLG"),
+			"dolby": _("Dolby")
+		})
 		config.av.hdmihdrtype.addNotifier(setHdmiHdrType)
 
 	if SystemInfo["HDRSupport"]:
 		def setHlgSupport(configElement):
 			open("/proc/stb/hdmi/hlg_support", "w").write(configElement.value)
-		config.av.hlg_support = ConfigSelection(default="auto(EDID)",
-			choices=[("auto(EDID)", _("controlled by HDMI")), ("yes", _("force enabled")), ("no", _("force disabled"))])
+		config.av.hlg_support = ConfigSelection(default="auto(EDID)", choices=[
+			("auto(EDID)", _("Controlled by HDMI")),
+			("yes", _("Force enabled")),
+			("no", _("Force disabled"))
+		])
 		config.av.hlg_support.addNotifier(setHlgSupport)
 
 		def setHdr10Support(configElement):
 			open("/proc/stb/hdmi/hdr10_support", "w").write(configElement.value)
-		config.av.hdr10_support = ConfigSelection(default="auto(EDID)",
-			choices=[("auto(EDID)", _("controlled by HDMI")), ("yes", _("force enabled")), ("no", _("force disabled"))])
+		config.av.hdr10_support = ConfigSelection(default="auto(EDID)", choices=[
+			("auto(EDID)", _("Controlled by HDMI")),
+			("yes", _("Force enabled")),
+			("no", _("Force disabled"))
+		])
 		config.av.hdr10_support.addNotifier(setHdr10Support)
 
 		def setDisable12Bit(configElement):

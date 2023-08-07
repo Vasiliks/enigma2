@@ -12,7 +12,6 @@ from Components.Renderer.FrontpanelLed import FrontpanelLed
 from Components.config import config
 from Components.SystemInfo import BoxInfo
 
-
 class SessionGlobals(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
