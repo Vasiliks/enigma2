@@ -9,13 +9,6 @@ if [ -d /home/root ]; then
 	cd
 fi
 
-# any debuglevel passed?
-if [ -z $ENIGMA_DEBUG_LVL ]; then
-	DEBUG_LVL=3
-else
-	DEBUG_LVL=$ENIGMA_DEBUG_LVL
-fi
-
 # LC_ALL available?
 if [ -z $LC_ALL ]; then
 	export LC_ALL=en_GB.utf8
@@ -41,46 +34,46 @@ while : ; do
 		@bindir@/enigma2_pre_start.sh
 	fi
 
-# Randomize timestamp if clock is not set
-RANDOMIZE1970=''
-time=`date +%Y` ;
-if [ "$time" = 1970 ]; then
-	RANDOMIZE1970="$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 5 | tr -d '\n')"
-fi
-
 	# start enigma
 	sync
-# Set time format used to prefix each line in the debug logs.
-DEBUGTIME=`sed -En 's|^config\.crash\.debugTimeFormat=(.+)$|\1|p' "@sysconfdir@/enigma2/settings"`
-[ -n "${DEBUGTIME}" ] || DEBUGTIME="2"
-DEBUG_TIME="${DEBUGTIME}"
-
-# Create and set log folder
-LOGFOLDER="/home/root/logs/"
-if [ ! -d $LOGFOLDER ] ; then mkdir -p $LOGFOLDER; fi
-if [ "$(grep config.crash.debug_path= /etc/enigma2/settings | sed 's/config.crash.debug_path=//g')" != "" -a -d "$(grep config.crash.debug_path= /etc/enigma2/settings | sed 's/config.crash.debug_path=//g')" ]; then
-	LOGFOLDER=$(grep config.crash.debug_path= /etc/enigma2/settings | sed 's/config.crash.debug_path=//g')
-fi
-
-# Enable and configure gstreamer debug log of category and level without color
-if [ "$(grep -i config.crash.gstdebug=true /etc/enigma2/settings)" != "" ]; then
-	GSTDEBUGCATEGORY="*"
-	GSTDEBUGLEVEL="INFO"
-	if [ "$(grep config.crash.gstdebugcategory= /etc/enigma2/settings | sed 's/config.crash.gstdebugcategory=//g')" != "" ]; then
-		GSTDEBUGCATEGORY=$(grep config.crash.gstdebugcategory= /etc/enigma2/settings | sed 's/config.crash.gstdebugcategory=//g')
+	# Randomize timestamp if clock is not set
+	RANDOMIZE1970=''
+	time=`date +%Y` ;
+	if [ "$time" = 1970 ]; then
+		RANDOMIZE1970="$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 5 | tr -d '\n')"
 	fi
-	if [ "$(grep config.crash.gstdebuglevel= /etc/enigma2/settings | sed 's/config.crash.gstdebuglevel=//g')" != "" ]; then
-		GSTDEBUGLEVEL=$(grep config.crash.gstdebuglevel= /etc/enigma2/settings | sed 's/config.crash.gstdebuglevel=//g')
-	fi
-	export GST_DEBUG_FILE="${LOGFOLDER}$(date +%Y%m%d-%H%M%S)-gstreamer-debug.log"
-	export GST_DEBUG="${GSTDEBUGCATEGORY}:${GSTDEBUGLEVEL}"
-	export GST_DEBUG_NO_COLOR="1"
-fi
 
-# Enable and set gstreamer directory for pipeline graphs that are not created if directory is not set
-if [ "$(grep -i config.crash.gstdot=true /etc/enigma2/settings)" != "" ]; then
-	export GST_DEBUG_DUMP_DOT_DIR=${LOGFOLDER}
-fi
+	# Set time format used to prefix each line in the debug logs.
+	DEBUGTIME=`sed -En 's|^config\.crash\.debugTimeFormat=(.+)$|\1|p' "/etc/enigma2/settings"`
+	[ -n "${DEBUGTIME}" ] || DEBUGTIME="2"
+	DEBUG_TIME="${DEBUGTIME}"
+
+	# Create and set log folder
+	LOGFOLDER="/home/root/logs/"
+	if [ ! -d $LOGFOLDER ] ; then mkdir -p $LOGFOLDER; fi
+	if [ "$(grep config.crash.debugPath= /etc/enigma2/settings | sed 's/config.crash.debugPath=//g')" != "" -a -d "$(grep config.crash.debugPath= /etc/enigma2/settings | sed 's/config.crash.debugPath=//g')" ]; then
+		LOGFOLDER=$(grep config.crash.debugPath= /etc/enigma2/settings | sed 's/config.crash.debugPath=//g')
+	fi
+
+	# Enable and configure gstreamer debug log of category and level without color
+	if [ "$(grep -i config.crash.gstdebug=true /etc/enigma2/settings)" != "" ]; then
+		GSTDEBUGCATEGORY="*"
+		GSTDEBUGLEVEL="INFO"
+		if [ "$(grep config.crash.gstdebugcategory= /etc/enigma2/settings | sed 's/config.crash.gstdebugcategory=//g')" != "" ]; then
+			GSTDEBUGCATEGORY=$(grep config.crash.gstdebugcategory= /etc/enigma2/settings | sed 's/config.crash.gstdebugcategory=//g')
+		fi
+		if [ "$(grep config.crash.gstdebuglevel= /etc/enigma2/settings | sed 's/config.crash.gstdebuglevel=//g')" != "" ]; then
+			GSTDEBUGLEVEL=$(grep config.crash.gstdebuglevel= /etc/enigma2/settings | sed 's/config.crash.gstdebuglevel=//g')
+		fi
+		export GST_DEBUG_FILE="${LOGFOLDER}$(date +%Y%m%d-%H%M%S)-gstreamer-debug.log"
+		export GST_DEBUG="${GSTDEBUGCATEGORY}:${GSTDEBUGLEVEL}"
+		export GST_DEBUG_NO_COLOR="1"
+	fi
+
+	# Enable and set gstreamer directory for pipeline graphs that are not created if directory is not set
+	if [ "$(grep -i config.crash.gstdot=true /etc/enigma2/settings)" != "" ]; then
+		export GST_DEBUG_DUMP_DOT_DIR=${LOGFOLDER}
+	fi
 
 # Enable generation of core dumps
 # It would be best to have this at system startup because this way we may not
@@ -98,35 +91,35 @@ if [ "$(grep -i config.crash.coredump=true /etc/enigma2/settings)" != "" ]; then
 	ulimit -c ${COREDUMPSIZE}
 fi
 
-# Start enigma2 with or without debug
-if [ "$(grep -i config.crash.enabledebug=true /etc/enigma2/settings)" != "" ]; then
-	DEBUG_LVL='4'
-	(LD_PRELOAD=$LIBS ENIGMA_DEBUG_LVL=$DEBUG_LVL ENIGMA_DEBUG_TIME="${DEBUG_TIME}" @bindir@/enigma2 &> ${LOGFOLDER}$(date +%Y%m%d-%H%M%S)-enigma2-debug.log) &
-else
-	(LD_PRELOAD=$LIBS ENIGMA_DEBUG_LVL=$DEBUG_LVL ENIGMA_DEBUG_TIME="${DEBUG_TIME}" @bindir@/enigma2) &
-fi
+	# Start enigma2 with or without debug
+	if [ "$(grep -i config.crash.enabledebug=true /etc/enigma2/settings)" != "" ]; then
+		(LD_PRELOAD=$LIBS ENIGMA_DEBUG_TIME="${DEBUG_TIME}" @bindir@/enigma2 &> ${LOGFOLDER}$(date +%Y%m%d-%H%M%S)-enigma2-debug.log) &
+	else
+		(LD_PRELOAD=$LIBS ENIGMA_DEBUG_TIME="${DEBUG_TIME}" @bindir@/enigma2) &
+	fi
 
-enigma2pid=$!
+	enigma2pid=$!
 
-# Enable generation of core dumps with ELF header included.
-# This seem to be required by gdb.
-# Would be default if kernel is configured with CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS.
-# Default coredump filter can only be set via kernel command line.
-# In all other cases this is only available per process.
-if [ "$(grep -i config.crash.coredump=true /etc/enigma2/settings)" != "" ]; then
-	COREDUMPFILTER=0x33
-	echo ${COREDUMPFILTER} > /proc/${enigma2pid}/coredump_filter
-fi
+	# Enable generation of core dumps with ELF header included.
+	# This seem to be required by gdb.
+	# Would be default if kernel is configured with CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS.
+	# Default coredump filter can only be set via kernel command line.
+	# In all other cases this is only available per process.
+	if [ "$(grep -i config.crash.coredump=true /etc/enigma2/settings)" != "" ]; then
+		COREDUMPFILTER=0x33
+		echo ${COREDUMPFILTER} > /proc/${enigma2pid}/coredump_filter
+	fi
 
-wait ${enigma2pid}
+	wait ${enigma2pid}
 
 	# enigma2 exit codes:
 	#
 	#  1 - halt
 	#  2 - reboot
-	#  3 - restart enigma
+	#  3 - restart enigma in normal mode
 	#  4 - front processor upgrade
 	#  5 - install new settings
+	#  6 - restart enigma in debug mode
 	#  7 - manufacturer reset
 	# 42 - restart for unattended update
 	# 43 - restart for network restore
@@ -142,6 +135,9 @@ wait ${enigma2pid}
 		2)
 			/sbin/reboot
 			;;
+		3)
+			ENIGMA_DEBUG_LVL="3"
+			;;
 		4)
 			/sbin/rmmod lcd
 			/usr/sbin/fpupgrade --upgrade 2>&1 | tee /home/root/fpupgrade.log
@@ -154,6 +150,9 @@ wait ${enigma2pid}
 			if ! grep -q config.misc.RestartUI /etc/enigma2/settings; then
 				echo "config.misc.RestartUI=true" >>/etc/enigma2/settings
 			fi
+			;;
+		6)
+			ENIGMA_DEBUG_LVL="4"
 			;;
 		7)
 			rm -R /etc/enigma2
