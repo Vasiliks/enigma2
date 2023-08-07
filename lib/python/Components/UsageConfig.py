@@ -3,12 +3,13 @@ from Components.Harddisk import harddiskmanager
 from Components.Console import Console
 from Components.config import ConfigSubsection, ConfigDirectory, ConfigYesNo, config, ConfigSelection, ConfigText, ConfigNumber, ConfigSet, ConfigLocations, ConfigSelectionNumber, ConfigClock, ConfigSlider, ConfigEnableDisable, ConfigSubDict, ConfigDictionarySet, ConfigInteger, ConfigPassword, ConfigIP, NoSave, ConfigBoolean
 from Tools.Directories import SCOPE_HDD, SCOPE_TIMESHIFT, defaultRecordingLocation, fileContains, resolveFilename, fileHas
-from enigma import setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, eDVBDB, Misc_Options, eBackgroundFileEraser, eServiceEvent, eDVBLocalTimeHandler, eEPGCache, getBoxType
+from enigma import setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, eDVBDB, Misc_Options, eBackgroundFileEraser, eServiceEvent, eDVBLocalTimeHandler, eEPGCache
 from Components.About import GetIPsFromNetworkInterfaces
 from Components.NimManager import nimmanager
 from Components.Renderer.FrontpanelLed import ledPatterns, PATTERN_ON, PATTERN_OFF, PATTERN_BLINK
 from Components.ServiceList import refreshServiceList
-from Components.SystemInfo import SystemInfo, MODEL
+from Components.SystemInfo import BoxInfo, SystemInfo
+from os import makedirs
 from os.path import exists, islink, join as pathjoin, normpath
 import os
 import skin, locale
@@ -19,6 +20,8 @@ from keyids import KEYIDS
 originalAudioTracks = "orj dos ory org esl qaa und mis mul ORY ORJ Audio_ORJ oth"
 visuallyImpairedCommentary = "NAR qad"
 
+model = BoxInfo.getItem("model")
+displaytype = BoxInfo.getItem("displaytype")
 
 def InitUsageConfig():
 	config.usage = ConfigSubsection()
@@ -625,14 +628,13 @@ def InitUsageConfig():
 	else:
 		config.usage.blinking_display_clock_during_recording = ConfigYesNo(default=False)
 
-	# blink for displaytext not in 7segment
-	if SystemInfo["textlcd"]:
+	if displaytype == "textlcd" or "text" in displaytype:
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Channel", choices=[
 			("Rec", _("REC symbol")),
 			("RecBlink", _("Blinking REC symbol")),
 			("Channel", _("Channel name"))
 		])
-	if SystemInfo["7segment"]:
+	if displaytype == "7segment" or "7seg" in displaytype:
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Rec", choices=[
 			("Rec", _("REC")),
 			("RecBlink", _("Blinking REC")),
@@ -641,7 +643,6 @@ def InitUsageConfig():
 	else:
 		config.usage.blinking_rec_symbol_during_recording = ConfigYesNo(default=True)
 
-	# show/hide time in display in standby
 	config.usage.show_in_standby = ConfigSelection(default="time", choices=[
 		("time", _("Time")),
 		("nothing", _("Nothing"))
@@ -1341,31 +1342,31 @@ def InitUsageConfig():
 	config.usage.keytrans = ConfigText(default=keytranslation)
 	config.usage.alternative_imagefeed = ConfigText(default="", fixed_size=False)
 
-	config.crash = ConfigSubsection()
+	# This is already in StartEniga.py.
+	# config.crash = ConfigSubsection()
 
-	#// handle python crashes
+	# Handle python crashes.
 	config.crash.bsodpython = ConfigYesNo(default=True)
 	config.crash.bsodpython_ready = NoSave(ConfigYesNo(default=False))
-	choicelist = [("0", _("never")), ("1", "1"), ("2", "2"), ("3", "3"), ("4", "4"), ("5", "5"), ("6", "6"), ("7", "7"), ("8", "8"), ("9", "9"), ("10", "10")]
-	config.crash.bsodhide = ConfigSelection(default="0", choices=choicelist)
-	config.crash.bsodmax = ConfigSelection(default="3", choices=choicelist)
-	#//
+	choiceList = [("0", _("Never"))] + [(str(x), str(x)) for x in range(1, 11)]
+	config.crash.bsodhide = ConfigSelection(default="0", choices=choiceList)
+	config.crash.bsodmax = ConfigSelection(default="3", choices=choiceList)
 
 	config.crash.enabledebug = ConfigYesNo(default=False)
 	config.crash.debugloglimit = ConfigSelectionNumber(min=1, max=10, stepwidth=1, default=4, wraparound=True)
-	config.crash.daysloglimit = ConfigSelectionNumber(min=1, max=30, stepwidth=1, default=2, wraparound=True)
-	config.crash.sizeloglimit = ConfigSelectionNumber(min=1, max=250, stepwidth=1, default=5, wraparound=True)
+	config.crash.daysloglimit = ConfigSelectionNumber(min=1, max=30, stepwidth=1, default=8, wraparound=True)
+	config.crash.sizeloglimit = ConfigSelectionNumber(min=1, max=250, stepwidth=1, default=10, wraparound=True)
 	config.crash.lastfulljobtrashtime = ConfigInteger(default=-1)
 
 	# The config.crash.debugTimeFormat item is used to set ENIGMA_DEBUG_TIME environmental variable on enigma2 start from enigma2.sh.
-	config.crash.debugTimeFormat = ConfigSelection(choices=[
+	config.crash.debugTimeFormat = ConfigSelection(default="6", choices=[
 		("0", _("None")),
 		("1", _("Boot time")),
 		("2", _("Local time")),
 		("3", _("Boot time and local time")),
 		("6", _("Local date/time")),
 		("7", _("Boot time and local data/time"))
-	], default="6")
+	])
 	config.crash.debugTimeFormat.save_forced = True
 
 	config.crash.gstdebug = ConfigYesNo(default=False)
@@ -1545,15 +1546,48 @@ def InitUsageConfig():
 		def setHaveColorspace(configElement):
 			open(SystemInfo["HasColorspace"], "w").write(configElement.value)
 		if SystemInfo["HasColorspaceSimple"]:
-			config.av.hdmicolorspace = ConfigSelection(default="Edid(Auto)", choices={"Edid(Auto)": _("auto"), "Hdmi_Rgb": "RGB", "444": "YCbCr 4:4:4", "422": "YCbCr 4:2:2", "420": "YCbCr 4:2:0"})
+			config.av.hdmicolorspace = ConfigSelection(default="Edid(Auto)", choices={
+				"Edid(Auto)": _("Auto"),
+				"Hdmi_Rgb": _("RGB"),
+				"444": _("YCbCr444"),
+				"422": _("YCbCr422"),
+				"420": _("YCbCr420")
+			})
 		else:
-			config.av.hdmicolorspace = ConfigSelection(default="auto", choices={"auto": _("auto"), "rgb": "RGB", "420": "4:2:0", "422": "4:2:2", "444": "4:4:4"})
+			if model == "vuzero4k" or BoxInfo.getItem("platform") == "dm4kgen":
+				config.av.hdmicolorspace = ConfigSelection(default="Edid(Auto)", choices={
+					"Edid(Auto)": _("Auto"),
+					"Hdmi_Rgb": _("RGB"),
+					"Itu_R_BT_709": _("BT709"),
+					"DVI_Full_Range_RGB": _("Full Range RGB"),
+					"FCC": _("FCC 1953"),
+					"Itu_R_BT_470_2_BG": _("BT470 BG"),
+					"Smpte_170M": _("Smpte 170M"),
+					"Smpte_240M": _("Smpte 240M"),
+					"Itu_R_BT_2020_NCL": _("BT2020 NCL"),
+					"Itu_R_BT_2020_CL": _("BT2020 CL"),
+					"XvYCC_709": _("BT709 XvYCC"),
+					"XvYCC_601": _("BT601 XvYCC")
+				})
+			else:
+				config.av.hdmicolorspace = ConfigSelection(default="auto", choices={
+					"auto": _("Auto"),
+					"rgb": _("RGB"),
+					"420": _("420"),
+					"422": _("422"),
+					"444": _("444")
+				})
 		config.av.hdmicolorspace.addNotifier(setHaveColorspace)
 
 	if SystemInfo["HasColordepth"]:
 		def setHaveColordepth(configElement):
 			open(SystemInfo["HasColordepth"], "w").write(configElement.value)
-		config.av.hdmicolordepth = ConfigSelection(default="auto", choices={"auto": _("auto"), "8bit": "8bit", "10bit": "10bit", "12bit": "12bit"})
+		config.av.hdmicolordepth = ConfigSelection(default="auto", choices={
+			"auto": _("Auto"),
+			"8bit": _("8 bit"),
+			"10bit": _("10 bit"),
+			"12bit": _("12 bit")
+		})
 		config.av.hdmicolordepth.addNotifier(setHaveColordepth)
 
 	if SystemInfo["HasHDMIpreemphasis"]:

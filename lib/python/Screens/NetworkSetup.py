@@ -20,6 +20,9 @@ from Tools.Directories import resolveFilename, fileReadLines, SCOPE_PLUGINS, SCO
 from Tools.LoadPixmap import LoadPixmap
 from Plugins.Plugin import PluginDescriptor
 from enigma import eTimer, getDesktop, eConsoleAppContainer
+from Components.SystemInfo import BoxInfo, SystemInfo
+
+model = BoxInfo.getItem("model")
 
 MODULE_NAME = __name__.split(".")[-1]
 

@@ -4,7 +4,7 @@ from fcntl import ioctl
 from struct import pack, unpack
 from time import localtime, time, timezone
 from Tools.Directories import fileExists
-from boxbranding import getMachineBuild
+from Components.SystemInfo import BoxInfo
 
 INFO_TYPE = "/proc/stb/info/type"
 INFO_SUBTYPE = "/proc/stb/info/subtype"
@@ -83,14 +83,13 @@ def getFPVersion():
 		if fileExists("/proc/stb/info/micomver"):
 			ret = open("/proc/stb/info/micomver", "r").read()
 		elif fileExists("/proc/stb/fp/version"):
-			if getMachineBuild() == "dm4kgen" or getBoxType() in ("dm520", "dm7080", "dm820"):
+			print("[StbHardware] Read /proc/stb/fp/version")
+			if BoxInfo.getItem("platform") == "dm4kgen" or BoxInfo.getItem("model") in ("dm520", "dm7080", "dm820"):
 				ret = open("/proc/stb/fp/version", "r").read()
 			else:
 				ret = int(open("/proc/stb/fp/version", "r").read())
 		elif fileExists("/sys/firmware/devicetree/base/bolt/tag"):
 			ret = open("/sys/firmware/devicetree/base/bolt/tag", "r").read().rstrip("\0")
-		elif getMachineBuild() in ('dm7080', 'dm820', 'dm520', 'dm525', 'dm900', 'dm920'):
-			ret = open("/proc/stb/fp/version", "r").read()
 		else:
 			fp = open("/dev/dbox/fp0")
 			ret = ioctl(fp.fileno(), 0)

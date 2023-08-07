@@ -7,11 +7,12 @@ from glob import glob
 from sys import maxsize, modules, version_info
 import socket, fcntl, struct
 from subprocess import PIPE, Popen
-from Components.SystemInfo import SystemInfo, ARCHITECTURE, MODEL
-from Tools.HardwareInfo import HardwareInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.Directories import fileExists, fileReadLine, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
+
+socfamily = BoxInfo.getItem("socfamily")
 
 
 def _ifinfo(sock, addr, ifname):
@@ -127,9 +128,6 @@ def getKernelVersionString():
 		return _("Unknown")
 	return version.split(" ", 4)[2].split("-", 2)[0]
 
-def getHardwareTypeString():
-	return HardwareInfo().get_device_string()
-
 
 def getImageTypeString():
 	try:
@@ -217,19 +215,24 @@ def getChipSetNumber():
 
 
 def getCPUBrand():
-	if SystemInfo["HiSilicon"]:
+	if BoxInfo.getItem("AmlogicFamily"):
+		return _("Amlogic")
+	elif BoxInfo.getItem("HiSilicon"):
 		return _("HiSilicon")
-	else:
+	elif socfamily.startswith("smp"):
+		return _("Sigma Designs")
+	elif socfamily.startswith("bcm") or BoxInfo.getItem("brand") == "rpi":
 		return _("Broadcom")
+	print("[About] No CPU brand?")
+	return _("Undefined")
 
 
 def getCPUArch():
-	if SystemInfo["ArchIsARM64"]:
+	if BoxInfo.getItem("ArchIsARM64"):
 		return _("ARM64")
-	elif SystemInfo["ArchIsARM"]:
+	elif BoxInfo.getItem("ArchIsARM"):
 		return _("ARM")
-	else:
-		return _("Mipsel")
+	return _("Mipsel")
 
 
 def getDriverInstalledDate():

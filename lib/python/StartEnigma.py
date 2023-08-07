@@ -15,10 +15,27 @@ enigma.eTimer = eBaseImpl.eTimer
 enigma.eSocketNotifier = eBaseImpl.eSocketNotifier
 enigma.eConsoleAppContainer = eConsoleImpl.eConsoleAppContainer
 from Components.config import config, configfile, ConfigText, ConfigYesNo, ConfigInteger, ConfigSelection, ConfigSubsection, NoSave
-from Components.SystemInfo import BoxInfo, SystemInfo, ARCHITECTURE, MODEL
+from Components.SystemInfo import BoxInfo
 
 from traceback import print_exc
 
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+platform = BoxInfo.getItem("platform")
+socfamily = BoxInfo.getItem("socfamily")
+
+# These entries should be moved back to UsageConfig.py when it is safe to bring UsageConfig init to this location in StartEnigma.py.
+#
+config.crash = ConfigSubsection()
+config.crash.debugScreens = ConfigYesNo(default=False)
+config.crash.debugKeyboards = ConfigYesNo(default=False)
+config.crash.debugRemoteControls = ConfigYesNo(default=False)
+config.crash.debugDVBScan = ConfigYesNo(default=False)
+
+# config.plugins needs to be defined before InputDevice < HelpMenu < MessageBox < InfoBar
+config.plugins = ConfigSubsection()
+config.plugins.remotecontroltype = ConfigSubsection()
+config.plugins.remotecontroltype.rctype = ConfigInteger(default=0)
 
 
 # New Plugin Style
@@ -35,11 +52,6 @@ config.misc.plugin_style = ConfigSelection(default="normallstyle", choices=[
 config.misc.virtualkeyBoardstyle = ConfigSelection(default="new", choices=[
 	("new", _("New style")),
 	("e2", _("Enigma2 default"))])
-
-# config.plugins needs to be defined before InputDevice < HelpMenu < MessageBox < InfoBar
-config.plugins = ConfigSubsection()
-config.plugins.remotecontroltype = ConfigSubsection()
-config.plugins.remotecontroltype.rctype = ConfigInteger(default=0)
 
 profile("SetupDevices")
 import Components.SetupDevices
@@ -689,7 +701,7 @@ from Components.Lcd import IconCheck, InitLcd
 InitLcd()
 IconCheck()
 
-if MODEL in ("dm7080", "dm820"):
+if model in ("dm7080", "dm820"):
 	MODULE_NAME = __name__.split(".")[-1]
 	fileUpdateLine("/proc/stb/hdmi-rx/0/hdmi_rx_monitor", conditionValue="on", replacementValue="off", source=MODULE_NAME)
 	fileUpdateLine("/proc/stb/audio/hdmi_rx_monitor", conditionValue="on", replacementValue="off", source=MODULE_NAME)

@@ -1,7 +1,10 @@
 from Components.config import config, ConfigSlider, ConfigSelection, ConfigYesNo, ConfigEnableDisable, ConfigSubsection, ConfigBoolean, ConfigSelectionNumber, ConfigNothing, NoSave
 from enigma import eAVSwitch, eDVBVolumecontrol, getDesktop
-from Components.SystemInfo import BoxInfo, SystemInfo, BRAND, MODEL
+from Components.SystemInfo import BoxInfo, SystemInfo
 from os.path import exists
+
+model = BoxInfo.getItem("model")
+platform = BoxInfo.getItem("platform")
 
 
 class AVSwitch:
@@ -67,7 +70,7 @@ class AVSwitch:
 
 def InitAVSwitch():
 	config.av = ConfigSubsection()
-	if MODEL == "vuduo":
+	if model == "vuduo" or BoxInfo.getItem("brand") == "ixuss":
 		config.av.yuvenabled = ConfigBoolean(default=False)
 	else:
 		config.av.yuvenabled = ConfigBoolean(default=True)
@@ -78,7 +81,7 @@ def InitAVSwitch():
 		colorformat_choices["yuv"] = "YPbPr"
 	if BoxInfo.getItem("scart"):
 		colorformat_choices["rgb"] = "RGB"
-	if SystemInfo["HasSVideo"]:
+	if BoxInfo.getItem("svideo"):
 		colorformat_choices["svideo"] = "S-Video"
 
 	config.av.colorformat = ConfigSelection(choices=colorformat_choices, default="cvbs")
@@ -154,9 +157,9 @@ def InitAVSwitch():
 	iAVSwitch = AVSwitch()
 
 	def setColorFormat(configElement):
-		if MODEL == "et6x00":
+		if model == "et6x00":
 			map = {"cvbs": 3, "rgb": 3, "svideo": 2, "yuv": 3}
-		elif MODEL == "gb7356":
+		elif platform == "gb7356" or model.startswith('et'):
 			map = {"cvbs": 0, "rgb": 3, "svideo": 2, "yuv": 3}
 		else:
 			map = {"cvbs": 0, "rgb": 1, "svideo": 2, "yuv": 3}
@@ -180,7 +183,7 @@ def InitAVSwitch():
 	config.av.wss.addNotifier(setWSS)
 
 	iAVSwitch.setInput("ENCODER") # init on startup
-	if MODEL in ("gb7356", "et5x00", "et6x00", "ixussone", "ixusszero", "axodin", "axase3", "optimussos1", "optimussos2", "gb800seplus", "gb800ueplus", "gbultrase", "gbultraue", "gbultraueh", "twinboxlcd"):
+	if platform == "gb7356" or model in ("et5x00", "et6x00", "ixussone", "ixusszero", "axodin", "axase3", "optimussos1", "optimussos2", "gb800seplus", "gb800ueplus", "gbultrase", "gbultraue", "gbultraueh", "twinboxlcd"):
 		detected = False
 	else:
 		detected = eAVSwitch.getInstance().haveScartSwitch()
@@ -212,7 +215,7 @@ def InitAVSwitch():
 			]
 			default = "Edid(Auto)"
 		else:
-			if MODEL in ("vuzero4k", "dm900", "dm920"):
+			if model in ("vuzero4k", "dm900", "dm920"):
 				choices = [
 					("Edid(Auto)", _("Auto")),
 					("Hdmi_Rgb", _("RGB")),
@@ -741,7 +744,7 @@ def InitAVSwitch():
 			except IOError:
 				print("[AVSwitch] Couldn't write pep_scaler_sharpness or pep_apply")
 
-		if MODEL == "gb7356":
+		if platform == "gb7356":
 			config.av.scaler_sharpness = ConfigSlider(default=5, limits=(0, 26))
 		else:
 			config.av.scaler_sharpness = ConfigSlider(default=13, limits=(0, 26))

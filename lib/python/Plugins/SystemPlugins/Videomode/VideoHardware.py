@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
 from Components.config import config, ConfigSlider, ConfigSelection, ConfigSubDict, ConfigYesNo, ConfigEnableDisable, ConfigOnOff, ConfigSubsection, ConfigBoolean, ConfigSelectionNumber, ConfigNothing, NoSave  # storm - some config are required
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.CList import CList
-from Tools.HardwareInfo import HardwareInfo
 from Components.About import about
 from Tools.Directories import fileExists
 from Components.Console import Console
 from os.path import isfile
 import os
 from enigma import getDesktop
+
+brand = BoxInfo.getItem("brand")
+platform = BoxInfo.getItem("platform")
+socfamily = BoxInfo.getItem("socfamily").replace('bcm', '').replace('hisi', '')
+chipsetstring = about.getChipSetString()
+has_hdmi = BoxInfo.getItem("hdmi")
+has_scart = BoxInfo.getItem("scart")
+has_yuv = BoxInfo.getItem("yuv")
+has_rca = BoxInfo.getItem("rca")
+has_avjack = BoxInfo.getItem("avjack")
 
 # The "VideoHardware" is the interface to /proc/stb/video.
 # It generates hotplug events, and gives you the list of
@@ -78,7 +87,7 @@ class VideoHardware:
                 "multi": {50: "2160p50", 60: "2160p60"},
                 "auto": {50: "2160p50", 60: "2160p60", 24: "2160p24"}}
 
-        if HardwareInfo().get_device_name() in ("dm900", "dm920"):
+        if platform in ("dm4kgen"):
                 rates["2160p"] = {"50Hz": {50: "2160p50"},
                 	"60Hz": {60: "2160p60"},
                 	"multi": {50: "2160p50", 60: "2160p60"}, 
@@ -112,7 +121,7 @@ class VideoHardware:
                 "640x480": {60: "640x480"}
         }
 
-        if HardwareInfo().get_device_name() in ("one", "two"):
+        if platform in ("dm4kgen", "dmamlogic"):
                 rates["480i"] = {"60hz": {60: "480i60hz"}}
 
                 rates["576i"] = {"50hz": {50: "576i50hz"}}
@@ -149,13 +158,13 @@ class VideoHardware:
 
         if SystemInfo["HasScart"]:
                 modes["Scart"] = ["PAL", "NTSC", "Multi"]
-        if SystemInfo["HasComposite"] and HardwareInfo().get_device_name() in ("dm7020hd", "dm7020hdv2", "dm8000"):
+        if SystemInfo["HasComposite"] and platform in ("dm4kgen"):
                 modes["RCA"] = ["576i", "PAL", "NTSC", "Multi"]
         if SystemInfo["HasYPbPr"]:
                 modes["YPbPr"] = ["720p", "1080i", "576p", "480p", "576i", "480i"]
         if SystemInfo["Has2160p"]:
                 modes["DVI"] = ["720p", "1080p", "2160p", "1080i", "576p", "480p", "576i", "480i"]
-        if HardwareInfo().get_device_name() in ("one", "two"):
+        if platform in ("dm4kgen", "dmamlogic"):
                 modes["HDMI"] = ["720p", "1080p", "smpte", "2160p30", "2160p", "1080i", "576p", "576i", "480p", "480i"]
                 widescreen_modes = {"720p", "1080p", "1080i", "2160p", "smpte"}
         else:
@@ -317,7 +326,7 @@ class VideoHardware:
                         if force == 50:
                                 mode_24 = mode_50
 
-                if HardwareInfo().get_device_name() in ("one", "two"): # storm - this part should be here
+                if platform == "dmamlogic": # storm - this part should be here
                         amlmode = list(modes.values())[0]
                         oldamlmode = self.getAMLMode()
                         f = open("/sys/class/display/mode", "w")
@@ -431,7 +440,7 @@ class VideoHardware:
         def getModeList(self, port):
                 print("[Videomode] VideoHardware getModeList for port", port)
                 res = []
-                if HardwareInfo().get_device_name() not in ("one", "two"):
+                if platform != "dmamlogic":
                         for mode in self.modes[port]:
                                 # list all rates which are completely valid
                                 rates = [rate for rate in self.rates[mode] if self.isModeAvailable(port, mode, rate)]
@@ -447,7 +456,6 @@ class VideoHardware:
                 return res
 
         def createConfig(self, *args):
-                has_hdmi = HardwareInfo().has_hdmi()
                 lst = []
 
                 config.av.videomode = ConfigSubDict()
@@ -491,7 +499,7 @@ class VideoHardware:
                         print("[Videomode] VideoHardware current mode not available, not setting videomode")
                         return
 
-                if HardwareInfo().get_device_name() in ("one", "two") and (mode.find("0p30") != -1 or mode.find("0p24") != -1 or mode.find("0p25") != -1):
+                if platform == "dmamlogic" and (mode.find("0p30") != -1 or mode.find("0p24") != -1 or mode.find("0p25") != -1):
                         match = re.search(r"(\d*?[ip])(\d*?)$", mode)
                         mode = match.group(1)
                         rate = match.group(2) + "Hz"
@@ -557,7 +565,7 @@ class VideoHardware:
                         wss = "auto"
 
                 print("[Videomode] VideoHardware -> setting aspect, policy, policy2, wss", aspect, policy, policy2, wss)
-                if chipsetstring.startswith("meson-6") and HardwareInfo().get_device_name() not in ("one", "two"):
+                if chipsetstring.startswith("meson-6") and platform != "dmamlogic":
                         arw = "0"
                         if config.av.policy_43.value == "bestfit":
                                 arw = "10"
@@ -569,7 +577,7 @@ class VideoHardware:
                                 open("/sys/class/video/screen_mode", "w").write(arw)
                         except IOError:
                                 print("[Videomode] Write to /sys/class/video/screen_mode failed.")
-                elif HardwareInfo().get_device_name() in ("one", "two"):
+                elif platform == "dmamlogic":
                         arw = "0"
                         if config.av.policy_43.value == "bestfit":
                                 arw = "10"

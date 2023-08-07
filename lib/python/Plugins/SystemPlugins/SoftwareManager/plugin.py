@@ -3,6 +3,7 @@ import os
 import time
 import pickle
 from Plugins.Plugin import PluginDescriptor
+from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
@@ -29,7 +30,7 @@ from Components.AVSwitch import AVSwitch
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS, SCOPE_CURRENT_PLUGIN, SCOPE_CURRENT_SKIN, SCOPE_METADIR
 from Tools.LoadPixmap import LoadPixmap
 from Tools.NumericalTextInput import NumericalTextInput
-from enigma import ePicLoad, eRCInput, getPrevAsciiCode, eEnv
+from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER, eListbox, gFont, getDesktop, ePicLoad, eRCInput, getPrevAsciiCode, eEnv
 from twisted.web import client
 from Plugins.SystemPlugins.SoftwareManager.BackupRestore import BackupSelection, RestoreMenu, BackupScreen, RestoreScreen, getBackupPath, getBackupFilename
 from Plugins.SystemPlugins.SoftwareManager.SoftwareTools import iSoftwareTools
@@ -108,7 +109,6 @@ class UpdatePluginMenu(Screen):
 
 	def __init__(self, session, args=0):
 		Screen.__init__(self, session)
-		self.setTitle(_("Software management"))
 		self.skin_path = plugin_path
 		self.menu = args
 		self.list = []
@@ -185,6 +185,7 @@ class UpdatePluginMenu(Screen):
 		self.backuppath = getBackupPath()
 		self.backupfile = getBackupFilename()
 		self.fullbackupfilename = self.backuppath + "/" + self.backupfile
+		self.onShown.append(self.setWindowTitle)
 		self.onChangedEntry = []
 		self["menu"].onSelectionChanged.append(self.selectionChanged)
 
@@ -206,6 +207,8 @@ class UpdatePluginMenu(Screen):
 	def layoutFinished(self):
 		idx = 0
 		self["menu"].index = idx
+	def setWindowTitle(self):
+		self.setTitle(_("Software management"))
 
 	def cleanup(self):
 		iSoftwareTools.cleanupSoftwareTools()
@@ -338,12 +341,13 @@ class SoftwareManagerSetup(ConfigListScreen, Screen):
 
 	def __init__(self, session, skin_path=None):
 		Screen.__init__(self, session)
+		self.session = session
 		self.skin_path = skin_path
 		if self.skin_path is None:
 			self.skin_path = resolveFilename(SCOPE_CURRENT_PLUGIN, "SystemPlugins/SoftwareManager")
 
 		self.onChangedEntry = []
-		self.setTitle(_("Software manager setup"))
+		self.setup_title = _("Software manager setup")
 		self.overwriteConfigfilesEntry = None
 
 		self.list = []
@@ -363,6 +367,10 @@ class SoftwareManagerSetup(ConfigListScreen, Screen):
 		self["introduction"] = StaticText()
 
 		self.createSetup()
+		self.onLayoutFinish.append(self.layoutFinished)
+
+	def layoutFinished(self):
+		self.setTitle(self.setup_title)
 
 	def createSetup(self):
 		self.list = []
@@ -418,6 +426,21 @@ class SoftwareManagerSetup(ConfigListScreen, Screen):
 			self.session.openWithCallback(self.cancelConfirm, MessageBox, _("Really close without saving settings?"), MessageBox.TYPE_YESNO, timeout=20, default=True)
 		else:
 			self.close()
+	# for summary:
+	def changedEntry(self):
+		for x in self.onChangedEntry:
+			x()
+		self.selectionChanged()
+
+	def getCurrentEntry(self):
+		return self["config"].getCurrent()[0]
+
+	def getCurrentValue(self):
+		return str(self["config"].getCurrent()[1].value)
+
+	def createSummary(self):
+		from Screens.Setup import SetupSummary
+		return SetupSummary
 
 
 class SoftwareManagerInfo(Screen):
@@ -447,7 +470,7 @@ class SoftwareManagerInfo(Screen):
 
 	def __init__(self, session, skin_path=None, mode=None):
 		Screen.__init__(self, session)
-		self.setTitle(_("Softwaremanager information"))
+		self.session = session
 		self.mode = mode
 		self.skin_path = skin_path
 		if self.skin_path is None:
@@ -468,7 +491,12 @@ class SoftwareManagerInfo(Screen):
 		self["key_blue"] = StaticText()
 		self["introduction"] = StaticText()
 
-		self.onLayoutFinish.append(self.showInfos)
+		self.onLayoutFinish.append(self.layoutFinished)
+
+	def layoutFinished(self):
+		self.setTitle(_("Softwaremanager information"))
+		if self.mode is not None:
+			self.showInfos()
 
 	def showInfos(self):
 		if self.mode == "backupinfo":
@@ -516,7 +544,7 @@ class PluginManager(Screen, PackageInfoHandler):
 
 	def __init__(self, session, plugin_path=None, args=None):
 		Screen.__init__(self, session)
-		self.setTitle(_("Extensions management"))
+		self.session = session
 		self.skin_path = plugin_path
 		if self.skin_path is None:
 			self.skin_path = resolveFilename(SCOPE_CURRENT_PLUGIN, "SystemPlugins/SoftwareManager")
@@ -556,7 +584,11 @@ class PluginManager(Screen, PackageInfoHandler):
 		self.saved_currentSelectedPackage = None
 		self.restartRequired = False
 
+		self.onShown.append(self.setWindowTitle)
 		self.onLayoutFinish.append(self.getUpdateInfos)
+
+	def setWindowTitle(self):
+		self.setTitle(_("Extensions management"))
 
 	def exit(self):
 		if self.currList == "packages":
@@ -946,7 +978,7 @@ class PluginManagerInfo(Screen):
 
 	def __init__(self, session, plugin_path, cmdlist=None):
 		Screen.__init__(self, session)
-		self.setTitle(_("Plugin manager activity information"))
+		self.session = session
 		self.skin_path = plugin_path
 		self.cmdlist = cmdlist
 
@@ -964,7 +996,11 @@ class PluginManagerInfo(Screen):
 		self["key_green"] = StaticText(_("Only extensions."))
 		self["status"] = StaticText(_("Following tasks will be done after you press OK!"))
 
+		self.onShown.append(self.setWindowTitle)
 		self.onLayoutFinish.append(self.rebuildList)
+
+	def setWindowTitle(self):
+		self.setTitle(_("Plugin manager activity information"))
 
 	def rebuildList(self):
 		self.list = []
@@ -1043,7 +1079,7 @@ class PluginManagerHelp(Screen):
 
 	def __init__(self, session, plugin_path):
 		Screen.__init__(self, session)
-		self.setTitle(_("Plugin manager help"))
+		self.session = session
 		self.skin_path = plugin_path
 
 		self["shortcuts"] = ActionMap(["ShortcutActions", "WizardActions"],
@@ -1057,7 +1093,11 @@ class PluginManagerHelp(Screen):
 		self["key_red"] = StaticText(_("Close"))
 		self["status"] = StaticText(_("A small overview of the available icon states and actions."))
 
+		self.onShown.append(self.setWindowTitle)
 		self.onLayoutFinish.append(self.rebuildList)
+
+	def setWindowTitle(self):
+		self.setTitle(_("Plugin manager help"))
 
 	def rebuildList(self):
 		self.list = []
@@ -1117,7 +1157,6 @@ class PluginDetails(Screen, PackageInfoHandler):
 			self.divpicinstance = packagedata[6]
 			self.fillPackageDetails(self.details)
 
-		self.setTitle(_("Details for plugin: ") + self.pluginname)
 		self.thumbnail = ""
 
 		self["shortcuts"] = ActionMap(["ShortcutActions", "WizardActions"],
@@ -1151,7 +1190,11 @@ class PluginDetails(Screen, PackageInfoHandler):
 		self.oktext = _("\nAfter pressing OK, please wait!")
 		self.picload = ePicLoad()
 		self.picload.PictureData.get().append(self.paintScreenshotPixmapCB)
+		self.onShown.append(self.setWindowTitle)
 		self.onLayoutFinish.append(self.setInfos)
+
+	def setWindowTitle(self):
+		self.setTitle(_("Details for plugin: ") + self.pluginname)
 
 	def exit(self):
 		self.close(False)
@@ -1302,7 +1345,6 @@ class OPKGMenu(Screen):
 
 	def __init__(self, session, plugin_path):
 		Screen.__init__(self, session)
-		self.setTitle(_("Select update source to edit"))
 		self.skin_path = plugin_path
 
 		self["key_red"] = StaticText(_("Close"))
@@ -1328,6 +1370,13 @@ class OPKGMenu(Screen):
 		})
 		self["filelist"] = MenuList([])
 		self.fill_list()
+		self.onLayoutFinish.append(self.layoutFinished)
+
+	def layoutFinished(self):
+		self.setWindowTitle()
+
+	def setWindowTitle(self):
+		self.setTitle(_("Select update source to edit"))
 
 	def fill_list(self):
 		flist = []
@@ -1361,7 +1410,7 @@ class OPKGSource(Screen):
 
 	def __init__(self, session, configfile=None):
 		Screen.__init__(self, session)
-		self.setTitle(_("Edit update source url"))
+		self.session = session
 		self.configfile = configfile
 		text = ""
 		if self.configfile:
@@ -1373,11 +1422,17 @@ class OPKGSource(Screen):
 				fp.close()
 			except IOError:
 				pass
+		desk = getDesktop(0)
+		x = int(desk.size().width())
+		y = int(desk.size().height())
 
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("Save"))
 
-		self["text"] = Input(text, maxSize=False, type=Input.TEXT)
+		if (y >= 720):
+			self["text"] = Input(text, maxSize=False, type=Input.TEXT)
+		else:
+			self["text"] = Input(text, maxSize=False, visible_width=55, type=Input.TEXT)
 
 		self["actions"] = NumberActionMap(["WizardActions", "InputActions", "TextEntryActions", "KeyboardInputActions", "ShortcutActions"],
 		{
@@ -1406,7 +1461,11 @@ class OPKGSource(Screen):
 		self.onLayoutFinish.append(self.layoutFinished)
 
 	def layoutFinished(self):
+		self.setWindowTitle()
 		self["text"].right()
+
+	def setWindowTitle(self):
+		self.setTitle(_("Edit update source url"))
 
 	def go(self):
 		text = self["text"].getText()
@@ -1463,7 +1522,7 @@ class PacketManager(Screen, NumericalTextInput):
 	def __init__(self, session, plugin_path, args=None):
 		Screen.__init__(self, session)
 		NumericalTextInput.__init__(self)
-		self.setTitle(_("Packet manager"))
+		self.session = session
 		self.skin_path = plugin_path
 
 		self.setUseableChars('1234567890abcdefghijklmnopqrstuvwxyz')
@@ -1507,6 +1566,7 @@ class PacketManager(Screen, NumericalTextInput):
 
 		self.opkg = OpkgComponent()
 		self.opkg.addCallback(self.opkgCallback)
+		self.onShown.append(self.setWindowTitle)
 		self.onLayoutFinish.append(self.rebuildList)
 
 		rcinput = eRCInput.getInstance()
@@ -1550,6 +1610,8 @@ class PacketManager(Screen, NumericalTextInput):
 			os.unlink(self.cache_file)
 			self.list_updating = True
 			self.rebuildList()
+	def setWindowTitle(self):
+		self.setTitle(_("Packet manager"))
 
 	def setStatus(self, status=None):
 		if status:

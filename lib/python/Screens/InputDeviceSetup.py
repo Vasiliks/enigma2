@@ -10,7 +10,7 @@ from Components.ConfigList import ConfigListScreen
 from Components.ActionMap import ActionMap, HelpableActionMap
 from Tools.Directories import resolveFilename, SCOPE_CURRENT_SKIN
 from Tools.LoadPixmap import LoadPixmap
-from boxbranding import getBoxType, getMachineBrand, getMachineName, getBrandOEM
+from Components.SystemInfo import BoxInfo
 from enigma import getDesktop
 
 def getDesktopSize():
@@ -390,33 +390,11 @@ class RemoteControlType(ConfigListScreen, Screen):
 
 		self.defaultRcType = 0
 		self.getDefaultRcType()
-	def getBoxTypeCompatible(self):
-		try:
-			with open('/proc/stb/info/boxtype', 'r') as fd:
-				boxType = fd.read()
-				return boxType
-		except:
-			return "Default"
-		return "Default"
 
 	def getDefaultRcType(self):
-		boxtype = getBoxType()
-		boxtypecompat = self.getBoxTypeCompatible()
-		self.defaultRcType = 0
-		#print "Boxtype is %s" % boxtype
-		for x in self.defaultRcList:
-			if x[0] in boxtype:
-				self.defaultRcType = x[1]
-				#print "Selecting %d as defaultRcType" % self.defaultRcType
-				break
-
-		# boxtypecompat should be removed in the future
-		if (self.defaultRcType == 0):
-			for x in self.defaultRcList:
-				if x[0] in boxtypecompat:
-					self.defaultRcType = x[1]
-					#print "Selecting %d as defaultRcType" % self.defaultRcType
-					break
+		self.defaultRcType = BoxInfo.getItem("rctype")
+		if self.defaultRcType == 0:
+			self.defaultRcType = iRcTypeControl.readRcType()
 
 	def setDefaultRcType(self):
 		iRcTypeControl.writeRcType(self.defaultRcType)

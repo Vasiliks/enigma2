@@ -24,17 +24,25 @@ from Components.Console import Console
 from Components.GUIComponent import GUIComponent
 from Components.Pixmap import MultiPixmap, Pixmap
 from Components.Network import iNetwork
-from Components.SystemInfo import BoxInfo, SystemInfo, BRAND, MODEL, DISPLAYMODEL
+from Components.SystemInfo import BoxInfo, SystemInfo
 
 from Tools.Directories import SCOPE_PLUGINS, resolveFilename, fileExists, fileHas, pathExists, fileReadLines, fileWriteLine, isPluginInstalled
 from Tools.Geolocation import geolocation
-from Tools.StbHardware import getFPVersion, getProcInfoTypeTuner
+from Tools.StbHardware import getFPVersion, getProcInfoTypeTuner, getBoxProc
 from Tools.LoadPixmap import LoadPixmap
 from time import strftime
 
 
 API_GITHUB = 0
 API_GITLAB = 1
+
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+socfamily = BoxInfo.getItem("socfamily")
+displaytype = BoxInfo.getItem("displaytype")
+platform = BoxInfo.getItem("platform")
+
+procmodel = getBoxProc()
 
 MODULE_NAME = __name__.split(".")[-1]
 
@@ -84,7 +92,7 @@ class InformationBase(Screen, HelpableScreen):
 			"right": self.displayInformation,
 			"left": self.displayInformation,
 		}, prio=0, description=_("Common Information Actions"))
-		if isfile(resolveFilename(SCOPE_PLUGINS, pathjoin("boxes", "%s.png" % (MODEL)))):
+		if isfile(resolveFilename(SCOPE_PLUGINS, pathjoin("boxes", "%s.png" % (model)))):
 			self["key_info"] = StaticText(_("INFO"))
 			self["infoActions"] = HelpableActionMap(self, ["InfoActions"], {
 				"info": (self.showReceiverImage, _("Show receiver image(s)"))
@@ -196,11 +204,11 @@ class InformationImage(Screen, HelpableScreen):
 			"yellow": (self.nextImage, _("Show next image"))
 		}, prio=0, description=_("Receiver Image Actions"))
 		self.images = (
-			(_("Front"), "%s%s.png", (boxes, MODEL)),
-			(_("Rear"), "%s%s-rear.png", (boxes, MODEL)),
+			(_("Front"), "%s%s.png", (boxes, model)),
+			(_("Rear"), "%s%s-rear.png", (boxes, model)),
 			(_("Remote Control"), "%s%s.png", (remotes, BoxInfo.getItem("rcname"))),
-			(_("Flashing"), "%s%s-flashing.png", (boxes, MODEL)),
-			(_("Internal"), "%s%s-internal.png", (boxes, MODEL))
+			(_("Flashing"), "%s%s-flashing.png", (boxes, model)),
+			(_("Internal"), "%s%s-internal.png", (boxes, model))
 		)
 		self.imageIndex = 0
 		self.widgetContext = None
@@ -236,7 +244,7 @@ class InformationImage(Screen, HelpableScreen):
 		if self.widgetContext is None:
 			self.widgetContext = tuple(self["image"].getPosition() + self["image"].getSize())
 			print(self.widgetContext)
-		self["name"].setText("%s  -  %s %s" % (self.images[self.imageIndex][0], BRAND, DISPLAYMODEL))
+		self["name"].setText("%s  -  %s %s" % (self.images[self.imageIndex][0], brand, displaytype))
 		imagePath = resolveFilename(SCOPE_PLUGINS, self.images[self.imageIndex][1] % self.images[self.imageIndex][2])
 		image = LoadPixmap(imagePath)
 		if image:
@@ -289,9 +297,12 @@ class About(Screen):
 		self["key_blue"] = Button(_("Memory Info"))
 		hddsplit = skin.parameters.get("AboutHddSplit", 1)
 
-		AboutText = _("Model: ") + BRAND + " " + DISPLAYMODEL + "\n"
-		if MODEL:
-			AboutText += _("Hardware Type: ") + about.getHardwareTypeString() + "\n"
+		AboutText = _("Hardware: ") + model + "\n"
+		if platform != model:
+			AboutText += _("Platform: ") + platform + "\n"
+		if procmodel != model:
+ 			AboutText += _("Proc model: ") + procmodel + "\n"
+
 
 		if fileExists("/proc/stb/info/sn"):
 			hwserial = open("/proc/stb/info/sn", "r").read().strip()
@@ -312,6 +323,11 @@ class About(Screen):
 		AboutText += _("CPU: ") + cpu + "\n"
 		AboutText += _("CPU brand: ") + about.getCPUBrand() + "\n"
 
+		AboutText += "\n"
+		if BoxInfo.getItem("Display") or BoxInfo.getItem("7segment") or model != "gbip4k":
+			AboutText += _("Type Display: ") + BoxInfo.getItem("displaytype") + "\n"
+		else:
+			AboutText += _("No Display") + "\n"
 		EnigmaVersion = about.getEnigmaVersionString()
 		EnigmaVersion = EnigmaVersion.rsplit("-", EnigmaVersion.count("-") - 2)
 		if len(EnigmaVersion) == 3:
@@ -360,10 +376,6 @@ class About(Screen):
 
 		AboutText += "\n" + _('Skin & Resolution: %s (%sx%s)\n') % (config.skin.primary_skin.value.split('/')[0], getDesktop(0).size().width(), getDesktop(0).size().height())
 
-		if BoxInfo.getItem("displaytype"):
-			AboutText += _("Type Display: ") + BoxInfo.getItem("displaytype") + "\n"
-		else:
-			AboutText += _("No Display") + "\n"
 		servicemp3 = _("ServiceMP3. IPTV recording (Yes).")
 		servicehisilicon = _("ServiceHisilicon. IPTV recording (No). (Recommended ServiceMP3).")
 		exteplayer3 = _("ServiceApp-ExtEplayer3. IPTV recording (No). (Recommended ServiceMP3).")

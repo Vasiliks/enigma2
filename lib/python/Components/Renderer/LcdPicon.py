@@ -8,7 +8,7 @@ from Components.Renderer.Picon import PiconLocator
 
 
 def useLcdPicons():
-	return config.lcd.picon_pack.value
+	return BoxInfo.getItem("displaytype") in ("bwlcd255", "bwlcd140", "bwlcd128") or config.lcd.picon_pack.value
 
 
 lcdPiconLocator = None

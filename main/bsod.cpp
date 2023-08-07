@@ -130,6 +130,7 @@ bool bsodRestart()
 {
 	return bsodrestart;
 }
+
 void bsodFatal(const char *component)
 {
 	//handle python crashes	
@@ -150,6 +151,7 @@ void bsodFatal(const char *component)
 		return;
 	}
 	bsodrestart = true;
+
 	/* show no more than one bsod while shutting down/crashing */
 	if (bsodhandled) {
 		if (component) {
@@ -269,7 +271,6 @@ void bsodFatal(const char *component)
 
 		/* dump the kernel log */
 		getKlog(f);
-
 		fsync(fileno(f));
 		fclose(f);
 	}
@@ -289,11 +290,11 @@ void bsodFatal(const char *component)
 	p.resetClip(eRect(ePoint(0, 0), my_dc->size()));
 	p.setBackgroundColor(gRGB(0x27408B));
 	p.setForegroundColor(gRGB(0xFFFFFF));
+	p.clear();
 
 	int hd =  my_dc->size().width() == 1920;
 	ePtr<gFont> font = new gFont("Regular", hd ? 30 : 20);
 	p.setFont(font);
-	p.clear();
 
 	eRect usable_area = eRect(hd ? 30 : 100, hd ? 30 : 70, my_dc->size().width() - (hd ? 60 : 150), hd ? 150 : 100);
 
@@ -401,7 +402,6 @@ void bsodFatal(const char *component)
 		p.clear();
 		return;
 	}
-	if (component) raise(SIGKILL);
 	if (component) {
 		/*
 		 *  We need to use a signal that generate core dump.

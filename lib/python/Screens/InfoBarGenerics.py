@@ -11,7 +11,7 @@ from Components.Sources.ServiceEvent import ServiceEvent
 from Components.ServiceList import refreshServiceList
 from Components.Sources.Boolean import Boolean
 from Components.config import config, ConfigBoolean, ConfigClock, ACTIONKEY_RIGHT
-from Components.SystemInfo import BoxInfo, SystemInfo, BRAND, MODEL, PLATFORM
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Components.UsageConfig import preferredInstantRecordPath, defaultMoviePath
 from Components.VolumeControl import VolumeControl
 from Components.Sources.StaticText import StaticText
@@ -55,6 +55,10 @@ from RecordTimer import RecordTimerEntry, RecordTimer, findSafeRecordPath
 from Screens.Menu import MainMenu, mdom
 
 MODULE_NAME = __name__.split(".")[-1]
+
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+platform = BoxInfo.getItem("platform")
 
 
 def isStandardInfoBar(self):

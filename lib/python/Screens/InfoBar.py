@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Tools.Profile import profile
 from enigma import eServiceReference
-
+from Tools.StbHardware import getBoxProc
 # workaround for required config entry dependencies.
 import Screens.MovieSelection
 
@@ -30,6 +30,11 @@ from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
 
 profile("LOAD:HelpableScreen")
 from Screens.HelpMenu import HelpableScreen
+from Components.SystemInfo import BoxInfo
+
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+procmodel = getBoxProc()
 
 
 class InfoBar(InfoBarBase, InfoBarShowHide,
@@ -179,7 +184,7 @@ class MoviePlayer(InfoBarBase, InfoBarShowHide, InfoBarMenu, InfoBarSeek, InfoBa
 		self.allowPiP = True
 
 		for x in HelpableScreen, InfoBarShowHide, InfoBarMenu, \
-				InfoBarBase, InfoBarSeek, InfoBarShowMovies, InfoBarInstantRecord, InfoBarVmodeButton,\
+				InfoBarBase, InfoBarSeek, InfoBarShowMovies, InfoBarInstantRecord, InfoBarVmodeButton, \
 				InfoBarAudioSelection, InfoBarNotifications, InfoBarResolutionSelection, InfoBarAspectSelection, \
 				InfoBarServiceNotifications, InfoBarPVRState, InfoBarCueSheetSupport, \
 				InfoBarMoviePlayerSummarySupport, InfoBarSubtitleSupport, \

@@ -4,15 +4,17 @@ from os.path import isfile
 from sys import maxsize
 from twisted.internet import threads
 
-from boxbranding import getDBoxLCD
 from enigma import eActionMap, eDBoxLCD, eTimer
 
 from Components.config import ConfigNothing, ConfigSelection, ConfigSlider, ConfigSubsection, ConfigYesNo, config
-from Components.SystemInfo import SystemInfo, BoxInfo, MODEL
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Screens.InfoBar import InfoBar
 from Screens.Screen import Screen
 from Screens.Standby import inTryQuitMainloop
 from Tools.Directories import fileReadLine, fileWriteLine
+
+model = BoxInfo.getItem("model")
+platform = BoxInfo.getItem("platform")
 
 
 class dummyScreen(Screen):
@@ -181,8 +183,8 @@ class LCD:
 			print("[Lcd] setLCDMode='%s'." % value)
 			fileWriteLine("/proc/stb/lcd/show_symbols", value)
 		if config.lcd.mode.value == "0":
-			SystemInfo["SeekStatePlay"] = False
-			SystemInfo["StatePlayPause"] = False
+			BoxInfo.setItem("SeekStatePlay", False)
+			BoxInfo.setItem("StatePlayPause", False)
 			if isfile("/proc/stb/lcd/symbol_hdd"):
 				fileWriteLine("/proc/stb/lcd/symbol_hdd", "0")
 			if isfile("/proc/stb/lcd/symbol_hddprogress"):
@@ -252,7 +254,7 @@ class LCD:
 
 def leaveStandby():
 	config.lcd.bright.apply()
-	if MODEL == "vuultimo":
+	if model == "vuultimo":
 		config.lcd.ledbrightness.apply()
 		config.lcd.ledbrightnessdeepstandby.apply()
 
@@ -267,13 +269,13 @@ def standbyCounterChanged(configElement):
 
 def InitLcd():
 	detected = eDBoxLCD.getInstance().detected()
-	SystemInfo["Display"] = detected
+	BoxInfo.setItem("Display", detected)
 	config.lcd = ConfigSubsection()
 	if isfile("/proc/stb/lcd/mode"):
 		can_lcdmodechecking = fileReadLine("/proc/stb/lcd/mode")
 	else:
 		can_lcdmodechecking = False
-	SystemInfo["LCDMiniTV"] = can_lcdmodechecking
+	BoxInfo.setItem("LCDMiniTV", can_lcdmodechecking)
 	if detected:
 		ilcd = LCD()
 		if can_lcdmodechecking:
@@ -506,7 +508,7 @@ def InitLcd():
 		], default="on")
 		if isfile("/proc/stb/fp/power4x7suspend"):
 			config.lcd.power4x7suspend.addNotifier(setPower4x7Suspend)
-		if MODEL in ('dm900', 'dm920'):
+		if model in ('dm900', 'dm920'):
 			standby_default = 4
 		else:
 			standby_default = 1
@@ -515,9 +517,18 @@ def InitLcd():
 			config.lcd.contrast.addNotifier(setLCDcontrast)
 		else:
 			config.lcd.contrast = ConfigNothing()
-		config.lcd.standby = ConfigSlider(default=standby_default, limits=(0, 10))
-		config.lcd.dimbright = ConfigSlider(default=standby_default, limits=(0, 10))
-		config.lcd.bright = ConfigSlider(default=SystemInfo["DefaultDisplayBrightness"], limits=(0, 10))
+		if model in ("h3", "ebox5000", "ebox5100", "sh1", "spycat", "novacombo", "novatwin"):
+			config.lcd.standby = ConfigSlider(default=standby_default, limits=(0, 4))
+			config.lcd.dimbright = ConfigSlider(default=standby_default, limits=(0, 4))
+			config.lcd.bright = ConfigSlider(default=4, limits=(0, 4))
+		elif model in ("spycat4kmini", "osmega"):
+			config.lcd.standby = ConfigSlider(default=standby_default, limits=(0, 10))
+			config.lcd.dimbright = ConfigSlider(default=standby_default, limits=(0, 10))
+			config.lcd.bright = ConfigSlider(default=10, limits=(0, 10))
+		else:
+			config.lcd.standby = ConfigSlider(default=standby_default, limits=(0, 10))
+			config.lcd.dimbright = ConfigSlider(default=standby_default, limits=(0, 10))
+			config.lcd.bright = ConfigSlider(default=SystemInfo["DefaultDisplayBrightness"], limits=(0, 10))
 		config.lcd.dimbright.addNotifier(setLCDdimbright)
 		config.lcd.dimbright.apply = lambda: setLCDdimbright(config.lcd.dimbright)
 		config.lcd.dimdelay = ConfigSelection(choices=[
@@ -547,7 +558,7 @@ def InitLcd():
 		config.lcd.picon_pack.addNotifier(PiconPackChanged)
 		config.lcd.flip = ConfigYesNo(default=False)
 		config.lcd.flip.addNotifier(setLCDflipped)
-		LcdLiveTV = SystemInfo["LcdLiveTV"]
+		LcdLiveTV = BoxInfo.getItem("LcdLiveTV")
 		if LcdLiveTV:
 			def lcdLiveTvChanged(configElement):
 				if "live_enable" in LcdLiveTV:
@@ -563,7 +574,7 @@ def InitLcd():
 			config.lcd.showTv = ConfigYesNo(default=False)
 			config.lcd.showTv.addNotifier(lcdLiveTvChanged)
 
-		if SystemInfo["LCDMiniTV"]:
+		if BoxInfo.getItem("LCDMiniTV"):
 			config.lcd.minitvmode = ConfigSelection(choices=[
 				("0", _("Normal")),
 				("1", _("MiniTV")),
@@ -580,7 +591,7 @@ def InitLcd():
 			config.lcd.minitvfps = ConfigSlider(default=30, limits=(0, 30))
 			config.lcd.minitvfps.addNotifier(setLCDminitvfps)
 
-		VFD_scroll_repeats = SystemInfo["VFD_scroll_repeats"]
+		VFD_scroll_repeats = BoxInfo.getItem("VFD_scroll_repeats")
 		if VFD_scroll_repeats:
 			def scroll_repeats(configElement):
 				eDBoxLCD.getInstance().set_VFD_scroll_repeats(int(configElement.value))
@@ -596,7 +607,7 @@ def InitLcd():
 			config.usage.vfd_scroll_repeats.addNotifier(scroll_repeats, immediate_feedback=False)
 		else:
 			config.usage.vfd_scroll_repeats = ConfigNothing()
-		VFD_scroll_delay = SystemInfo["VFD_scroll_delay"]
+		VFD_scroll_delay = BoxInfo.getItem("VFD_scroll_delay")
 		if VFD_scroll_delay:
 			def scroll_delay(configElement):
 				eDBoxLCD.getInstance().set_VFD_scroll_delay(int(configElement.value))
@@ -607,7 +618,7 @@ def InitLcd():
 		else:
 			config.lcd.hdd = ConfigNothing()
 			config.usage.vfd_scroll_delay = ConfigNothing()
-		VFD_initial_scroll_delay = SystemInfo["VFD_initial_scroll_delay"]
+		VFD_initial_scroll_delay = BoxInfo.getItem("VFD_initial_scroll_delay")
 		if VFD_initial_scroll_delay:
 			def initial_scroll_delay(configElement):
 				eDBoxLCD.getInstance().set_VFD_initial_scroll_delay(int(configElement.value))
@@ -623,7 +634,7 @@ def InitLcd():
 			config.usage.vfd_initial_scroll_delay.addNotifier(initial_scroll_delay, immediate_feedback=False)
 		else:
 			config.usage.vfd_initial_scroll_delay = ConfigNothing()
-		VFD_final_scroll_delay = SystemInfo["VFD_final_scroll_delay"]
+		VFD_final_scroll_delay = BoxInfo.getItem("VFD_final_scroll_delay")
 		if VFD_final_scroll_delay:
 			def final_scroll_delay(configElement):
 				eDBoxLCD.getInstance().set_VFD_final_scroll_delay(int(configElement.value))
@@ -672,7 +683,7 @@ def InitLcd():
 		else:
 			config.lcd.showoutputresolution = ConfigNothing()
 
-		if MODEL == "vuultimo":
+		if model == "vuultimo":
 			config.lcd.ledblinkingtime = ConfigSlider(default=5, increment=1, limits=(0, 15))
 			config.lcd.ledblinkingtime.addNotifier(setLEDblinkingtime)
 			config.lcd.ledbrightnessdeepstandby = ConfigSlider(default=1, increment=1, limits=(0, 15))

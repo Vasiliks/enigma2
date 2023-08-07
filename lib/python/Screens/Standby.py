@@ -22,6 +22,9 @@ from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceRefe
 inStandby = None
 infoBarInstance = None
 
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+
 QUIT_SHUTDOWN = 1
 QUIT_REBOOT = 2
 QUIT_RESTART = 3
@@ -254,13 +257,13 @@ class QuitMainloopScreen(Screen):
 		Screen.__init__(self, session)
 		from Components.Label import Label
 		text = {
-			QUIT_SHUTDOWN: _("Your %s %s is shutting down"),
-			QUIT_REBOOT: _("Your %s %s is rebooting"),
-			QUIT_RESTART: _("The user interface of your %s %s is restarting"),
-			QUIT_UPGRADE_FP: _("Your frontprocessor will be updated\nPlease wait until your %s %s reboots\nThis may take a few minutes"),
-			QUIT_DEBUG_RESTART: _("The user interface of your %s %s is restarting in debug mode"),
-			QUIT_UPGRADE_PROGRAM: _("Unattended update in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes"),
-			QUIT_MANUFACTURER_RESET: _("Manufacturer reset in progress\nPlease wait until your %s %s restarts"),
+			QUIT_SHUTDOWN: _("Your %s %s is shutting down") % (brand, model),
+			QUIT_REBOOT: _("Your %s %s is rebooting") % (brand, model),
+			QUIT_RESTART: _("The user interface of your %s %s is restarting") % (brand, model),
+			QUIT_UPGRADE_FP: _("Your frontprocessor will be updated\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (brand, model),
+			QUIT_DEBUG_RESTART: _("The user interface of your %s %s is restarting in debug mode") % (brand, model),
+			QUIT_UPGRADE_PROGRAM: _("Unattended update in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (brand, model),
+			QUIT_MANUFACTURER_RESET: _("Manufacturer reset in progress\nPlease wait until your %s %s restarts") % (brand, model),
 		}.get(retvalue)
 		self["text"] = Label(text)
 

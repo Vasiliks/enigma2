@@ -7,7 +7,7 @@ from enigma import BT_ALPHABLEND, BT_ALPHATEST, BT_HALIGN_CENTER, BT_HALIGN_LEFT
 
 from Components.config import ConfigSubsection, ConfigText, config
 from Components.RcModel import rc_model
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Components.Sources.Source import ObsoleteSource
 from Tools.Directories import SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadXML
 from Tools.Import import my_import
@@ -172,6 +172,10 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 						res = element.attrib.get("resolution", "%s,%s" % (resolution[0], resolution[1]))
 						if res != "0,0":
 							element.attrib["resolution"] = res
+						if config.crash.debugScreens.value:
+							res = [parseInteger(x.strip()) for x in res.split(",")]
+							msg = ", resolution %dx%d," % (res[0], res[1]) if len(res) == 2 and res[0] and res[1] else ""
+							print("[Skin] Loading screen '%s'%s from '%s'.  (scope=%s)" % (name, msg, filename, scope))
 						domScreens[name] = (element, "%s/" % dirname(filename))
 			elif element.tag == "windowstyle":  # Process the windowstyle element.
 				scrnID = element.attrib.get("id")
@@ -180,6 +184,8 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 					domStyle = ElementTree(Element("skin"))
 					domStyle.getroot().append(element)
 					windowStyles[scrnID] = (desktop, screenID, domStyle.getroot(), filename, scope)
+					if config.crash.debugScreens.value:
+						print("[Skin] This skin has a windowstyle for screen ID='%s'." % scrnID)
 			# Element is not a screen or windowstyle element so no need for it any longer.
 		print("[Skin] Loading skin file '%s' complete." % filename)
 		if runCallbacks:

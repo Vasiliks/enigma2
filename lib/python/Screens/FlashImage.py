@@ -11,7 +11,7 @@ from Components.Console import Console
 from Components.Label import Label
 from Components.Pixmap import Pixmap
 from Components.ProgressBar import ProgressBar
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.BoundFunction import boundFunction
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS, fileExists, pathExists, fileHas
 from Tools.Downloader import downloadWithProgress
@@ -27,9 +27,9 @@ import shutil
 import tempfile
 import struct
 
-from enigma import eEPGCache, eEnv, getBoxType
+from enigma import eEPGCache, eEnv
 
-model = getBoxType()
+model = BoxInfo.getItem("model")
 
 
 def checkimagefiles(files):
@@ -44,7 +44,7 @@ class SelectImage(Screen):
 		self.imagesList = {}
 		self.setIndex = 0
 		self.expanded = []
-		self.model = getBoxType()
+		self.model = model
 		self.selectedImage = ["OpenPLi", {"url": "https://downloads.openpli.org/json/%s" % self.model, "model": self.model}]
 		self.models = [self.model]
 		self.setTitle(_("Select image"))
@@ -608,7 +608,7 @@ class MultibootSelection(SelectImage):
 				else:
 					shutil.copyfile(startupfile, os.path.join(self.tmp_dir, "STARTUP"))
 			else:
-				model = getBoxType()
+				model = model
 				if slot[1] == 1:
 					startupFileContents = "boot emmcflash0.kernel%s 'root=/dev/mmcblk0p%s rw rootwait %s_4.boxmode=1'\n" % (slot[0], slot[0] * 2 + 1, model)
 				else:
@@ -665,7 +665,7 @@ class KexecInit(Screen):
 
 	def RootInitEnd(self, *args, **kwargs):
 		from Screens.Standby import TryQuitMainloop
-		model = getBoxType()
+		model = "model"
 		for usbslot in range(1, 4):
 			if pathExists("/media/hdd/%s/linuxrootfs%s" % (model, usbslot)):
 				Console().ePopen("cp -R /media/hdd/%s/linuxrootfs%s . /" % (model, usbslot))

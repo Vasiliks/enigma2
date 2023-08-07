@@ -2,13 +2,13 @@
 import os
 import time
 from Tools.CList import CList
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import SystemInfo, BoxInfo
 from Components.Console import Console
 from Components import Task
 from Tools.StbHardware import getBoxProc
-from boxbranding import getMachineMtdRoot
 import re
 
+hw_type = getBoxProc()
 
 
 def readFile(filename):

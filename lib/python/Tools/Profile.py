@@ -2,9 +2,6 @@
 # the implementation here is a bit crappy.
 import time
 from Tools.Directories import resolveFilename, SCOPE_CONFIG
-from enigma import getBoxType
-
-model = getBoxType()
 
 PERCENTAGE_START = 0
 PERCENTAGE_END = 100
@@ -14,6 +11,8 @@ profile_start = time.time()
 profile_data = {}
 total_time = 1
 profile_file = None
+# model = BoxInfo.get("machinebuild")  # For when we can use BoxInfo.
+model = None
 
 try:
 	profile_old = open(resolveFilename(SCOPE_CONFIG, "profile"), "r").readlines()

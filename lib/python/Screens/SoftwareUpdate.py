@@ -20,10 +20,12 @@ from Components.Opkg import OpkgComponent
 from Components.Language import language
 from Components.Sources.StaticText import StaticText
 from Components.Slider import Slider
-from Components.SystemInfo import BoxInfo, BRAND, DISPLAYMODEL
+from Components.SystemInfo import BoxInfo
 from Tools.BoundFunction import boundFunction
 from Tools.Directories import fileExists
 
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
 
 class UpdatePlugin(Screen, ProtectedScreen):
 	def __init__(self, session, *args):
@@ -211,7 +213,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 					latestImageTimestamp = self.getLatestImageTimestamp()
 					if latestImageTimestamp:
 						message = _("Do you want to update your receiver to %s?") % latestImageTimestamp + "\n"
-						message += _("Your %s %s?") % (BRAND, DISPLAYMODEL) + "\n"
+						message += _("Your %s %s?") % (brand, model) + "\n"
 					else:
 						message = _("Do you want to update your receiver?") + "\n"
 					message += "(" + (ngettext("%s updated package available", "%s updated packages available", self.total_packages) % self.total_packages) + ")"
@@ -251,7 +253,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 			else:
 				self.activityTimer.stop()
 				self.activityslider.value = 0
-				error = _("Your receiver might be unusable now. Please consult the manual for further assistance before rebooting your receiver.")
+				error = _("Your receiver might be unusable now. Please consult the manual for further assistance before rebooting your receiver %s %s.") % (brand, model)
 				if self.packages == 0:
 					error = _("No updates available. Please try again later.")
 				if self.updating:
@@ -297,7 +299,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 	def exit(self):
 		if not self.opkg.isRunning():
 			if self.packages != 0 and self.error == 0 and self.channellist_only == 0:
-				self.session.openWithCallback(self.exitAnswer, MessageBox, _("Update completed. Do you want to reboot your receiver?"))
+				self.session.openWithCallback(self.exitAnswer, MessageBox, _("Update completed. Do you want to reboot your receiver %s %s?") % (brand, model))
 			else:
 				self.close()
 		else:

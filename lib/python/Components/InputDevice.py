@@ -10,10 +10,14 @@ from enigma import eRCInput
 from keyids import KEYIDS, KEYIDNAMES
 from Components.config import ConfigSubsection, ConfigInteger, ConfigSelection, ConfigYesNo, ConfigText, ConfigSlider, config
 from Components.Console import Console
-from Components.SystemInfo import BoxInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.Directories import SCOPE_KEYMAPS, SCOPE_SKINS, fileReadLine, fileWriteLine, fileReadLines, fileReadXML, resolveFilename, pathExists
 
 from six import ensure_str
+
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+
 MODULE_NAME = __name__.split(".")[-1]
 
 # BLACKLIST = ("dreambox front panel", "cec_input")  # Why was this being done?
@@ -169,7 +173,8 @@ class Keyboard:
 				if keyboardMapFile and keyboardMapName:
 					keyboardMapPath = resolveFilename(SCOPE_KEYMAPS, keyboardMapFile)
 					if isfile(keyboardMapPath):
-						print("[InputDevice] Adding keyboard keymap '%s' in '%s'." % (keyboardMapName, keyboardMapFile))
+						if config.crash.debugKeyboards.value:
+							print("[InputDevice] Adding keyboard keymap '%s' in '%s'." % (keyboardMapName, keyboardMapFile))
 						self.keyboardMaps.append((keyboardMapFile, keyboardMapName))
 					else:
 						print("[InputDevice] Error: Keyboard keymap file '%s' doesn't exist!" % keyboardMapPath)
@@ -214,7 +219,8 @@ class RemoteControl:
 				codeName = remote.attrib.get("codeName")
 				displayName = remote.attrib.get("displayName")
 				if codeName and displayName:
-					print("[InputDevice] Adding remote control for '%s'." % displayName)
+					if config.crash.debugRemoteControls.value:
+						print("[InputDevice] Adding remote control identifier for '%s'." % displayName)
 					self.remotes.append((model, rcType, codeName, displayName))
 		self.remotes.insert(0, ("", "", "", _("Default")))
 		if BoxInfo.getItem("RemoteTypeZeroAllowed", False):
@@ -242,7 +248,8 @@ class RemoteControl:
 				placeHolder = 0
 				rcButtons["keyIds"] = []
 				rcButtons["image"] = rc.attrib.get("image")
-				print("[InputDevice] Remote control image file '%s'." % rcButtons["image"])
+				if config.crash.debugRemoteControls.value:
+					print("[InputDevice] Remote control image file '%s'." % rcButtons["image"])
 				for button in rc.findall("button"):
 					id = button.attrib.get("id", button.attrib.get("keyid"))
 					remap = button.attrib.get("remap")
@@ -268,7 +275,8 @@ class RemoteControl:
 					rcButtons[keyId]["title"] = button.attrib.get("title")
 					rcButtons[keyId]["shape"] = button.attrib.get("shape")
 					rcButtons[keyId]["coords"] = [int(x.strip()) for x in button.attrib.get("coords", "0").split(",")]
-					print("[InputDevice] loadRemoteControl DEBUG: keyId='%s', label='%s', pos='%s', title='%s', shape='%s', coords='%s'." % (keyId, rcButtons[keyId]["label"], rcButtons[keyId]["pos"], rcButtons[keyId]["title"], rcButtons[keyId]["shape"], rcButtons[keyId]["coords"]))
+					if config.crash.debugRemoteControls.value:
+						print("[InputDevice] Remote control button id='%s', keyId='%s', label='%s', pos='%s', title='%s', shape='%s', coords='%s'." % (id, keyId, rcButtons[keyId]["label"], rcButtons[keyId]["pos"], rcButtons[keyId]["title"], rcButtons[keyId]["shape"], rcButtons[keyId]["coords"]))
 				if logRemaps:
 					for remap in logRemaps:
 						print("[InputDevice] Remapping '%s' to '%s'." % (remap[0], remap[1]))

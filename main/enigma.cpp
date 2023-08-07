@@ -357,14 +357,9 @@ const char *getBoxType()
 	return BOXTYPE;
 }
 
-const char *getBrand()
+const char *getBoxBrand()
 {
-	return MACHINE_BRAND;
-}
-
-const char *getPlatform()
-{
-	return PLATFORM;
+	return BOXBRAND;
 }
 
 #include <malloc.h>

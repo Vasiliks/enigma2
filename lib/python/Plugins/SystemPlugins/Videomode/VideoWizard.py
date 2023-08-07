@@ -6,10 +6,10 @@ from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 
 from Components.Pixmap import Pixmap
 from Components.config import config, ConfigBoolean, configfile
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-from Tools.HardwareInfo import HardwareInfo
+has_hdmi = BoxInfo.getItem("hdmi")
 
 config.misc.showtestcard = ConfigBoolean(default=False)
 
@@ -95,8 +95,6 @@ class VideoWizard(WizardLanguage, ShowRemoteControl):
 		configfile.save()
 
 	def listInputChannels(self):
-		hw_type = HardwareInfo().get_device_name()
-		has_hdmi = HardwareInfo().has_hdmi()
 		list = []
 
 		for port in self.hw.getPortList():
@@ -116,8 +114,6 @@ class VideoWizard(WizardLanguage, ShowRemoteControl):
 		self.inputSelect(index)
 
 	def inputSelectionMoved(self):
-		hw_type = HardwareInfo().get_device_name()
-		has_hdmi = HardwareInfo().has_hdmi()
 		print("[VideoWizard] input selection moved:", self.selection)
 		self.inputSelect(self.selection)
 		if self["portpic"].instance is not None:

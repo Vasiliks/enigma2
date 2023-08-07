@@ -5,7 +5,9 @@ from Components.config import config, ConfigSubList, ConfigSubsection, ConfigSli
 from Tools.BoundFunction import boundFunction
 
 import NavigationInstance
-from Components.SystemInfo import MODEL
+from Components.SystemInfo import BoxInfo
+
+model = BoxInfo.getItem("model")
 
 
 class FanControl:
@@ -66,20 +68,20 @@ class FanControl:
 		for fanid in range(self.getFanCount()):
 			fan = ConfigSubsection()
 			fan.vlt = ConfigSlider(default=15, increment=5, limits=(0, 255))
-			if MODEL == "tm2t":
+			if model == "tm2t":
 				fan.pwm = ConfigSlider(default=150, increment=5, limits=(0, 255))
-			elif MODEL == "tmsingle":
+			elif model == "tmsingle":
 				fan.pwm = ConfigSlider(default=100, increment=5, limits=(0, 255))
-			elif MODEL == "beyonwizu4":
+			elif model == "beyonwizu4":
 				fan.pwm = ConfigSlider(default=0xcc, increment=0x11, limits=(0x22, 0xff))
-			elif MODEL == "beyonwizt4":
+			elif model == "beyonwizt4":
 				fan.pwm = ConfigSlider(default=200, increment=5, limits=(0, 255))
 			else:
 				fan.pwm = ConfigSlider(default=50, increment=5, limits=(0, 255))
 			fan.vlt_standby = ConfigSlider(default=5, increment=5, limits=(0, 255))
-			if MODEL == "beyonwizu4":
+			if model == "beyonwizu4":
 				fan.pwm_standby = ConfigSlider(default=0x44, increment=0x11, limits=(0x22, 0xff))
-			elif MODEL == "beyonwizt4":
+			elif model == "beyonwizt4":
 				fan.pwm_standby = ConfigSlider(default=10, increment=5, limits=(0, 0xff))
 			else:
 				fan.pwm_standby = ConfigSlider(default=0, increment=5, limits=(0, 255))
@@ -108,7 +110,7 @@ class FanControl:
 		return int(open("/proc/stb/fp/fan_vlt", "r").readline().strip(), 16)
 
 	def setVoltage(self, fanid, value):
-		if MODEL == "beyonwizu4":
+		if model == "beyonwizu4":
 			return
 		if value > 255:
 			return
