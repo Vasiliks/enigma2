@@ -7,7 +7,7 @@ from Components.SystemInfo import BoxInfo
 
 class HTTPProgressDownloader(client.HTTPDownloader):
 	def __init__(self, url, outfile, headers=None):
-		client.HTTPDownloader.__init__(self, url, outfile, headers=headers, agent=b"HbbTV/1.1.1 (+PVR+RTSP+DL; Sonic; TV44; 1.32.455; 2.002) Bee/3.5") % (BoxInfo.getItem("brand"), BoxInfo.getItem("model")))
+		client.HTTPDownloader.__init__(self, url, outfile, headers=headers, agent=b"HbbTV/1.1.1 (+PVR+RTSP+DL; Sonic; TV44; 1.32.455; 2.002) Bee/3.5")
 		self.status = self.progress_callback = self.error_callback = self.end_callback = None
 		self.deferred = defer.Deferred()
 
