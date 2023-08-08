@@ -1,7 +1,6 @@
 from enigma import eConsoleAppContainer, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
 from os import listdir, popen, remove
 from os.path import getmtime, isfile, join as pathjoin
-from PIL import Image
 import skin
 import os
 import re
@@ -56,7 +55,6 @@ INFO_COLOR = {
 	"M": 0x00ffff00  # Messages.
 }
 
-
 def getTypeTuner():
 	typetuner = {
 		"00": _("OTT Model"),
@@ -92,11 +90,6 @@ class InformationBase(Screen, HelpableScreen):
 			"right": self.displayInformation,
 			"left": self.displayInformation,
 		}, prio=0, description=_("Common Information Actions"))
-		if isfile(resolveFilename(SCOPE_PLUGINS, pathjoin("boxes", "%s.png" % (model)))):
-			self["key_info"] = StaticText(_("INFO"))
-			self["infoActions"] = HelpableActionMap(self, ["InfoActions"], {
-				"info": (self.showReceiverImage, _("Show receiver image(s)"))
-			}, prio=0, description=_("Receiver Information Actions"))
 		colors = parameters.get("InformationColors", (0x00ffffff, 0x00ffffff, 0x00888888, 0x00888888, 0x00ffff00))
 		if len(colors) == len(INFO_COLORS):
 			for index in range(len(colors)):
@@ -160,120 +153,6 @@ def formatLine(style, left, right=None):
 	return "%s%s%s:%s|%s%s%s%s" % (leftIndent, leftStartColor, left, leftEndColor, rightIndent, rightStartColor, right, rightEndColor)
 
 
-class InformationImage(Screen, HelpableScreen):
-	skin = """
-	<screen name="InformationImage" title="Receiver Image" position="center,center" size="950,560">
-		<widget name="name" position="10,10" size="e-20,25" font="Regular;20" horizontalAlignment="center" transparent="1" verticalAlignment="center" />
-		<widget name="image" position="10,45" size="e-20,e-105" alphaTest="blend" scale="1" transparent="1" />
-		<widget source="key_red" render="Label" position="10,e-50" size="180,40" backgroundColor="key_red" conditional="key_red" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
-			<convert type="ConditionalShowHide" />
-		</widget>
-		<widget source="key_green" render="Label" position="200,e-50" size="180,40" backgroundColor="key_green" conditional="key_green" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
-			<convert type="ConditionalShowHide" />
-		</widget>
-		<widget source="key_yellow" render="Label" position="390,e-50" size="180,40" backgroundColor="key_yellow" conditional="key_yellow" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
-			<convert type="ConditionalShowHide" />
-		</widget>
-		<widget source="key_help" render="Label" position="e-90,e-50" size="80,40" backgroundColor="key_back" conditional="key_help" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
-			<convert type="ConditionalShowHide" />
-		</widget>
-		<widget source="lab1" render="Label" position="0,0" size="0,0" conditional="lab1" font="Regular;22" transparent="1" />
-		<widget source="lab2" render="Label" position="0,0" size="0,0" conditional="lab2" font="Regular;18" transparent="1" />
-		<widget source="lab3" render="Label" position="0,0" size="0,0" conditional="lab3" font="Regular;18" transparent="1" />
-		<widget source="lab4" render="Label" position="0,0" size="0,0" conditional="lab4" font="Regular;18" transparent="1" />
-		<widget source="lab5" render="Label" position="0,0" size="0,0" conditional="lab5" font="Regular;18" transparent="1" />
-		<widget source="lab6" render="Label" position="0,0" size="0,0" conditional="lab6" font="Regular;18" transparent="1" />
-	</screen>"""
-
-	def __init__(self, session):
-		Screen.__init__(self, session, mandatoryWidgets=["name", "image"])
-		HelpableScreen.__init__(self)
-		self["name"] = Label()
-		self["image"] = Pixmap()
-		self["key_red"] = StaticText(_("Close"))
-		self["key_green"] = StaticText(_("Prev Image"))
-		self["key_yellow"] = StaticText(_("Next Image"))
-		boxes = "Extensions/OpenWebif/public/images/boxes/"
-		remotes = "Extensions/OpenWebif/public/images/remotes/"
-		self["actions"] = HelpableActionMap(self, ["OkCancelActions", "ColorActions"], {
-			"cancel": (self.keyCancel, _("Close the screen")),
-			"close": (self.closeRecursive, _("Close the screen and exit all menus")),
-			"ok": (self.nextImage, _("Show next image")),
-			"red": (self.keyCancel, _("Close the screen")),
-			"green": (self.prevImage, _("Show previous image")),
-			"yellow": (self.nextImage, _("Show next image"))
-		}, prio=0, description=_("Receiver Image Actions"))
-		self.images = (
-			(_("Front"), "%s%s.png", (boxes, model)),
-			(_("Rear"), "%s%s-rear.png", (boxes, model)),
-			(_("Remote Control"), "%s%s.png", (remotes, BoxInfo.getItem("rcname"))),
-			(_("Flashing"), "%s%s-flashing.png", (boxes, model)),
-			(_("Internal"), "%s%s-internal.png", (boxes, model))
-		)
-		self.imageIndex = 0
-		self.widgetContext = None
-		self.onLayoutFinish.append(self.layoutFinished)
-
-	def keyCancel(self):
-		self.close()
-
-	def closeRecursive(self):
-		self.close(True)
-
-	def prevImage(self):
-		self.imageIndex -= 1
-		if self.imageIndex < 0:
-			self.imageIndex = len(self.images) - 1
-		while not isfile(resolveFilename(SCOPE_PLUGINS, self.images[self.imageIndex][1] % self.images[self.imageIndex][2])):
-			self.imageIndex -= 1
-			if self.imageIndex < 0:
-				self.imageIndex = len(self.images) - 1
-				break
-		self.layoutFinished()
-
-	def nextImage(self):
-		self.imageIndex += 1
-		while not isfile(resolveFilename(SCOPE_PLUGINS, self.images[self.imageIndex][1] % self.images[self.imageIndex][2])):
-			self.imageIndex += 1
-			if self.imageIndex >= len(self.images):
-				self.imageIndex = 0
-				break
-		self.layoutFinished()
-
-	def layoutFinished(self):
-		if self.widgetContext is None:
-			self.widgetContext = tuple(self["image"].getPosition() + self["image"].getSize())
-			print(self.widgetContext)
-		self["name"].setText("%s  -  %s %s" % (self.images[self.imageIndex][0], brand, displaytype))
-		imagePath = resolveFilename(SCOPE_PLUGINS, self.images[self.imageIndex][1] % self.images[self.imageIndex][2])
-		image = LoadPixmap(imagePath)
-		if image:
-			img = Image.open(imagePath)
-			imageWidth, imageHeight = img.size
-			scale = float(self.widgetContext[2]) / imageWidth if imageWidth >= imageHeight else float(self.widgetContext[3]) / imageHeight
-			sizeW = int(imageWidth * scale)
-			sizeH = int(imageHeight * scale)
-			posX = self.widgetContext[0] + int(self.widgetContext[2] / 2.0 - sizeW / 2.0)
-			posY = self.widgetContext[1] + int(self.widgetContext[3] / 2.0 - sizeH / 2.0)
-			self["image"].instance.move(ePoint(posX, posY))
-			self["image"].instance.resize(eSize(sizeW, sizeH))
-			self["image"].instance.setPixmap(image)
-
-
-def formatLine(style, left, right=None):
-	styleLen = len(style)
-	leftStartColor = "" if styleLen > 0 and style[0] == "B" else "\c%08x" % (INFO_COLOR.get(style[0], "P") if styleLen > 0 else INFO_COLOR["P"])
-	leftEndColor = "" if leftStartColor == "" else "\c%08x" % INFO_COLOR["N"]
-	leftIndent = "    " * int(style[1]) if styleLen > 1 and style[1].isdigit() else ""
-	rightStartColor = "" if styleLen > 2 and style[2] == "B" else "\c%08x" % (INFO_COLOR.get(style[2], "V") if styleLen > 2 else INFO_COLOR["V"])
-	rightEndColor = "" if rightStartColor == "" else "\c%08x" % INFO_COLOR["N"]
-	rightIndent = "    " * int(style[3]) if styleLen > 3 and style[3].isdigit() else ""
-	if right is None:
-		colon = "" if styleLen > 0 and style[0] in ("M", "P", "V") else ""
-		return "%s%s%s%s%s" % (leftIndent, leftStartColor, left, colon, leftEndColor)
-	return "%s%s%s:%s|%s%s%s%s" % (leftIndent, leftStartColor, left, leftEndColor, rightIndent, rightStartColor, right, rightEndColor)
-
-
 class InformationSummary(ScreenSummary):
 	def __init__(self, session, parent):
 		ScreenSummary.__init__(self, session, parent=parent)
@@ -290,19 +169,22 @@ class InformationSummary(ScreenSummary):
 class About(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
-		self.setTitle(_("About"))
-		self["key_green"] = Button(_("Translations"))
-		self["key_red"] = Button(_("Latest Commits"))
-		self["key_yellow"] = Button(_("Dmesg Info"))
-		self["key_blue"] = Button(_("Memory Info"))
-		hddsplit = skin.parameters.get("AboutHddSplit", 1)
+		self.setTitle(_("About Information"))
+		hddsplit = parameters.get("AboutHddSplit", 1)
+
+		model = BoxInfo.getItem("model")
+		brand = BoxInfo.getItem("brand")
+		socfamily = BoxInfo.getItem("socfamily")
+		displaytype = BoxInfo.getItem("displaytype")
+		platform = BoxInfo.getItem("platform")
+
+		procmodel = getBoxProc()
 
 		AboutText = _("Hardware: ") + model + "\n"
 		if platform != model:
 			AboutText += _("Platform: ") + platform + "\n"
 		if procmodel != model:
  			AboutText += _("Proc model: ") + procmodel + "\n"
-
 
 		if fileExists("/proc/stb/info/sn"):
 			hwserial = open("/proc/stb/info/sn", "r").read().strip()
@@ -324,10 +206,15 @@ class About(Screen):
 		AboutText += _("CPU brand: ") + about.getCPUBrand() + "\n"
 
 		AboutText += "\n"
+		if socfamily is not None:
+			AboutText += _("SoC family: ") + BoxInfo.getItem("socfamily") + "\n"
+
+		AboutText += "\n"
 		if BoxInfo.getItem("Display") or BoxInfo.getItem("7segment") or model != "gbip4k":
 			AboutText += _("Type Display: ") + BoxInfo.getItem("displaytype") + "\n"
 		else:
 			AboutText += _("No Display") + "\n"
+
 		EnigmaVersion = about.getEnigmaVersionString()
 		EnigmaVersion = EnigmaVersion.rsplit("-", EnigmaVersion.count("-") - 2)
 		if len(EnigmaVersion) == 3:
@@ -337,6 +224,7 @@ class About(Screen):
 		EnigmaVersion = _("Enigma2 version: ") + EnigmaVersion
 		self["EnigmaVersion"] = StaticText(EnigmaVersion)
 		AboutText += "\n" + EnigmaVersion + "\n"
+
 		AboutText += _("Build date: ") + about.getBuildDateString() + "\n"
 		AboutText += _("Last update: ") + about.getUpdateDateString() + "\n"
 		AboutText += _("Enigma2 (re)starts: %d\n") % config.misc.startCounter.value
@@ -409,7 +297,47 @@ class About(Screen):
 		AboutText += "\n"
 		AboutText += _("Uptime: ") + about.getBoxUptime()
 
+
+
+		self["TunerHeader"] = StaticText(_("Detected NIMs:"))
+		AboutText += "\n" + _("Detected NIMs:") + "\n"
+
+		nims = nimmanager.nimListCompressed()
+		for count in range(len(nims)):
+			if count < 4:
+				self["Tuner" + str(count)] = StaticText(nims[count])
+			else:
+				self["Tuner" + str(count)] = StaticText("")
+			AboutText += nims[count] + "\n"
+
+		self["HDDHeader"] = StaticText(_("Detected storage devices:"))
+		AboutText += "\n" + _("Detected storage devices:") + "\n"
+
+		hddlist = harddiskmanager.HDDList()
+		hddinfo = ""
+		if hddlist:
+			formatstring = hddsplit and "%s:%s, %.1f %s %s" or "%s\n(%s, %.1f %s %s)"
+			for count in range(len(hddlist)):
+				if hddinfo:
+					hddinfo += "\n"
+				hdd = hddlist[count][1]
+				if int(hdd.free()) > 1024:
+					hddinfo += formatstring % (hdd.model(), hdd.capacity(), hdd.free() / 1024.0, _("GB"), _("free"))
+				else:
+					hddinfo += formatstring % (hdd.model(), hdd.capacity(), hdd.free(), _("MB"), _("free"))
+		else:
+			hddinfo = _("none")
+		self["hddA"] = StaticText(hddinfo)
+		AboutText += hddinfo + "\n\n" + _("Network Info:")
+		for x in about.GetIPsFromNetworkInterfaces():
+			AboutText += "\n" + x[0] + ": " + x[1]
+
 		self["AboutScrollLabel"] = ScrollLabel(AboutText)
+		self["key_green"] = Button(_("Translations"))
+		self["key_red"] = Button(_("Latest Commits"))
+		self["key_yellow"] = Button(_("Dmesg Info"))
+		self["key_blue"] = Button(_("Memory Info"))
+
 		self["actions"] = ActionMap(["ColorActions", "SetupActions", "DirectionActions"], {
 			"cancel": self.close,
 			"ok": self.close,
@@ -498,8 +426,9 @@ class Geolocation(Screen):
 			self["AboutScrollLabel"] = ScrollLabel(GeolocationText)
 		except Exception as err:
 			self["AboutScrollLabel"] = ScrollLabel(_("Requires internet connection"))
+		self["key_red"] = Button(_("Close"))
 
-		self["actions"] = ActionMap(["ColorActionsAbout", "SetupActions", "DirectionActions"], {
+		self["actions"] = ActionMap(["ColorActions", "SetupActions", "DirectionActions"], {
 			"cancel": self.close,
 			"ok": self.close,
 			"up": self["AboutScrollLabel"].pageUp,
@@ -588,9 +517,10 @@ class TunerInformation(InformationBase):
 class Devices(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
-		screentitle = _("Storage Devices")
+		screentitle = _("Device Information")
 		title = screentitle
 		Screen.setTitle(self, title)
+		self["TunerHeader"] = StaticText(_("Detected tuners:"))
 		self["HDDHeader"] = StaticText(_("Detected devices:"))
 		self["MountsHeader"] = StaticText(_("Network servers:"))
 		self["nims"] = StaticText()
@@ -602,7 +532,7 @@ class Devices(Screen):
 		self.activityTimer = eTimer()
 		self.activityTimer.timeout.get().append(self.populate2)
 		self["key_red"] = Button(_("Close"))
-		self["actions"] = ActionMap(["SetupActions", "ColorActionsAbout", "TimerEditActions"], {
+		self["actions"] = ActionMap(["SetupActions", "ColorActions", "TimerEditActions"], {
 			"cancel": self.close,
 			"red": self.close,
 			"save": self.close
@@ -613,6 +543,9 @@ class Devices(Screen):
 		self.mountinfo = ''
 		self["actions"].setEnabled(False)
 		scanning = _("Please wait while scanning for devices...")
+		self["nims"].setText(scanning)
+		for count in (0, 1, 2, 3):
+			self["Tuner" + str(count)].setText(scanning)
 		self["hdd"].setText(scanning)
 		self['mounts'].setText(scanning)
 		self.activityTimer.start(1)
@@ -620,6 +553,47 @@ class Devices(Screen):
 	def populate2(self):
 		self.activityTimer.stop()
 		self.Console = Console()
+		niminfo = ""
+		nims = nimmanager.nimListCompressed()
+		for count in range(len(nims)):
+			if niminfo:
+				niminfo += "\n"
+			niminfo += nims[count]
+		self["nims"].setText(niminfo)
+
+		nims = nimmanager.nimList()
+		if len(nims) <= 4 :
+			for count in (0, 1, 2, 3):
+				if count < len(nims):
+					self["Tuner" + str(count)].setText(nims[count])
+				else:
+					self["Tuner" + str(count)].setText("")
+		else:
+			desc_list = []
+			count = 0
+			cur_idx = -1
+			while count < len(nims):
+				data = nims[count].split(":")
+				idx = data[0].strip('Tuner').strip()
+				desc = data[1].strip()
+				if desc_list and desc_list[cur_idx]['desc'] == desc:
+					desc_list[cur_idx]['end'] = idx
+				else:
+					desc_list.append({'desc' : desc, 'start' : idx, 'end' : idx})
+					cur_idx += 1
+				count += 1
+
+			for count in (0, 1, 2, 3):
+				if count < len(desc_list):
+					if desc_list[count]['start'] == desc_list[count]['end']:
+						text = "Tuner %s: %s" % (desc_list[count]['start'], desc_list[count]['desc'])
+					else:
+						text = "Tuner %s-%s: %s" % (desc_list[count]['start'], desc_list[count]['end'], desc_list[count]['desc'])
+				else:
+					text = ""
+
+				self["Tuner" + str(count)].setText(text)
+
 		self.hddlist = harddiskmanager.HDDList()
 		self.list = []
 		if self.hddlist:
@@ -674,7 +648,7 @@ class Devices(Screen):
 class SystemNetworkInfo(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
-		screentitle = _("Network")
+		screentitle = _("Network Information")
 		title = screentitle
 		Screen.setTitle(self, title)
 		self.skinName = ["SystemNetworkInfo", "WlanStatus"]
@@ -690,7 +664,6 @@ class SystemNetworkInfo(Screen):
 		self["signal"] = StaticText()
 		self["bitrate"] = StaticText()
 		self["enc"] = StaticText()
-
 		self["IFtext"] = StaticText()
 		self["IF"] = StaticText()
 		self["Statustext"] = StaticText()
@@ -699,13 +672,6 @@ class SystemNetworkInfo(Screen):
 		self["statuspic"].show()
 		self["devicepic"] = MultiPixmap()
 		self["AboutScrollLabel"] = ScrollLabel()
-		self["key_red"] = StaticText(_("Close"))
-		self["actions"] = ActionMap(["SetupActions", "ColorActionsAbout", "DirectionActions"], {
-			"cancel": self.close,
-			"ok": self.close,
-			"up": self["AboutScrollLabel"].pageUp,
-			"down": self["AboutScrollLabel"].pageDown,
-		})
 
 		self.iface = None
 		self.createscreen()
@@ -716,11 +682,18 @@ class SystemNetworkInfo(Screen):
 				from Plugins.SystemPlugins.WirelessLan.Wlan import iStatus
 
 				self.iStatus = iStatus
-			except:
+			except ImportError as err:
 				pass
 			self.resetList()
 			self.onClose.append(self.cleanup)
+		self["key_red"] = StaticText(_("Close"))
 
+		self["actions"] = ActionMap(["SetupActions", "ColorActions", "DirectionActions"], {
+			"cancel": self.close,
+			"ok": self.close,
+			"up": self["AboutScrollLabel"].pageUp,
+			"down": self["AboutScrollLabel"].pageDown
+		})
 		self.onLayoutFinish.append(self.updateStatusbar)
 
 	def createscreen(self):
@@ -806,7 +779,6 @@ class SystemNetworkInfo(Screen):
 		if str(publicip) != "":
 			self.AboutText += _("Public IP: ") + "\t" + str(publicip) + "\n" + "\n"
 
-
 		self.console = Console()
 		self.console.ePopen('ethtool %s' % self.iface, self.SpeedFinished)
 
@@ -818,8 +790,8 @@ class SystemNetworkInfo(Screen):
 				self.AboutText += _("Speed:") + "\t" + speed + _('Mb/s')
 
 		hostname = open('/proc/sys/kernel/hostname').read()
-		self.AboutText += "\n" + _("Hostname:") + "\t" + hostname + "\n"
-
+		self.AboutText += "\n"
+		self.AboutText += _("Hostname:") + "\t" + hostname + "\n"
 		self["AboutScrollLabel"].setText(self.AboutText)
 
 	def cleanup(self):
@@ -922,7 +894,7 @@ class SystemNetworkInfo(Screen):
 			self["devicepic"].setPixmapNum(1)
 			try:
 				self.iStatus.getDataForInterface(self.iface, self.getInfoCB)
-			except:
+			except Exception as err:
 				self["statuspic"].setPixmapNum(1)
 				self["statuspic"].show()
 		else:
@@ -958,7 +930,7 @@ class SystemNetworkInfo(Screen):
 			else:
 				self["statuspic"].setPixmapNum(1)
 			self["statuspic"].show()
-		except:
+		except Exception as err:
 			pass
 
 	def doNothing(self):
@@ -968,13 +940,13 @@ class SystemNetworkInfo(Screen):
 class SystemMemoryInfo(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
-		screentitle = _("Memory")
+		screentitle = _("Memory Information")
 		title = screentitle
 		Screen.setTitle(self, title)
 		self.skinName = ["SystemMemoryInfo", "About"]
 		self["AboutScrollLabel"] = ScrollLabel()
 		self["key_red"] = Button(_("Close"))
-		self["actions"] = ActionMap(["SetupActions", "ColorActionsAbout"], {
+		self["actions"] = ActionMap(["SetupActions", "ColorActions"], {
 			"cancel": self.close,
 			"ok": self.close,
 			"red": self.close
@@ -1082,7 +1054,7 @@ class CommitInfo(Screen):
 		# get the branch to display from the Enigma version
 		try:
 			branch = "?sha=" + "-".join(about.getEnigmaVersionString().split("-")[3:])
-		except:
+		except Exception as err:
 			branch = ""
 		branch_e2plugins = "?sha=python3"
 
@@ -1133,7 +1105,7 @@ class CommitInfo(Screen):
 					commitlog += date + ' ' + creator + '\n' + title + 2 * '\n'
 
 			self.cachedProjects[self.projects[self.project][1]] = commitlog
-		except Exception as e:
+		except Exception as err:
 			commitlog += _("Currently the commit log cannot be retrieved - please try later again.")
 		self["AboutScrollLabel"].setText(commitlog)
 
@@ -1160,7 +1132,7 @@ class MemoryInfo(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
 
-		self["actions"] = ActionMap(["SetupActions", "ColorActionsAbout"], {
+		self["actions"] = ActionMap(["SetupActions", "ColorActions"], {
 			"cancel": self.close,
 			"ok": self.getMemoryInfo,
 			"green": self.getMemoryInfo,
@@ -1219,7 +1191,7 @@ class MemoryInfo(Screen):
 			self["slide"].setValue(int(100.0 * (mem - free) / mem + 0.25))
 			self['pfree'].setText("%.1f %s" % (100. * free / mem, '%'))
 			self['pused'].setText("%.1f %s" % (100. * (mem - free) / mem, '%'))
-		except Exception as e:
+		except Exception as err:
 			print("[About] getMemoryInfo FAIL:", e)
 
 	def clearMemory(self):
@@ -1251,10 +1223,10 @@ class Troubleshoot(Screen):
 		Screen.__init__(self, session)
 		self.setTitle(_("Troubleshoot"))
 		self["AboutScrollLabel"] = ScrollLabel(_("Please wait"))
-		self["key_red"] = StaticText(_("Close"))
+		self["key_red"] = Button()
 		self["key_green"] = Button()
 
-		self["actions"] = ActionMap(["OkCancelActions", "DirectionActions", "ColorActionsAbout"], {
+		self["actions"] = ActionMap(["OkCancelActions", "DirectionActions", "ColorActions"], {
 			"cancel": self.close,
 			"up": self["AboutScrollLabel"].pageUp,
 			"down": self["AboutScrollLabel"].pageDown,
@@ -1293,7 +1265,7 @@ class Troubleshoot(Screen):
 		if self.commandIndex >= self.numberOfCommands:
 			try:
 				remove(self.commands[self.commandIndex][4:])
-			except:
+			except (IOError, OSError) as err:
 				pass
 			self.updateOptions()
 		self.run_console()
@@ -1303,7 +1275,7 @@ class Troubleshoot(Screen):
 			for fileName in self.getLogFilesList():
 				try:
 					remove(fileName)
-				except:
+				except (IOError, OSError) as err:
 					pass
 			self.updateOptions()
 			self.run_console()
@@ -1328,7 +1300,7 @@ class Troubleshoot(Screen):
 			try:
 				if self.container.execute(command):
 					raise Exception("failed to execute: " + command)
-			except Exception as e:
+			except Exception as err:
 				self["AboutScrollLabel"].setText("%s\n%s" % (_("An error occurred - Please try again later"), e))
 
 	def cancel(self):

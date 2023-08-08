@@ -34,7 +34,7 @@ def getIfConfig(ifname):
 	infos['hwaddr']  = 0x8927 # SIOCSIFHWADDR
 	infos['netmask'] = 0x891b # SIOCGIFNETMASK
 	try:
-		for k,v in infos.items():
+		for k, v in infos.items():
 			ifreq[k] = _ifinfo(sock, v, ifname)
 	except:
 		pass
@@ -147,61 +147,66 @@ def getCPUSerial():
 
 
 def getCPUInfoString():
-	try:
-		cpu_count = 0
-		cpu_speed = 0
-		processor = ""
-		for line in open("/proc/cpuinfo").readlines():
-			line = [x.strip() for x in line.strip().split(":")]
+	cpuCount = 0
+	cpuSpeed = 0
+	processor = ""
+	lines = fileReadLines("/proc/cpuinfo", source=MODULE_NAME)
+	if lines:
+		for line in lines:
+			line = [x.strip() for x in line.strip().split(":", 1)]
 			if not processor and line[0] in ("system type", "model name", "Processor"):
 				processor = line[1].split()[0]
-			elif not cpu_speed and line[0] == "cpu MHz":
-				cpu_speed = "%1.0f" % float(line[1])
+			elif not cpuSpeed and line[0] == "cpu MHz":
+				cpuSpeed = "%1.0f" % float(line[1])
 			elif line[0] == "processor":
-				cpu_count += 1
+				cpuCount += 1
 		if processor.startswith("ARM") and isfile("/proc/stb/info/chipset"):
-			processor = "%s (%s)" % (open("/proc/stb/info/chipset").readline().strip().upper(), processor)
-		if not cpu_speed:
-			try:
-				cpu_speed = int(open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq").read()) // 1000
-			except:
+			processor = "%s (%s)" % (fileReadLine("/proc/stb/info/chipset", "", source=MODULE_NAME).upper(), processor)
+		if not cpuSpeed:
+			cpuSpeed = fileReadLine("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", source=MODULE_NAME)
+			if cpuSpeed is None:
 				try:
-					import binascii
-					cpu_speed = int(int(binascii.hexlify(open('/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency', 'rb').read()), 16) // 100000000) * 100
+					cpuSpeed = int(int(hexlify(open("/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency", "rb").read()), 16) / 100000000) * 100
 				except:
-					cpu_speed = "-"
+					cpuSpeed = "-"
+			else:
+				cpuSpeed = int(cpuSpeed) / 1000
 
 		temperature = None
 		freq = _("MHz")
 		if isfile('/proc/stb/fp/temp_sensor_avs'):
-			temperature = open("/proc/stb/fp/temp_sensor_avs").readline().replace('\n', '')
+			temperature = fileReadLine("/proc/stb/fp/temp_sensor_avs", source=MODULE_NAME)
 		elif isfile('/proc/stb/power/avs'):
-			temperature = open("/proc/stb/power/avs").readline().replace('\n', '')
+			temperature = fileReadLine("/proc/stb/power/avs", source=MODULE_NAME)
 		elif isfile('/proc/stb/fp/temp_sensor'):
-			temperature = open("/proc/stb/fp/temp_sensor").readline().replace('\n', '')
+			temperature = fileReadLine("/proc/stb/fp/temp_sensor", source=MODULE_NAME)
 		elif isfile("/sys/devices/virtual/thermal/thermal_zone0/temp"):
-			try:
-				temperature = int(open("/sys/devices/virtual/thermal/thermal_zone0/temp").read().strip()) // 1000
-			except:
-				pass
+			temperature = fileReadLine("/sys/devices/virtual/thermal/thermal_zone0/temp", source=MODULE_NAME)
+			if temperature:
+				temperature = int(temperature) / 1000
+		elif isfile("/sys/class/thermal/thermal_zone0/temp"):
+			temperature = fileReadLine("/sys/class/thermal/thermal_zone0/temp", source=MODULE_NAME)
+			if temperature:
+				temperature = int(temperature) / 1000
 		elif isfile("/proc/hisi/msp/pm_cpu"):
-			try:
-				temperature = re.search('temperature = (\d+) degree', open("/proc/hisi/msp/pm_cpu").read()).group(1)
-			except:
-				pass
+			lines = fileReadLines("/proc/hisi/msp/pm_cpu", source=MODULE_NAME)
+			if lines:
+				for line in lines:
+					if "temperature = " in line:
+						temperature = line.split("temperature = ")[1].split()[0]
 		if temperature:
-			return "%s %s %s (%s) %s\xb0C" % (processor, cpu_speed, freq, ngettext("%d core", "%d cores", cpu_count) % cpu_count, temperature)
-		return "%s %s %s (%s)" % (processor, cpu_speed, freq, ngettext("%d core", "%d cores", cpu_count) % cpu_count)
-	except:
-		return _("undefined")
+			degree = u"\u00B0"
+			if not isinstance(degree, str):
+				degree = degree.encode("UTF-8", errors="ignore")
+			return "%s %s MHz (%s) %s%sC" % (processor, cpuSpeed, ngettext("%d core", "%d cores", cpuCount) % cpuCount, temperature, degree)
+		return "%s %s MHz (%s)" % (processor, cpuSpeed, ngettext("%d core", "%d cores", cpuCount) % cpuCount)
 
 
 def getChipSetString():
-	try:
-		chipset = open("/proc/stb/info/chipset", "r").read()
-		return str(chipset.lower().replace('\n', ''))
-	except IOError:
-		return _("undefined")
+	chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)
+	if chipset is None:
+		return _("Undefined")
+	return chipset.lower()
 
 
 def getChipSetNumber():
