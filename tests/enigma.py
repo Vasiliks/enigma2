@@ -194,38 +194,6 @@ class iRecordableService:
 
 quitMainloop = None
 
-
-class eAVSwitch:
-	@classmethod
-	def getInstance(self):
-		return self.instance
-
-	instance = None
-
-	def __init__(self):
-		eAVSwitch.instance = self
-
-	def setColorFormat(self, value):
-		print("[eAVSwitch] color format set to %d" % value)
-
-	def setAspectRatio(self, value):
-		print("[eAVSwitch] aspect ratio set to %d" % value)
-
-	def setWSS(self, value):
-		print("[eAVSwitch] wss set to %d" % value)
-
-	def setSlowblank(self, value):
-		print("[eAVSwitch] wss set to %d" % value)
-
-	def setVideomode(self, value):
-		print("[eAVSwitch] wss set to %d" % value)
-
-	def setInput(self, value):
-		print("[eAVSwitch] wss set to %d" % value)
-
-
-eAVSwitch()
-
 eDVBVolumecontrol = None
 
 
@@ -276,6 +244,9 @@ class eDBoxLCD:
 
 	def setLCDContrast(self, value):
 		print("[enigma] eDBoxLCD set contrast to %d" % value)
+
+	def setLED(self, value):
+		print("[enigma] eDBoxLCD set led button to %d" % value)
 
 	def setInverted(self, value):
 		print("[enigma] eDBoxLCD set inverted to %d" % value)
