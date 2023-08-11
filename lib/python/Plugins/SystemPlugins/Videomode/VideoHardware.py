@@ -47,8 +47,6 @@ class VideoHardware:
 
         rates = {} # high-level, use selectable modes.
 
-        modes = {}  # a list of (high-level) modes for a certain port.
-
         rates["PAL"] = {"50Hz": {50: "pal"},
                 "60Hz": {60: "pal60"},
                 "multi": {50: "pal", 60: "pal60"}}
@@ -124,8 +122,6 @@ class VideoHardware:
                 "640x480": {60: "640x480"}
         }
 
-        modes = {}  # a list of (high-level) modes for a certain port.
-
         if platform in ("dm4kgen", "dmamlogic"):
                 rates["480i"] = {"60hz": {60: "480i60hz"}}
 
@@ -161,6 +157,8 @@ class VideoHardware:
                         "30hz": {60: "2160p30hz"},
                         "auto": {60: "2160p30hz"}}
 
+        modes = {}  # a list of (high-level) modes for a certain port.
+
         if SystemInfo["HasScart"]:
                 modes["Scart"] = ["PAL", "NTSC", "Multi"]
         if SystemInfo["HasComposite"] and platform in ("dm4kgen"):
@@ -173,6 +171,14 @@ class VideoHardware:
                 modes["HDMI"] = ["720p", "1080p", "smpte", "2160p30", "2160p", "1080i", "576p", "576i", "480p", "480i"]
         else:
                 modes["DVI"] = ["720p", "1080p", "2160p", "2160p30", "1080i", "576p", "480p", "576i", "480i"]
+
+                widescreen_modes = tuple([x for x in modes["DVI"] if x not in ("576p", "576i", "480p", "480i")])
+
+                ASPECT_SWITCH_MSG = (_("16/9 reset to normal"),
+                                "1.85:1 %s" % _("Letterbox"),
+                                "2.00:1 %s" % _("Letterbox"),
+                                "2.21:1 %s" % _("Letterbox"),
+                                "2.35:1 %s" % _("Letterbox"))
 
         def getOutputAspect(self):
                 ret = (16, 9)
@@ -217,14 +223,6 @@ class VideoHardware:
                 self.readAvailableModes()
                 self.is24hzAvailable()
                 self.readPreferredModes()
-
-                widescreen_modes = tuple([x for x in modes["HDMI"] if x not in ("576p", "576i", "480p", "480i")])
-
-                ASPECT_SWITCH_MSG = (_("16/9 reset to normal"),
-                                "1.85:1 %s" % _("Letterbox"),
-                                "2.00:1 %s" % _("Letterbox"),
-                                "2.21:1 %s" % _("Letterbox"),
-                                "2.35:1 %s" % _("Letterbox"))
 
                 if "DVI-PC" in self.modes and not self.getModeList("DVI-PC"):
                         print("[VideoHardware] remove DVI-PC because of not existing modes")
