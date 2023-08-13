@@ -147,66 +147,69 @@ def getCPUSerial():
 
 
 def getCPUInfoString():
-	cpuCount = 0
-	cpuSpeed = 0
-	processor = ""
-	lines = fileReadLines("/proc/cpuinfo", source=MODULE_NAME)
-	if lines:
-		for line in lines:
-			line = [x.strip() for x in line.strip().split(":", 1)]
+	try:
+		cpu_count = 0
+		cpu_speed = 0
+		processor = ""
+		for line in open("/proc/cpuinfo").readlines():
+			line = [x.strip() for x in line.strip().split(":")]
+
 			if not processor and line[0] in ("system type", "model name", "Processor"):
 				processor = line[1].split()[0]
-			elif not cpuSpeed and line[0] == "cpu MHz":
-				cpuSpeed = "%1.0f" % float(line[1])
+			elif not cpu_speed and line[0] == "cpu MHz":
+				cpu_speed = "%1.0f" % float(line[1])
 			elif line[0] == "processor":
-				cpuCount += 1
+				cpu_count += 1
 		if processor.startswith("ARM") and isfile("/proc/stb/info/chipset"):
-			processor = "%s (%s)" % (fileReadLine("/proc/stb/info/chipset", "", source=MODULE_NAME).upper(), processor)
-		if not cpuSpeed:
-			cpuSpeed = fileReadLine("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", source=MODULE_NAME)
-			if cpuSpeed is None:
+			processor = "%s (%s)" % (open("/proc/stb/info/chipset").readline().strip().upper(), processor)
+		if not cpu_speed:
+			try:
+				cpu_speed = int(open("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq").read()) // 1000
+			except:
 				try:
-					cpuSpeed = int(int(hexlify(open("/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency", "rb").read()), 16) / 100000000) * 100
+					import binascii
+					cpu_speed = int(int(binascii.hexlify(open('/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency', 'rb').read()), 16) // 100000000) * 100
 				except:
-					cpuSpeed = "-"
-			else:
-				cpuSpeed = int(cpuSpeed) / 1000
+					cpu_speed = "-"
+
+
 
 		temperature = None
 		freq = _("MHz")
 		if isfile('/proc/stb/fp/temp_sensor_avs'):
-			temperature = fileReadLine("/proc/stb/fp/temp_sensor_avs", source=MODULE_NAME)
+			temperature = open("/proc/stb/fp/temp_sensor_avs").readline().replace('\n', '')
 		elif isfile('/proc/stb/power/avs'):
-			temperature = fileReadLine("/proc/stb/power/avs", source=MODULE_NAME)
+			temperature = open("/proc/stb/power/avs").readline().replace('\n', '')
 		elif isfile('/proc/stb/fp/temp_sensor'):
-			temperature = fileReadLine("/proc/stb/fp/temp_sensor", source=MODULE_NAME)
+			temperature = open("/proc/stb/fp/temp_sensor").readline().replace('\n', '')
 		elif isfile("/sys/devices/virtual/thermal/thermal_zone0/temp"):
-			temperature = fileReadLine("/sys/devices/virtual/thermal/thermal_zone0/temp", source=MODULE_NAME)
-			if temperature:
-				temperature = int(temperature) / 1000
-		elif isfile("/sys/class/thermal/thermal_zone0/temp"):
-			temperature = fileReadLine("/sys/class/thermal/thermal_zone0/temp", source=MODULE_NAME)
-			if temperature:
-				temperature = int(temperature) / 1000
+			try:
+				temperature = int(open("/sys/devices/virtual/thermal/thermal_zone0/temp").read().strip()) // 1000
+			except:
+				pass
+
+
+
 		elif isfile("/proc/hisi/msp/pm_cpu"):
-			lines = fileReadLines("/proc/hisi/msp/pm_cpu", source=MODULE_NAME)
-			if lines:
-				for line in lines:
-					if "temperature = " in line:
-						temperature = line.split("temperature = ")[1].split()[0]
+			try:
+				temperature = re.search('temperature = (\d+) degree', open("/proc/hisi/msp/pm_cpu").read()).group(1)
+			except:
+				pass
+
 		if temperature:
-			degree = u"\u00B0"
-			if not isinstance(degree, str):
-				degree = degree.encode("UTF-8", errors="ignore")
-			return "%s %s MHz (%s) %s%sC" % (processor, cpuSpeed, ngettext("%d core", "%d cores", cpuCount) % cpuCount, temperature, degree)
-		return "%s %s MHz (%s)" % (processor, cpuSpeed, ngettext("%d core", "%d cores", cpuCount) % cpuCount)
+			return "%s %s %s (%s) %s\xb0C" % (processor, cpu_speed, freq, ngettext("%d core", "%d cores", cpu_count) % cpu_count, temperature)
+		return "%s %s %s (%s)" % (processor, cpu_speed, freq, ngettext("%d core", "%d cores", cpu_count) % cpu_count)
+	except:
+		return _("undefined")
+
 
 
 def getChipSetString():
-	chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)
-	if chipset is None:
-		return _("Undefined")
-	return chipset.lower()
+	try:
+		chipset = open("/proc/stb/info/chipset", "r").read()
+		return str(chipset.lower().replace('\n', ''))
+	except IOError:
+		return _("undefined")
 
 
 def getChipSetNumber():
@@ -220,16 +223,10 @@ def getChipSetNumber():
 
 
 def getCPUBrand():
-	if BoxInfo.getItem("AmlogicFamily"):
-		return _("Amlogic")
-	elif BoxInfo.getItem("HiSilicon"):
+	if SystemInfo["HiSilicon"]:
 		return _("HiSilicon")
-	elif socfamily.startswith("smp"):
-		return _("Sigma Designs")
-	elif socfamily.startswith("bcm") or BoxInfo.getItem("brand") == "rpi":
+	else:
 		return _("Broadcom")
-	print("[About] No CPU brand?")
-	return _("Undefined")
 
 
 def getCPUArch():
@@ -240,29 +237,44 @@ def getCPUArch():
 	return _("Mipsel")
 
 
+def getFlashType():
+	if BoxInfo.getItem("SmallFlash"):
+		return _("Small - Tiny image")
+	elif BoxInfo.getItem("MiddleFlash"):
+		return _("Middle - Lite image")
+	return _("Normal - Standard image")
+
+
 def getDriverInstalledDate():
+	def extractDate(value):
+		match = search('[0-9]{8}', value)
+		if match:
+			return match[0]
+		else:
+			return value
+
 	filenames = glob("/var/lib/opkg/info/*dvb-modules*.control")
 	if filenames:
 		lines = fileReadLines(filenames[0], source=MODULE_NAME)
 		if lines:
 			for line in lines:
 				if line[0:8] == "Version:":
-					driver = line.split("-")[-2:11][0][-8:]
-					return "%s-%s-%s" % (driver[:4], driver[4:6], driver[6:])
+					return extractDate(line)
+
 	filenames = glob("/var/lib/opkg/info/*dvb-proxy*.control")
 	if filenames:
 		lines = fileReadLines(filenames[0], source=MODULE_NAME)
 		if lines:
 			for line in lines:
 				if line[0:8] == "Version:":
-					return line.split("-")[-2:-1][0][-8:]
+					return extractDate(line)
 	filenames = glob("/var/lib/opkg/info/*platform-util*.control")
 	if filenames:
 		lines = fileReadLines(filenames[0], source=MODULE_NAME)
 		if lines:
 			for line in lines:
 				if line[0:8] == "Version:":
-					return line.split("-")[-2:-1][0][-8:]
+					return extractDate(line)
 	return _("Unknown")
 
 
@@ -348,15 +360,14 @@ def getGccVersion():
 	return _("Unknown")
 
 
-def getOpenSSLVersion():
-	process = Popen(("/usr/bin/openssl", "version"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
-	stdout, stderr = process.communicate()
-	if process.returncode == 0:
-		data = stdout.strip().split()
-		if len(data) > 1 and data[0] == "OpenSSL":
-			return data[1]
-	print("[About] Get OpenSSL version failed.")
-	return _("Unknown")
+def getopensslVersionString():
+	lines = fileReadLines("/var/lib/opkg/info/openssl.control", source=MODULE_NAME)
+	if lines:
+		for line in lines:
+			if line[0:8] == "Version:":
+				return line[9:].split("+")[0]
+	return _("Not Installed")
+
 
 # For modules that do "from About import about"
 about = modules[__name__]

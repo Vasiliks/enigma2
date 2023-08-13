@@ -5,18 +5,21 @@ from struct import pack, unpack
 from time import localtime, time, timezone
 from Tools.Directories import fileExists
 from Components.SystemInfo import BoxInfo
+from Tools.Directories import fileReadLine, fileWriteLine
+
+MODULE_NAME = __name__.split(".")[-1]
 
 INFO_TYPE = "/proc/stb/info/type"
 INFO_SUBTYPE = "/proc/stb/info/subtype"
 
 def getBoxProcType():
-	procmodeltype = "unknown"
-	try:
-		if fileExists("/proc/stb/info/type"):
-			procmodeltype = open("/proc/stb/info/type", "r").readline().strip().lower()
-	except IOError:
-		print("[StbHardware] getBoxProcType failed!")
-	return procmodeltype
+	proctype = "unknown"
+	if isfile("/proc/stb/info/type"):
+		proctype = fileReadLine("/proc/stb/info/type", "unknown", source=MODULE_NAME).strip().lower()
+	elif isfile("/proc/stb/info/subtype"):
+		proctype = fileReadLine("/proc/stb/info/subtype", "unknown", source=MODULE_NAME).strip().lower()
+	return proctype
+
 
 def getBoxProc():
 	procmodel = "unknown"
@@ -54,19 +57,15 @@ def getProcInfoTypeTuner():
 	return typetuner
 
 def getHWSerial():
-	hwserial = "unknown"
-	try:
-		if fileExists("/proc/stb/info/sn"):
-			hwserial = open("/proc/stb/info/sn", "r").read().strip()
-		elif fileExists("/proc/stb/info/serial"):
-			hwserial = open("/proc/stb/info/serial", "r").read().strip()
-		elif fileExists("/proc/stb/info/serial_number"):
-			hwserial = open("/proc/stb/info/serial_number", "r").read().strip()
-		else:
-			hwserial = open("/sys/class/dmi/id/product_serial", "r").read().strip()
-	except IOError:
-		print("[StbHardware] getHWSerial failed!")
-	return hwserial
+	if isfile("/proc/stb/info/sn"):
+		hwserial = fileReadLine("/proc/stb/info/sn", "unknown", source=MODULE_NAME)
+	elif isfile("/proc/stb/info/serial"):
+		hwserial = fileReadLine("/proc/stb/info/serial", "unknown", source=MODULE_NAME)
+	elif isfile("/proc/stb/info/serial_number"):
+		hwserial = fileReadLine("/proc/stb/info/serial_number", "unknown", source=MODULE_NAME)
+	else:
+		hwserial = fileReadLine("/sys/class/dmi/id/product_serial", "unknown", source=MODULE_NAME)
+	return hwserial.strip()
 
 def getBoxRCType():
 	boxrctype = "unknown"
