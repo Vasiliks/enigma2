@@ -2766,12 +2766,8 @@ msgstr "Вы действительно хотите удалить выбран
 msgid "Are you sure to restore all deleted images"
 msgstr "Вы уверены,что хотите восстановить все удаленные имиджи"
 
-msgid ""
-"Are you sure you want to activate this network configuration?\n"
-"\n"
-msgstr ""
-"Уверены, что хотите активировать эту конфигурацию сети?\n"
-"\n"
+msgid "Are you sure you want to activate this network configuration?\n\n"
+msgstr "Вы уверены, что хотите активировать эту конфигурацию сети?\n\n"
 
 msgid ""
 "Are you sure you want to delete\n"
@@ -2798,8 +2794,8 @@ msgstr "Уверены, что хотите выйти из этого маст�
 msgid "Are you sure you want to reload the EPG data from:\n"
 msgstr "Действительно хотите перезагрузить данные ТВ-гида из\n"
 
-msgid "Are you sure you want to restart your network interfaces?"
-msgstr "Уверены, что хотите перезагрузить сетевые интерфейсы?"
+msgid "Are you sure you want to restart your network interfaces?\n\n"
+msgstr "Вы уверены, что хотите перезапустить сетевые интерфейсы?\n\n"
 
 #, python-format
 msgid ""
@@ -6078,7 +6074,10 @@ msgid "Detected devices:"
 msgstr "Обнаружены устройства:"
 
 msgid "Detected tuners:"
-msgstr "Обнаружены тюнера:"
+msgstr "Обнаруженные тюнеры:"
+
+msgid "Detected tuners"
+msgstr "Обнаруженные тюнеры"
 
 msgid "Device"
 msgstr "Устройство"
@@ -6521,7 +6520,7 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Download Successful\n"
+"Download Successsful\n"
 "%s"
 msgstr ""
 "Успешно загружено\n"
@@ -9456,6 +9455,9 @@ msgstr "Запись результата лога в /tmp"
 msgid "Log settings"
 msgstr "Настройки журнала"
 
+msgid "Logical tuners"
+msgstr "Логические тюнеры"
+
 msgid "Logfile does not exist anymore"
 msgstr "Лог-файл больше не существует"
 
@@ -10861,6 +10863,9 @@ msgstr "Открыть настройки тюнера "
 
 msgid "OpenSSL version: "
 msgstr "Версия OpenSSL: "
+
+msgid "OpenPli Information"
+msgstr "Информация OpenPli"
 
 msgid "Open the movie list"
 msgstr "Открыть список видео"
@@ -12531,6 +12536,9 @@ msgstr "Требуемый тип носителя:"
 
 msgid "Rereading partition table"
 msgstr "Пересмотр таблицы разделов"
+
+msgid "Receiver Information"
+msgstr "Информация о приемнике"
 
 msgid "Reserved"
 msgstr "Зарезервировано"
@@ -15234,7 +15242,10 @@ msgid "Storage device manager"
 msgstr "Диспетчер устройств хранения"
 
 msgid "Storage devices"
-msgstr "Список устройств хранения"
+msgstr "Устройства хранения данных"
+
+msgid "Storage Devices"
+msgstr "Устройства хранения данных"
 
 msgid "Storage"
 msgstr "Место хранения"
@@ -16702,8 +16713,20 @@ msgstr "Настройка неудачная! Проверьте сигнал!"
 msgid "Tuner"
 msgstr "Тюнер"
 
+msgid "Tuner "
+msgstr "Тюнер "
+
+msgid "Tuner :"
+msgstr "Тюнер :"
+
 msgid "Tuner Configuration"
 msgstr "Конфигурация тюнера"
+
+msgid "Tuner Information"
+msgstr "Информация о тюнере"
+
+msgid "Tuner information"
+msgstr "Информация о тюнере"
 
 msgid "Tuner configuration"
 msgstr "Конфигурация тюнера"
@@ -16734,6 +16757,9 @@ msgstr "Состояние тюнера:"
 
 msgid "Tuner type"
 msgstr "Тип тюнера"
+
+msgid "Type Tuner"
+msgstr "Тип Тюнер"
 
 msgid "Tuners & Scanning"
 msgstr "Тюнера и Сканирование"
