@@ -53,6 +53,7 @@ def InitUsageConfig():
 	config.usage.alternative_number_mode = ConfigYesNo(default=False)
 
 	config.misc.usegstplaybin3 = ConfigYesNo(default=False)
+	config.usage.informationExtraSpacing = ConfigYesNo(False)
 
 	def alternativeNumberModeChange(configElement):
 		eDVBDB.getInstance().setNumberingMode(configElement.value)

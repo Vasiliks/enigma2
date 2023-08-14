@@ -11,6 +11,7 @@ MODULE_NAME = __name__.split(".")[-1]
 
 SystemInfo = {}
 
+
 class BoxInformation:  # To maintain data integrity class variables should not be accessed from outside of this class!
 	def __init__(self):
 		self.immutableList = []
@@ -164,6 +165,12 @@ cmdline = {k: v.strip('"') for k, v in findall(r'(\S+)=(".*?"|\S+)', cmdline)}
 
 def getBoxDisplayName():  # This function returns a tuple like ("BRANDNAME", "BOXNAME")
 	return (DISPLAYBRAND, DISPLAYMODEL)
+def getDemodVersion():
+	version = None
+	if exists("/proc/stb/info/nim_firmware_version"):
+		version = fileReadLine("/proc/stb/info/nim_firmware_version")
+	return version and version.strip()
+
 
 def getNumVideoDecoders():
 	numVideoDecoders = 0
@@ -225,6 +232,25 @@ else:
 	repeat = 100
 SystemInfo["RemoteRepeat"] = repeat
 SystemInfo["RemoteDelay"] = 200 if model in ("maram9", "axodin") else 700
+
+BoxInfo.setItem("HDMI-PreEmphasis", fileExists("/proc/stb/hdmi/preemphasis"))
+
+try:
+	branch = "?sha=" + "-".join(about.getEnigmaVersionString().split("-")[3:])
+except:
+	branch = ""
+branch_e2plugins = "?sha=python3"
+commitLogs = [
+	("openPli Enigma2", "https://api.github.com/repos/68foxboris/my-py3/commits"),
+	("Openpli Oe Core", "https://api.github.com/repos/openpli/openpli-oe-core/commits"),
+	("Enigma2 Plugins", "https://api.github.com/repos/openpli/enigma2-plugins/commits"),
+	("Aio Grab", "https://api.github.com/repos/openpli/aio-grab/commits"),
+	("Plugin EPGImport", "https://api.github.com/repos/openpli/enigma2-plugin-extensions-epgimport/commits"),
+	("Skin PLi HD", "https://api.github.com/repos/littlesat/skin-PLiHD/commits"),
+	("OpenWebif", "https://api.github.com/repos/E2OpenPlugins/e2openplugin-OpenWebif/commits"),
+	("Hans settings", "https://gitlab.openpli.org/api/v4/projects/5/repository/commits")
+]
+BoxInfo.setItem("InformationCommitLogs", commitLogs)
 
 SystemInfo["InDebugMode"] = eGetEnigmaDebugLvl() >= 4
 SystemInfo["CommonInterface"] = model in ("h9combo", "h9combose", "h10", "pulse4kmini") and 1 or eDVBCIInterfaces.getInstance().getNumOfSlots()

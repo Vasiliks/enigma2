@@ -1,43 +1,40 @@
-from enigma import eConsoleAppContainer, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
-from os import listdir, popen, remove, statvfs
-from os.path import getmtime, isfile, isdir, join as pathjoin, join, basename
 from datetime import datetime
 from glob import glob
-import skin
-import os
-import re
+from json import loads
+from locale import format_string
+from os import listdir, popen, remove, statvfs
+from os.path import getmtime, isfile, isdir, join as pathjoin, join, basename
+from time import localtime, strftime, strptime
+from urllib.request import urlopen
+from enigma import eConsoleAppContainer, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
 from skin import parameters
-from Screens.HelpMenu import HelpableScreen
-from Screens.Screen import Screen, ScreenSummary
-from Screens.MessageBox import MessageBox
+from Components.About import about
+from Components.ActionMap import ActionMap, HelpableActionMap
 
 from Components.config import config
-from Components.ActionMap import ActionMap, HelpableActionMap
+from Components.Console import Console
 from Components.Sources.StaticText import StaticText
 from Components.Harddisk import harddiskmanager
-from Components.NimManager import nimmanager
-from Components.About import about
-from Components.ScrollLabel import ScrollLabel
-from Components.Button import Button
+from Components.InputDevice import REMOTE_DISPLAY_NAME, REMOTE_NAME, REMOTE_RCTYPE, remoteControl
 from Components.Label import Label
-from Components.ProgressBar import ProgressBar
-from Components.Console import Console
-from Components.GUIComponent import GUIComponent
-from Components.Pixmap import MultiPixmap, Pixmap
 from Components.Network import iNetwork
+from Components.NimManager import nimmanager
+from Components.Pixmap import Pixmap
+from Components.ScrollLabel import ScrollLabel
+from Components.ProgressBar import ProgressBar
+from Components.GUIComponent import GUIComponent
 from Components.SystemInfo import BoxInfo, SystemInfo
+from Screens.HelpMenu import HelpableScreen
+from Screens.MessageBox import MessageBox
+from Screens.Screen import Screen, ScreenSummary
 
 from Tools.Directories import SCOPE_PLUGINS, resolveFilename, fileExists, fileHas, pathExists, fileReadLine, fileReadLines, fileWriteLine, isPluginInstalled
 from Tools.Geolocation import geolocation
-from Tools.StbHardware import getFPVersion, getProcInfoTypeTuner, getBoxProc, getBoxRCType
+from Tools.StbHardware import getFPVersion, getProcInfoTypeTuner, getBoxProc, getHWSerial, getBoxRCType, getBoxProcType, getDemodVersion
 from Tools.LoadPixmap import LoadPixmap
 from Tools.Conversions import scaleNumber, formatDate
-from time import localtime, strftime, strptime
 
 MODULE_NAME = __name__.split(".")[-1]
-
-API_GITHUB = 0
-API_GITLAB = 1
 
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
@@ -46,21 +43,20 @@ displaytype = BoxInfo.getItem("displaytype")
 platform = BoxInfo.getItem("platform")
 DISPLAY_BRAND = BoxInfo.getItem("displaybrand")
 DISPLAY_MODEL = BoxInfo.getItem("displaymodel")
-
 rcname = BoxInfo.getItem("rcname")
 procModel = getBoxProc()
 fpVersion = getFPVersion()
 
-MODULE_NAME = __name__.split(".")[-1]
-
-INFO_COLORS = ["N", "H", "P", "V", "M"]
+INFO_COLORS = ["N", "H", "S", "P", "V", "M", "F"]
 INFO_COLOR = {
 	"B": None,
 	"N": 0x00ffffff,  # Normal.
 	"H": 0x00ffffff,  # Headings.
+	"S": 0x00ffffff,  # Subheadings.
 	"P": 0x00cccccc,  # Prompts.
 	"V": 0x00cccccc,  # Values.
-	"M": 0x00ffff00  # Messages.
+	"M": 0x00ffff00,  # Messages.
+	"F": 0x0000ffff  # Features.
 }
 LOG_MAX_LINES = 10000  # Maximum number of log lines to be displayed on screen.
 AUTO_REFRESH_TIME = 5000  # Streaming auto refresh timer (in milliseconds).
@@ -79,16 +75,17 @@ def getTypeTuner():
 
 def getBoxProcTypeName():
 	boxProcTypes = {
-		"00": _("OTT"),
+		"00": _("OTT Model"),
 		"10": _("Single Tuner"),
 		"11": _("Twin Tuner"),
 		"12": _("Combo Tuner"),
 		"21": _("Twin Hybrid"),
 		"22": _("Hybrid Tuner")
 	}
+	procType = getBoxProcType()
 	if procType == "unknown":
 		return _("Unknown")
-	return "%s - %s" % (procType, boxProcTypes.get(procType, _("Unknown")))
+	return "%s  -  %s" % (procType, boxProcTypes.get(procType, _("Unknown")))
 
 
 class InformationBase(Screen, HelpableScreen):
@@ -113,22 +110,20 @@ class InformationBase(Screen, HelpableScreen):
 			"right": self.displayInformation,
 			"left": self.displayInformation,
 		}, prio=0, description=_("Common Information Actions"))
-		colors = parameters.get("InformationColors", (0x00ffffff, 0x00ffffff, 0x00888888, 0x00888888, 0x00ffff00))
+		colors = parameters.get("InformationColors", (0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00cccccc, 0x00cccccc, 0x00ffff00, 0x0000ffff))
 		if len(colors) == len(INFO_COLORS):
 			for index in range(len(colors)):
 				INFO_COLOR[INFO_COLORS[index]] = colors[index]
 		else:
 			print("[Information] Warning: %d colors are defined in the skin when %d were expected!" % (len(colors), len(INFO_COLORS)))
 		self["information"].setText(_("Loading information, please wait..."))
+		self.extraSpacing = config.usage.informationExtraSpacing.value
 		self.onInformationUpdated = [self.displayInformation]
 		self.onLayoutFinish.append(self.displayInformation)
 		self.console = Console()
 		self.informationTimer = eTimer()
 		self.informationTimer.callback.append(self.fetchInformation)
 		self.informationTimer.start(25)
-
-	def showReceiverImage(self):
-		self.session.openWithCallback(self.informationWindowClosed, InformationImage)
 
 	def keyCancel(self):
 		self.console.killAll()
@@ -272,72 +267,6 @@ class CommitInformation(InformationBase):
 
 	def getSummaryInformation(self):
 		return "Commit Log Information"
-
-
-class GeolocationInformation(InformationBase):
-	def __init__(self, session):
-		InformationBase.__init__(self, session)
-		self.setTitle(_("Geolocation Information"))
-		self.skinName.insert(0, "GeolocationInformation")
-
-	def displayInformation(self):
-		info = []
-		geolocationData = geolocation.getGeolocationData(fields="continent,country,regionName,city,lat,lon,timezone,currency,isp,org,mobile,proxy,query", useCache=False)
-		if geolocationData.get("status", None) == "success":
-			info.append(formatLine("H", _("Location information")))
-			info.append("")
-			continent = geolocationData.get("continent", None)
-			if continent:
-				info.append(formatLine("P1", _("Continent"), continent))
-			country = geolocationData.get("country", None)
-			if country:
-				info.append(formatLine("P1", _("Country"), country))
-			state = geolocationData.get("regionName", None)
-			if state:
-				info.append(formatLine("P1", _("State"), state))
-			city = geolocationData.get("city", None)
-			if city:
-				info.append(formatLine("P1", _("City"), city))
-			latitude = geolocationData.get("lat", None)
-			if latitude:
-				info.append(formatLine("P1", _("Latitude"), latitude))
-			longitude = geolocationData.get("lon", None)
-			if longitude:
-				info.append(formatLine("P1", _("Longitude"), longitude))
-			info.append("")
-			info.append(formatLine("H", _("Local information")))
-			info.append("")
-			timezone = geolocationData.get("timezone", None)
-			if timezone:
-				info.append(formatLine("P1", _("Timezone"), timezone))
-			currency = geolocationData.get("currency", None)
-			if currency:
-				info.append(formatLine("P1", _("Currency"), currency))
-			info.append("")
-			info.append(formatLine("H", _("Connection information")))
-			info.append("")
-			isp = geolocationData.get("isp", None)
-			if isp:
-				ispOrg = geolocationData.get("org", None)
-				if ispOrg:
-					info.append(formatLine("P1", _("ISP"), "%s  (%s)" % (isp, ispOrg)))
-				else:
-					info.append(formatLine("P1", _("ISP"), isp))
-			mobile = geolocationData.get("mobile", None)
-			info.append(formatLine("P1", _("Mobile connection"), (_("Yes") if mobile else _("No"))))
-			proxy = geolocationData.get("proxy", False)
-			info.append(formatLine("P1", _("Proxy detected"), (_("Yes") if proxy else _("No"))))
-			publicIp = geolocationData.get("query", None)
-			if publicIp:
-				info.append(formatLine("P1", _("Public IP"), publicIp))
-		else:
-			info.append(_("Geolocation information cannot be retrieved, please try again later."))
-			info.append("")
-			info.append(_("Access to geolocation information requires an internet connection."))
-		self["information"].setText("\n".join(info))
-
-	def getSummaryInformation(self):
-		return "Geolocation Information"
 
 
 class DebugInformation(InformationBase):
@@ -514,8 +443,6 @@ class DebugInformation(InformationBase):
 				info = [_("Retrieving '%s' log, please wait...") % name]
 		else:
 			info = [_("Finding available log files, please wait...")]
-
-
 		self["information"].setText("\n".join(info))
 
 	def getSummaryInformation(self):
@@ -533,7 +460,6 @@ class ImageInformation(InformationBase):
 			"yellow": (self.showCommitLogs, _("Show latest commit log information")),
 			"blue": (self.showTranslation, _("Show translation information"))
 		}, prio=0, description=_("OpenPli Information Actions"))
-		self.copyright = str("\xc2\xb0")
 		self.resolutions = {
 			480: _("NTSC"),
 			576: _("PAL"),
@@ -558,17 +484,20 @@ class ImageInformation(InformationBase):
 		yResolution = getDesktop(0).size().height()
 		info.append(formatLine("P1", _("Skin & Resolution"), "%s  (%s  -  %s x %s)" % (config.skin.primary_skin.value.split('/')[0], self.resolutions.get(yResolution, "Unknown"), xResolution, yResolution)))
 		info.append("")
-		info.append(formatLine("H", _("Enigma2 information")))
-		info.append("")
-		enigmaVersion = about.getEnigmaVersionString()
+		info.append(formatLine("S", _("Enigma2 information")))
+		if self.extraSpacing:
+			info.append("")
+		enigmaVersion = str(BoxInfo.getItem("imageversion"))
 		enigmaVersion = enigmaVersion.rsplit("-", enigmaVersion.count("-") - 2)
 		if len(enigmaVersion) == 3:
 			enigmaVersion = "%s (%s-%s)" % (enigmaVersion[0], enigmaVersion[2], enigmaVersion[1].capitalize())
+		elif len(enigmaVersion) == 1:
+			enigmaVersion = "%s" % enigmaVersion[0]
 		else:
 			enigmaVersion = "%s (%s)" % (enigmaVersion[0], enigmaVersion[1].capitalize())
 		info.append(formatLine("P1", _("Enigma2 version"), enigmaVersion))
-		compiledate = str(BoxInfo.getItem("compiledate"))
-		info.append(formatLine("P1", _("Last update"), formatDate("%s%s%s" % (compiledate[:4], compiledate[4:6], compiledate[6:]))))
+		compileDate = str(BoxInfo.getItem("compiledate"))
+		info.append(formatLine("P1", _("Last update"), formatDate("%s%s%s" % (compileDate[:4], compileDate[4:6], compileDate[6:]))))
 		info.append(formatLine("P1", _("Enigma2 (re)starts"), config.misc.startCounter.value))
 		info.append(formatLine("P1", _("Enigma2 debug level"), eGetEnigmaDebugLvl()))
 		if isPluginInstalled("ServiceHisilicon") and not isPluginInstalled("ServiceMP3"):
@@ -582,8 +511,23 @@ class ImageInformation(InformationBase):
 			extraService = "ServiceApp"
 			info.append(formatLine("P1", _("Extra service player"), "%s") % extraService)
 		info.append("")
-		info.append(formatLine("H", _("Software information")))
+		info.append(formatLine("S", _("Build information")))
+		if self.extraSpacing:
+			info.append("")
+		info.append(formatLine("P1", _("Distribution"), BoxInfo.getItem("displaydistro")))
+		info.append(formatLine("P1", _("Distribution build"), formatDate(BoxInfo.getItem("imagebuild"))))
+		info.append(formatLine("P1", _("Distribution build date"), formatDate(about.getBuildDateString())))
+		info.append(formatLine("P1", _("Distribution architecture"), BoxInfo.getItem("architecture")))
+		if BoxInfo.getItem("imagedir"):
+			info.append(formatLine("P1", _("Distribution folder"), BoxInfo.getItem("imagedir")))
+		if BoxInfo.getItem("imagefs"):
+			info.append(formatLine("P1", _("Distribution file system"), BoxInfo.getItem("imagefs").strip()))
+		info.append(formatLine("P1", _("Feed URL"), BoxInfo.getItem("feedsurl")))
+		info.append(formatLine("P1", _("Compiled by"), BoxInfo.getItem("developername")))
 		info.append("")
+		info.append(formatLine("S", _("Software information")))
+		if self.extraSpacing:
+			info.append("")
 		info.append(formatLine("P1", _("GCC version"), about.getGccVersion()))
 		info.append(formatLine("P1", _("Glibc version"), about.getGlibcVersion()))
 		info.append(formatLine("P1", _("OpenSSL version"), about.getopensslVersionString()))
@@ -597,56 +541,99 @@ class ImageInformation(InformationBase):
 		if uuId:
 			info.append(formatLine("P1", _("UUID"), uuId))
 		info.append("")
-		if BoxInfo.getItem("HiSilicon"):
+		info.append(formatLine("S", _("Boot information")))
+		if self.extraSpacing:
 			info.append("")
-			info.append(formatLine("H", _("HiSilicon specific information")))
-			info.append("")
-			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
-			stdout, stderr = process.communicate()
-			if process.returncode == 0:
-				missing = True
-				packageList = stdout.split("\n")
-				revision = self.findPackageRevision("grab", packageList)
-				if revision and revision != "r0":
-					info.append(formatLine("P1", _("Grab"), revision))
-					missing = False
-				revision = self.findPackageRevision("hihalt", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Halt"), revision))
-					missing = False
-				revision = self.findPackageRevision("libs", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Libs"), revision))
-					missing = False
-				revision = self.findPackageRevision("partitions", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Partitions"), revision))
-					missing = False
-				revision = self.findPackageRevision("reader", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Reader"), revision))
-					missing = False
-				revision = self.findPackageRevision("showiframe", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Showiframe"), revision))
-					missing = False
-				if missing:
-					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
-			else:
-				info.append(formatLine("P1", _("Package information currently not available!")))
+		if BoxInfo.getItem("mtdbootfs"):
+			info.append(formatLine("P1", _("MTD boot"), BoxInfo.getItem("mtdbootfs")))
+		if BoxInfo.getItem("mtdkernel"):
+			info.append(formatLine("P1", _("MTD kernel"), BoxInfo.getItem("mtdkernel")))
+		if BoxInfo.getItem("mtdrootfs"):
+			info.append(formatLine("P1", _("MTD root"), BoxInfo.getItem("mtdrootfs")))
+		if BoxInfo.getItem("kernelfile"):
+			info.append(formatLine("P1", _("Kernel file"), BoxInfo.getItem("kernelfile")))
+		if BoxInfo.getItem("rootfile"):
+			info.append(formatLine("P1", _("Root file"), BoxInfo.getItem("rootfile")))
+		if BoxInfo.getItem("mkubifs"):
+			info.append(formatLine("P1", _("MKUBIFS"), BoxInfo.getItem("mkubifs")))
+		if BoxInfo.getItem("ubinize"):
+			info.append(formatLine("P1", _("UBINIZE"), BoxInfo.getItem("ubinize")))
 		self["information"].setText("\n".join(info))
-
-	def findPackageRevision(self, package, packageList):
-		revision = None
-		data = [x for x in packageList if "-%s" % package in x]
-		if data:
-			data = data[0].split("-")
-			if len(data) >= 4:
-				revision = data[3]
-		return revision
 
 	def getSummaryInformation(self):
 		return "OpenPli Information"
+
+
+class GeolocationInformation(InformationBase):
+	def __init__(self, session):
+		InformationBase.__init__(self, session)
+		self.setTitle(_("Geolocation Information"))
+		self.skinName.insert(0, "GeolocationInformation")
+
+	def displayInformation(self):
+		info = []
+		info.append(formatLine("H", _("Geolocation information")))
+		info.append("")
+		geolocationData = geolocation.getGeolocationData(fields="continent,country,regionName,city,lat,lon,timezone,currency,isp,org,mobile,proxy,query", useCache=False)
+		if geolocationData.get("status", None) == "success":
+			info.append(formatLine("S", _("Location information")))
+			if self.extraSpacing:
+				info.append("")
+			continent = geolocationData.get("continent", None)
+			if continent:
+				info.append(formatLine("P1", _("Continent"), continent))
+			country = geolocationData.get("country", None)
+			if country:
+				info.append(formatLine("P1", _("Country"), country))
+			state = geolocationData.get("regionName", None)
+			if state:
+				# TRANSLATORS: "State" is location information and not condition based information.
+				info.append(formatLine("P1", _("State"), state))
+			city = geolocationData.get("city", None)
+			if city:
+				info.append(formatLine("P1", _("City"), city))
+			latitude = geolocationData.get("lat", None)
+			if latitude:
+				info.append(formatLine("P1", _("Latitude"), latitude))
+			longitude = geolocationData.get("lon", None)
+			if longitude:
+				info.append(formatLine("P1", _("Longitude"), longitude))
+			info.append("")
+			info.append(formatLine("S", _("Local information")))
+			if self.extraSpacing:
+				info.append("")
+			timezone = geolocationData.get("timezone", None)
+			if timezone:
+				info.append(formatLine("P1", _("Timezone"), timezone))
+			currency = geolocationData.get("currency", None)
+			if currency:
+				info.append(formatLine("P1", _("Currency"), currency))
+			info.append("")
+			info.append(formatLine("S", _("Connection information")))
+			if self.extraSpacing:
+				info.append("")
+			isp = geolocationData.get("isp", None)
+			if isp:
+				ispOrg = geolocationData.get("org", None)
+				if ispOrg:
+					info.append(formatLine("P1", _("ISP"), "%s  (%s)" % (isp, ispOrg)))
+				else:
+					info.append(formatLine("P1", _("ISP"), isp))
+			mobile = geolocationData.get("mobile", None)
+			info.append(formatLine("P1", _("Mobile connection"), (_("Yes") if mobile else _("No"))))
+			proxy = geolocationData.get("proxy", False)
+			info.append(formatLine("P1", _("Proxy detected"), (_("Yes") if proxy else _("No"))))
+			publicIp = geolocationData.get("query", None)
+			if publicIp:
+				info.append(formatLine("P1", _("Public IP"), publicIp))
+		else:
+			info.append(_("Geolocation information cannot be retrieved, please try again later."))
+			info.append("")
+			info.append(_("Access to geolocation information requires an Internet connection."))
+		self["information"].setText("\n".join(info))
+
+	def getSummaryInformation(self):
+		return "Geolocation Information"
 
 
 class MemoryInformation(InformationBase):
@@ -660,27 +647,42 @@ class MemoryInformation(InformationBase):
 		self["key_yellow"] = StaticText(_("Clear"))
 
 	def displayInformation(self):
+		def formatNumber(number):
+			number = number.strip()
+			value, units = number.split(maxsplit=1) if " " in number else (number, None)
+			if "." in value:
+				format = "%.3f"
+				value = float(value)
+			else:
+				format = "%d"
+				value = int(value)
+			return "%s %s" % (format_string(format, value, grouping=True), units) if units else format_string(format, value, grouping=True)
+
 		info = []
+		info.append(formatLine("H", _("Memory information")))
+		info.append("")
 		memInfo = fileReadLines("/proc/meminfo", source=MODULE_NAME)
-		info.append(formatLine("H", _("RAM (Summary)")))
-		info.append("")
+		info.append(formatLine("S", _("RAM (Summary)")))
+		if self.extraSpacing:
+			info.append("")
 		for line in memInfo:
-			key, value, units = [x for x in line.split()]
+			key, value = [x for x in line.split(maxsplit=1)]
 			if key == "MemTotal:":
-				info.append(formatLine("P1", _("Total memory"), "%s %s" % (value, units)))
-			if key == "MemFree:":
-				info.append(formatLine("P1", _("Free memory"), "%s %s" % (value, units)))
-			if key == "Buffers:":
-				info.append(formatLine("P1", _("Buffers"), "%s %s" % (value, units)))
-			if key == "Cached:":
-				info.append(formatLine("P1", _("Cached"), "%s %s" % (value, units)))
-			if key == "SwapTotal:":
-				info.append(formatLine("P1", _("Total swap"), "%s %s" % (value, units)))
-			if key == "SwapFree:":
-				info.append(formatLine("P1", _("Free swap"), "%s %s" % (value, units)))
+				info.append(formatLine("P1", _("Total memory"), formatNumber(value)))
+			elif key == "MemFree:":
+				info.append(formatLine("P1", _("Free memory"), formatNumber(value)))
+			elif key == "Buffers:":
+				info.append(formatLine("P1", _("Buffers"), formatNumber(value)))
+			elif key == "Cached:":
+				info.append(formatLine("P1", _("Cached"), formatNumber(value)))
+			elif key == "SwapTotal:":
+				info.append(formatLine("P1", _("Total swap"), formatNumber(value)))
+			elif key == "SwapFree:":
+				info.append(formatLine("P1", _("Free swap"), formatNumber(value)))
 		info.append("")
-		info.append(formatLine("H", _("FLASH")))
-		info.append("")
+		info.append(formatLine("S", _("FLASH")))
+		if self.extraSpacing:
+			info.append("")
 		stat = statvfs("/")
 		diskSize = stat.f_blocks * stat.f_frsize
 		diskFree = stat.f_bfree * stat.f_frsize
@@ -689,19 +691,19 @@ class MemoryInformation(InformationBase):
 		info.append(formatLine("P1", _("Used flash"), "%s  (%s)" % (scaleNumber(diskUsed), scaleNumber(diskUsed, "Iec"))))
 		info.append(formatLine("P1", _("Free flash"), "%s  (%s)" % (scaleNumber(diskFree), scaleNumber(diskFree, "Iec"))))
 		info.append("")
-		info.append(formatLine("H", _("RAM (Details)")))
-		info.append("")
-
+		info.append(formatLine("S", _("RAM (Details)")))
+		if self.extraSpacing:
+			info.append("")
 		for line in memInfo:
-			key, value, units = [x for x in line.split()]
-			info.append(formatLine("P1", key[:-1], "%s %s" % (value, units)))
+			key, value = [x for x in line.split(maxsplit=1)]
+			info.append(formatLine("P1", key[:-1], formatNumber(value)))
 		info.append("")
-		info.append(formatLine("P1", _("The detailed information is intended for developers only.")))
-		info.append(formatLine("P1", _("Please don't panic if you see values that look suspicious.")))
-		self["information"].setText("\n".join(info).encode("UTF-8", "ignore") if PY2 else "\n".join(info))
+		info.append(formatLine("M1", _("The detailed information is intended for developers only.")))
+		info.append(formatLine("M1", _("Please don't panic if you see values that look suspicious.")))
+		self["information"].setText("\n".join(info))
 
 	def clearMemoryInformation(self):
-		eConsoleAppContainer().execute(*["/bin/sync", "/bin/sync"])
+		self.console.ePopen(("/bin/sync", "/bin/sync"))
 		fileWriteLine("/proc/sys/vm/drop_caches", "3")
 		self.informationTimer.start(25)
 		for callback in self.onInformationUpdated:
@@ -709,6 +711,26 @@ class MemoryInformation(InformationBase):
 
 	def getSummaryInformation(self):
 		return "Memory Information Data"
+
+
+class MultiBootInformation(InformationBase):
+	def __init__(self, session):
+		InformationBase.__init__(self, session)
+		self.setTitle(_("MultiBoot Information"))
+		self.skinName.insert(0, "MultiBootInformation")
+
+	def fetchInformation(self):
+		self.informationTimer.stop()
+		for callback in self.onInformationUpdated:
+			callback()
+
+	def displayInformation(self):
+		info = []
+		info.append(_("This screen is not yet available."))
+		self["information"].setText("\n".join(info))
+
+	def getSummaryInformation(self):
+		return "MultiBoot Information Data"
 
 
 class NetworkInformation(InformationBase):
@@ -1012,17 +1034,25 @@ class ReceiverInformation(InformationBase):
 			info.append(formatLine("P1", _("Platform"), platform))
 		if procModel != model and procModel != "unknown":
 			info.append(formatLine("P1", _("Proc model"), procModel))
+		info.append(formatLine("P1", _("Hardware type"), getBoxProcTypeName().split("-")[0])) if getBoxProcTypeName() != _("Unknown") else ""
+		hwSerial = getHWSerial() if getHWSerial() != "unknown" else None
+		cpuSerial = about.getCPUSerial() if about.getCPUSerial() != "unknown" else None
+		if hwSerial or cpuSerial:
+			info.append(formatLine("P1", _("Hardware serial"), (hwSerial if hwSerial else cpuSerial)))
 		hwRelease = fileReadLine("/proc/stb/info/release", source=MODULE_NAME)
 		if hwRelease:
 			info.append(formatLine("P1", _("Factory release"), hwRelease))
-		displaytype = BoxInfo.getItem("displaytype").startswith(" ")
-		if displaytype and not displaytype.startswith(" "):
+		displaytype = BoxInfo.getItem("displaytype")
+		if not displaytype.startswith(" "):
 			info.append(formatLine("P1", _("Display type"), displaytype))
 		fpVersion = getFPVersion()
 		if fpVersion and fpVersion != "unknown":
 			info.append(formatLine("P1", _("Front processor version"), fpVersion))
 		transcoding = _("Yes") if BoxInfo.getItem("transcoding") else _("MultiTranscoding") if BoxInfo.getItem("multitranscoding") else _("No")
 		info.append(formatLine("P1", _("Transcoding"), transcoding))
+		DemodVersion = getDemodVersion()
+		if DemodVersion and DemodVersion != "unknown":
+			info.append(formatLine("P1", _("Demod firmware version"), DemodVersion))
 		info.append("")
 		info.append(formatLine("H", _("Processor information")))
 		info.append("")
@@ -1041,9 +1071,16 @@ class ReceiverInformation(InformationBase):
 		info.append(formatLine("H", _("Remote control information")))
 		info.append("")
 		rcIndex = int(config.inputDevices.remotesIndex.value)
-		info.append(formatLine("P1", _("RC selected name"), rcname))
-		if rcname != rcname:
+		info.append(formatLine("P1", _("RC identification"), "%s  (Index: %d)" % (remoteControl.remotes[rcIndex][REMOTE_DISPLAY_NAME], rcIndex)))
+		rcName = remoteControl.remotes[rcIndex][REMOTE_NAME]
+		info.append(formatLine("P1", _("RC selected name"), rcName))
+		if rcname != rcName:
 			info.append(formatLine("P1", _("RC default name"), rcname))
+		sysType = remoteControl.remotes[rcIndex][REMOTE_RCTYPE]
+		info.append(formatLine("P1", _("RC selected type"), sysType))
+		rctype = BoxInfo.getItem("rctype")
+		if rctype != sysType:
+			info.append(formatLine("P1", _("RC default type"), rctype))
 		boxRcType = getBoxRCType()
 		if boxRcType:
 			if boxRcType == "unknown":
@@ -1051,7 +1088,8 @@ class ReceiverInformation(InformationBase):
 					boxRcType = _("Amlogic remote")
 				elif isfile("/usr/sbin/lircd"):
 					boxRcType = _("LIRC remote")
-		info.append(formatLine("P1", _("RC detected type"), boxRcType))
+			if boxRcType != sysType:
+				info.append(formatLine("P1", _("RC detected type"), boxRcType))
 		customCode = fileReadLine("/proc/stb/ir/rc/customcode", source=MODULE_NAME)
 		if customCode:
 			info.append(formatLine("P1", _("RC custom code"), customCode))
@@ -1060,13 +1098,11 @@ class ReceiverInformation(InformationBase):
 			address = config.hdmicec.fixed_physical_address.value if config.hdmicec.fixed_physical_address.value != "0.0.0.0" else _("N/A")
 			info.append(formatLine("P1", _("HDMI-CEC address"), address))
 		info.append("")
-		info.append(formatLine("H", _("Driver and kernel information")))
-		info.append("")
-		kernel = BoxInfo.getItem("kernel")
-		driverdate = BoxInfo.getItem("driverdate")
-		if driverdate != kernel:
-			info.append(formatLine("P1", _("Drivers version"), driverdate))
-		info.append(formatLine("P1", _("Kernel version"), kernel))
+		info.append(formatLine("S", _("Driver and kernel information")))
+		if self.extraSpacing:
+			info.append("")
+		info.append(formatLine("P1", _("Drivers version"), formatDate(BoxInfo.getItem("driversdate"))))
+		info.append(formatLine("P1", _("Kernel version"), BoxInfo.getItem("kernel")))
 		deviceId = fileReadLine("/proc/device-tree/amlogic-dt-id", source=MODULE_NAME)
 		if deviceId:
 			info.append(formatLine("P1", _("Device id"), deviceId))
@@ -1411,687 +1447,3 @@ class InformationSummary(ScreenSummary):
 	def updateSummary(self):
 		# print("[Information] DEBUG: Updating summary.")
 		self["information"].setText(self.parent.getSummaryInformation())
-
-
-class About(Screen):
-	def __init__(self, session):
-		Screen.__init__(self, session)
-		self.setTitle(_("About Information"))
-		hddsplit = parameters.get("AboutHddSplit", 1)
-
-		model = BoxInfo.getItem("model")
-		brand = BoxInfo.getItem("brand")
-		socfamily = BoxInfo.getItem("socfamily")
-		displaytype = BoxInfo.getItem("displaytype")
-		platform = BoxInfo.getItem("platform")
-
-		procmodel = getBoxProc()
-
-		AboutText = _("Hardware: ") + model + "\n"
-		if platform != model:
-			AboutText += _("Platform: ") + platform + "\n"
-		if procmodel != model:
- 			AboutText += _("Proc model: ") + procmodel + "\n"
-
-		if fileExists("/proc/stb/info/sn"):
-			hwserial = open("/proc/stb/info/sn", "r").read().strip()
-			AboutText += _("Hardware serial: ") + hwserial + "\n"
-
-		if fileExists("/proc/stb/info/release"):
-			hwrelease = open("/proc/stb/info/release", "r").read().strip()
-			AboutText += _("Factory release: ") + hwrelease + "\n"
-
-		AboutText += _("Brand/Meta: ") + BoxInfo.getItem("brand") + "\n"
-
-		if fileExists("/proc/stb/ir/rc/type"):
-			rctype = open("/proc/stb/ir/rc/type", "r").read().strip()
-			AboutText += _("RC type: ") + rctype + "\n"
-
-		AboutText += "\n"
-		cpu = about.getCPUInfoString()
-		AboutText += _("CPU: ") + cpu + "\n"
-		AboutText += _("CPU brand: ") + about.getCPUBrand() + "\n"
-
-		AboutText += "\n"
-		if socfamily is not None:
-			AboutText += _("SoC family: ") + BoxInfo.getItem("socfamily") + "\n"
-
-		AboutText += "\n"
-		if BoxInfo.getItem("Display") or BoxInfo.getItem("7segment") or model != "gbip4k":
-			AboutText += _("Type Display: ") + BoxInfo.getItem("displaytype") + "\n"
-		else:
-			AboutText += _("No Display") + "\n"
-
-		EnigmaVersion = about.getEnigmaVersionString()
-		EnigmaVersion = EnigmaVersion.rsplit("-", EnigmaVersion.count("-") - 2)
-		if len(EnigmaVersion) == 3:
-			EnigmaVersion = EnigmaVersion[0] + " (" + EnigmaVersion[2] + "-" + EnigmaVersion[1] + ")"
-		else:
-			EnigmaVersion = EnigmaVersion[0] + " (" + EnigmaVersion[1] + ")"
-		EnigmaVersion = _("Enigma2 version: ") + EnigmaVersion
-		self["EnigmaVersion"] = StaticText(EnigmaVersion)
-		AboutText += "\n" + EnigmaVersion + "\n"
-
-		AboutText += _("Build date: ") + about.getBuildDateString() + "\n"
-		AboutText += _("Last update: ") + about.getUpdateDateString() + "\n"
-		AboutText += _("Enigma2 (re)starts: %d\n") % config.misc.startCounter.value
-		AboutText += _("Enigma2 debug level: %d\n") % eGetEnigmaDebugLvl()
-
-		AboutText += "\n"
-		AboutText += _("DVB driver version: ") + about.getDriverInstalledDate() + "\n"
-
-		GStreamerVersion = _("GStreamer version: ") + about.getGStreamerVersionString().replace("GStreamer", "")
-		self["GStreamerVersion"] = StaticText(GStreamerVersion)
-		AboutText += "\n" + GStreamerVersion + "\n"
-
-		FFmpegVersion = _("FFmpeg version: ") + about.getFFmpegVersionString()
-		self["FFmpegVersion"] = StaticText(FFmpegVersion)
-		AboutText += FFmpegVersion + "\n"
-
-		AboutText += "\n"
-		AboutText += _("Python version: ") + about.getPythonVersionString() + "\n"
-		AboutText += _("GCC version: ") + about.getGccVersion() + "\n"
-		AboutText += _("Glibc version: ") + about.getGlibcVersion() + "\n"
-		AboutText += "\n"
-
-		fp_version = getFPVersion()
-		if fp_version is None or fp_version == "unknown":
- 			fp_version = ""
-		else:
-			fp_version = _("Frontprocessor version: %s") % fp_version
-			AboutText += fp_version
-			self["FPVersion"] = StaticText(fp_version)
-
-		if SystemInfo["HasHDMI-CEC"] and config.hdmicec.enabled.value:
-			address = config.hdmicec.fixed_physical_address.value if config.hdmicec.fixed_physical_address.value != "0.0.0.0" else _("No fixed address set")
-			AboutText += "\n" + _("HDMI-CEC Enabled") + ": " + address
-		else:
-			hdmicec_disabled = _("Disabled")
-			AboutText += "\n" + _("HDMI-CEC %s") % hdmicec_disabled
-
-		AboutText += "\n" + _('Skin & Resolution: %s (%sx%s)\n') % (config.skin.primary_skin.value.split('/')[0], getDesktop(0).size().width(), getDesktop(0).size().height())
-
-		servicemp3 = _("ServiceMP3. IPTV recording (Yes).")
-		servicehisilicon = _("ServiceHisilicon. IPTV recording (No). (Recommended ServiceMP3).")
-		exteplayer3 = _("ServiceApp-ExtEplayer3. IPTV recording (No). (Recommended ServiceMP3).")
-		gstplayer = _("ServiceApp-GstPlayer. IPTV recording (No). (Recommended ServiceMP3).")
-		if isPluginInstalled("ServiceApp"):
-			if isPluginInstalled("ServiceMP3"):
-				if config.plugins.serviceapp.servicemp3.replace.value and config.plugins.serviceapp.servicemp3.player.value == "exteplayer3":
-					player = "%s" % exteplayer3
-				else:
-					player = "%s" % gstplayer
-				if not config.plugins.serviceapp.servicemp3.replace.value:
-					player = "%s" % servicemp3
-			elif isPluginInstalled("ServiceHisilicon"):
-				if config.plugins.serviceapp.servicemp3.replace.value and config.plugins.serviceapp.servicemp3.player.value == "exteplayer3":
-					player = "%s" % exteplayer3
-				else:
-					player = "%s" % gstplayer
-				if not config.plugins.serviceapp.servicemp3.replace.value:
-					player = "%s" % servicehisilicon
-			else:
-				player = _("Not installed")
-		else:
-			if isPluginInstalled("ServiceMP3"):
-				player = "%s" % servicemp3
-			elif isPluginInstalled("ServiceHisilicon"):
-				player = "%s" % servicehisilicon
-			else:
-				player = _("Not installed")
-		AboutText += _("Player: %s") % player
-
-		AboutText += "\n"
-		AboutText += _("Uptime: ") + about.getBoxUptime()
-
-		self["TunerHeader"] = StaticText(_("Detected NIMs:"))
-		AboutText += "\n" + _("Detected NIMs:") + "\n"
-
-		nims = nimmanager.nimListCompressed()
-		for count in range(len(nims)):
-			if count < 4:
-				self["Tuner" + str(count)] = StaticText(nims[count])
-			else:
-				self["Tuner" + str(count)] = StaticText("")
-			AboutText += nims[count] + "\n"
-
-		self["HDDHeader"] = StaticText(_("Detected storage devices:"))
-		AboutText += "\n" + _("Detected storage devices:") + "\n"
-
-		hddlist = harddiskmanager.HDDList()
-		hddinfo = ""
-		if hddlist:
-			formatstring = hddsplit and "%s:%s, %.1f %s %s" or "%s\n(%s, %.1f %s %s)"
-			for count in range(len(hddlist)):
-				if hddinfo:
-					hddinfo += "\n"
-				hdd = hddlist[count][1]
-				if int(hdd.free()) > 1024:
-					hddinfo += formatstring % (hdd.model(), hdd.capacity(), hdd.free() / 1024.0, _("GB"), _("free"))
-				else:
-					hddinfo += formatstring % (hdd.model(), hdd.capacity(), hdd.free(), _("MB"), _("free"))
-		else:
-			hddinfo = _("none")
-		self["hddA"] = StaticText(hddinfo)
-		AboutText += hddinfo + "\n\n" + _("Network Info:")
-		for x in about.GetIPsFromNetworkInterfaces():
-			AboutText += "\n" + x[0] + ": " + x[1]
-
-		self["AboutScrollLabel"] = ScrollLabel(AboutText)
-		self["key_green"] = Button(_("Translations"))
-		self["key_red"] = Button(_("Latest Commits"))
-		self["key_yellow"] = Button(_("Dmesg Info"))
-		self["key_blue"] = Button(_("Memory Info"))
-
-		self["actions"] = ActionMap(["ColorActions", "SetupActions", "DirectionActions"], {
-			"cancel": self.close,
-			"ok": self.close,
-			"red": self.showCommits,
-			"green": self.showTranslationInfo,
-			"blue": self.showMemoryInfo,
-			"yellow": self.showTroubleshoot,
-			"up": self["AboutScrollLabel"].pageUp,
-			"down": self["AboutScrollLabel"].pageDown
-		})
-
-	def showTranslationInfo(self):
-		self.session.open(TranslationInfo)
-
-	def showCommits(self):
-		self.session.open(CommitInfo)
-
-	def showMemoryInfo(self):
-		self.session.open(MemoryInfo)
-
-	def showTroubleshoot(self):
-		self.session.open(Troubleshoot)
-
-	def doNothing(self):
-		pass
-
-
-class Devices(Screen):
-	def __init__(self, session):
-		Screen.__init__(self, session)
-		screentitle = _("Device Information")
-		title = screentitle
-		Screen.setTitle(self, title)
-		self["TunerHeader"] = StaticText(_("Detected tuners:"))
-		self["HDDHeader"] = StaticText(_("Detected devices:"))
-		self["MountsHeader"] = StaticText(_("Network servers:"))
-		self["nims"] = StaticText()
-		for count in (0, 1, 2, 3):
-			self["Tuner" + str(count)] = StaticText("")
-		self["hdd"] = StaticText()
-		self["mounts"] = StaticText()
-		self.list = []
-		self.activityTimer = eTimer()
-		self.activityTimer.timeout.get().append(self.populate2)
-		self["key_red"] = Button(_("Close"))
-		self["actions"] = ActionMap(["SetupActions", "ColorActions", "TimerEditActions"], {
-			"cancel": self.close,
-			"red": self.close,
-			"save": self.close
-		})
-		self.onLayoutFinish.append(self.populate)
-
-	def populate(self):
-		self.mountinfo = ''
-		self["actions"].setEnabled(False)
-		scanning = _("Please wait while scanning for devices...")
-		self["nims"].setText(scanning)
-		for count in (0, 1, 2, 3):
-			self["Tuner" + str(count)].setText(scanning)
-		self["hdd"].setText(scanning)
-		self['mounts'].setText(scanning)
-		self.activityTimer.start(1)
-
-	def populate2(self):
-		self.activityTimer.stop()
-		self.Console = Console()
-		niminfo = ""
-		nims = nimmanager.nimListCompressed()
-		for count in range(len(nims)):
-			if niminfo:
-				niminfo += "\n"
-			niminfo += nims[count]
-		self["nims"].setText(niminfo)
-
-		nims = nimmanager.nimList()
-		if len(nims) <= 4 :
-			for count in (0, 1, 2, 3):
-				if count < len(nims):
-					self["Tuner" + str(count)].setText(nims[count])
-				else:
-					self["Tuner" + str(count)].setText("")
-		else:
-			desc_list = []
-			count = 0
-			cur_idx = -1
-			while count < len(nims):
-				data = nims[count].split(":")
-				idx = data[0].strip('Tuner').strip()
-				desc = data[1].strip()
-				if desc_list and desc_list[cur_idx]['desc'] == desc:
-					desc_list[cur_idx]['end'] = idx
-				else:
-					desc_list.append({'desc' : desc, 'start' : idx, 'end' : idx})
-					cur_idx += 1
-				count += 1
-
-			for count in (0, 1, 2, 3):
-				if count < len(desc_list):
-					if desc_list[count]['start'] == desc_list[count]['end']:
-						text = "Tuner %s: %s" % (desc_list[count]['start'], desc_list[count]['desc'])
-					else:
-						text = "Tuner %s-%s: %s" % (desc_list[count]['start'], desc_list[count]['end'], desc_list[count]['desc'])
-				else:
-					text = ""
-
-				self["Tuner" + str(count)].setText(text)
-
-		self.hddlist = harddiskmanager.HDDList()
-		self.list = []
-		if self.hddlist:
-			for count in range(len(self.hddlist)):
-				hdd = self.hddlist[count][1]
-				hddp = self.hddlist[count][0]
-				if "ATA" in hddp:
-					hddp = hddp.replace('ATA', '')
-					hddp = hddp.replace('Internal', 'ATA Bus ')
-				free = hdd.Totalfree()
-				if ((float(free) / 1024) / 1024) >= 1:
-					freeline = _("Free: ") + str(round(((float(free) / 1024) / 1024), 2)) + _("TB")
-				elif (free / 1024) >= 1:
-					freeline = _("Free: ") + str(round((float(free) / 1024), 2)) + _("GB")
-				elif free >= 1:
-					freeline = _("Free: ") + str(free) + _("MB")
-				elif "Generic(STORAGE" in hddp:
-					continue
-				else:
-					freeline = _("Free: ") + _("full")
-				line = "%s      %s" % (hddp, freeline)
-				self.list.append(line)
-		self.list = '\n'.join(self.list)
-		self["hdd"].setText(self.list)
-
-		self.Console.ePopen("df -mh | grep -v '^Filesystem'", self.Stage1Complete)
-
-	def Stage1Complete(self, result, retval, extra_args=None):
-		result = result.replace('\n                        ', ' ').split('\n')
-		self.mountinfo = ""
-		for line in result:
-			self.parts = line.split()
-			if line and self.parts[0] and (self.parts[0].startswith('192') or self.parts[0].startswith('//192')):
-				line = line.split()
-				ipaddress = line[0]
-				mounttotal = line[1]
-				mountfree = line[3]
-				if self.mountinfo:
-					self.mountinfo += "\n"
-				self.mountinfo += "%s (%sB, %sB %s)" % (ipaddress, mounttotal, mountfree, _("free"))
-
-		if self.mountinfo:
-			self["mounts"].setText(self.mountinfo)
-		else:
-			self["mounts"].setText(_('none'))
-		self["actions"].setEnabled(True)
-
-	def doNothing(self):
-		pass
-
-
-class TranslationInfo(Screen):
-	def __init__(self, session):
-		Screen.__init__(self, session)
-		self.setTitle(_("Translation"))
-		# don't remove the string out of the _(), or it can't be "translated" anymore.
-
-		# TRANSLATORS: Add here whatever should be shown in the "translator" about screen, up to 6 lines (use \n for newline)
-		info = _("TRANSLATOR_INFO")
-
-		if info == "TRANSLATOR_INFO":
-			info = "(N/A)"
-
-		infolines = _("").split("\n")
-		infomap = {}
-		for x in infolines:
-			data = x.split(': ')
-			if len(data) != 2:
-				continue
-			(type, value) = data
-			infomap[type] = value
-		print("[About] DEBUG: infomap=%s" % str(infomap))
-
-		self["key_red"] = Button(_("Cancel"))
-		self["TranslationInfo"] = StaticText(info)
-
-		translator_name = infomap.get("Language-Team", "none")
-		if translator_name == "none":
-			translator_name = infomap.get("Last-Translator", "")
-
-		self["TranslatorName"] = StaticText(translator_name)
-
-		self["actions"] = ActionMap(["SetupActions"], {
-			"cancel": self.close,
-			"ok": self.close
-		})
-
-
-class CommitInfo(Screen):
-	def __init__(self, session):
-		Screen.__init__(self, session)
-		self.setTitle(_("Latest Commits"))
-		self.skinName = ["CommitInfo", "About"]
-		self["AboutScrollLabel"] = ScrollLabel(_("Please wait"))
-		self["actions"] = ActionMap(["SetupActions", "DirectionActions"], {
-			"cancel": self.close,
-			"ok": self.close,
-			"up": self["AboutScrollLabel"].pageUp,
-			"down": self["AboutScrollLabel"].pageDown,
-			"left": self.left,
-			"right": self.right
-		})
-
-		self["key_red"] = Button(_("Cancel"))
-
-		# get the branch to display from the Enigma version
-		try:
-			branch = "?sha=" + "-".join(about.getEnigmaVersionString().split("-")[3:])
-		except Exception as err:
-			branch = ""
-		branch_e2plugins = "?sha=python3"
-
-		self.project = 0
-		self.projects = [
-			("https://api.github.com/repos/68foxboris/my-py3/commits" + branch, "Enigma2", API_GITHUB),
-			("https://api.github.com/repos/openpli/openpli-oe-core/commits" + branch, "Openpli Oe Core", API_GITHUB),
-			("https://api.github.com/repos/openpli/enigma2-plugins/commits" + branch_e2plugins, "Enigma2 Plugins", API_GITHUB),
-			("https://api.github.com/repos/openpli/aio-grab/commits", "Aio Grab", API_GITHUB),
-			("https://api.github.com/repos/openpli/enigma2-plugin-extensions-epgimport/commits", "Plugin EPGImport", API_GITHUB),
-			("https://api.github.com/repos/littlesat/skin-PLiHD/commits", "Skin PLi HD", API_GITHUB),
-			("https://api.github.com/repos/E2OpenPlugins/e2openplugin-OpenWebif/commits", "OpenWebif", API_GITHUB),
-			("https://gitlab.openpli.org/api/v4/projects/5/repository/commits", "Hans settings", API_GITLAB)
-		]
-		self.cachedProjects = {}
-		self.Timer = eTimer()
-		self.Timer.callback.append(self.readGithubCommitLogs)
-		self.Timer.start(50, True)
-
-	def readGithubCommitLogs(self):
-		url = self.projects[self.project][0]
-		commitlog = ""
-		from datetime import datetime
-		from json import loads
-		from urllib.request import urlopen
-		try:
-			commitlog += 80 * '-' + '\n'
-			commitlog += url.split('/')[-2] + '\n'
-			commitlog += 80 * '-' + '\n'
-			try:
-				# OpenPli 5.0 uses python 2.7.11 and here we need to bypass the certificate check
-				from ssl import _create_unverified_context
-				log = loads(urlopen(url, timeout=5, context=_create_unverified_context()).read())
-			except:
-				log = loads(urlopen(url, timeout=5).read())
-
-			if self.projects[self.project][2] == API_GITHUB:
-				for c in log:
-					creator = c['commit']['author']['name']
-					title = c['commit']['message']
-					date = datetime.strptime(c['commit']['committer']['date'], '%Y-%m-%dT%H:%M:%SZ').strftime('%x %X')
-					commitlog += date + ' ' + creator + '\n' + title + 2 * '\n'
-			elif self.projects[self.project][2] == API_GITLAB:
-				for c in log:
-					creator = c['author_name']
-					title = c['title']
-					date = datetime.strptime(c['committed_date'], '%Y-%m-%dT%H:%M:%S.000%z').strftime('%x %X')
-					commitlog += date + ' ' + creator + '\n' + title + 2 * '\n'
-
-			self.cachedProjects[self.projects[self.project][1]] = commitlog
-		except Exception as err:
-			commitlog += _("Currently the commit log cannot be retrieved - please try later again.")
-		self["AboutScrollLabel"].setText(commitlog)
-
-	def updateCommitLogs(self):
-		if self.projects[self.project][1] in self.cachedProjects:
-			self["AboutScrollLabel"].setText(self.cachedProjects[self.projects[self.project][1]])
-		else:
-			self["AboutScrollLabel"].setText(_("Please wait"))
-			self.Timer.start(50, True)
-
-	def left(self):
-		self.project = self.project == 0 and len(self.projects) - 1 or self.project - 1
-		self.updateCommitLogs()
-
-	def right(self):
-		self.project = self.project != len(self.projects) - 1 and self.project + 1 or 0
-		self.updateCommitLogs()
-
-	def doNothing(self):
-		pass
-
-
-class MemoryInfo(Screen):
-	def __init__(self, session):
-		Screen.__init__(self, session)
-
-		self["actions"] = ActionMap(["SetupActions", "ColorActions"], {
-			"cancel": self.close,
-			"ok": self.getMemoryInfo,
-			"green": self.getMemoryInfo,
-			"blue": self.clearMemory
-		})
-
-		self["key_red"] = Label(_("Cancel"))
-		self["key_green"] = Label(_("Refresh"))
-		self["key_blue"] = Label(_("Clear"))
-		self['lmemtext'] = Label()
-		self['lmemvalue'] = Label()
-		self['rmemtext'] = Label()
-		self['rmemvalue'] = Label()
-		self['pfree'] = Label()
-		self['pused'] = Label()
-		self["slide"] = ProgressBar()
-		self["slide"].setValue(100)
-
-		self["params"] = MemoryInfoSkinParams()
-
-		self['info'] = Label(_("This info is for developers only.\nFor normal users it is not relevant.\nPlease don't panic if you see values displayed looking suspicious!"))
-
-		self.setTitle(_("Memory Info"))
-		self.onLayoutFinish.append(self.getMemoryInfo)
-
-	def getMemoryInfo(self):
-		try:
-			ltext = rtext = ""
-			lvalue = rvalue = ""
-			mem = 1
-			free = 0
-			rows_in_column = self["params"].rows_in_column
-			for i, line in enumerate(open('/proc/meminfo', 'r')):
-				s = line.strip().split(None, 2)
-				if len(s) == 3:
-					name, size, units = s
-				elif len(s) == 2:
-					name, size = s
-					units = ""
-				else:
-					continue
-				if name.startswith("MemTotal"):
-					mem = int(size)
-				if name.startswith("MemFree") or name.startswith("Buffers") or name.startswith("Cached"):
-					free += int(size)
-				if i < rows_in_column:
-					ltext += "".join((name, "\n"))
-					lvalue += "".join((size, " ", units, "\n"))
-				else:
-					rtext += "".join((name, "\n"))
-					rvalue += "".join((size, " ", units, "\n"))
-			self['lmemtext'].setText(ltext)
-			self['lmemvalue'].setText(lvalue)
-			self['rmemtext'].setText(rtext)
-			self['rmemvalue'].setText(rvalue)
-			self["slide"].setValue(int(100.0 * (mem - free) / mem + 0.25))
-			self['pfree'].setText("%.1f %s" % (100. * free / mem, '%'))
-			self['pused'].setText("%.1f %s" % (100. * (mem - free) / mem, '%'))
-		except Exception as err:
-			print("[About] getMemoryInfo FAIL:", e)
-
-	def clearMemory(self):
-		eConsoleAppContainer().execute("sync")
-		open("/proc/sys/vm/drop_caches", "w").write("3")
-		self.getMemoryInfo()
-
-
-class MemoryInfoSkinParams(GUIComponent):
-	def __init__(self):
-		GUIComponent.__init__(self)
-		self.rows_in_column = 25
-
-	def applySkin(self, desktop, screen):
-		if self.skinAttributes != None:
-			attribs = []
-			for (attrib, value) in self.skinAttributes:
-				if attrib == "rowsincolumn":
-					self.rows_in_column = int(value)
-			self.skinAttributes = attribs
-			applySkin = GUIComponent
-		return applySkin()
-
-	GUI_WIDGET = eLabel
-
-
-class Troubleshoot(Screen):
-	def __init__(self, session):
-		Screen.__init__(self, session)
-		self.setTitle(_("Troubleshoot"))
-		self["AboutScrollLabel"] = ScrollLabel(_("Please wait"))
-		self["key_red"] = Button()
-		self["key_green"] = Button()
-
-		self["actions"] = ActionMap(["OkCancelActions", "DirectionActions", "ColorActions"], {
-			"cancel": self.close,
-			"up": self["AboutScrollLabel"].pageUp,
-			"down": self["AboutScrollLabel"].pageDown,
-			"moveUp": self["AboutScrollLabel"].homePage,
-			"moveDown": self["AboutScrollLabel"].endPage,
-			"left": self.left,
-			"right": self.right,
-			"red": self.red,
-			"green": self.green
-		})
-
-		self.container = eConsoleAppContainer()
-		self.container.appClosed.append(self.appClosed)
-		self.container.dataAvail.append(self.dataAvail)
-		self.commandIndex = 0
-		self.updateOptions()
-		self.onLayoutFinish.append(self.run_console)
-
-	def left(self):
-		self.commandIndex = (self.commandIndex - 1) % len(self.commands)
-		self.updateKeys()
-		self.run_console()
-
-	def right(self):
-		self.commandIndex = (self.commandIndex + 1) % len(self.commands)
-		self.updateKeys()
-		self.run_console()
-
-	def red(self):
-		if self.commandIndex >= self.numberOfCommands:
-			self.session.openWithCallback(self.removeAllLogfiles, MessageBox, _("Do you want to remove all the crash logfiles"), default=False)
-		else:
-			self.close()
-
-	def green(self):
-		if self.commandIndex >= self.numberOfCommands:
-			try:
-				remove(self.commands[self.commandIndex][4:])
-			except (IOError, OSError) as err:
-				pass
-			self.updateOptions()
-		self.run_console()
-
-	def removeAllLogfiles(self, answer):
-		if answer:
-			for fileName in self.getLogFilesList():
-				try:
-					remove(fileName)
-				except (IOError, OSError) as err:
-					pass
-			self.updateOptions()
-			self.run_console()
-
-	def appClosed(self, retval):
-		if retval:
-			self["AboutScrollLabel"].setText(_("An error occurred - Please try again later"))
-
-	def dataAvail(self, data):
-		self["AboutScrollLabel"].appendText(data.decode())
-
-	def run_console(self):
-		self["AboutScrollLabel"].setText("")
-		self.setTitle("%s - %s" % (_("Troubleshoot"), self.titles[self.commandIndex]))
-		command = self.commands[self.commandIndex]
-		if command.startswith("cat "):
-			try:
-				self["AboutScrollLabel"].setText(open(command[4:], "r").read())
-			except:
-				self["AboutScrollLabel"].setText(_("Logfile does not exist anymore"))
-		else:
-			try:
-				if self.container.execute(command):
-					raise Exception("failed to execute: " + command)
-			except Exception as err:
-				self["AboutScrollLabel"].setText("%s\n%s" % (_("An error occurred - Please try again later"), e))
-
-	def cancel(self):
-		self.container.appClosed.remove(self.appClosed)
-		self.container.dataAvail.remove(self.dataAvail)
-		self.container = None
-		self.close()
-
-	def getDebugFilesList(self):
-		import glob
-		return [x for x in sorted(glob.glob("/home/root/logs/enigma2_debug_*.log"), key=lambda x: isfile(x) and getmtime(x))]
-
-	def getLogFilesList(self):
-		import glob
-		home_root = "/home/root/logs/enigma2_crash.log"
-		tmp = "/tmp/enigma2_crash.log"
-		return [x for x in sorted(glob.glob("/mnt/hdd/*.log"), key=lambda x: isfile(x) and getmtime(x))] + (isfile(home_root) and [home_root] or []) + (isfile(tmp) and [tmp] or [])
-
-	def updateOptions(self):
-		self.titles = ["dmesg", "ifconfig", "df", "top", "ps", "messages"]
-		self.commands = ["dmesg", "ifconfig", "df -h", "top -n 1", "ps -l", "cat /var/volatile/log/messages"]
-		install_log = "/home/root/autoinstall.log"
-		if isfile(install_log):
-				self.titles.append("%s" % install_log)
-				self.commands.append("cat %s" % install_log)
-		self.numberOfCommands = len(self.commands)
-		fileNames = self.getLogFilesList()
-		if fileNames:
-			totalNumberOfLogfiles = len(fileNames)
-			logfileCounter = 1
-			for fileName in reversed(fileNames):
-				self.titles.append("logfile %s (%s/%s)" % (fileName, logfileCounter, totalNumberOfLogfiles))
-				self.commands.append("cat %s" % (fileName))
-				logfileCounter += 1
-		fileNames = self.getDebugFilesList()
-		if fileNames:
-			totalNumberOfLogfiles = len(fileNames)
-			logfileCounter = 1
-			for fileName in reversed(fileNames):
-				self.titles.append("debug log %s (%s/%s)" % (fileName, logfileCounter, totalNumberOfLogfiles))
-				self.commands.append("tail -n 2500 %s" % (fileName))
-				logfileCounter += 1
-		self.commandIndex = min(len(self.commands) - 1, self.commandIndex)
-		self.updateKeys()
-
-	def updateKeys(self):
-		self["key_red"].setText(_("Cancel") if self.commandIndex < self.numberOfCommands else _("Remove all logfiles"))
-		self["key_green"].setText(_("Refresh") if self.commandIndex < self.numberOfCommands else _("Remove this logfile"))
-	def doNothing(self):
-		pass

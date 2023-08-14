@@ -66,7 +66,14 @@ def getImageVersionString():
 
 
 def getFlashDateString():
-	return _("Unknown")
+	try:
+		tm = localtime(stat("/boot").st_ctime)
+		if tm.tm_year >= 2011:
+			return strftime(_("%Y-%m-%d"), tm)
+		else:
+			return _("Unknown")
+	except:
+		return _("Unknown")
 
 
 def getBuildDateString():
@@ -223,10 +230,16 @@ def getChipSetNumber():
 
 
 def getCPUBrand():
-	if SystemInfo["HiSilicon"]:
+	if BoxInfo.getItem("AmlogicFamily"):
+		return _("Amlogic")
+	elif BoxInfo.getItem("HiSilicon"):
 		return _("HiSilicon")
-	else:
+	elif socfamily.startswith("smp"):
+		return _("Sigma Designs")
+	elif socfamily.startswith("bcm") or BoxInfo.getItem("brand") == "rpi":
 		return _("Broadcom")
+	print("[About] No CPU brand?")
+	return _("Undefined")
 
 
 def getCPUArch():
