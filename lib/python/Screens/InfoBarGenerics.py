@@ -2,6 +2,7 @@
 from Screens.ChannelSelection import ChannelSelection, BouquetSelector, SilentBouquetSelector
 
 from Components.ActionMap import ActionMap, HelpableActionMap, HelpableNumberActionMap, NumberActionMap
+from Components.AVSwitch import AVSwitch
 from Components.Harddisk import harddiskmanager
 from Components.Input import Input
 from Components.Label import Label
@@ -51,9 +52,6 @@ import itertools
 import datetime
 
 from RecordTimer import RecordTimerEntry, RecordTimer, findSafeRecordPath
-
-from Components.AVSwitch import AVSwitch
-iAVSwitch = AVSwitch()
 
 # hack alert!
 from Screens.Menu import MainMenu, mdom
@@ -3179,45 +3177,27 @@ class InfoBarAspectSelection:
 
 	def aspectSelection(self):
 		selection = 0
-		if SystemInfo["AmlogicFamily"]:
-			aspectList = [
-				(_("Resolution"), "resolution"),
-				("--", ""),
-				(_("Normal"), "0"),
-				(_("Full Stretch"), "1"),
-				(_("4:3"), "2"),
-				(_("16:9"), "3"),
-				(_("Non-Linear"), "4"),
-				(_("Normal No ScaleUp"), "5"),
-				(_("4:3 Ignore"), "6"),
-				(_("4:3 Letterbox"), "7"),
-				(_("4:3 PanScan"), "8"),
-				(_("4:3 Combined"), "9"),
-				(_("16:9 Ignore"), "10"),
-				(_("16:9 Letterbox"), "11"),
-				(_("16:9 PanScan"), "12"),
-				(_("16:9 Combined"), "13")
-			]
-		else:
-			aspectList = [
-				(_("Resolution"), "resolution"),
-				("--", ""),
-				(_("4:3 Letterbox"), "0"),
-				(_("4:3 PanScan"), "1"),
-				(_("16:9"), "2"),
-				(_("16:9 Always"), "3"),
-				(_("16:10 Letterbox"), "4"),
-				(_("16:10 PanScan"), "5"),
-				(_("16:9 Letterbox"), "6")
-			]
+		aspectList = [
+			(_("Resolution"), "resolution"),
+			("--", ""),
+			(_("4:3 Letterbox"), "0"),
+			(_("4:3 PanScan"), "1"),
+			(_("16:9"), "2"),
+			(_("16:9 Always"), "3"),
+			(_("16:10 Letterbox"), "4"),
+			(_("16:10 PanScan"), "5"),
+			(_("16:9 Letterbox"), "6")
+		]
+
 		keys = ["green", "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+		iAVSwitch = AVSwitch()
 		aspect = iAVSwitch.getAspectRatioSetting()
 		selection = 0
 		for item in range(len(aspectList)):
 			if aspectList[item][1] == aspect:
 				selection = item
 				break
-		self.session.openWithCallback(self.aspectSelected, ChoiceBox, text=_("Please select an aspect ratio..."), list=tlist, selection=selection, keys=keys)
+		self.session.openWithCallback(self.aspectSelected, ChoiceBox, title=_("Please select an aspect ratio..."), list=aspectList, keys=keys, selection=selection)
 
 	def aspectSelected(self, aspect):
 		if not aspect is None:
@@ -3227,10 +3207,12 @@ class InfoBarAspectSelection:
 				elif aspect[1] == "resolution":
 					self.ExGreen_toggleGreen()
 				else:
+					iAVSwitch = AVSwitch()
 					iAVSwitch.setAspectRatio(int(aspect[1]))
 					self.ExGreen_doHide()
 		else:
 			self.ExGreen_doHide()
+		return
 
 
 class InfoBarResolutionSelection:
