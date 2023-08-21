@@ -35,8 +35,11 @@
 	-->
 
 	<map context="HelpActions">
-		<key id="KEY_HELP" mapto="displayHelp" flags="m" />
+		<key id="KEY_EXIT" mapto="cancel" flags="m" />
+		<key id="KEY_OK" mapto="select" flags="m" />
+		<!-- <key id="KEY_HELP" mapto="displayHelp" flags="m" /> -->
 		<!-- <key id="KEY_HELP" mapto="DISPLAYHELP" flags="b" /> -->
+		<key id="KEY_HELP" mapto="displayHelp" flags="b" />
 		<key id="KEY_HELP" mapto="displayHelpLong" flags="l" />
 		<!-- Keyboard specific buttons -->
 		<key id="KEY_ESC" mapto="cancel" flags="m" />
@@ -85,6 +88,7 @@
 		<key id="KEY_FASTFORWARD" mapto="last" flags="m" />
 		<key id="KEY_DOWN" mapto="down" flags="mr" />
 		<key id="KEY_CHANNELDOWN" mapto="pageDown" flags="mr" />
+		<key id="KEY_FASTFORWARD" mapto="bottom" flags="m" />
 		<!--
 		<key id="KEY_FASTFORWARD" mapto="bottom" flags="m" />
 		-->
@@ -121,6 +125,32 @@
 		<key id="KEY_KP7" mapto="7" flags="m" />
 		<key id="KEY_KP8" mapto="8" flags="m" />
 		<key id="KEY_KP9" mapto="9" flags="m" />
+	</map>
+
+	<map context="SelectCancelActions">
+		<key id="KEY_OK" mapto="select" flags="m" />
+		<key id="KEY_OK" mapto="SELECT" flags="b" />
+		<key id="KEY_OK" mapto="SELECTLong" flags="l" />
+		<key id="KEY_GREEN" mapto="select" flags="m" />
+		<key id="KEY_GREEN" mapto="SELECT" flags="b" />
+		<key id="KEY_GREEN" mapto="SELECTLong" flags="l" />
+		<key id="KEY_EXIT" mapto="cancel" flags="b" />
+		<key id="KEY_RED" mapto="cancel" flags="b" />
+		<key id="KEY_EXIT" mapto="close" flags="l" />
+		<key id="KEY_RED" mapto="close" flags="l" />
+		<!-- Keyboard specific buttons -->
+		<key id="KEY_ENTER" mapto="select" flags="m" />
+		<key id="KEY_ENTER" mapto="SELECT" flags="b" />
+		<key id="KEY_ENTER" mapto="SELECTLong" flags="l" />
+		<key id="KEY_F5" mapto="select" flags="m" />
+		<key id="KEY_F5" mapto="SELECT" flags="b" />
+		<key id="KEY_F5" mapto="SELECTLong" flags="l" />
+		<key id="KEY_ESC" mapto="cancel" flags="b" />
+		<key id="KEY_F6" mapto="cancel" flags="b" />
+		<key id="KEY_ESC" mapto="close" flags="l" />
+		<key id="KEY_F6" mapto="close" flags="l" />
+		<key id="\x0a" mapto="select" flags="m" />
+		<key id="\x1b" mapto="cancel" flags="m" />
 	</map>
 
 	<map context="TextEditActions">
@@ -773,6 +803,16 @@
 		<key id="KEY_F1" mapto="f1" flags="m" />
 		<key id="KEY_F2" mapto="f2" flags="m" />
 		<key id="KEY_F3" mapto="f3" flags="m" />
+	</map>
+
+	<map context="DNSSettingsActions">
+		<key id="KEY_YELLOW" mapto="dnsAdd" flags="m" />
+		<key id="KEY_BLUE" mapto="dnsRemove" flags="m" />
+		<key id="KEY_TV" mapto="moveUp" flags="mr" />
+		<key id="KEY_RADIO" mapto="moveDown" flags="mr" />
+		<!-- Keyboard specific buttons -->
+		<key id="KEY_F7" mapto="dnsAdd" flags="m" />
+		<key id="KEY_F8" mapto="dnsRemove" flags="m" />
 	</map>
 
 	<map context="MsgBoxActions">
