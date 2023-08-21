@@ -3,12 +3,12 @@ from glob import glob
 from json import loads
 from locale import format_string
 from os import listdir, popen, remove, statvfs
-from os.path import getmtime, isfile, isdir, join as pathjoin, join, basename
+from os.path import getmtime, isfile, isdir, join, basename
 from time import localtime, strftime, strptime
 from urllib.request import urlopen
 from enigma import eConsoleAppContainer, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
 from skin import parameters
-from Components.About import about
+from Components.About import about, getChipSetString
 from Components.ActionMap import ActionMap, HelpableActionMap
 
 from Components.config import config
@@ -44,6 +44,7 @@ platform = BoxInfo.getItem("platform")
 DISPLAY_BRAND = BoxInfo.getItem("displaybrand")
 DISPLAY_MODEL = BoxInfo.getItem("displaymodel")
 rcname = BoxInfo.getItem("rcname")
+procType = getBoxProcType()
 procModel = getBoxProc()
 fpVersion = getFPVersion()
 
@@ -82,15 +83,14 @@ def getBoxProcTypeName():
 		"21": _("Twin Hybrid"),
 		"22": _("Hybrid Tuner")
 	}
-	procType = getBoxProcType()
 	if procType == "unknown":
 		return _("Unknown")
-	return "%s  -  %s" % (procType, boxProcTypes.get(procType, _("Unknown")))
+	return "%s - %s" % (procType, boxProcTypes.get(procType, _("Unknown")))
 
 
 class InformationBase(Screen, HelpableScreen):
 	def __init__(self, session):
-		Screen.__init__(self, session, mandatoryWidgets=["information"])
+		Screen.__init__(self, session)
 		HelpableScreen.__init__(self)
 		self.skinName = ["Information"]
 		self["information"] = ScrollLabel()
@@ -103,12 +103,10 @@ class InformationBase(Screen, HelpableScreen):
 			"ok": (self.refreshInformation, _("Refresh the screen")),
 			"top": (self["information"].moveTop, _("Move to first line / screen")),
 			"pageUp": (self["information"].pageUp, _("Move up a screen")),
-			"up": (self["information"].pageUp, _("Move up a screen")),
-			"down": (self["information"].pageDown, _("Move down a screen")),
+			"up": (self["information"].moveUp, _("Move up a line")),
+			"down": (self["information"].moveDown, _("Move down a line")),
 			"pageDown": (self["information"].pageDown, _("Move down a screen")),
-			"bottom": (self["information"].moveBottom, _("Move to last line / screen")),
-			"right": self.displayInformation,
-			"left": self.displayInformation,
+			"bottom": (self["information"].moveBottom, _("Move to last line / screen"))
 		}, prio=0, description=_("Common Information Actions"))
 		colors = parameters.get("InformationColors", (0x00ffffff, 0x00ffffff, 0x00ffffff, 0x00cccccc, 0x00cccccc, 0x00ffff00, 0x0000ffff))
 		if len(colors) == len(INFO_COLORS):
@@ -496,8 +494,8 @@ class ImageInformation(InformationBase):
 		else:
 			enigmaVersion = "%s (%s)" % (enigmaVersion[0], enigmaVersion[1].capitalize())
 		info.append(formatLine("P1", _("Enigma2 version"), enigmaVersion))
-		compileDate = str(BoxInfo.getItem("compiledate"))
-		info.append(formatLine("P1", _("Last update"), formatDate("%s%s%s" % (compileDate[:4], compileDate[4:6], compileDate[6:]))))
+		compiledate = str(BoxInfo.getItem("compiledate"))
+		info.append(formatLine("P1", _("Last update"), formatDate("%s%s%s" % (compiledate[:4], compiledate[4:6], compiledate[6:]))))
 		info.append(formatLine("P1", _("Enigma2 (re)starts"), config.misc.startCounter.value))
 		info.append(formatLine("P1", _("Enigma2 debug level"), eGetEnigmaDebugLvl()))
 		if isPluginInstalled("ServiceHisilicon") and not isPluginInstalled("ServiceMP3"):
@@ -523,7 +521,6 @@ class ImageInformation(InformationBase):
 		if BoxInfo.getItem("imagefs"):
 			info.append(formatLine("P1", _("Distribution file system"), BoxInfo.getItem("imagefs").strip()))
 		info.append(formatLine("P1", _("Feed URL"), BoxInfo.getItem("feedsurl")))
-		info.append(formatLine("P1", _("Compiled by"), BoxInfo.getItem("developername")))
 		info.append("")
 		info.append(formatLine("S", _("Software information")))
 		if self.extraSpacing:
@@ -534,12 +531,6 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("P1", _("Python version"), about.getPythonVersionString()))
 		info.append(formatLine("P1", _("GStreamer version"), about.getGStreamerVersionString().replace("GStreamer ", "")))
 		info.append(formatLine("P1", _("FFmpeg version"), about.getFFmpegVersionString()))
-		bootId = fileReadLine("/proc/sys/kernel/random/boot_id", source=MODULE_NAME)
-		if bootId:
-			info.append(formatLine("P1", _("Boot ID"), bootId))
-		uuId = fileReadLine("/proc/sys/kernel/random/uuid", source=MODULE_NAME)
-		if uuId:
-			info.append(formatLine("P1", _("UUID"), uuId))
 		info.append("")
 		info.append(formatLine("S", _("Boot information")))
 		if self.extraSpacing:
@@ -737,7 +728,7 @@ class NetworkInformation(InformationBase):
 	def __init__(self, session):
 		InformationBase.__init__(self, session)
 		self.setTitle(_("Network Information"))
-		self.skinName = ["NetworkInformation", "WlanStatus"]
+		self.skinName.insert(0, "NetworkInformation")
 		self["key_yellow"] = StaticText(_("WAN Geolocation"))
 		self["geolocationActions"] = HelpableActionMap(self, ["ColorActions"], {
 			"yellow": (self.useGeolocation, _("Use geolocation to get WAN information")),
@@ -804,7 +795,7 @@ class NetworkInformation(InformationBase):
 		info = []
 		if geolocationData.get("status", None) == "success":
 			info.append("")
-			info.append(formatLine("H", _("WAN connection information")))
+			info.append(formatLine("S", _("WAN connection information")))
 			isp = geolocationData.get("isp", None)
 			if isp:
 				ispOrg = geolocationData.get("org", None)
@@ -822,7 +813,7 @@ class NetworkInformation(InformationBase):
 		else:
 			info.append(_("Geolocation information cannot be retrieved, please try again later."))
 			info.append("")
-			info.append(_("Access to geolocation information requires an internet connection."))
+			info.append(_("Access to geolocation information requires an Internet connection."))
 		self.geolocationData = info
 		for callback in self.onInformationUpdated:
 			callback()
@@ -849,6 +840,8 @@ class NetworkInformation(InformationBase):
 		if retVal == 0:
 			capture = False
 			data = ""
+			if isinstance(result, bytes):
+				result = result.decode("UTF-8", "ignore")
 			for line in result.split("\n"):
 				if line.startswith("%s " % extraArgs):
 					capture = True
@@ -900,6 +893,8 @@ class NetworkInformation(InformationBase):
 		if retVal == 0:
 			capture = False
 			data = ""
+			if isinstance(result, bytes):
+				result = result.decode("UTF-8", "ignore")
 			for line in result.split("\n"):
 				if line.startswith("%s " % extraArgs):
 					capture = True
@@ -937,6 +932,8 @@ class NetworkInformation(InformationBase):
 
 	def ethtoolInfoFinished(self, result, retVal, extraArgs):  # This temporary code borrowed and adapted from the new but unreleased Network.py!
 		if retVal == 0:
+			if isinstance(result, bytes):
+				result = result.decode("UTF-8", "ignore")
 			for line in result.split("\n"):
 				if "Speed:" in line:
 					self.interfaceData[extraArgs]["speed"] = line.split(":")[1][:-4].strip()
@@ -953,13 +950,15 @@ class NetworkInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
+		info.append(formatLine("H", _("Network information")))
+		info.append("")
 		hostname = fileReadLine("/proc/sys/kernel/hostname", source=MODULE_NAME)
-		info.append(formatLine("H0H", _("Hostname"), hostname))
-		for interface in sorted(list(self.interfaceData.keys())):
+		info.append(formatLine("S0S", _("Hostname"), hostname))
+		for interface in sorted(self.interfaceData.keys()):
 			info.append("")
-			info.append(formatLine("H", _("Interface '%s'") % interface, iNetwork.getFriendlyAdapterName(interface)))
+			info.append(formatLine("S", _("Interface '%s'") % interface, iNetwork.getFriendlyAdapterName(interface)))
 			if "up" in self.interfaceData[interface]:
-				info.append(formatLine("P1", _("Status"), (_("Up") if self.interfaceData[interface]["up"] else _("Down"))))
+				info.append(formatLine("P1", _("Status"), (_("Up / Active") if self.interfaceData[interface]["up"] else _("Down / Inactive"))))
 				if self.interfaceData[interface]["up"]:
 					if "addr" in self.interfaceData[interface]:
 						info.append(formatLine("P1", _("IP address"), self.interfaceData[interface]["addr"]))
@@ -970,7 +969,10 @@ class NetworkInformation(InformationBase):
 					if "addr6" in self.interfaceData[interface]:
 						for addr6 in self.interfaceData[interface]["addr6"]:
 							addr, scope = addr6.split()
-							info.append(formatLine("P1", _("IPv6 address"), _("%s  -  Scope: %s") % (addr, scope)))
+							info.append(formatLine("P1", _("IPv6 address"), addr))
+							info.append(formatLine("P3V2", _("Scope"), scope))
+						info.append(formatLine("P1", _("IPv6 address"), "2003:0000:4021:4700:4270:0000:0000:8250/64"))
+						info.append(formatLine("P3V2", _("Scope"), "Global"))
 					if "mac" in self.interfaceData[interface]:
 						info.append(formatLine("P1", _("MAC address"), self.interfaceData[interface]["mac"]))
 					if "speed" in self.interfaceData[interface]:
@@ -992,15 +994,17 @@ class NetworkInformation(InformationBase):
 					if "accessPoint" in self.interfaceData[interface]:
 						info.append(formatLine("P1", _("Access point"), self.interfaceData[interface]["accessPoint"]))
 					if "bitrate" in self.interfaceData[interface]:
-						info.append(formatLine("P1", _("Bit rate"), self.interfaceData[interface]["bitrate"]))
+						info.append(formatLine("P1", _("Bitrate"), self.interfaceData[interface]["bitrate"]))
 					if "signalQuality" in self.interfaceData[interface]:
 						info.append(formatLine("P1", _("Signal quality"), self.interfaceData[interface]["signalQuality"]))
 					if "signalStrength" in self.interfaceData[interface]:
 						info.append(formatLine("P1", _("Signal strength"), self.interfaceData[interface]["signalStrength"]))
 			if "rxBytes" in self.interfaceData[interface] or "txBytes" in self.interfaceData[interface]:
 				info.append("")
-				info.append(formatLine("P1", _("Bytes received"), self.interfaceData[interface]["rxBytes"]))
-				info.append(formatLine("P1", _("Bytes sent"), self.interfaceData[interface]["txBytes"]))
+				rxBytes = int(self.interfaceData[interface]["rxBytes"].split(" ")[0])
+				txBytes = int(self.interfaceData[interface]["txBytes"].split(" ")[0])
+				info.append(formatLine("P1", _("Bytes received"), "%d (%s)" % (rxBytes, scaleNumber(rxBytes, style="Iec", format="%.1f"))))
+				info.append(formatLine("P1", _("Bytes sent"), "%d (%s)" % (txBytes, scaleNumber(txBytes, style="Iec", format="%.1f"))))
 		info += self.geolocationData
 		self["information"].setText("\n".join(info))
 
@@ -1013,26 +1017,37 @@ class ReceiverInformation(InformationBase):
 		self["key_yellow"] = StaticText(_("System"))
 		self["key_blue"] = StaticText(_("Debug Information"))
 		self["receiverActions"] = HelpableActionMap(self, ["InfoActions", "ColorActions"], {
-			"yellow": (self.showSystem, _("Show system information")),
+			"yellow": (self.showSystemInformation, _("Show system information")),
 			"blue": (self.showDebugInformation, _("Show debug log information"))
 		}, prio=0, description=_("Receiver Information Actions"))
 
-	def showSystem(self):
+	def showSystemInformation(self):
 		self.session.openWithCallback(self.informationWindowClosed, SystemInformation)
 
 	def showDebugInformation(self):
 		self.session.openWithCallback(self.informationWindowClosed, DebugInformation)
 
 	def displayInformation(self):
+		def findPackageRevision(package, packageList):
+			revision = None
+			data = [x for x in packageList if "-%s" % package in x]
+			if data:
+				data = data[0].split("-")
+				if len(data) >= 4:
+					revision = data[3]
+			return revision
+
 		info = []
-		info.append(formatLine("H", _("Hardware information")))
 		info.append("")
-		info.append(formatLine("P1", _("Build Brand"), BoxInfo.getItem("brand")))
+		info.append(formatLine("S", _("Hardware information")))
+		if self.extraSpacing:
+			info.append("")
 		platform = BoxInfo.getItem("platform")
 		info.append(formatLine("P1", _("Build Model"), model))
 		if platform != model:
 			info.append(formatLine("P1", _("Platform"), platform))
-		if procModel != model and procModel != "unknown":
+		procModel = getBoxProc()
+		if procModel != model:
 			info.append(formatLine("P1", _("Proc model"), procModel))
 		info.append(formatLine("P1", _("Hardware type"), getBoxProcTypeName().split("-")[0])) if getBoxProcTypeName() != _("Unknown") else ""
 		hwSerial = getHWSerial() if getHWSerial() != "unknown" else None
@@ -1048,39 +1063,48 @@ class ReceiverInformation(InformationBase):
 		fpVersion = getFPVersion()
 		if fpVersion and fpVersion != "unknown":
 			info.append(formatLine("P1", _("Front processor version"), fpVersion))
-		transcoding = _("Yes") if BoxInfo.getItem("transcoding") else _("MultiTranscoding") if BoxInfo.getItem("multitranscoding") else _("No")
-		info.append(formatLine("P1", _("Transcoding"), transcoding))
 		DemodVersion = getDemodVersion()
 		if DemodVersion and DemodVersion != "unknown":
 			info.append(formatLine("P1", _("Demod firmware version"), DemodVersion))
+		transcoding = _("Yes") if BoxInfo.getItem("transcoding") else _("MultiTranscoding") if BoxInfo.getItem("multitranscoding") else _("No")
+		info.append(formatLine("P1", _("Transcoding"), transcoding))
+		temp = about.getSystemTemperature()
+		if temp:
+			info.append(formatLine("P1", _("System temperature"), temp))
 		info.append("")
-		info.append(formatLine("H", _("Processor information")))
-		info.append("")
-		info.append(formatLine("P1", _("CPU"), about.getCPUInfoString()))
+		info.append(formatLine("S", _("Processor information")))
+		if self.extraSpacing:
+			info.append("")
+		cpu = about.getCPUInfoString()
+		info.append(formatLine("P1", _("CPU"), cpu[0]))
+		info.append(formatLine("P1", _("CPU speed/cores"), "%s %s" % (cpu[1], cpu[2])))
+		if cpu[3]:
+			info.append(formatLine("P1", _("CPU temperature"), cpu[3]))
 		info.append(formatLine("P1", _("CPU brand"), about.getCPUBrand()))
-		socfamily = BoxInfo.getItem("socfamily")
-		if socfamily:
-			info.append(formatLine("P1", _("SoC family"), socfamily))
+		socFamily = BoxInfo.getItem("socfamily")
+		if socFamily:
+			info.append(formatLine("P1", _("SoC family"), socFamily))
 		info.append(formatLine("P1", _("CPU architecture"), about.getCPUArch()))
-		fpu = BoxInfo.getItem("fpu")
-		if fpu:
-			info.append(formatLine("P1", _("FPU"), fpu))
+		if BoxInfo.getItem("fpu"):
+			info.append(formatLine("P1", _("FPU"), BoxInfo.getItem("fpu")))
 		if BoxInfo.getItem("architecture") == "aarch64":
 			info.append(formatLine("P1", _("MultiLib"), (_("Yes") if BoxInfo.getItem("multilib") else _("No"))))
 		info.append("")
-		info.append(formatLine("H", _("Remote control information")))
-		info.append("")
+		info.append(formatLine("S", _("Remote control information")))
+		if self.extraSpacing:
+			info.append("")
 		rcIndex = int(config.inputDevices.remotesIndex.value)
 		info.append(formatLine("P1", _("RC identification"), "%s  (Index: %d)" % (remoteControl.remotes[rcIndex][REMOTE_DISPLAY_NAME], rcIndex)))
 		rcName = remoteControl.remotes[rcIndex][REMOTE_NAME]
 		info.append(formatLine("P1", _("RC selected name"), rcName))
-		if rcname != rcName:
-			info.append(formatLine("P1", _("RC default name"), rcname))
-		sysType = remoteControl.remotes[rcIndex][REMOTE_RCTYPE]
-		info.append(formatLine("P1", _("RC selected type"), sysType))
-		rctype = BoxInfo.getItem("rctype")
-		if rctype != sysType:
-			info.append(formatLine("P1", _("RC default type"), rctype))
+		boxName = BoxInfo.getItem("rcname")
+		if boxName != rcName:
+			info.append(formatLine("P1", _("RC default name"), boxName))
+		rcType = remoteControl.remotes[rcIndex][REMOTE_RCTYPE]
+		info.append(formatLine("P1", _("RC selected type"), rcType))
+		boxType = BoxInfo.getItem("rctype")
+		if boxType != rcType:
+			info.append(formatLine("P1", _("RC default type"), boxType))
 		boxRcType = getBoxRCType()
 		if boxRcType:
 			if boxRcType == "unknown":
@@ -1088,7 +1112,7 @@ class ReceiverInformation(InformationBase):
 					boxRcType = _("Amlogic remote")
 				elif isfile("/usr/sbin/lircd"):
 					boxRcType = _("LIRC remote")
-			if boxRcType != sysType:
+			if boxRcType != rcType and boxRcType != "unknown":
 				info.append(formatLine("P1", _("RC detected type"), boxRcType))
 		customCode = fileReadLine("/proc/stb/ir/rc/customcode", source=MODULE_NAME)
 		if customCode:
@@ -1101,24 +1125,63 @@ class ReceiverInformation(InformationBase):
 		info.append(formatLine("S", _("Driver and kernel information")))
 		if self.extraSpacing:
 			info.append("")
-		info.append(formatLine("P1", _("Drivers version"), formatDate(BoxInfo.getItem("driversdate"))))
-		info.append(formatLine("P1", _("Kernel version"), BoxInfo.getItem("kernel")))
+		info.append(formatLine("P1", _("Drivers version"), about.getDriverInstalledDate()))
+		info.append(formatLine("P1", _("Kernel version"), about.getKernelVersionString()))
 		deviceId = fileReadLine("/proc/device-tree/amlogic-dt-id", source=MODULE_NAME)
 		if deviceId:
 			info.append(formatLine("P1", _("Device id"), deviceId))
 		givenId = fileReadLine("/proc/device-tree/le-dt-id", source=MODULE_NAME)
 		if givenId:
 			info.append(formatLine("P1", _("Given device id"), givenId))
+		if BoxInfo.getItem("HiSilicon"):
+			info.append("")
+			info.append(formatLine("S", _("HiSilicon specific information")))
+			if self.extraSpacing:
+				info.append("")
+			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
+			stdout, stderr = process.communicate()
+			if process.returncode == 0:
+				missing = True
+				packageList = stdout.split("\n")
+				revision = findPackageRevision("grab", packageList)
+				if revision and revision != "r0":
+					info.append(formatLine("P1", _("Grab"), revision))
+					missing = False
+				revision = findPackageRevision("hihalt", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Halt"), revision))
+					missing = False
+				revision = findPackageRevision("libs", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Libs"), revision))
+					missing = False
+				revision = findPackageRevision("partitions", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Partitions"), revision))
+					missing = False
+				revision = findPackageRevision("reader", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Reader"), revision))
+					missing = False
+				revision = findPackageRevision("showiframe", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Showiframe"), revision))
+					missing = False
+				if missing:
+					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
+			else:
+				info.append(formatLine("P1", _("Package information currently not available!")))
 		info.append("")
-		info.append(formatLine("H", _("Tuner information")))
-		info.append("")
-		nims = nimmanager.nimListCompressed()
-		for count in range(len(nims)):
-			tuner, type = [x.strip() for x in nims[count].split(":", 1)]
+		info.append(formatLine("S", _("Tuner information")))
+		if self.extraSpacing:
+			info.append("")
+		for count, nim in enumerate(nimmanager.nimListCompressed()):
+			tuner, type = [x.strip() for x in nim.split(":", 1)]
 			info.append(formatLine("P1", tuner, type))
 		info.append("")
-		info.append(formatLine("H", _("Storage information")))
-		info.append("")
+		info.append(formatLine("S", _("Storage / Drive information")))
+		if self.extraSpacing:
+			info.append("")
 		stat = statvfs("/")
 		diskSize = stat.f_blocks * stat.f_frsize
 		info.append(formatLine("P1", _("Internal flash"), "%s  (%s)" % (scaleNumber(diskSize), scaleNumber(diskSize, "Iec"))))
@@ -1132,12 +1195,13 @@ class ReceiverInformation(InformationBase):
 		else:
 			info.append(formatLine("H", _("No hard disks detected.")))
 		info.append("")
-		info.append(formatLine("H", _("Network information")))
-		info.append("")
+		info.append(formatLine("S", _("Network information")))
+		if self.extraSpacing:
+			info.append("")
 		for x in about.GetIPsFromNetworkInterfaces():
 			info.append(formatLine("P1", x[0], x[1]))
 		info.append("")
-		info.append(formatLine("H", _("Uptime"), about.getBoxUptime()))
+		info.append(formatLine("S", _("Uptime"), about.getBoxUptime()))
 		self["information"].setText("\n".join(info))
 
 	def getSummaryInformation(self):
@@ -1147,8 +1211,8 @@ class ReceiverInformation(InformationBase):
 class StorageInformation(InformationBase):
 	def __init__(self, session):
 		InformationBase.__init__(self, session)
-		self.setTitle(_("Storage Information"))
-		self.skinName.insert(0, "StorageInformation")
+		self.setTitle(_("Storage / Disk Information"))
+		self.skinName.insert(0, "StorageDiskInformation")
 		self["information"].setText(_("Retrieving network server information, please wait..."))
 		self.mountInfo = []
 
@@ -1171,7 +1235,7 @@ class StorageInformation(InformationBase):
 				self.mountInfo.append(data)
 		if isdir("/media/autofs"):
 			for entry in sorted(listdir("/media/autofs")):
-				path = pathjoin("/media/autofs", entry)
+				path = join("/media/autofs", entry)
 				keep = True
 				for data in self.mountInfo:
 					if data[5] == path:
@@ -1184,12 +1248,12 @@ class StorageInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
-		info.append(formatLine("H", _("Detected storage devices")))
+		info.append(formatLine("H", _("Storage / Disk information")))
 		info.append("")
 		partitions = sorted(harddiskmanager.getMountedPartitions(), key=lambda partitions: partitions.device or "")
 		for partition in partitions:
 			if partition.mountpoint == "/":
-				info.append(formatLine("H1", "/dev/root", partition.description))
+				info.append(formatLine("S1", "/dev/root", partition.description))
 				stat = statvfs("/")
 				diskSize = stat.f_blocks * stat.f_frsize
 				diskFree = stat.f_bfree * stat.f_frsize
@@ -1205,13 +1269,13 @@ class StorageInformation(InformationBase):
 			for hdd in hddList:
 				hdd = hdd[1]
 				info.append("")
-				info.append(formatLine("H1", hdd.getDeviceName(), hdd.bus()))
+				info.append(formatLine("S1", hdd.getDeviceName(), hdd.bus()))
 				info.append(formatLine("P2", _("Model"), hdd.model()))
 				diskSize = hdd.diskSize() * 1000000
 				info.append(formatLine("P2", _("Capacity"), "%s  (%s)" % (scaleNumber(diskSize), scaleNumber(diskSize, "Iec"))))
 				info.append(formatLine("P2", _("Sleeping"), (_("Yes") if hdd.isSleeping() else _("No"))))
 				for partition in partitions:
-					if partition.device and pathjoin("/dev", partition.device).startswith(hdd.getDeviceName()):
+					if partition.device and join("/dev", partition.device).startswith(hdd.getDeviceName()):
 						info.append(formatLine("P2", _("Partition"), partition.device))
 						stat = statvfs(partition.mountpoint)
 						diskSize = stat.f_blocks * stat.f_frsize
@@ -1223,13 +1287,16 @@ class StorageInformation(InformationBase):
 						info.append(formatLine("P3", _("Free"), "%s  (%s)" % (scaleNumber(diskFree), scaleNumber(diskFree, "Iec"))))
 		else:
 			info.append("")
-			info.append(formatLine("H1", _("No hard disks detected.")))
+			info.append(formatLine("S1", _("No storage or hard disks detected.")))
 		info.append("")
-		info.append(formatLine("H", _("Detected network servers")))
+		info.append(formatLine("H", "%s %s %s" % (_("Network storage on"), DISPLAY_BRAND, DISPLAY_MODEL)))
+		info.append("")
 		if self.mountInfo:
+			count = 0
 			for data in self.mountInfo:
-				info.append("")
-				info.append(formatLine("H1", data[5]))
+				if count:
+					info.append("")
+				info.append(formatLine("S1", data[5]))
 				if data[0]:
 					info.append(formatLine("P2", _("Network address"), data[0]))
 					info.append(formatLine("P2", _("Capacity"), data[1]))
@@ -1237,10 +1304,65 @@ class StorageInformation(InformationBase):
 					info.append(formatLine("P2", _("Free"), data[3]))
 				else:
 					info.append(formatLine("P2", _("Not currently mounted.")))
+				count += 1
 		else:
-			info.append("")
-			info.append(formatLine("P1", _("No network servers detected.")))
+			info.append(formatLine("S1", _("No network storage detected.")))
 		self["information"].setText("\n".join(info))
+
+
+class StreamingInformation(InformationBase):
+	def __init__(self, session):
+		InformationBase.__init__(self, session)
+		self.setTitle(_("Streaming Tuner Information"))
+		self.skinName.insert(0, "StreamingInformation")
+		self["key_yellow"] = StaticText(_("Stop Auto Refresh"))
+		self["key_blue"] = StaticText()
+		self["refreshActions"] = HelpableActionMap(self, ["ColorActions"], {
+			"yellow": (self.toggleAutoRefresh, _("Toggle auto refresh On/Off"))
+		}, prio=0, description=_("Streaming Information Actions"))
+		self["streamActions"] = HelpableActionMap(self, ["ColorActions"], {
+			"blue": (self.stopStreams, _("Stop streams"))
+		}, prio=0, description=_("Streaming Information Actions"))
+		self["streamActions"].setEnabled(False)
+		self.autoRefresh = True
+
+	def toggleAutoRefresh(self):
+		self.autoRefresh = not self.autoRefresh
+		self["key_yellow"].setText(_("Stop Auto Refresh") if self.autoRefresh else _("Start Auto Refresh"))
+
+	def stopStreams(self):
+		if eStreamServer.getInstance().getConnectedClients():
+			eStreamServer.getInstance().stopStream()
+		if eRTSPStreamServer.getInstance().getConnectedClients():
+			eRTSPStreamServer.getInstance().stopStream()
+
+	def displayInformation(self):
+		info = []
+		info.append(formatLine("H", _("Streaming tuner information for %s %s") % getBoxDisplayName()))
+		info.append("")
+		clientList = eStreamServer.getInstance().getConnectedClients() + eRTSPStreamServer.getInstance().getConnectedClients()
+		if clientList:
+			self["key_blue"].setText(_("Stop Streams"))
+			self["streamActions"].setEnabled(True)
+			for count, client in enumerate(clientList):
+				# print("[Information] DEBUG: Client data '%s'." % str(client))
+				if count:
+					info.append("")
+				info.append(formatLine("S", "%s  -  %d" % (_("Client"), count + 1)))
+				info.append(formatLine("P1", _("Service reference"), client[1]))
+				info.append(formatLine("P1", _("Service name"), ServiceReference(client[1]).getServiceName() or _("Unknown service!")))
+				info.append(formatLine("P1", _("IP address"), client[0][7:] if client[0].startswith("::ffff:") else client[0]))
+				info.append(formatLine("P1", _("Transcoding"), _("Yes") if client[2] else _("No")))
+		else:
+			self["key_blue"].setText("")
+			self["streamActions"].setEnabled(False)
+			info.append(formatLine("P1", _("No tuners are currently streaming.")))
+		self["information"].setText("\n".join(info))
+		if self.autoRefresh:
+			self.informationTimer.start(AUTO_REFRESH_TIME)
+
+	def getSummaryInformation(self):
+		return "Streaming Tuner Information"
 
 
 class SystemInformation(InformationBase):
@@ -1338,6 +1460,7 @@ class TranslationInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
+		info.append("")
 		translateInfo = _("TRANSLATOR_INFO")
 		if translateInfo != "TRANSLATOR_INFO":
 			info.append(formatLine("H", _("Translation information")))
@@ -1373,14 +1496,6 @@ class TunerInformation(InformationBase):
 		nims = nimmanager.nimList()
 		descList = []
 		curIndex = -1
-		if fileExists("/usr/bin/dvb-fe-tool"):
-			import time
-			try:
-				cmd = 'dvb-fe-tool > /tmp/dvbfetool.txt ; dvb-fe-tool -f 1 >> /tmp/dvbfetool.txt ; cat /proc/bus/nim_sockets >> /tmp/dvbfetool.txt'
-				res = Console().ePopen(cmd)
-				time.sleep(0.1)
-			except:
-				pass
 		for count in range(len(nims)):
 			data = nims[count].split(":")
 			idx = data[0].strip("Tuner").strip()
@@ -1396,10 +1511,11 @@ class TunerInformation(InformationBase):
 				curIndex += 1
 			count += 1
 		for count in range(len(descList)):
-			data = descList[count]["start"] if descList[count]["start"] == descList[count]["end"] else ("%s - %s" % (descList[count]["start"], descList[count]["end"]))
-			info.append(formatLine("H", "Tuner %s:" % data))
-			info.append(formatLine("", "%s" % descList[count]["desc"]))
-		info.append(formatLine("H", _("Type Tuner"), "%s" % getTypeTuner())) if getTypeTuner() else ""
+			data = descList[count]["start"] if descList[count]["start"] == descList[count]["end"] else ("%s-%s" % (descList[count]["start"], descList[count]["end"]))
+			info.append(formatLine("P1", "Tuner %s:" % data))
+			data = descList[count]["start"] if descList[count]["start"] == descList[count]["end"] else ("%s-%s" % (descList[count]["start"], descList[count]["end"]))
+			info.append(formatLine("P2", "%s" % descList[count]["desc"]))
+		info.append(formatLine("P1", _("Tuner type"), "%s" % getBoxProcTypeName().split("-")[1])) if getBoxProcTypeName() != _("Unknown") else ""
 		# info.append("")
 		# info.append(formatLine("H", _("Logical tuners")))  # Each tuner is a listed separately even if the hardware is common.
 		# info.append("")
@@ -1408,25 +1524,19 @@ class TunerInformation(InformationBase):
 		# 	tuner, type = [x.strip() for x in nims[count].split(":", 1)]
 		# 	info.append(formatLine("P1", tuner, type))
 		info.append("")
-		numSlots = 0
+		info.append(formatLine("", _("DVB API"), about.getDVBAPI()))
 		dvbFeToolTxt = ""
-		nimSlots = nimmanager.getSlotCount()
-		for nim in range(nimSlots):
+		for nim in range(nimmanager.getSlotCount()):
 			dvbFeToolTxt += eDVBResourceManager.getInstance().getFrontendCapabilities(nim)
-		dvbApiVersion = dvbFeToolTxt.splitlines()[0].replace("DVB API version: ", "").strip()
-		info.append(formatLine("", _("DVB API"), _("New"))) if float(dvbApiVersion) > 5 else info.append(formatLine("", _("DVB API"), _("Old")))
+		dvbApiVersion = dvbFeToolTxt.splitlines()[0].replace("DVB API version: ", "").strip() if dvbFeToolTxt else _("N/A")
 		info.append(formatLine("", _("DVB API version"), dvbApiVersion))
 		info.append("")
 		info.append(formatLine("", _("Transcoding"), (_("Yes") if BoxInfo.getItem("transcoding") else _("No"))))
 		info.append(formatLine("", _("MultiTranscoding"), (_("Yes") if BoxInfo.getItem("multitranscoding") else _("No"))))
 		info.append("")
-		if fileHas("/tmp/dvbfetool.txt", "Mode 2: DVB-S"):
-			 info.append(formatLine("", _("DVB-S2/C/T2 Combined"), (_("Yes"))))
-
-		info.append(formatLine("", _("DVB-S2X"), (_("Yes") if fileHas("/tmp/dvbfetool.txt", "DVB-S2X") or pathExists("/proc/stb/frontend/0/t2mi") or pathExists("/proc/stb/frontend/1/t2mi") else _("No"))))
+		info.append(formatLine("", _("DVB-C"), (_("Yes") if "DVBC" in dvbFeToolTxt or "DVB-C" in dvbFeToolTxt else _("No"))))
 		info.append(formatLine("", _("DVB-S"), (_("Yes") if "DVBS" in dvbFeToolTxt or "DVB-S" in dvbFeToolTxt else _("No"))))
 		info.append(formatLine("", _("DVB-T"), (_("Yes") if "DVBT" in dvbFeToolTxt or "DVB-T" in dvbFeToolTxt else _("No"))))
-		info.append(formatLine("", _("DVB-C"), (_("Yes") if "DVBC" in dvbFeToolTxt or "DVB-C" in dvbFeToolTxt else _("No"))))
 		info.append("")
 		info.append(formatLine("", _("Multistream"), (_("Yes") if "MULTISTREAM" in dvbFeToolTxt else _("No"))))
 		info.append("")
@@ -1434,6 +1544,9 @@ class TunerInformation(InformationBase):
 		info.append(formatLine("", _("ANNEX-B"), (_("Yes") if "ANNEX_B" in dvbFeToolTxt or "ANNEX-B" in dvbFeToolTxt else _("No"))))
 		info.append(formatLine("", _("ANNEX-C"), (_("Yes") if "ANNEX_C" in dvbFeToolTxt or "ANNEX-C" in dvbFeToolTxt else _("No"))))
 		self["information"].setText("\n".join(info))
+
+	def getSummaryInformation(self):
+		return "DVB Information"
 
 
 class InformationSummary(ScreenSummary):
@@ -1445,5 +1558,4 @@ class InformationSummary(ScreenSummary):
 		# self.updateSummary()
 
 	def updateSummary(self):
-		# print("[Information] DEBUG: Updating summary.")
 		self["information"].setText(self.parent.getSummaryInformation())

@@ -158,6 +158,21 @@ BoxInfo = BoxInformation()
 
 from Tools.Multiboot import getMultibootStartupDevice, getMultibootslots  # This import needs to be here to avoid a SystemInfo load loop!
 
+ARCHITECTURE = BoxInfo.getItem("architecture")
+BRAND = BoxInfo.getItem("brand")
+MODEL = BoxInfo.getItem("model")
+SOC_FAMILY = BoxInfo.getItem("socfamily")
+DISPLAYTYPE = BoxInfo.getItem("displaytype")
+MTDROOTFS = BoxInfo.getItem("mtdrootfs")
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+platform = BoxInfo.getItem("platform")
+displaytype = BoxInfo.getItem("displaytype")
+architecture = BoxInfo.getItem("architecture")
+socfamily = BoxInfo.getItem("socfamily")
+DISPLAYMODEL = BoxInfo.getItem("displaymodel")
+DISPLAYBRAND = BoxInfo.getItem("displaybrand")
+
 # Parse the boot commandline.
 #
 cmdline = fileReadLine("/proc/cmdline", source=MODULE_NAME)
@@ -198,19 +213,74 @@ def getBootdevice():
 	return dev
 
 
+SystemInfo["ArchIsARM"] = ARCHITECTURE.startswith(("arm", "cortex"))
+SystemInfo["ArchIsARM64"] = "64" in ARCHITECTURE
+
 def getRCFile(ext):
 	filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", "%s.%s" % (BoxInfo.getItem("rcname"), ext)))
 	if not isfile(filename):
 		filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", "dmm1.%s" % ext))
 	return filename
-model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
-platform = BoxInfo.getItem("platform")
-displaytype = BoxInfo.getItem("displaytype")
-architecture = BoxInfo.getItem("architecture")
-socfamily = BoxInfo.getItem("socfamily")
-DISPLAYMODEL = BoxInfo.getItem("displaymodel")
-DISPLAYBRAND = BoxInfo.getItem("displaybrand")
+
+def getChipsetString():
+	if model in ("dm7080", "dm820"):
+		return "7435"
+	elif model in ("dm520", "dm525"):
+		return "73625"
+	elif model in ("dm900", "dm920", "et13000"):
+		return "7252S"
+	elif model in ("hd51", "vs1500", "h7"):
+		return "7251S"
+	elif model in ('dreamone', 'dreamonetwo', 'dreamseven'):
+		return "S922X"
+	chipset = fileReadLine("/proc/stb/info/chipset", default=_("Undefined"), source=MODULE_NAME)
+	return str(chipset.lower().replace("\n", "").replace("bcm", "").replace("brcm", "").replace("sti", ""))
+
+
+def getModuleLayout():
+	modulePath = BoxInfo.getItem("enigmamodule")
+	if modulePath:
+		process = Popen(("/sbin/modprobe", "--dump-modversions", modulePath), stdout=PIPE, stderr=PIPE, universal_newlines=True)
+		stdout, stderr = process.communicate()
+		if process.returncode == 0:
+			for detail in stdout.split("\n"):
+				if "module_layout" in detail:
+					return detail.split("\t")[0]
+	return None
+
+
+def getBoxName():
+	box = MACHINE
+	machinename = DISPLAYMODEL.lower()
+	if box in ('uniboxhd1', 'uniboxhd2', 'uniboxhd3'):
+		box = "ventonhdx"
+	elif box == "odinm6":
+		box = machinename
+	elif box == "inihde" and machinename == "hd-1000":
+		box = "sezam-1000hd"
+	elif box == "ventonhdx" and machinename == "hd-5000":
+		box = "sezam-5000hd"
+	elif box == "ventonhdx" and machinename == "premium twin":
+		box = "miraclebox-twin"
+	elif box == "xp1000" and machinename == "sf8 hd":
+		box = "sf8"
+	elif box.startswith('et') and not box in ('et8000', 'et8500', 'et8500s', 'et10000'):
+		box = box[0:3] + 'x00'
+	elif box == "odinm9":
+		box = "maram9"
+	elif box.startswith('sf8008m'):
+		box = "sf8008m"
+	elif box.startswith('sf8008'):
+		box = "sf8008"
+	elif box.startswith('ustym4kpro'):
+		box = "ustym4kpro"
+	elif box.startswith('twinboxlcdci'):
+		box = "twinboxlcd"
+	elif box == "sfx6018":
+		box = "sfx6008"
+	elif box == "sx888":
+		box = "sx88v2"
+	return box
 
 SystemInfo["MachineBrand"] = brand  # Users of these values should be updated to BoxInfo calls.
 SystemInfo["MachineModel"] = model
@@ -386,17 +456,22 @@ SystemInfo["OScamInstalled"] = fileExists("/usr/bin/oscam") or fileCheck("/usr/b
 SystemInfo["OScamIsActive"] = SystemInfo["OScamInstalled"] and fileCheck("/tmp/.oscam/oscam.version")
 SystemInfo["NCamInstalled"] = fileExists("/usr/bin/ncam")
 SystemInfo["NCamIsActive"] = SystemInfo["NCamInstalled"] and fileCheck("/tmp/.ncam/ncam.version")
+SystemInfo["OLDE2API"] = model == "dm800"
 SystemInfo["7segment"] = displaytype == "7segment" or "7seg" in displaytype
+SystemInfo["textlcd"] = displaytype == "textlcd" or "text" in displaytype
 SystemInfo["GraphicLCD"] = model in ("vuultimo", "xpeedlx3", "et10000", "hd2400", "sezammarvel", "atemionemesis", "mbultra", "beyonwizt4", "osmio4kplus")
 SystemInfo["LCDMiniTV"] = fileExists("/proc/stb/lcd/mode")
 SystemInfo["LCDMiniTVPiP"] = SystemInfo["LCDMiniTV"] and model not in ("gb800ueplus", "gbquad4k", "gbue4k")
 SystemInfo["DefaultDisplayBrightness"] = platform == "dm4kgen" and 8 or 5
 SystemInfo["ConfigDisplay"] = SystemInfo["FrontpanelDisplay"] and displaytype != "7segment" and "7seg" not in displaytype
 SystemInfo["DreamBoxAudio"] = platform == "dm4kgen" or model in ("dm7080", "dm800")
+SystemInfo["DreamBoxDVI"] = model in ("dm8000", "dm800")
 SystemInfo["VFDDelay"] = model in ("sf4008", "beyonwizu4")
 SystemInfo["VFDRepeats"] = brand != "ixuss" and displaytype != "7segment" and "7seg" not in displaytype
 SystemInfo["VFDSymbol"] = BoxInfo.getItem("vfdsymbol")
 SystemInfo["FCCactive"] = False
+SystemInfo["ArchIsARM64"] = ARCHITECTURE == "aarch64" or "64" in ARCHITECTURE
+SystemInfo["ArchIsARM"] = ARCHITECTURE.startswith(("arm", "cortex"))
 SystemInfo["FirstCheckModel"] = model in ("tmtwin4k", "mbmicrov2", "revo4k", "force3uhd", "mbmicro", "e4hd", "e4hdhybrid", "valalinux", "lunix", "tmnanom3", "purehd", "force2nano", "purehdse") or brand in ("linkdroid", "wetek")
 SystemInfo["SecondCheckModel"] = model in ("osninopro", "osnino", "osninoplus", "dm7020hd", "dm7020hdv2", "9910lx", "9911lx", "9920lx", "tmnanose", "tmnanoseplus", "tmnanosem2", "tmnanosem2plus", "tmnanosecombo", "force2plus", "force2", "force2se", "optimussos", "fusionhd", "fusionhdse", "force2plushv") or brand == "ixuss"
 SystemInfo["SeekStatePlay"] = False
