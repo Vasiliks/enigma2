@@ -1289,7 +1289,7 @@ class StorageInformation(InformationBase):
 			info.append("")
 			info.append(formatLine("S1", _("No storage or hard disks detected.")))
 		info.append("")
-		info.append(formatLine("H", "%s %s %s" % (_("Network storage on"), DISPLAY_BRAND, DISPLAY_MODEL)))
+		info.append(formatLine("H", _("Detected network servers")))
 		info.append("")
 		if self.mountInfo:
 			count = 0
