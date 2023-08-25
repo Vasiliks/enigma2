@@ -47,8 +47,6 @@ class VideoHardware:
 
         rates = {} # high-level, use selectable modes.
 
-        modes = {}  # a list of (high-level) modes for a certain port.
-
         rates["PAL"] = {"50Hz": {50: "pal"},
                 "60Hz": {60: "pal60"},
                 "multi": {50: "pal", 60: "pal60"}}
@@ -159,6 +157,8 @@ class VideoHardware:
                         "30hz": {60: "2160p30hz"},
                         "auto": {60: "2160p30hz"}}
 
+        modes = {}  # a list of (high-level) modes for a certain port.
+
         if SystemInfo["HasScart"]:
                 modes["Scart"] = ["PAL", "NTSC", "Multi"]
         if SystemInfo["HasComposite"] and platform in ("dm4kgen"):
@@ -166,19 +166,19 @@ class VideoHardware:
         if SystemInfo["HasYPbPr"]:
                 modes["YPbPr"] = ["720p", "1080i", "576p", "480p", "576i", "480i"]
         if SystemInfo["Has2160p"]:
-                modes["HDMI"] = ["720p", "1080p", "2160p", "1080i", "576p", "480p", "576i", "480i"]
+                modes["DVI"] = ["720p", "1080p", "2160p", "1080i", "576p", "480p", "576i", "480i"]
         if platform in ("dm4kgen", "dmamlogic"):
                 modes["HDMI"] = ["720p", "1080p", "smpte", "2160p30", "2160p", "1080i", "576p", "576i", "480p", "480i"]
         else:
-                modes["HDMI"] = ["720p", "1080p", "2160p", "2160p30", "1080i", "576p", "480p", "576i", "480i"]
+                modes["DVI"] = ["720p", "1080p", "2160p", "2160p30", "1080i", "576p", "480p", "576i", "480i"]
 
-        widescreen_modes = tuple([x for x in modes["HDMI"] if x not in ("576p", "576i", "480p", "480i")])
+                widescreen_modes = tuple([x for x in modes["DVI"] if x not in ("576p", "576i", "480p", "480i")])
 
-        ASPECT_SWITCH_MSG = (_("16/9 reset to normal"),
-        		"1.85:1 %s" % _("Letterbox"),
-        		"2.00:1 %s" % _("Letterbox"),
-        		"2.21:1 %s" % _("Letterbox"),
-        		"2.35:1 %s" % _("Letterbox"))
+                ASPECT_SWITCH_MSG = (_("16/9 reset to normal"),
+                                "1.85:1 %s" % _("Letterbox"),
+                                "2.00:1 %s" % _("Letterbox"),
+                                "2.21:1 %s" % _("Letterbox"),
+                                "2.35:1 %s" % _("Letterbox"))
 
         def getOutputAspect(self):
                 ret = (16, 9)
@@ -289,9 +289,9 @@ class VideoHardware:
                 portlist = self.getPortList()
                 for port in portlist:
                         descr = port
-                        if descr == 'HDMI' and SystemInfo["DreamBoxDVI"]:
+                        if descr == 'HDMI' and has_dvi:
                                 descr = 'DVI'
-                        if descr == 'HDMI-PC' and SystemInfo["DreamBoxDVI"]:
+                        if descr == 'HDMI-PC' and has_dvi:
                                 descr = 'DVI-PC'
                         if descr == "Scart" and has_rca and not has_scart:
                                 descr = "RCA"
