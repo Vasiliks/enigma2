@@ -26,7 +26,6 @@ LCDMiniTV = BoxInfo.getItem("LCDMiniTV")
 
 inStandby = None
 infoBarInstance = None
-TVinStandby = None
 
 QUIT_SHUTDOWN = 1
 QUIT_REBOOT = 2
@@ -45,66 +44,6 @@ def setLCDModeMinitTV(value):
 		open("/proc/stb/lcd/mode", "w").write(value)
 	except:
 		print("[Standby] Write to /proc/stb/lcd/mode failed.")
-
-
-class TVstate: #load in Navigation
-	def __init__(self):
-		global TVinStandby
-		if TVinStandby is not None:
-			print("[Standby] only one TVstate instance is allowed!")
-		TVinStandby = self
-
-		try:
-			import Components.HdmiCec
-			self.hdmicec_instance = Components.HdmiCec.hdmi_cec.instance
-			self.hdmicec_ok = self.hdmicec_instance and config.hdmicec.enabled.value
-		except:
-			self.hdmicec_ok = False
-
-		if not self.hdmicec_ok:
-			print('[Standby] HDMI-CEC is not enabled or unavailable!')
-
-	def skipHdmiCecNow(self, value):
-		if self.hdmicec_ok:
-			if value is True or value is False:
-				self.hdmicec_instance.tv_skip_messages = value
-			elif 'zaptimer' in value:
-				self.hdmicec_instance.tv_skip_messages = config.hdmicec.control_tv_wakeup.value and not config.hdmicec.tv_wakeup_zaptimer.value and inStandby
-			elif 'zapandrecordtimer' in value:
-				self.hdmicec_instance.tv_skip_messages = config.hdmicec.control_tv_wakeup.value and not config.hdmicec.tv_wakeup_zapandrecordtimer.value and inStandby
-			elif 'wakeuppowertimer' in value:
-				self.hdmicec_instance.tv_skip_messages = config.hdmicec.control_tv_wakeup.value and not config.hdmicec.tv_wakeup_wakeuppowertimer.value and inStandby
-
-	def getTVstandby(self, value):
-		if self.hdmicec_ok:
-			if 'zaptimer' in value:
-				return config.hdmicec.control_tv_wakeup.value and not config.hdmicec.tv_wakeup_zaptimer.value
-			elif 'zapandrecordtimer' in value:
-				return config.hdmicec.control_tv_wakeup.value and not config.hdmicec.tv_wakeup_zapandrecordtimer.value
-			elif 'wakeuppowertimer' in value:
-				return config.hdmicec.control_tv_wakeup.value and not config.hdmicec.tv_wakeup_wakeuppowertimer.value
-		return False
-
-	def getTVstate(self, value):
-		if self.hdmicec_ok:
-			if not config.hdmicec.check_tv_state.value or self.hdmicec_instance.sendMessagesIsActive():
-				return False
-			elif value == 'on':
-				return value in self.hdmicec_instance.tv_powerstate and config.hdmicec.control_tv_standby.value
-			elif value == 'standby':
-				return value in self.hdmicec_instance.tv_powerstate and config.hdmicec.control_tv_wakeup.value
-			elif value == 'active':
-				return 'on' in self.hdmicec_instance.tv_powerstate and self.hdmicec_instance.activesource
-			elif value == 'notactive':
-				return 'standby' in self.hdmicec_instance.tv_powerstate or not self.hdmicec_instance.activesource
-		return False
-
-	def setTVstate(self, value):
-		if self.hdmicec_ok:
-			if value == 'on' or (value == 'power' and config.hdmicec.handle_deepstandby_events.value and not self.hdmicec_instance.handleTimer.isActive()):
-				self.hdmicec_instance.wakeupMessages()
-			elif value == 'standby':
-				self.hdmicec_instance.standbyMessages()
 
 
 def isInfoBarInstance():
@@ -128,7 +67,6 @@ class StandbyScreen(Screen):
 		self.avswitch = AVSwitch()
 
 		print("[Standby] enter standby")
-		BoxInfo.setItem("StandbyState", True)
 
 		if isfile("/usr/script/standby_enter.sh"):
 			Console().ePopen("/usr/script/standby_enter.sh")
@@ -189,30 +127,11 @@ class StandbyScreen(Screen):
 		#set input to vcr scart
 		self.avswitch.setInput("off")
 
-		if isfile("/proc/stb/hdmi/output"):
-			try:
-				print("[Standby] Write to /proc/stb/hdmi/output")
-				open("/proc/stb/hdmi/output", "w").write("off")
-			except:
-				print("[Standby] Write to /proc/stb/hdmi/output failed.")
-
-		if AmlogicFamily:
-			try:
-				print("[Standby] Write to /sys/class/leds/led-sys/brightness")
-				open("/sys/class/leds/led-sys/brightness", "w").write("0")
-			except:
-				print("[Standby] Write to /sys/class/leds/led-sys/brightness failed.")
-			try:
-				print("[Standby] Write to /sys/class/cec/cmd")
-				open("/sys/class/cec/cmd", "w").write("0f 36")
-			except:
-				print("[Standby] Write to /sys/class/cec/cmd failed.")
-
 		gotoShutdownTime = int(config.usage.standby_to_shutdown_timer.value)
 		if gotoShutdownTime:
 			self.standbyTimeoutTimer.startLongTimer(gotoShutdownTime)
 
-		if self.StandbyCounterIncrease: # Wakeup timer with value "yes" or "standby" (only standby mode) in SleepTimerEdit.
+		if self.StandbyCounterIncrease != 1:
 			gotoWakeupTime = isNextWakeupTime(True)
 			if gotoWakeupTime != -1:
 				curtime = localtime(time())
@@ -252,8 +171,7 @@ class StandbyScreen(Screen):
 
 		if isfile("/usr/script/standby_leave.sh"):
 			Console().ePopen("/usr/script/standby_leave.sh")
-
-		if config.usage.remote_fallback_import_standby.value and not config.clientmode.enabled.value:
+		if config.usage.remote_fallback_import_standby.value:
 			ImportChannels()
 
 	def __onFirstExecBegin(self):
@@ -265,30 +183,7 @@ class StandbyScreen(Screen):
 
 	def Power(self):
 		print("[Standby] leave standby")
-		BoxInfo.setItem("StandbyState", False)
 		self.close(True)
-
-		if isfile("/usr/script/StandbyLeave.sh"):
-			Console().ePopen("/usr/script/StandbyLeave.sh")
-
-		if isfile("/proc/stb/hdmi/output"):
-			try:
-				print("[Standby] Write to /proc/stb/hdmi/output")
-				open("/proc/stb/hdmi/output", "w").write("on")
-			except:
-				print("[Standby] Write to /proc/stb/hdmi/output failed.")
-
-		if AmlogicFamily:
-			try:
-				print("[Standby] Write to /sys/class/leds/led-sys/brightness")
-				open("/sys/class/leds/led-sys/brightness", "w").write("1")
-			except:
-				print("[Standby] Write to /sys/class/leds/led-sys/brightness failed")
-			try:
-				print("[Standby] Write to /sys/class/cec/cmd")
-				open("/sys/class/cec/cmd", "w").write("10 04")
-			except:
-				print("[Standby] Write to /sys/class/cec/cmd failed.")
 
 	def setMute(self):
 		self.wasMuted = eDVBVolumecontrol.getInstance().isMuted()
@@ -462,8 +357,19 @@ class TryQuitMainloop(MessageBox):
 			self.hide()
 			if self.retval == QUIT_SHUTDOWN:
 				config.misc.DeepStandby.value = True
-				if not inStandby and isfile("/usr/script/standby_enter.sh"):
-					Console().ePopen("/usr/script/standby_enter.sh")
+				if not inStandby:
+					if isfile("/usr/script/standby_enter.sh"):
+						Console().ePopen("/usr/script/standby_enter.sh")
+					if SystemInfo["HasHDMI-CEC"] and config.hdmicec.enabled.value and config.hdmicec.control_tv_standby.value and config.hdmicec.next_boxes_detect.value:
+						import Components.HdmiCec
+						Components.HdmiCec.hdmi_cec.secondBoxActive()
+						if not hasattr(self, "quitScreen"):
+							self.quitScreen = self.session.instantiateDialog(QuitMainloopScreen)
+							self.quitScreen.show()
+						self.delay = eTimer()
+						self.delay.timeout.callback.append(self.quitMainloopDelay)
+						self.delay.start(1500, True)
+						return
 			elif not inStandby:
 				config.misc.RestartUI.value = True
 				config.misc.RestartUI.save()
@@ -480,6 +386,10 @@ class TryQuitMainloop(MessageBox):
 		else:
 			MessageBox.close(self, True)
 
+	def quitMainloopDelay(self):
+		self.session.nav.stopService()
+		quitMainloop(self.retval)
+
 	def quitMainloop(self):
 		self.session.nav.stopService()
 		self.quitScreen = self.session.instantiateDialog(QuitMainloopScreen, retvalue=self.retval)
@@ -493,9 +403,6 @@ class TryQuitMainloop(MessageBox):
 	def __onHide(self):
 		global inTryQuitMainloop
 		inTryQuitMainloop = False
-
-	def createSummary(self):  # Suppress the normal MessageBox ScreenSummary screen.
-		return None
 
 
 class SwitchToAndroid(Screen):
