@@ -3,6 +3,7 @@ import os
 from Components.Renderer.Renderer import Renderer
 from enigma import ePixmap, ePicLoad
 from Tools.Directories import pathExists, SCOPE_CURRENT_SKIN, resolveFilename
+from Components.SystemInfo import BoxInfo
 from Components.config import config
 from Components.Renderer.Picon import PiconLocator
 

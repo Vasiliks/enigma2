@@ -448,15 +448,8 @@ class PowerKey:
 		globalActionMap.actions["power_down"] = lambda *args: None
 		globalActionMap.actions["power_up"] = self.powerup
 		globalActionMap.actions["power_long"] = self.powerlong
-		globalActionMap.actions["deepstandby"] = self.shutdown # frontpanel long power button press
+		globalActionMap.actions["deepstandby"] = self.shutdown  # Front panel long power button press.
 		globalActionMap.actions["discrete_off"] = self.standby
-
-	def shutdown(self):
-		print("[StartEnigma] PowerOff - Now!")
-		if not Screens.Standby.inTryQuitMainloop and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND:
-			self.session.open(Screens.Standby.TryQuitMainloop, 1)
-		else:
-			return 0
 
 	def powerup(self):
 		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
@@ -467,6 +460,19 @@ class PowerKey:
 	def powerlong(self):
 		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
 			self.doAction(config.misc.hotkey.power_long.value)
+		else:
+			return 0
+
+	def shutdown(self):
+		print("[StartEnigma] Power off, now!")
+		if not Screens.Standby.inTryQuitMainloop and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND:
+			self.session.open(Screens.Standby.TryQuitMainloop, 1)  # Shutdown
+		else:
+			return 0
+
+	def standby(self):
+		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
+			self.session.open(Screens.Standby.Standby)
 		else:
 			return 0
 
@@ -489,11 +495,6 @@ class PowerKey:
 						if id and id == selected[1]:
 							self.session.open(MainMenu, x)
 
-	def standby(self):
-		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
-			self.session.open(Screens.Standby.Standby)
-		else:
-			return 0
 
 
 profile("Scart")
@@ -502,7 +503,7 @@ from Screens.Scart import Scart
 
 class AutoScartControl:
 	def __init__(self, session):
-		self.hasScart = SystemInfo["HasScart"]
+		self.hasScart = BoxInfo.getItem("SCART")
 		if self.hasScart:
 			self.force = False
 			self.current_vcr_sb = enigma.eAVControl.getInstance().getVCRSlowBlanking()
@@ -658,13 +659,15 @@ from skin import InitSkins
 InitSkins()
 
 profile("InputDevice")
-import Components.InputDevice
-Components.InputDevice.InitInputDevices()
+from Components.InputDevice import InitInputDevices
+InitInputDevices()
+
+profile("Hotplug")
 import Components.InputHotplug
 
 profile("AVSwitch")
-import Components.AVSwitch
-Components.AVSwitch.InitAVSwitch()
+from Components.AVSwitch import InitAVSwitch
+InitAVSwitch()
 
 profile("HdmiRecord")
 import Components.HdmiRecord
@@ -700,8 +703,9 @@ import Components.Network
 Components.Network.waitForNetwork()
 
 profile("LCD")
-import Components.Lcd
-Components.Lcd.InitLcd()
+from Components.Lcd import IconCheck, InitLcd
+InitLcd()
+IconCheck()
 
 enigma.eAVControl.getInstance().disableHDMIIn()
 
