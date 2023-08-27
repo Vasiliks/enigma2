@@ -27,10 +27,10 @@ class eTimer:
 	def __init__(self):
 		self.timeout = slot()
 		self.next_activation = None
-		print("NEW TIMER")
+		print("[enigma] NEW TIMER")
 
 	def start(self, msec, singleshot=False):
-		print("start timer", msec)
+		print("[enigma] start timer", msec)
 		self.next_activation = time.time() + msec / 1000.0
 		self.msec = msec
 		self.singleshot = singleshot
@@ -54,7 +54,7 @@ def runIteration():
 	assert len(running_timers), "no running timers, so nothing will ever happen!"
 	running_timers.sort(key=lambda x: x.next_activation)
 
-	print("running:", running_timers)
+	print("[enigma] running:", running_timers)
 
 	next_timer = running_timers[0]
 
@@ -208,22 +208,22 @@ class eRFmod:
 		eRFmod.instance = self
 
 	def setFunction(self, value):
-		print("[eRFmod] set function to %d" % value)
+		print("[enigma] eRFmod set function to %d" % value)
 
 	def setTestmode(self, value):
-		print("[eRFmod] set testmode to %d" % value)
+		print("[enigma] eRFmod set testmode to %d" % value)
 
 	def setSoundFunction(self, value):
-		print("[eRFmod] set sound function to %d" % value)
+		print("[enigma] eRFmod set sound function to %d" % value)
 
 	def setSoundCarrier(self, value):
-		print("[eRFmod] set sound carrier to %d" % value)
+		print("[enigma] eRFmod set sound carrier to %d" % value)
 
 	def setChannel(self, value):
-		print("[eRFmod] set channel to %d" % value)
+		print("[enigma] eRFmod set channel to %d" % value)
 
 	def setFinetune(self, value):
-		print("[eRFmod] set finetune to %d" % value)
+		print("[enigma] eRFmod set finetune to %d" % value)
 
 
 eRFmod()
@@ -275,9 +275,9 @@ eServiceCenter()
 
 ##################### ENIGMA CHROOT
 
-print("import directories")
+print("[enigma] import directories")
 import Tools.Directories
-print("done")
+print("[enigma] done")
 
 chroot = "."
 
@@ -289,9 +289,9 @@ Tools.Directories.defaultPaths[Tools.Directories.SCOPE_CONFIG] = ("/etc/enigma2/
 
 ##################### ENIGMA CONFIG
 
-print("import config")
+print("[enigma] import config")
 import Components.config
-print("done")
+print("[enigma] done")
 
 my_config = [
 "config.skin.primary_skin=None\n"
@@ -310,20 +310,20 @@ class eActionMap:
 ##################### ENIGMA STARTUP:
 
 def init_nav():
-	print("init nav")
+	print("[enigma] init nav")
 	import Navigation
 	import NavigationInstance
 	NavigationInstance.instance = Navigation.Navigation()
 
 
 def init_record_config():
-	print("init recording")
+	print("[enigma] init recording")
 	import Components.RecordingConfig
 	Components.RecordingConfig.InitRecordingConfig()
 
 
 def init_parental_control():
-	print("init parental")
+	print("[enigma] init parental")
 	from Components.ParentalControl import InitParentalControl
 	InitParentalControl()
 
@@ -349,9 +349,6 @@ def init_all():
 
 	import Components.Lcd
 	Components.Lcd.InitLcd()
-
-	import Components.SetupDevices
-	Components.SetupDevices.InitSetupDevices()
 
 	import Components.RFmod
 	Components.RFmod.InitRFmod()
