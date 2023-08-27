@@ -596,7 +596,7 @@ int eDVBFrontend::openFrontend()
 
 	if (!m_simulate)
 	{
-		eDebug("[eDVBFrontend%d] opening frontend", m_dvbid);
+		eTrace("[eDVBFrontend%d] opening frontend", m_dvbid);
 		if (m_fd < 0)
 		{
 			m_fd = ::open(m_filename.c_str(), O_RDWR | O_NONBLOCK | O_CLOEXEC);
@@ -711,7 +711,7 @@ int eDVBFrontend::openFrontend()
 		fe_info.frequency_min = 900000;
 		fe_info.frequency_max = 2200000;
 
-		eDebug("[eDVBFrontend%d] opening frontend", m_dvbid);
+		eTrace("[eDVBFrontend%d] opening frontend", m_dvbid);
 		int tmp_fd = ::open(m_filename.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 		if (tmp_fd < 0)
 		{
@@ -749,7 +749,7 @@ int eDVBFrontend::closeFrontend(bool force, bool no_delayed)
 			eDVBRegisteredFrontend *linked_fe = (eDVBRegisteredFrontend*)tmp;
 			if (linked_fe->m_inuse || (m_fbc && m_sec && m_sec->tunerLinkedInUse(m_slotid)))
 			{
-				eDebugNoSimulate("[eDVBFrontend%d] dont close frontend while the linked frontend %d in slot %d is still in use",
+				eDebugNoSimulate("[eDVBFrontend%d] do not close frontend while the linked frontend %d in slot %d is still in use",
 					m_dvbid, linked_fe->m_frontend->getDVBID(), linked_fe->m_frontend->getSlotID());
 				return -1;
 			}
@@ -759,7 +759,7 @@ int eDVBFrontend::closeFrontend(bool force, bool no_delayed)
 
 	if (m_fd >= 0)
 	{
-		eDebugNoSimulate("[eDVBFrontend%d] close frontend", m_dvbid);
+		eTrace("[eDVBFrontend%d] close frontend", m_dvbid);
 
 		long link = m_data[ADVANCED_SATPOSDEPENDS_LINK];
 		if (link != -1)
@@ -1756,7 +1756,7 @@ int eDVBFrontend::tuneLoopInt()  // called by m_tuneTimer
 		{
 			case eSecCommand::SLEEP:
 				delay = m_sec_sequence.current()++->msec;
-				eDebugNoSimulate("[eDVBFrontend%d] sleep %dms", m_dvbid, delay);
+				eTrace("[eDVBFrontend%d] sleep %dms", m_dvbid, delay);
 				break;
 			case eSecCommand::GOTO:
 				if ( !setSecSequencePos(m_sec_sequence.current()->steps) )
@@ -2515,7 +2515,7 @@ RESULT eDVBFrontend::prepare_sat(const eDVBFrontendParametersSatellite &feparm, 
 		if ((unsigned int)satfrequency < (fe_info.type ? fe_info.frequency_min/1000 : fe_info.frequency_min)
 			|| (unsigned int)satfrequency > (fe_info.type ? fe_info.frequency_max/1000 : fe_info.frequency_max))
 		{
-			eDebugNoSimulate("[eDVBFrontend%d] %d mhz out of tuner range.. dont tune", m_dvbid, satfrequency / 1000);
+			eTrace("[eDVBFrontend%d] %d mhz out of tuner range.. dont tune", m_dvbid, satfrequency / 1000);
 			return -EINVAL;
 		}
 		eDebugNoSimulate("[eDVBFrontend%d] tuning to %d mhz", m_dvbid, satfrequency / 1000);
@@ -2553,7 +2553,7 @@ RESULT eDVBFrontend::tune(const iDVBFrontendParameters &where, bool blindscan)
 {
 	unsigned int timeout = 5000;
 	int type;
-	eDebugNoSimulate("[eDVBFrontend%d] tune", m_dvbid);
+	eTrace("[eDVBFrontend%d] tune", m_dvbid);
 
 	m_timeout->stop();
 
@@ -2779,7 +2779,7 @@ RESULT eDVBFrontend::setVoltage(int voltage)
 		}
 	}
 
-	eDebug("[eDVBFrontend%d] setVoltage FE_ENABLE_HIGH_LNB_VOLTAGE %d FE_SET_VOLTAGE %d", m_dvbid, increased, vlt);
+	eTrace("[eDVBFrontend%d] setVoltage FE_ENABLE_HIGH_LNB_VOLTAGE %d FE_SET_VOLTAGE %d", m_dvbid, increased, vlt);
 	::ioctl(m_fd, FE_ENABLE_HIGH_LNB_VOLTAGE, increased);
 	return ::ioctl(m_fd, FE_SET_VOLTAGE, vlt);
 }

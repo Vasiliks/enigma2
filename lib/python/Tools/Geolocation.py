@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 from json import loads
 from requests import exceptions, get
 from enigma import checkInternetAccess
-
 
 # Data available from http://ip-api.com/json/:
 #
@@ -39,6 +39,7 @@ from enigma import checkInternetAccess
 # 	proxy		Proxy, VPN or Tor exit address		true			bool
 # 	hosting		Hosting, colocated or data center	true			bool
 # 	query		IP used for the query			173.194.67.94		string
+
 geolocationFields = {
 	"country": 0x00000001,
 	"countryCode": 0x00000002,

@@ -1743,7 +1743,6 @@ RESULT eDVBServicePlay::subServices(ePtr<iSubserviceList> &ptr)
 RESULT eDVBServicePlay::timeshift(ePtr<iTimeshiftService> &ptr)
 {
 	ptr = nullptr;
-	eDebug("[eDVBServicePlay] timeshift");
 	if (m_timeshift_enabled || !m_is_pvr)
 	{
 		if (!m_timeshift_enabled)
@@ -1766,7 +1765,7 @@ RESULT eDVBServicePlay::timeshift(ePtr<iTimeshiftService> &ptr)
 
 			if (((off_t)fs.f_bavail) * ((off_t)fs.f_bsize) < 1024*1024*1024LL)
 			{
-				eDebug("[eDVBServicePlay] timeshift not enough diskspace for timeshift! (less than 1GB)");
+				eTrace("[eDVBServicePlay] timeshift not enough diskspace for timeshift! (less than 1GB)");
 				return -3;
 			}
 		}

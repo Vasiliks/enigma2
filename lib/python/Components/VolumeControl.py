@@ -5,7 +5,6 @@ from Screens.Volume import Volume
 from Screens.Mute import Mute
 from GlobalActions import globalActionMap
 from Components.config import config, ConfigSubsection, ConfigInteger
-from Components.SystemInfo import SystemInfo
 
 profile("VolumeControl")
 #TODO .. move this to a own .py file
@@ -63,9 +62,9 @@ class VolumeControl:
 		vol = self.volctrl.getVolume()
 		self.volumeDialog.show()
 		if is_muted:
-			self.volMute()  # unmute
+			self.volMute() # unmute
 		elif not vol:
-			self.volMute(False, True)  # mute but dont show mute symbol
+			self.volMute(False, True) # mute but do not show mute symbol
 		if self.volctrl.isMuted():
 			self.volumeDialog.setValue(0)
 		else:

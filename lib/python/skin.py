@@ -9,7 +9,7 @@ from Components.config import ConfigSubsection, ConfigText, config
 from Components.RcModel import rc_model
 from Components.SystemInfo import BoxInfo, SystemInfo
 from Components.Sources.Source import ObsoleteSource
-from Tools.Directories import SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadXML
+from Tools.Directories import SCOPE_CONFIG, SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadXML
 from Tools.Import import my_import
 from Tools.LoadPixmap import LoadPixmap
 
@@ -155,14 +155,19 @@ def InitSkins():
 def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), screenID=GUI_SKIN_ID):
 	global windowStyles, resolutions
 	filename = resolveFilename(scope, filename)
-	print("[Skin] Loading skin file '%s'." % filename)
+	lines = []
+	lines = fileReadLines(resolveFilename(SCOPE_CONFIG, "settings"), default=lines, source=MODULE_NAME)
+	debugMode = "config.crash.debugSkin=True" in lines
+	if debugMode:
+		print("[Skin] Loading skin file '%s'." % filename)
 	domSkin = fileReadXML(filename, source=MODULE_NAME)
 	if domSkin:
 		# For loadSingleSkinData colors, bordersets etc. are applied one after
 		# the other in order of ascending priority.
 		loadSingleSkinData(desktop, screenID, domSkin, filename, scope=scope)
 		resolution = resolutions.get(screenID, (0, 0, 0))
-		print("[Skin] Skin resolution is %dx%d and color depth is %d bits." % (resolution[0], resolution[1], resolution[2]))
+		if debugMode:
+			print("[Skin] Skin resolution is %dx%d and color depth is %d bits." % (resolution[0], resolution[1], resolution[2]))
 		for element in domSkin:
 			if element.tag == "screen":  # Process all screen elements.
 				name = element.attrib.get("name")
@@ -187,7 +192,8 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 					if config.crash.debugScreens.value:
 						print("[Skin] This skin has a windowstyle for screen ID='%s'." % scrnID)
 			# Element is not a screen or windowstyle element so no need for it any longer.
-		print("[Skin] Loading skin file '%s' complete." % filename)
+		if debugMode:
+			print("[Skin] Loading skin file '%s' complete." % filename)
 		if runCallbacks:
 			for method in callbacks:
 				if method:

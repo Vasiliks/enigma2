@@ -27,6 +27,7 @@ socfamily = BoxInfo.getItem("socfamily")
 # These entries should be moved back to UsageConfig.py when it is safe to bring UsageConfig init to this location in StartEnigma.py.
 #
 config.crash = ConfigSubsection()
+config.crash.debugSkin = ConfigYesNo(default=False)
 config.crash.debugScreens = ConfigYesNo(default=False)
 config.crash.debugKeyboards = ConfigYesNo(default=False)
 config.crash.debugRemoteControls = ConfigYesNo(default=False)

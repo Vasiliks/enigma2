@@ -263,7 +263,7 @@ int main(int argc, char **argv)
 	dsk_lcd.setRedrawTask(main);
 
 
-	eDebug("[Enigma] Loading spinners...");
+	eTrace("[Enigma] Loading spinners...");
 
 	{
 		int i;
