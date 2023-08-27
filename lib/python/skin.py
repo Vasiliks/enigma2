@@ -9,7 +9,7 @@ from Components.config import ConfigSubsection, ConfigText, config
 from Components.RcModel import rc_model
 from Components.SystemInfo import BoxInfo, SystemInfo
 from Components.Sources.Source import ObsoleteSource
-from Tools.Directories import SCOPE_CONFIG, SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadXML
+from Tools.Directories import SCOPE_CONFIG, SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadLines, fileReadXML
 from Tools.Import import my_import
 from Tools.LoadPixmap import LoadPixmap
 
