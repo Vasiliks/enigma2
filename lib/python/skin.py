@@ -464,11 +464,25 @@ def parseInteger(value, default=0):
 
 def parseItemAlignment(value):
 	options = {
-		"default": eListbox.itemAlignDefault,
-		"center": eListbox.itemAlignCenter,
-		"justify": eListbox.itemAlignJustify,
+		"default": eListbox.itemAlignLeftTop,
+		"center": eListbox.itemAlignCenterMiddle,
+		"justify": eListbox.itemAlignJustifyFull,
+		"leftTop": eListbox.itemAlignLeftTop,
+		"leftMiddle": eListbox.itemAlignLeftMiddle,
+		"leftBottom": eListbox.itemAlignLeftBottom,
+		"rightTop": eListbox.itemAlignRightTop,
+		"rightMiddle": eListbox.itemAlignRightMiddle,
+		"rightBottom": eListbox.itemAlignRightBottom,
+		"centerTop": eListbox.itemAlignCenterTop,
+		"centerMiddle": eListbox.itemAlignCenterMiddle,
+		"centerBottom": eListbox.itemAlignCenterBottom,
+		"justifyTop": eListbox.itemAlignJustifyTop,
+		"justifyMiddle": eListbox.itemAlignJustifyMiddle,
+		"justifyBottom": eListbox.itemAlignJustifyBottom,
+		"justifyLeft": eListbox.itemAlignJustifyLeft,
+		"justifyRight": eListbox.itemAlignJustifyRight
 	}
-	return parseOptions(options, "itemAlignment", value, eListbox.itemAlignDefault)
+	return parseOptions(options, "itemAlignment", value, eListbox.itemAlignLeftTop)
 
 
 def parseScrollbarLength(value, default):
@@ -740,7 +754,7 @@ class AttributeParser:
 		self.scaleTuple = scale
 
 	def applyAll(self, attributes):
-		attributes.sort(key=lambda x: {"pixmap": 1}.get(x[0], 0))  # For SVG pixmap scale required the size, so sort pixmap last.
+		# attributes.sort(key=lambda x: {"pixmap": 1}.get(x[0], 0))  # For SVG pixmap scale required the size, so sort pixmap last.
 		for attribute, value in attributes:
 			self.applyOne(attribute, value)
 
@@ -847,11 +861,11 @@ class AttributeParser:
 
 	def halign(self, value):  # This legacy definition uses an inconsistent name, use 'horizontalAlignment' instead!
 		self.horizontalAlignment(value)
-		attribDeprecationWarning("halign", "horizontalAlignment")
+		# attribDeprecationWarning("halign", "horizontalAlignment")
 
 	def hAlign(self, value):  # This typo catcher definition uses an inconsistent name, use 'horizontalAlignment' instead!
 		self.horizontalAlignment(value)
-		attribDeprecationWarning("hAlign", "horizontalAlignment")
+		# attribDeprecationWarning("hAlign", "horizontalAlignment")
 
 	def horizontalAlignment(self, value):
 		self.guiObject.setHAlign(parseHorizontalAlignment(value))
@@ -984,7 +998,7 @@ class AttributeParser:
 
 	def seek_pointer(self, value):  # This legacy definition uses an inconsistent name, use 'seekPointer' instead!
 		self.seekPointer(value)
-		attribDeprecationWarning("seek_pointer", "seekPointer")
+		# attribDeprecationWarning("seek_pointer", "seekPointer")
 
 	def seekPointer(self, value):
 		(name, pos) = [x.strip() for x in value.split(":", 1)]
@@ -1007,6 +1021,10 @@ class AttributeParser:
 		if value > 500:
 			value = 500
 		self.guiObject.setSelectionZoom(float("%d.%02d" % ((value // 100) + 1, value % 100)))
+
+	def selectionZoomSize(self, value):
+		size = parseValuePair(value, self.scaleTuple, self.guiObject, self.desktop)
+		self.guiObject.setSelectionZoomSize(size[0], size[1])
 
 	def shadowColor(self, value):
 		self.guiObject.setShadowColor(parseColor(value, 0x00000000))
@@ -1051,11 +1069,11 @@ class AttributeParser:
 
 	def valign(self, value):  # This legacy definition uses an inconsistent name, use 'verticalAlignment' instead!
 		self.verticalAlignment(value)
-		attribDeprecationWarning("valign", "verticalAlignment")
+		# attribDeprecationWarning("valign", "verticalAlignment")
 
 	def vAlign(self, value):  # This typo catcher definition uses an inconsistent name, use 'verticalAlignment' instead!
 		self.verticalAlignment(value)
-		attribDeprecationWarning("vAlign", "verticalAlignment")
+		# attribDeprecationWarning("vAlign", "verticalAlignment")
 
 	def valueFont(self, value):
 		self.guiObject.setValueFont(parseFont(value, self.scaleTuple))
