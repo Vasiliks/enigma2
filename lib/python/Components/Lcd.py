@@ -39,8 +39,8 @@ def IconCheck(session=None, **kwargs):
 
 class IconCheckPoller:
 	def __init__(self):
-		self.symbolNetwork = exists("/proc/stb/lcd/symbol_network")
-		self.symbolUsb = exists("/proc/stb/lcd/symbol_usb")
+		self.symbolNetwork = isfile("/proc/stb/lcd/symbol_network")
+		self.symbolUsb = isfile("/proc/stb/lcd/symbol_usb")
 		self.lcdMode = config.lcd.mode.value
 		config.lcd.mode.addNotifier(self.setLCDmode)
 		self.timer = eTimer()
@@ -64,11 +64,11 @@ class IconCheckPoller:
 	def jobTask(self):
 		if self.symbolNetwork and self.lcdMode:
 			linkState = "0"
-			if exists("/sys/class/net/wlan0/operstate"):
+			if isfile("/sys/class/net/wlan0/operstate"):
 				linkState = fileReadLine("/sys/class/net/wlan0/operstate")
 				if linkState != "down":
 					linkState = fileReadLine("/sys/class/net/wlan0/carrier")
-			elif exists("/sys/class/net/eth0/operstate"):
+			elif isfile("/sys/class/net/eth0/operstate"):
 				linkState = fileReadLine("/sys/class/net/eth0/operstate")
 				if linkState != "down":
 					linkState = fileReadLine("/sys/class/net/eth0/carrier")
