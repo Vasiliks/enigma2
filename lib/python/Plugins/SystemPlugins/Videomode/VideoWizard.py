@@ -29,11 +29,6 @@ class VideoWizard(WizardLanguage, ShowRemoteControl):
 		self.mode = None
 		self.rate = None
 		self["portpic"] = Pixmap()
-		self["lab1"] = StaticText(_("norhap"))
-		self["lab2"] = StaticText(_("Report problems to:"))
-		self["lab3"] = StaticText(_("telegram @norhap"))
-		self["lab4"] = StaticText(_("Sources are available at:"))
-		self["lab5"] = StaticText(_("https://github.com/norhap"))
 
 	def listPorts(self):  # Called by wizardvideo.xml.
 		ports = []
