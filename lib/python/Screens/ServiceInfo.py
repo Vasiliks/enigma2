@@ -140,26 +140,23 @@ class ServiceInfo(Screen):
 			else:
 				name = _("N/A")
 				refstr = _("N/A")
+			videocodec = "-"
 			resolution = "-"
+			fps = ""
 			if self.info:
-				from Components.Converter.PliExtraInfo import codec_data
+				from enigma import eAVControl
+				from Components.Converter.PliExtraInfo import codec_data, gamma_data
+				avControl = eAVControl.getInstance()
 				videocodec = codec_data.get(self.info.getInfo(iServiceInformation.sVideoType), "N/A")
-				width = self.info.getInfo(iServiceInformation.sVideoWidth)
-				height = self.info.getInfo(iServiceInformation.sVideoHeight)
-				if width > 0 and height > 0:
-					fps = (self.info.getInfo(iServiceInformation.sFrameRate) + 500) // 1000
-					if fps in (0, -1):
-						try:
-							fps = (int(open("/proc/stb/vmpeg/0/framerate", "r").read()) + 500) // 1000
-						except (ValueError, IOError):
-							pass
-					resolution = "%s - %dx%d - %s" % (videocodec, width, height, fps)
-					resolution += (" i", " p", "")[self.info.getInfo(iServiceInformation.sProgressive)]
-					aspect = self.getServiceInfoValue(iServiceInformation.sAspect)
-					resolution += " - [%s]" % (aspect in (1, 2, 5, 6, 9, 0xA, 0xD, 0xE) and "4:3" or "16:9")
-				gamma = ("SDR", "HDR", "HDR10", "HLG", "")[self.info.getInfo(iServiceInformation.sGamma)]
-				if gamma:
-					resolution += " - %s" % gamma
+				gamma = gamma_data.get(self.info.getInfo(iServiceInformation.sGamma), "")
+				video_rate = avControl.getFrameRate()
+				fps = str((video_rate + 500) // 1000)
+				video_width = avControl.getResolutionX()
+				video_height = avControl.getResolutionY()
+				video_pol = "p" if avControl.getProgressive() else "i"
+				aspect = self.getServiceInfoValue(iServiceInformation.sAspect)
+				aspect = aspect in (1, 2, 5, 6, 9, 0xA, 0xD, 0xE) and "4:3" or "16:9"
+				resolution = videocodec + " - " + gamma + " %dx%d - " % (video_width, video_height) + fps + video_pol + " " + aspect if gamma else videocodec + " - " + "%dx%d - " % (video_width, video_height) + fps + video_pol + " " + aspect
 			self.toggle_pid_button()
 			track_list = self.get_track_list()
 			fillList = [
