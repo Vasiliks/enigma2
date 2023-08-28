@@ -19,7 +19,7 @@ class Keyboard:
 				try:
 					with open(resolveFilename(SCOPE_KEYMAPS, keymapFile), "r") as fd:
 						for line in fd.readlines():
-							key, val = [x.strip() for x in line.split("=", 1)]
+							key, val = (x.strip() for x in line.split("=", 1))
 							if key == "kmap":
 								mapFile = val
 							if key == "name":

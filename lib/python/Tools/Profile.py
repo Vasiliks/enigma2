@@ -15,7 +15,7 @@ profile_file = None
 model = None
 
 try:
-	profile_old = open(resolveFilename(SCOPE_CONFIG, "profile"), "r").readlines()
+	profile_old = open(resolveFilename(SCOPE_CONFIG, "profile")).readlines()
 
 	t = None
 	for line in profile_old:

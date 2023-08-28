@@ -372,8 +372,8 @@ class DebugInformation(InformationBase):
 				info = self.cachedDebugInfo[path]
 			else:
 				try:
-					with open(path, "r") as fd:
-						info = [x.strip() for x in fd.readlines()][-LOG_MAX_LINES:]
+					with open(path) as fd:
+						info = (x.strip() for x in fd.readlines())[-LOG_MAX_LINES:]
 				except OSError as err:
 					info = "%s,%s" % (err.errno, err.strerror)
 			self.cachedDebugInfo[path] = info
@@ -657,7 +657,7 @@ class MemoryInformation(InformationBase):
 		if self.extraSpacing:
 			info.append("")
 		for line in memInfo:
-			key, value = [x for x in line.split(maxsplit=1)]
+			key, value = (x for x in line.split(maxsplit=1))
 			if key == "MemTotal:":
 				info.append(formatLine("P1", _("Total memory"), formatNumber(value)))
 			elif key == "MemFree:":
@@ -686,7 +686,7 @@ class MemoryInformation(InformationBase):
 		if self.extraSpacing:
 			info.append("")
 		for line in memInfo:
-			key, value = [x for x in line.split(maxsplit=1)]
+			key, value = (x for x in line.split(maxsplit=1))
 			info.append(formatLine("P1", key[:-1], formatNumber(value)))
 		info.append("")
 		info.append(formatLine("M1", _("The detailed information is intended for developers only.")))
@@ -1176,7 +1176,7 @@ class ReceiverInformation(InformationBase):
 		if self.extraSpacing:
 			info.append("")
 		for count, nim in enumerate(nimmanager.nimListCompressed()):
-			tuner, type = [x.strip() for x in nim.split(":", 1)]
+			tuner, type = (x.strip() for x in nim.split(":", 1))
 			info.append(formatLine("P1", tuner, type))
 		info.append("")
 		info.append(formatLine("S", _("Storage / Drive information")))
@@ -1426,8 +1426,8 @@ class SystemInformation(InformationBase):
 			self.console.ePopen(command, self.fetchInformationCallback)
 		elif path:
 			try:
-				with open(path, "r") as fd:
-					self.info = [x.strip() for x in fd.readlines()]
+				with open(path) as fd:
+					self.info = (x.strip() for x in fd.readlines())
 			except OSError as err:
 				self.info = [_("Error %d: System information file '%s' can't be read!  (%s)") % (err.errno, path, err.strerror)]
 			for callback in self.onInformationUpdated:
@@ -1473,7 +1473,7 @@ class TranslationInformation(InformationBase):
 		for translate in translateInfo:
 			if not translate:
 				continue
-			translate = [x.strip() for x in translate.split(":", 1)]
+			translate = (x.strip() for x in translate.split(":", 1))
 			if len(translate) == 1:
 				translate.append("")
 			info.append(formatLine("P1", translate[0], translate[1]))
@@ -1521,7 +1521,7 @@ class TunerInformation(InformationBase):
 		# info.append("")
 		# nims = nimmanager.nimListCompressed()
 		# for count in range(len(nims)):
-		# 	tuner, type = [x.strip() for x in nims[count].split(":", 1)]
+		# 	tuner, type = (x.strip() for x in nims[count].split(":", 1))
 		# 	info.append(formatLine("P1", tuner, type))
 		info.append("")
 		info.append(formatLine("", _("DVB API"), about.getDVBAPI()))

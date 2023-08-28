@@ -429,7 +429,7 @@ def parseFont(value, scale=((1, 1), (1, 1))):
 
 
 def parseGradient(value):
-	data = [x.strip() for x in value.split(",")]
+	data = (x.strip() for x in value.split(","))
 	if len(data) > 2:
 		options = {
 			"horizontal": ePixmap.GRADIENT_HORIZONTAL,
@@ -541,7 +541,7 @@ def parseParameter(value):
 	elif value in colors:  # Named color.
 		return colors[value].argb()
 	elif value.find(";") != -1:  # Font.
-		(font, size) = [x.strip() for x in value.split(";", 1)]
+		(font, size) = (x.strip() for x in value.split(";", 1))
 		return [font, int(size)]
 	else:  # Integer.
 		return int(value)
@@ -829,7 +829,7 @@ class AttributeParser:
 		if value in variables:
 			value = variables[value]
 		errors = []
-		flags = [x.strip() for x in value.split(",")]
+		flags = (x.strip() for x in value.split(","))
 		for flag in flags:
 			try:
 				self.guiObject.setFlag(eWindow.__dict__[flag])
@@ -913,7 +913,7 @@ class AttributeParser:
 		self.guiObject.setPixmap(parsePixmap(value, self.desktop))
 
 	def pointer(self, value):
-		(name, pos) = [x.strip() for x in value.split(":", 1)]
+		(name, pos) = (x.strip() for x in value.split(":", 1))
 		ptr = parsePixmap(name, self.desktop)
 		pos = parsePosition(pos, self.scaleTuple)
 		self.guiObject.setPointer(0, ptr, pos)
@@ -1001,7 +1001,7 @@ class AttributeParser:
 		# attribDeprecationWarning("seek_pointer", "seekPointer")
 
 	def seekPointer(self, value):
-		(name, pos) = [x.strip() for x in value.split(":", 1)]
+		(name, pos) = (x.strip() for x in value.split(":", 1))
 		ptr = parsePixmap(name, self.desktop)
 		pos = parsePosition(pos, self.scaleTuple)
 		self.guiObject.setPointer(1, ptr, pos)
@@ -1230,7 +1230,7 @@ def loadSingleSkinData(desktop, screenID, domSkin, pathSkin, scope=SCOPE_GUISKIN
 			name = parameter.attrib.get("name")
 			value = parameter.attrib.get("value")
 			if name and value:
-				parameters[name] = list(map(parseParameter, [x.strip() for x in value.split(",")])) if "," in value else parseParameter(value)
+				parameters[name] = list(map(parseParameter, (x.strip() for x in value.split(",")))) if "," in value else parseParameter(value)
 			else:
 				skinError("Tag 'parameter' needs a name and value, got name='%s' and size='%s'" % (name, value))
 	for tag in domSkin.findall("menus"):
