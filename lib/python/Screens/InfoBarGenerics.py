@@ -3144,6 +3144,7 @@ class InfoBarAspectSelection:
 	def __init__(self):
 		self["AspectSelectionAction"] = HelpableActionMap(self, ["InfobarAspectSelectionActions"], {
 			"aspectSelection": (self.ExGreen_toggleGreen, _("Aspect ratio list")),
+			"exitLong": (self.switchTo720p, _("Switch to 720p video?")),
 		}, prio=0, description=_("Aspect Ratio Actions"))
 		self.__ExGreen_state = self.STATE_HIDDEN
 
@@ -3168,13 +3169,10 @@ class InfoBarAspectSelection:
 		# 	self.STATE_RESOLUTION: "RESOLUTION"
 		# }.get(self.__ExGreen_state))
 		if self.__ExGreen_state == self.STATE_HIDDEN:
-			print("self.STATE_HIDDEN")
 			self.ExGreen_doAspect()
 		elif self.__ExGreen_state == self.STATE_ASPECT:
-			print("self.STATE_ASPECT")
 			self.ExGreen_doResolution()
 		elif self.__ExGreen_state == self.STATE_RESOLUTION:
-			print("self.STATE_RESOLUTION")
 			self.ExGreen_doHide()
 
 	def aspectSelection(self):
@@ -3200,6 +3198,24 @@ class InfoBarAspectSelection:
 				selection = item
 				break
 		self.session.openWithCallback(self.aspectSelected, ChoiceBox, title=_("Please select an aspect ratio..."), list=aspectList, keys=keys, selection=selection)
+
+	def confirm(self, confirmed):
+		from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+		port = config.av.videoport.value
+		mode = config.av.videomode[port].value
+		rate = config.av.videorate[mode].value
+		self.last_video = (port, mode, rate)
+		if not confirmed:   # return to the last used video mode
+			config.av.videoport.value = self.last_video[0]
+			config.av.videomode[self.last_video[0]].value = self.last_video[1]
+			config.av.videorate[self.last_video[1]].value = self.last_video[2]
+			VIDEO.setMode(*self.last_video)
+
+	def switchTo720p(self):  # use 720p video mode recover signal on your video port
+		from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+		VIDEO.setMode("HDMI", "720p", "50Hz")
+		from Screens.MessageBox import MessageBox
+		self.session.openWithCallback(self.confirm, MessageBox, _("Switch to 720p video?"), MessageBox.TYPE_YESNO, timeout=20, simple=True)
 
 	def aspectSelected(self, aspect):
 		if not aspect is None:
