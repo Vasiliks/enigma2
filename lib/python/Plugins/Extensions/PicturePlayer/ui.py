@@ -67,7 +67,7 @@ class picshow(Screen):
 		if not pathExists(currDir):
 			currDir = "/"
 
-		self.filelist = FileList(currDir, matchingPattern="(?i)^.*\.(jpeg|jpg|jpe|png|bmp|gif|svg)")
+		self.filelist = FileList(currDir, matchingPattern=r"(?i)^.*\.(jpeg|jpg|jpe|png|bmp|gif|svg)")
 		self["filelist"] = self.filelist
 		self["filelist"].onSelectionChanged.append(self.selectionChanged)
 
