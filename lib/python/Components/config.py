@@ -981,7 +981,7 @@ class ConfigInteger(ConfigSequence):
 
 
 class ConfigPIN(ConfigInteger):
-	def __init__(self, default, pinLength=4, censor=u"\u2022"):
+	def __init__(self, default, pinLength=4, censor="\u2022"):
 		if not isinstance(default, int):
 			raise TypeError("[Config] Error: 'ConfigPIN' default must be an integer!")
 		if censor != "" and (isinstance(censor, str) and len(censor) != 1):  # and (isinstance(censor, unicode) and len(censor) != 1):
@@ -1214,7 +1214,7 @@ class ConfigText(ConfigElement, NumericalTextInput):
 
 
 class ConfigPassword(ConfigText):
-	def __init__(self, default="", fixed_size=False, visible_width=False, censor=u"\u2022"):
+	def __init__(self, default="", fixed_size=False, visible_width=False, censor="\u2022"):
 		ConfigText.__init__(self, default=default, fixed_size=fixed_size, visible_width=visible_width)
 		if censor != "" and (isinstance(censor, str) and len(censor) != 1) and (isinstance(censor, unicode) and len(censor) != 1):
 			raise ValueError("[Config] Error: Censor must be a single char (or \"\")!")
