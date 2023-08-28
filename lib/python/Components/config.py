@@ -100,7 +100,7 @@ def NoSave(element):
 #            the default if saved_value is 'None' (default)
 #            or invalid.
 #
-class ConfigElement(object):
+class ConfigElement:
 	def __init__(self):
 		self.saved_value = None
 		self.save_forced = False
