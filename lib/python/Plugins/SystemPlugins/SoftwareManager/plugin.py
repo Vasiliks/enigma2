@@ -1413,7 +1413,7 @@ class OPKGSource(Screen):
 		text = ""
 		if self.configfile:
 			try:
-				fp = open(self.configfile, 'r')
+				fp = open(self.configfile)
 				sources = fp.readlines()
 				if sources:
 					text = sources[0]

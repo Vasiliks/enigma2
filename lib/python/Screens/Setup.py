@@ -17,10 +17,10 @@ import xml.etree.ElementTree
 # read the setupmenu
 try:
 	# first we search in the current path
-	setupfile = open('data/setup.xml', 'r')
+	setupfile = open('data/setup.xml')
 except:
 	# if not found in the current path, we use the global datadir-path
-	setupfile = open(eEnv.resolve('${datadir}/enigma2/setup.xml'), 'r')
+	setupfile = open(eEnv.resolve('${datadir}/enigma2/setup.xml'))
 setupdom = xml.etree.ElementTree.parse(setupfile)
 setupfile.close()
 

@@ -158,7 +158,7 @@ class Network:
 		interfaces = []
 		# parse the interfaces-file
 		try:
-			fp = open('/etc/network/interfaces', 'r')
+			fp = open('/etc/network/interfaces')
 			interfaces = fp.readlines()
 			fp.close()
 		except:
@@ -227,9 +227,9 @@ class Network:
 		resolv = []
 		try:
 			if config.usage.dns.value.lower() in ("dhcp-router", "staticip"):
-				fp = open('/etc/resolv.conf', 'r')
+				fp = open('/etc/resolv.conf')
 			else:
-				fp = open('/etc/enigma2/nameservers', 'r')
+				fp = open('/etc/enigma2/nameservers')
 			resolv = fp.readlines()
 			fp.close()
 			self.nameservers = []
@@ -583,7 +583,7 @@ class Network:
 		device = re.compile('[a-z]{2,}[0-9]*:')
 		ifnames = []
 		print("[Network] Read /proc/net/wireless")
-		fp = open('/proc/net/wireless', 'r')
+		fp = open('/proc/net/wireless')
 		for line in fp:
 			try:
 				ifnames.append(device.search(line).group()[:-1])

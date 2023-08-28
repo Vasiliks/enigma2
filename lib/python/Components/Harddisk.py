@@ -20,7 +20,7 @@ def readFile(filename):
 
 def getProcMounts():
 	try:
-		mounts = open("/proc/mounts", 'r')
+		mounts = open("/proc/mounts")
 	except IOError as ex:
 		print("[Harddisk] Failed to open /proc/mounts", ex)
 		return []
@@ -33,7 +33,7 @@ def getProcMounts():
 
 def isFileSystemSupported(filesystem):
 	try:
-		for fs in open('/proc/filesystems', 'r'):
+		for fs in open('/proc/filesystems'):
 			if fs.strip().endswith(filesystem):
 				return True
 		return False

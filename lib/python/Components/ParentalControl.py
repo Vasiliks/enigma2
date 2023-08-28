@@ -212,7 +212,7 @@ class ParentalControl:
 	def openListFromFile(self, sWhichList):
 		result = {}
 		try:
-			for x in open(resolveFilename(SCOPE_CONFIG, sWhichList), 'r'):
+			for x in open(resolveFilename(SCOPE_CONFIG, sWhichList)):
 				sPlain = x.strip()
 				self.serviceMethodWrapper(sPlain, self.addServiceToList, result)
 		except:

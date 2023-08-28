@@ -178,7 +178,7 @@ class ProgressDiskSpaceInfo(Poll, Converter):
 		def isMountPoint():
 			try:
 #				print("[ProgressDiskSpaceInfo] Read /proc/mounts")
-				fd = open('/proc/mounts', 'r')
+				fd = open('/proc/mounts')
 				for line in fd:
 					l = line.split()
 					if len(l) > 1 and l[1] == path:

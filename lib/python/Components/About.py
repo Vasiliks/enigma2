@@ -265,7 +265,7 @@ def getChipSetString():
 
 def getChipSetNumber():
 	try:
-		f = open('/proc/stb/info/chipset', 'r')
+		f = open('/proc/stb/info/chipset')
 		chipset = f.read()
 		f.close()
 		return str(chipset.lower().replace('\n', '').replace('brcm', '').replace('bcm', ''))

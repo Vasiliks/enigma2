@@ -432,7 +432,7 @@ class FlashImage(Screen):
 
 	def doUnzip(self):
 		try:
-			zipfile.ZipFile(self.zippedimage, 'r').extractall(self.unzippedimage)
+			zipfile.ZipFile(self.zippedimage).extractall(self.unzippedimage)
 			self.flashimage()
 		except:
 			self.session.openWithCallback(self.abort, MessageBox, _("Error during unzipping image\n%s") % self.imagename, type=MessageBox.TYPE_ERROR, simple=True)

@@ -110,7 +110,7 @@ class AutoInstallWizard(Screen):
 
 		import glob
 		print("[StartWizard] Read /sys/class/net/eth0/address")
-		mac_address = open('/sys/class/net/eth0/address', 'r').readline().strip().replace(":", "")
+		mac_address = open('/sys/class/net/eth0/address').readline().strip().replace(":", "")
 		autoinstallfiles = glob.glob('/media/*/backup/autoinstall%s' % mac_address) + glob.glob('/media/net/*/backup/autoinstall%s' % mac_address)
 		if not autoinstallfiles:
 			autoinstallfiles = glob.glob('/media/*/backup/autoinstall') + glob.glob('/media/net/*/backup/autoinstall')

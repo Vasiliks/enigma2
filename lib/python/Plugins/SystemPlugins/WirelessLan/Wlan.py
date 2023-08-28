@@ -273,7 +273,7 @@ class wpaSupplicant:
 		try:
 			#parse the wpasupplicant configfile
 			print("[Wlan] Parsing configfile: ", configfile)
-			fp = open(configfile, 'r')
+			fp = open(configfile)
 			supplicant = fp.readlines()
 			fp.close()
 			essid = None

@@ -12,7 +12,7 @@ if len(sys.argv) > 2:
 
 l = {}
 
-with open(infilename, 'r') as f:
+with open(infilename) as f:
 	f.readline() # throw away header line
 	for line in f:
 		item = line.split('\t')

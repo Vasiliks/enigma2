@@ -130,7 +130,7 @@ class NetworkAdapterSelection(Screen, HelpableScreen):
                         os.unlink("/etc/default_gw")
 
                 if os.path.exists("/etc/default_gw"):
-                        fp = open('/etc/default_gw', 'r')
+                        fp = open('/etc/default_gw')
                         result = fp.read()
                         fp.close()
                         default_gw = result
@@ -156,7 +156,7 @@ class NetworkAdapterSelection(Screen, HelpableScreen):
                 old_default_gw = None
                 num_configured_if = len(iNetwork.getConfiguredAdapters())
                 if os.path.exists("/etc/default_gw"):
-                        fp = open('/etc/default_gw', 'r')
+                        fp = open('/etc/default_gw')
                         old_default_gw = fp.read()
                         fp.close()
                 if num_configured_if > 1 and (not old_default_gw or old_default_gw != selection[0]):

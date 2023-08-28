@@ -104,7 +104,7 @@ class ImportChannels:
 						self.ImportChannelsDone(False, _("ERROR downloading file %s/%s") % (e2path, file))
 						return
 				else:
-					with open('%s/%s' % (e2path, file), 'r') as f:
+					with open('%s/%s' % (e2path, file)) as f:
 						content = f.readlines()
 			except Exception as e:
 				# for the moment just log and ignore
