@@ -10,14 +10,14 @@ from Components.config import config
 from Components.AVSwitch import AVSwitch
 from Components.Console import Console
 from Components.ImportChannels import ImportChannels
-from Components.SystemInfo import SystemInfo, BoxInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Components.Sources.StreamService import StreamServiceList
 from Components.Task import job_manager
 from Tools.Directories import mediaFilesInUse
 from Tools.Notifications import AddNotification
 from time import time, localtime
 from GlobalActions import globalActionMap
-from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, quitMainloop, iRecordableService, eDBoxLCD
+from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, quitMainloop, iRecordableService
 
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
@@ -124,14 +124,21 @@ class StandbyScreen(Screen):
 			del self.session.pip
 		self.session.pipshown = False
 
-		#set input to vcr scart
-		self.avswitch.setInput("off")
+		if SystemInfo["ScartSwitch"]:
+			self.avswitch.setInput("SCART")
+		else:
+			self.avswitch.setInput("AUX")
+		if brand in ("dinobot",) or SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
+			output = "/proc/stb/hdmi/output"
+			if os.path.isfile(output):
+				with open(output, "w") as hdmi:
+					hdmi.write("off")
 
 		gotoShutdownTime = int(config.usage.standby_to_shutdown_timer.value)
 		if gotoShutdownTime:
 			self.standbyTimeoutTimer.startLongTimer(gotoShutdownTime)
 
-		if self.StandbyCounterIncrease != 1:
+		if self.StandbyCounterIncrease:  # Wakeup timer with value "yes" or "standby" (only standby mode) in SleepTimerEdit.
 			gotoWakeupTime = isNextWakeupTime(True)
 			if gotoWakeupTime != -1:
 				curtime = localtime(time())
@@ -163,7 +170,7 @@ class StandbyScreen(Screen):
 		globalActionMap.setEnabled(True)
 		if RecordTimer.RecordTimerEntry.receiveRecordEvents:
 			RecordTimer.RecordTimerEntry.stopTryQuitMainloop()
-		self.avswitch.setInput("encoder")
+		self.avswitch.setInput("ENCODER")
 		self.leaveMute()
 		# set LCDminiTV
 		if LCDMiniTV:
@@ -171,7 +178,7 @@ class StandbyScreen(Screen):
 
 		if isfile("/usr/script/standby_leave.sh"):
 			Console().ePopen("/usr/script/standby_leave.sh")
-		if config.usage.remote_fallback_import_standby.value:
+		if config.usage.remote_fallback_import_standby.value and not config.clientmode.enabled.value:
 			ImportChannels()
 
 	def __onFirstExecBegin(self):
@@ -183,7 +190,16 @@ class StandbyScreen(Screen):
 
 	def Power(self):
 		print("[Standby] leave standby")
+		SystemInfo["StandbyState"] = False
 		self.close(True)
+
+		if os.path.exists("/usr/script/StandbyLeave.sh"):
+			Console().ePopen("/usr/script/StandbyLeave.sh")
+		if brand in ("dinobot",) or SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
+			output = "/proc/stb/hdmi/output"
+			if os.path.isfile(output):
+				with open(output, "w") as hdmi:
+					hdmi.write("on")
 
 	def setMute(self):
 		self.wasMuted = eDVBVolumecontrol.getInstance().isMuted()
@@ -203,7 +219,7 @@ class StandbyScreen(Screen):
 	def standbyTimeout(self):
 		if config.usage.standby_to_shutdown_timer_blocktime.value:
 			curtime = localtime(time())
-			if curtime.tm_year > 1970: #check if the current time is valid
+			if curtime.tm_year > 1970:  # check if the current time is valid
 				curtime = (curtime.tm_hour, curtime.tm_min, curtime.tm_sec)
 				begintime = tuple(config.usage.standby_to_shutdown_timer_blocktime_begin.value)
 				endtime = tuple(config.usage.standby_to_shutdown_timer_blocktime_end.value)
@@ -339,13 +355,13 @@ class TryQuitMainloop(MessageBox):
 	def getRecordEvent(self, recservice, event):
 		if event == iRecordableService.evEnd:
 			recordings = self.session.nav.getRecordings()
-			if not recordings: # no more recordings exist
+			if not recordings:  # no more recordings exist
 				rec_time = self.session.nav.RecordTimer.getNextRecordingTime()
 				if rec_time > 0 and (rec_time - time()) < 360:
-					self.initTimeout(360) # wait for next starting timer
+					self.initTimeout(360)  # wait for next starting timer
 					self.startTimer()
 				else:
-					self.close(True) # immediate shutdown
+					self.close(True)  # immediate shutdown
 		elif event == iRecordableService.evStart:
 			self.stopTimer()
 
@@ -373,22 +389,21 @@ class TryQuitMainloop(MessageBox):
 			elif not inStandby:
 				config.misc.RestartUI.value = True
 				config.misc.RestartUI.save()
-			if LCDMiniTV:
-				# set LCDminiTV off / fix a deep-standby-crash on some boxes
-				print("[Standby] LCDminiTV off")
-				setLCDModeMinitTV("0")
-			if model in ("vusolo4k", "pulse4k"):  # Workaround for white display flash.
-				try:
-					eDBoxLCD.getInstance().setLCDBrightness(0)
-				except:
-					print("[Standby] Write to oled_brightness failed.")
+			if SystemInfo["Display"] and SystemInfo["LCDMiniTV"]:
+				mode = "/proc/stb/lcd/mode"
+				if os.path.isfile(mode):
+					print("[Standby] LCDminiTV off")
+					with open(mode, "w") as lcd:
+						lcd.write("0")
+			if model == "vusolo4k":
+				oled_brightness = "/proc/stb/fp/oled_brightness"
+				if os.path.isfile(oled_brightness):
+					print("[Standby] Brightness OLED off")
+					with open(oled_brightness, "w") as oled:
+						oled.write("0")
 			self.quitMainloop()
 		else:
 			MessageBox.close(self, True)
-
-	def quitMainloopDelay(self):
-		self.session.nav.stopService()
-		quitMainloop(self.retval)
 
 	def quitMainloop(self):
 		self.session.nav.stopService()
@@ -403,6 +418,9 @@ class TryQuitMainloop(MessageBox):
 	def __onHide(self):
 		global inTryQuitMainloop
 		inTryQuitMainloop = False
+
+	def createSummary(self):  # Suppress the normal MessageBox ScreenSummary screen.
+		return None
 
 
 class SwitchToAndroid(Screen):
