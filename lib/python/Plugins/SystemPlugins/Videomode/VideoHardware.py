@@ -143,7 +143,7 @@ class VideoHardware:
 		del modes["Scart"]
 
 	if model == "hd2400":
-		rev = open("/proc/stb/info/board_revision", "r").read()
+		rev = open("/proc/stb/info/board_revision").read()
 		if rev >= "2":
 			del modes["YPbPr"]
 
@@ -166,7 +166,7 @@ class VideoHardware:
 						ret = (16, 10)
 			elif is_auto:
 				try:
-					aspect_str = open("/proc/stb/vmpeg/0/aspect", "r").read()
+					aspect_str = open("/proc/stb/vmpeg/0/aspect").read()
 					if aspect_str == "1":  # 4:3
 						ret = (4, 3)
 				except Exception:

@@ -1071,7 +1071,7 @@ def InitUsageConfig():
 		]
 		if os.path.exists("/proc/stb/fp/fan_choices"):
 			print("[UsageConfig] Read /proc/stb/fp/fan_choices")
-			choicelist = [x for x in choicelist if x[0] in open("/proc/stb/fp/fan_choices", "r").read().strip().split(" ")]
+			choicelist = [x for x in choicelist if x[0] in open("/proc/stb/fp/fan_choices").read().strip().split(" ")]
 		config.usage.fan = ConfigSelection(choicelist)
 
 		def fanChanged(configElement):
@@ -1085,7 +1085,7 @@ def InitUsageConfig():
 		config.usage.fanspeed.addNotifier(fanSpeedChanged)
 
 	if SystemInfo["WakeOnLAN"]:
-		f = open(SystemInfo["WakeOnLAN"], "r")
+		f = open(SystemInfo["WakeOnLAN"])
 		status = f.read().strip()
 		f.close()
 

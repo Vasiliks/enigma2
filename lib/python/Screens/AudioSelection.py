@@ -122,7 +122,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("dac", _("DAC"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/avl_choices", "r") as avl_choices:
+					with open("/proc/stb/audio/avl_choices") as avl_choices:
 						avl_choices.read().split('\n', 1)[0]
 						avl_choices.close()
 				self.settings.autovolume = ConfigSelection(choices=choice_list, default=config.av.autovolume.value)
@@ -135,7 +135,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("enabled", _("On"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/autovolumelevel_choices", "r") as autovolumelevel_choices:
+					with open("/proc/stb/audio/autovolumelevel_choices") as autovolumelevel_choices:
 						autovolumelevel_choices.read().split('\n', 1)[0]
 						autovolumelevel_choices.close()
 				self.settings.autovolumelevel = ConfigSelection(choices=choice_list, default=config.av.autovolumelevel.value)
@@ -148,7 +148,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("passthrough", _("Passthrough"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/ac3_choices", "r") as ac3_choices:
+					with open("/proc/stb/audio/ac3_choices") as ac3_choices:
 						ac3_choices.read().split('\n', 1)[0]
 						ac3_choices.close()
 				self.settings.downmix_ac3 = ConfigSelection(choices=choice_list, default=config.av.downmix_ac3.value)
@@ -161,7 +161,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("passthrough", _("Passthrough"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/aac_choices", "r") as aac_choices:
+					with open("/proc/stb/audio/aac_choices") as aac_choices:
 						aac_choices.read().split('\n', 1)[0]
 						aac_choices.close()
 				self.settings.downmix_aac = ConfigSelection(choices=choice_list, default=config.av.downmix_aac.value)
@@ -180,7 +180,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("extrawide", _("Extra wide"))
 				]
 				if SystemInfo["CanProc"]:
-					with open(SystemInfo["CanDownmixAACPlus"], "r") as aacplus_choices:
+					with open(SystemInfo["CanDownmixAACPlus"]) as aacplus_choices:
 						aacplus_choices.read().split('\n', 1)[0]
 						aacplus_choices.close()
 				self.settings.downmix_aacplus = ConfigSelection(choices=choice_list, default=config.av.downmix_aacplus.value)
@@ -194,7 +194,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("dts", _("DTS"))
 				]
 				if SystemInfo["CanProc"]:
-					with open(SystemInfo["CanAACTranscode"], "r") as aac_transcode_choices:
+					with open(SystemInfo["CanAACTranscode"]) as aac_transcode_choices:
 						aac_transcode_choices.read().split('\n', 1)[0]
 						aac_transcode_choices.close()
 				self.settings.transcodeaac = ConfigSelection(choices=choice_list, default=config.av.transcodeaac.value)
@@ -207,7 +207,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("force_ac3", _("Convert to AC3"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/ac3plus_choices", "r") as ac3plus_choices:
+					with open("/proc/stb/audio/ac3plus_choices") as ac3plus_choices:
 						ac3plus_choices.read().split('\n', 1)[0]
 						ac3plus_choices.close()
 				self.settings.transcodeac3plus = ConfigSelection(choices=choice_list, default=config.av.transcodeac3plus.value)
@@ -220,7 +220,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("passthrough", _("Passthrough"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/dts_choices", "r") as dts_choices:
+					with open("/proc/stb/audio/dts_choices") as dts_choices:
 						dts_choices.read().split('\n', 1)[0]
 						dts_choices.close()
 				self.settings.downmix_dts = ConfigSelection(choices=choice_list, default=config.av.downmix_dts.value)
@@ -236,7 +236,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("hdmi_best", _("Use best / Controlled by HDMI"))
 				]
 				if SystemInfo["CanProc"]:
-					with open(SystemInfo["CanDTSHD"], "r") as dtshd_choices:
+					with open(SystemInfo["CanDTSHD"]) as dtshd_choices:
 						dtshd_choices.read().split('\n', 1)[0]
 						dtshd_choices.close()
 				self.settings.dtshd = ConfigSelection(choices=choice_list, default=config.av.dtshd.value)
@@ -251,7 +251,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("hdmi_best", _("Use best / Controlled by HDMI"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/wmapro_choices", "r") as wmapro_choices:
+					with open("/proc/stb/audio/wmapro_choices") as wmapro_choices:
 						wmapro_choices.read().split('\n', 1)[0]
 						wmapro_choices.close()
 				self.settings.wmapro = ConfigSelection(choices=choice_list, default=config.av.wmapro.value)
@@ -266,7 +266,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("dac", _("DAC"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/3d_surround_choices", "r") as surround:
+					with open("/proc/stb/audio/3d_surround_choices") as surround:
 						surround.read().split('\n', 1)[0]
 						surround.close()
 				self.settings.surround_3d = ConfigSelection(choices=choice_list, default=config.av.surround_3d.value)
@@ -280,7 +280,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("extrawide", _("Extra wide"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/3d_surround_speaker_position_choices", "r") as speaker:
+					with open("/proc/stb/audio/3d_surround_speaker_position_choices") as speaker:
 						speaker.read().split('\n', 1)[0]
 						speaker.close()
 				self.settings.speaker_3d = ConfigSelection(choices=choice_list, default=config.av.speaker_3d.value)
@@ -295,7 +295,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("extrawide", _("Extra wide"))
 				]
 				if SystemInfo["CanProc"]:
-					with open("/proc/stb/audio/3dsurround_choices", "r") as surroundspeaker:
+					with open("/proc/stb/audio/3dsurround_choices") as surroundspeaker:
 						surroundspeaker.read().split('\n', 1)[0]
 						surroundspeaker.close()
 				self.settings.surround_3d_speaker = ConfigSelection(choices=choice_list, default=config.av.surround_3d_speaker.value)

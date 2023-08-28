@@ -111,13 +111,13 @@ def getEnigmaVersionString():
 def getGStreamerVersionString():
 	from glob import glob
 	try:
-		gst = [x.split("Version: ") for x in open(glob("/var/lib/opkg/info/gstreamer[0-9].[0-9].control")[0], "r") if x.startswith("Version:")][0]
+		gst = [x.split("Version: ") for x in open(glob("/var/lib/opkg/info/gstreamer[0-9].[0-9].control")[0]) if x.startswith("Version:")][0]
 		return "%s" % gst[1].split("+")[0].split("-")[0].replace("\n", "")
 	except:
 		try:
 			from glob import glob
 			print("[About] Read /var/lib/opkg/info/gstreamer.control")
-			gst = [x.split("Version: ") for x in open(glob("/var/lib/opkg/info/gstreamer?.[0-9].control")[0], "r") if x.startswith("Version:")][0]
+			gst = [x.split("Version: ") for x in open(glob("/var/lib/opkg/info/gstreamer?.[0-9].control")[0]) if x.startswith("Version:")][0]
 			return "%s" % gst[1].split("+")[0].replace("\n", "")
 		except:
 			return _("Not installed")
@@ -135,7 +135,7 @@ def getFFmpegVersionString():
 def getKernelVersionString():
 	kernelversion = "unknown"
 	try:
-		with open("/proc/version", "r") as f:
+		with open("/proc/version") as f:
 			kernelversion = f.read().split(" ", 4)[2].split("-", 2)[0]
 			return kernelversion
 	except:
@@ -257,7 +257,7 @@ def getSystemTemperature():
 
 def getChipSetString():
 	try:
-		chipset = open("/proc/stb/info/chipset", "r").read()
+		chipset = open("/proc/stb/info/chipset").read()
 		return str(chipset.lower().replace('\n', ''))
 	except IOError:
 		return _("undefined")
@@ -311,17 +311,17 @@ def getDriverInstalledDate():
 		from glob import glob
 		try:
 			if MODEL in ("dm800", "dm8000"):
-				driver = [x.split("-")[-2:-1][0][-9:] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0], "r") if x.startswith("Version:")][0]
+				driver = [x.split("-")[-2:-1][0][-9:] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0]) if x.startswith("Version:")][0]
 				return "%s-%s-%s" % (driver[:4], driver[4:6], driver[6:])
 			else:
-				driver = [x.split("-")[-2:-1][0][-8:] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0], "r") if x.startswith("Version:")][0]
+				driver = [x.split("-")[-2:-1][0][-8:] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0]) if x.startswith("Version:")][0]
 				return "%s-%s-%s" % (driver[:4], driver[4:6], driver[6:])
 		except:
 			try:
-				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-dvb-proxy-*.control")[0], "r") if x.startswith("Version:")][0]
+				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-dvb-proxy-*.control")[0]) if x.startswith("Version:")][0]
 				return "%s" % driver[1].replace("\n", "")
 			except:
-				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-platform-util-*.control")[0], "r") if x.startswith("Version:")][0]
+				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-platform-util-*.control")[0]) if x.startswith("Version:")][0]
 				return "%s" % driver[1].replace("\n", "")
 	except:
 		return _("unknown")

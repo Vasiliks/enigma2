@@ -488,7 +488,7 @@ class CaidInfo2(Poll, Converter, object):
 				if ecm_mtime == old_ecm_mtime:
 					return info
 				old_ecm_mtime = ecm_mtime
-				ecmf = open("/tmp/ecm.info", "r")
+				ecmf = open("/tmp/ecm.info")
 				ecm = ecmf.readlines()
 			except:
 				old_ecm_mtime = None

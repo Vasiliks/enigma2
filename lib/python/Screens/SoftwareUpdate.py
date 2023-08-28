@@ -148,7 +148,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 			except Exception as er:
 				print('[UpdatePlugin] Error in get timestamp', er)
 				return ""
-		return sorted([gettime(open("/etc/opkg/%s" % file, "r").readlines()[0].split()[2]) for file in listdir("/etc/opkg") if not file.startswith("3rd-party") and file not in ("arch.conf", "opkg.conf", "picons-feed.conf")], reverse=True)[0]
+		return sorted([gettime(open("/etc/opkg/%s" % file).readlines()[0].split()[2]) for file in listdir("/etc/opkg") if not file.startswith("3rd-party") and file not in ("arch.conf", "opkg.conf", "picons-feed.conf")], reverse=True)[0]
 
 	def startActualUpdate(self, answer):
 		if answer:
@@ -288,7 +288,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 			text = "\n".join([x[0] for x in sorted(self.opkg.getFetchedList(), key=lambda d: d[0])])
 			self.session.openWithCallback(boundFunction(self.opkgCallback, OpkgComponent.EVENT_DONE, None), TextBox, text, _("Packages to update"), True)
 		elif answer[1] == "log":
-			text = open("/home/root/opkgupgrade.log", "r").read()
+			text = open("/home/root/opkgupgrade.log").read()
 			self.session.openWithCallback(boundFunction(self.opkgCallback, OpkgComponent.EVENT_DONE, None), TextBox, text, _("Latest update log"), True)
 		else:
 			self.opkg.startCmd(OpkgComponent.CMD_UPGRADE, args={'test_only': False})

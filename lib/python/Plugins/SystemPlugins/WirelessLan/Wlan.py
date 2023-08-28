@@ -179,7 +179,7 @@ class wpaSupplicant:
 		configfile = getWlConfName(iface)
 
 		try:
-			fd = open(configfile, "r")
+			fd = open(configfile)
 			lines = fd.readlines()
 			fd.close()
 
