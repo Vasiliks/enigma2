@@ -8,7 +8,6 @@ from time import localtime, strftime, struct_time
 from enigma import getPrevAsciiCode
 
 from Tools.Directories import SCOPE_CONFIG, fileExists, fileAccess, resolveFilename
-from Tools.LoadPixmap import LoadPixmap
 from Tools.NumericalTextInput import NumericalTextInput
 from Components.Harddisk import harddiskmanager  # This import is order critical!
 

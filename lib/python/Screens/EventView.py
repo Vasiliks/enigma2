@@ -12,7 +12,7 @@ from Components.Sources.ServiceEvent import ServiceEvent
 from Components.Sources.StaticText import StaticText
 from Components.Sources.Event import Event
 from enigma import eEPGCache, eTimer, eServiceReference
-from RecordTimer import RecordTimerEntry, parseEvent, AFTEREVENT, createRecordTimerEntry
+from RecordTimer import RecordTimerEntry, parseEvent, createRecordTimerEntry
 from Screens.TimerEntry import TimerEntry
 from Plugins.Plugin import PluginDescriptor
 from Tools.BoundFunction import boundFunction

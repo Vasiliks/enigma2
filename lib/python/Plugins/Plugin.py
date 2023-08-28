@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from os.path import join as pathjoin
-from Components.config import ConfigSubsection, config
 from Tools.LoadPixmap import LoadPixmap
 
 

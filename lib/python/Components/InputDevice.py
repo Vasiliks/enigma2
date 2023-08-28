@@ -8,7 +8,7 @@ from struct import pack
 from enigma import eRCInput
 
 from keyids import KEYIDS, KEYIDNAMES
-from Components.config import ConfigSubsection, ConfigInteger, ConfigSelection, ConfigYesNo, ConfigText, ConfigSlider, config
+from Components.config import ConfigSubsection, ConfigSelection, ConfigYesNo, ConfigText, ConfigSlider, config
 from Components.Console import Console
 from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.Directories import SCOPE_KEYMAPS, SCOPE_SKINS, fileReadLine, fileWriteLine, fileReadLines, fileReadXML, resolveFilename, pathExists

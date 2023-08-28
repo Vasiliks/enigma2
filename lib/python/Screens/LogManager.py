@@ -3,9 +3,7 @@ from Screens.Screen import Screen
 from Components.GUIComponent import GUIComponent
 from Components.VariableText import VariableText
 from Components.ActionMap import ActionMap
-from Components.Label import Label
 from Components.Sources.StaticText import StaticText
-from Components.FileList import FileList
 from Components.MenuList import MenuList
 from Components.config import config, configfile
 from Components.FileList import MultiFileSelectList
