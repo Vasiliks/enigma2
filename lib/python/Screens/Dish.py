@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Screens.Screen import Screen
+from Components.Pixmap import Pixmap
 from Components.config import config, ConfigInteger
 from Components.Sources.Boolean import Boolean
 from Components.Label import Label

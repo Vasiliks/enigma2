@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Components.Converter.Converter import Converter
 from Components.Element import cached
-from time import localtime
+from time import localtime, strftime
 
 
 class AnalogClock(Converter):

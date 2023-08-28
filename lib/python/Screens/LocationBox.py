@@ -24,6 +24,7 @@ from Tools.NumericalTextInput import NumericalTextInput
 # GUI (Components)
 from Components.ActionMap import NumberActionMap, HelpableActionMap
 from Components.Label import Label
+from Components.Pixmap import Pixmap
 from Components.Sources.StaticText import StaticText
 from Components.Button import Button
 from Components.FileList import FileList

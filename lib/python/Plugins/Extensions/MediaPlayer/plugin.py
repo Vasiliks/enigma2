@@ -640,6 +640,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 			self.openServiceList()
 
 	def playAudioCD(self):
+		from enigma import eServiceReference
 		if len(self.cdAudioTrackFiles):
 			self.playlist.clear()
 			self.savePlaylistOnExit = False
@@ -1189,6 +1190,7 @@ def menu(menuid, **kwargs):
 
 
 def filescan_open(list, session, **kwargs):
+	from enigma import eServiceReference
 
 	mp = session.open(MediaPlayer)
 	mp.playlist.clear()
@@ -1207,6 +1209,7 @@ def filescan_open(list, session, **kwargs):
 
 
 def audioCD_open(list, session, **kwargs):
+	from enigma import eServiceReference
 	if os.path.isfile('/media/audiocd/cdplaylist.cdpls'):
 		list = open("/media/audiocd/cdplaylist.cdpls")
 	else:
@@ -1225,6 +1228,7 @@ def audioCD_open(list, session, **kwargs):
 
 
 def audioCD_open_mn(session, **kwargs):
+	from enigma import eServiceReference
 	if os.path.isfile('/media/audiocd/cdplaylist.cdpls'):
 		list = open("/media/audiocd/cdplaylist.cdpls")
 	else:
@@ -1246,6 +1250,7 @@ def movielist_open(list, session, **kwargs):
 	if not list:
 		# sanity
 		return
+	from enigma import eServiceReference
 	from Screens.InfoBar import InfoBar
 	f = list[0]
 	if f.mimetype == "video/mp2t":
