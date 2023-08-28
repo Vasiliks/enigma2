@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-01 11:29+0330\n"
-"PO-Revision-Date: 2023-07-02 07:15+0300\n"
+"PO-Revision-Date: 2023-08-28 16:15+0300\n"
 "Last-Translator: foxbob <boris.fox.solovyev@gmail.com>\n"
 "Language-Team: RU locale edited by foxbob\n"
 "Language: ru\n"
@@ -2766,8 +2766,12 @@ msgstr "Вы действительно хотите удалить выбран
 msgid "Are you sure to restore all deleted images"
 msgstr "Вы уверены,что хотите восстановить все удаленные имиджи"
 
-msgid "Are you sure you want to activate this network configuration?\n\n"
-msgstr "Вы уверены, что хотите активировать эту конфигурацию сети?\n\n"
+msgid ""
+"Are you sure you want to activate this network configuration?\n"
+"\n"
+msgstr ""
+"Вы уверены, что хотите активировать эту конфигурацию сети?\n"
+"\n"
 
 msgid ""
 "Are you sure you want to delete\n"
@@ -2794,8 +2798,12 @@ msgstr "Уверены, что хотите выйти из этого маст�
 msgid "Are you sure you want to reload the EPG data from:\n"
 msgstr "Действительно хотите перезагрузить данные ТВ-гида из\n"
 
-msgid "Are you sure you want to restart your network interfaces?\n\n"
-msgstr "Вы уверены, что хотите перезапустить сетевые интерфейсы?\n\n"
+msgid ""
+"Are you sure you want to restart your network interfaces?\n"
+"\n"
+msgstr ""
+"Вы уверены, что хотите перезапустить сетевые интерфейсы?\n"
+"\n"
 
 #, python-format
 msgid ""
@@ -3483,6 +3491,12 @@ msgstr "Повышение синего"
 msgid "Boost green"
 msgstr "Повышение зеленого"
 
+msgid "Boot ID"
+msgstr "Идентификатор загрузки"
+
+msgid "Boot information"
+msgstr "Информация о загрузке"
+
 msgid "Boot time"
 msgstr "Время загрузки"
 
@@ -3549,6 +3563,12 @@ msgstr "Яркость (В режиме ожидания)"
 msgid "British Indian Ocean Territory"
 msgstr "British Indian Ocean Territory"
 
+msgid "Broadcast address"
+msgstr "Адрес трансляции"
+
+msgid "Broadcast systems"
+msgstr "Системы вещания"
+
 msgid "Broadcom"
 msgstr "Broadcom"
 
@@ -3564,6 +3584,22 @@ msgstr "Буферизация %d%%"
 
 msgid "Buffers:"
 msgstr "Буферы:"
+
+msgid "Build Brand"
+msgstr "Построение сборки"
+
+msgid "Build Information"
+msgstr "Информация о сборке"
+
+msgid "Build Model"
+msgstr "Модель сборки"
+
+msgid "Build information"
+msgstr "Информация о сборке"
+
+#, python-format
+msgid "Build information for %s %s"
+msgstr "Информация о сборке для %s %s"
 
 msgid "Build date: "
 msgstr "Дата сборки: "
@@ -4331,6 +4367,9 @@ msgstr "Выберите страну для декодирования инфо
 
 msgid "Choose bouquet"
 msgstr "Выбор букета"
+
+msgid "Choose server and press ok"
+msgstr "Выберите сервер и нажмите ок"
 
 msgid "Choose style of main menus"
 msgstr "Выберите стиль главного меню"
@@ -5148,6 +5187,9 @@ msgstr "Подключено транскодирование, лимит - PiP 
 
 msgid "Connection using the supplied FTP parameters failed. Please recheck the details and try again."
 msgstr "Не удалось установить соединение с использованием параметров FTP, входящих в комплект поставки. Пожалуйста, проверьте все детали и повторите попытку."
+
+msgid "Connection information"
+msgstr "Информация о подключении"
 
 msgid "Console"
 msgstr "Консоль"
@@ -6067,6 +6109,9 @@ msgstr "Обнаружение следующих ресиверов перед 
 msgid "Detected storage devices:"
 msgstr "Обнаружены HDD:"
 
+msgid "Detected network servers:"
+msgstr "Обнаруженные сетевые серверы:"
+
 msgid "Detected NIMs:"
 msgstr "Обнаружены NIMs (тюнера):"
 
@@ -6283,7 +6328,41 @@ msgid "Display the virtual keyboard for data entry"
 msgstr "Отображение виртуальной клавиатуры для ввода данных"
 
 msgid "Display type"
-msgstr "Настройка дисплея"
+msgstr "Тип дисплея"
+
+msgid "Distance"
+msgstr "Расстояние"
+
+msgid "Distribution"
+msgstr "Дистрибутив"
+
+#, python-format
+msgid "Distribution '%s' information for %s %s"
+msgstr "Инфо о дистрибутиве '%s' для %s %s"
+
+msgid "Distribution architecture"
+msgstr "Архитектура"
+
+msgid "Distribution build"
+msgstr "Сборка дистрибутива"
+
+msgid "Distribution build date"
+msgstr "Дата сборки"
+
+msgid "Distribution file system"
+msgstr "Файловая система"
+
+msgid "Distribution folder"
+msgstr "Папка дистрибутива"
+
+msgid "Distribution language"
+msgstr "Язык дистрибутива"
+
+msgid "Distribution revision"
+msgstr "Редакция дистрибутива"
+
+msgid "Distribution version"
+msgstr "Версия дистрибутива"
 
 msgid "Djibouti"
 msgstr "Djibouti"
@@ -6407,6 +6486,19 @@ msgstr "Вы хотите установить список каналов?"
 
 msgid "Do you want to install the package:\n"
 msgstr "Вы хотите установить пакет:\n"
+
+msgid ""
+"Do you want to use auto mode detection?\n"
+"\n"
+"This option reads all supported modes and automatically sets the highest resolution supported by your TV. Choose 'No' if you want to customize your settings.\n"
+"\n"
+"If on the next screen you lose signal on your video port, long press EXIT to return to the list of video modes."
+msgstr ""
+"Хотите использовать автоматическое определение режима?\n"
+"\n"
+"Эта опция считывает все поддерживаемые режимы и автоматически устанавливает самое высокое разрешение, поддерживаемое вашим телевизором. Выберите «Нет», если хотите изменить настройки.\n"
+"\n"
+"Если на следующем экране вы потеряете сигнал на видеопорте, нажмите и удерживайте EXIT, чтобы вернуться к списку видеорежимов."
 
 msgid "Do you want to play DVD in drive?"
 msgstr "Вы хотите воспроизвести DVD в приводе?"
@@ -6550,8 +6642,17 @@ msgstr "Пытаемся загрузить новый список пакето
 msgid "Downloading plugin information. Please wait..."
 msgstr "Загрузка информации о плагинах. Пожалуйста, подождите..."
 
+msgid "Download speedtest.png failed!"
+msgstr "Загрузить Speedtest.png не удалось!"
+
 msgid "Downmix"
 msgstr "Микширование"
+
+msgid "Driver and kernel information"
+msgstr "Информация о драйвере и ядре"
+
+msgid "Drivers version"
+msgstr "Версия драйверов"
 
 msgid "Drama and Films"
 msgstr "Драма и Фильмы"
@@ -6703,6 +6804,9 @@ msgstr "Ecuador"
 
 msgid "Edit"
 msgstr "Изменить"
+
+msgid "Edit DNS"
+msgstr "Изменить DNS"
 
 msgid "Edit alternatives"
 msgstr "Изменить альтернативу"
@@ -7009,6 +7113,21 @@ msgstr "Окончание: %H:%M"
 
 msgid "English"
 msgstr "Английский"
+
+msgid "Enigma2 (re)starts"
+msgstr "Enigma2 (пере)запусков"
+
+msgid "Enigma2 debug level"
+msgstr "Уровень отладки Enigma2"
+
+msgid "Enigma2 information"
+msgstr "Информация об Enigma2"
+
+msgid "Enigma2 revision"
+msgstr "Ревизия Enigma2"
+
+msgid "Enigma2 skin selector"
+msgstr "Селектор скинов Enigma2"
 
 msgid "Enigma (re)starts: %d\n"
 msgstr "Энигма (ре)стартов: %d\n"
@@ -7821,6 +7940,9 @@ msgstr "Франция"
 msgid "Free flash"
 msgstr "Свободно флеш"
 
+msgid "Free memory"
+msgstr "Доступно"
+
 msgid "Free memory:"
 msgstr "Доступно памяти:"
 
@@ -8010,8 +8132,12 @@ msgstr "Не удается получить информацию о геоло�
 msgid "Geolocation information for %s %s"
 msgstr "Информация о геолокации для %s %s"
 
-msgid "Geolocation is not available. There is no Internet.\nPress \"OK\" to continue wizard."
-msgstr "Геолокация недоступна. Интернета нет.\nНажмите \"ОК\", чтобы продолжить работу мастера."
+msgid ""
+"Geolocation is not available. There is no Internet.\n"
+"Press \"OK\" to continue wizard."
+msgstr ""
+"Геолокация недоступна. Интернета нет.\n"
+"Нажмите \"ОК\", чтобы продолжить работу мастера."
 
 msgid "Georgia"
 msgstr "Грузия"
@@ -8036,9 +8162,6 @@ msgstr "Гана"
 
 msgid "Gibraltar"
 msgstr "Гибралтар"
-
-msgid "Glibc version"
-msgstr "Версия Glibc"
 
 msgid "Go down the list"
 msgstr "Перейти вниз списка"
@@ -8298,6 +8421,12 @@ msgstr "Жесткий диск"
 msgid "Harddisk Setup"
 msgstr "Настройки жестокого диска"
 
+msgid "Hardware information"
+msgstr "Информация об оборудовании"
+
+msgid "Hardware Information"
+msgstr "Информация об оборудовании"
+
 msgid "Hardware Accelerated"
 msgstr "Аппаратное ускорение"
 
@@ -8423,6 +8552,9 @@ msgstr "Поляризация (H) - скорость поворота"
 
 msgid "Host domain"
 msgstr "Хост-домен"
+
+msgid "Hostname"
+msgstr "Имя хоста"
 
 msgid "Host name"
 msgstr "Имя хоста"
@@ -8567,6 +8699,9 @@ msgstr "Iceland"
 msgid "Icons"
 msgstr "Иконка"
 
+msgid "I check Internet speedtest, be patient..."
+msgstr "Я проверяю скорость интернета, наберитесь терпения..."
+
 msgid "If disabled, underline characters in file and directory names are not shown and are replaced with spaces."
 msgstr "Если этот параметр отключен,символы подчеркивания в именах файлов и каталогов не отображаются и заменяются пробелами."
 
@@ -8615,8 +8750,14 @@ msgstr "Если установлено значение \"да\", то знач
 msgid "If set to 'yes' the same commands will be sent to the TV for deep standby events, as are sent during regular standby events."
 msgstr "Если установлено 'да', то для событий режима глубокого ожидания на ТВ будут отправляться те же команды, что и во время обычных событий для режима ожидания."
 
-msgid "%s\n\nIf the DNS of other servers are still kept in the DHCP Router, to get the DNS from your Router, reboot receiver."
-msgstr "%s\n\nЕсли DNS других серверов все еще хранятся в маршрутизаторе DHCP, чтобы получить DNS от вашего маршрутизатора, перезагрузите приемник."
+msgid ""
+"%s\n"
+"\n"
+"If the DNS of other servers are still kept in the DHCP Router, to get the DNS from your Router, reboot receiver."
+msgstr ""
+"%s\n"
+"\n"
+"Если DNS других серверов все еще хранятся в маршрутизаторе DHCP, чтобы получить DNS от вашего маршрутизатора, перезагрузите приемник."
 
 msgid "If the text is too long to be displayed on the front panel display, it will be repeated (number of times):"
 msgstr "Если текст слишком длинный для отображения на дисплее передней панели, он будет повторяться (количество раз):"
@@ -8912,6 +9053,10 @@ msgstr "Немедленные записи..."
 msgid "Interface"
 msgstr "Интерфейс"
 
+#, python-format
+msgid "Interface '%s'"
+msgstr "Интерфейс '%s'"
+
 msgid "Interface to change MAC"
 msgstr "Интерфейс для смены MAC"
 
@@ -8949,6 +9094,9 @@ msgid "Internet Speed Test..."
 msgstr "Тест скорости интернета..."
 
 msgid "InternetSpeedTest"
+msgstr "Тест скорости интернета"
+
+msgid "Internet Speed Test"
 msgstr "Тест скорости интернета"
 
 msgid "InternetSpeedTest..."
@@ -9329,6 +9477,9 @@ msgstr "Качество связи:"
 msgid "Link:"
 msgstr "Ссылка:"
 
+msgid "Link detected"
+msgstr "Обнаружена ссылка"
+
 msgid "Linked titles with a DVD menu"
 msgstr "Названия, связанные с DVD меню"
 
@@ -9339,6 +9490,9 @@ msgid "List mode"
 msgstr "Режим списка"
 
 msgid "List of storage devices"
+msgstr "Список устройств хранения"
+
+msgid "List of Storage Devices"
 msgstr "Список устройств хранения"
 
 msgid "List type"
@@ -9395,6 +9549,9 @@ msgstr "Загрузить"
 msgid "Local mountpoint"
 msgstr "Локальная точка монтирования"
 
+msgid "Local information"
+msgstr "Локальная информация"
+
 msgid "Local network"
 msgstr "Локальная сеть"
 
@@ -9406,6 +9563,9 @@ msgstr "Локаль"
 
 msgid "Location"
 msgstr "Расположение"
+
+msgid "Location information"
+msgstr "Информация о местонахождении"
 
 msgid "Location code"
 msgstr "Код местоположения"
@@ -9703,6 +9863,9 @@ msgid "Memory"
 msgstr "Память"
 
 msgid "Memory Information"
+msgstr "Информация о памяти"
+
+msgid "Memory information"
 msgstr "Информация о памяти"
 
 msgid "Memory Info"
@@ -10048,6 +10211,9 @@ msgstr "Мультиканальное микширование"
 msgid "Multi-EPG bouquet selection"
 msgstr "Выбор букетов при старте Мульти ТВ-гид"
 
+msgid "MultiBoot"
+msgstr "Мультизагрузка"
+
 msgid "MultiBoot Image Manager"
 msgstr "Диспетчер мультизагрузки"
 
@@ -10071,6 +10237,9 @@ msgstr "Селектор мультизагрузочного образа"
 
 msgid "Multiboot Image Selector"
 msgstr "Мультибут - выбор имиджа"
+
+msgid "MultiTranscoding"
+msgstr "Мультитранскодирование"
 
 msgid "Multichannel PCM"
 msgstr "Мультиканал PCM"
@@ -10233,6 +10402,9 @@ msgstr "Конфигурация сети"
 
 msgid "Network configuration..."
 msgstr "Конфигурация сети..."
+
+msgid "Network information"
+msgstr "Информация о сети"
 
 msgid "Network menu"
 msgstr "Настройка сети"
@@ -10419,6 +10591,9 @@ msgstr ""
 msgid "No network connection available."
 msgstr "Нет доступного сетевого подключения."
 
+msgid "No network storage detected."
+msgstr "Сетевое хранилище не обнаружено."
+
 msgid "No networks found"
 msgstr "Сети не найдены"
 
@@ -10439,6 +10614,9 @@ msgstr "Не найдены настроенные спутниковые,каб
 
 msgid "No service"
 msgstr "Нет сервиса"
+
+msgid "No servers received!"
+msgstr "Сервера не получены!"
 
 msgid "No services/providers selected"
 msgstr "Не выбраны сервисы/провайдеры"
@@ -10848,6 +11026,9 @@ msgstr "Открыть, долгая"
 
 msgid "Open satellites list"
 msgstr "Открыть список спутников"
+
+msgid "OpenSSL version"
+msgstr "Версия OpenSSL"
 
 msgid "Open select location"
 msgstr "Открыть выбор расположения"
@@ -11903,6 +12084,9 @@ msgstr "Приоритет LNB"
 msgid "Process"
 msgstr "Процесс"
 
+msgid "Processor information"
+msgstr "Информация о процессоре"
+
 msgid "Progress"
 msgstr "Прогресс"
 
@@ -11993,6 +12177,9 @@ msgstr "Провайдеры:"
 msgid "Providers: "
 msgstr "Провайдеры: "
 
+msgid "Python version"
+msgstr "Версия Python"
+
 msgid "Puerto Rico"
 msgstr "Puerto Rico"
 
@@ -12052,6 +12239,36 @@ msgstr "Быстрое меню"
 
 msgid "QuickMenu/Extensions"
 msgstr "Быстрое меню/Дополнения"
+
+msgid "RAM (Details)"
+msgstr "ОЗУ (подробно)"
+
+msgid "RAM (Summary)"
+msgstr "ОЗУ (обзор)"
+
+msgid "RAM benchmark"
+msgstr "Бенчмарк RAM"
+
+msgid "RC custom code"
+msgstr "Пользовательский код RC"
+
+msgid "RC default name"
+msgstr "Имя пульта по умолчанию"
+
+msgid "RC default type"
+msgstr "Тип пульта по умолчанию"
+
+msgid "RC detected type"
+msgstr "Обнаруженный тип RC"
+
+msgid "RC identification"
+msgstr "Идентификация пульта"
+
+msgid "RC selected name"
+msgstr "Выбранное имя пульта"
+
+msgid "RC selected type"
+msgstr "Выбранный тип пульта"
 
 msgid "RAM"
 msgstr "Оперативная память"
@@ -12675,6 +12892,9 @@ msgstr "Продолжить с позиции %s"
 msgid "Resuming playback"
 msgstr "Возобновление воспроизведения"
 
+msgid "Result successfully saved in /tmp/speedtest.png"
+msgstr "Результат успешно сохранен в /tmp/speedtest.png"
+
 msgid "Retrieving image list - Please wait..."
 msgstr "Получение списка имиджей - пожалуйста, подождите..."
 
@@ -12945,6 +13165,9 @@ msgstr "Сохранить плейлист"
 
 msgid "Save playlist on exit"
 msgstr "Сохранить плейлист при выходе"
+
+msgid "Save results"
+msgstr "Сохранить результаты"
 
 msgid "Save settings and EPG data"
 msgstr "Сохранить настройки и данные ТВ-гида"
@@ -13574,6 +13797,9 @@ msgstr "Информация о сервере (OScam-версия:% s)"
 msgid "Server:"
 msgstr "Сервер:"
 
+msgid "Server list"
+msgstr "Список серверов"
+
 msgid "Servers"
 msgstr "Серверы"
 
@@ -13781,8 +14007,12 @@ msgstr "Установить систему"
 msgid "Set the aspect ratio of the service picons."
 msgstr "Установите соотношение сторон пиконов сервиса."
 
-msgid "Set the MAC address of your receiver\n."
-msgstr "Установите MAC-адрес вашего ресивера\n."
+msgid ""
+"Set the MAC address of your receiver\n"
+"."
+msgstr ""
+"Установите MAC-адрес вашего ресивера\n"
+"."
 
 msgid "Set the User ID of the OpenWebif from your fallback tuner"
 msgstr "Установите идентификатор пользователя OpenWebif из вашего запасного тюнера"
@@ -13837,6 +14067,15 @@ msgstr "Установите вертикальное положение суб�
 
 msgid "Set the time to wait for execute the default action in shutdown, standby or restart messages. (e.g. used in Timer, PowerTimer, Sleeptimer, ...)"
 msgstr "Установите время ожидания выполнения действия по умолчанию в сообщениях о выключении, режиме ожидания или перезапуске. (например, используется в Timer, PowerTimer, Sleeptimer, ...)"
+
+msgid ""
+"Set the video output mode (or resolution).\n"
+"\n"
+"WARNING: If the chosen video mode causes a loss of signal on your video port, long press EXIT button."
+msgstr ""
+"Установите режим вывода видео (или разрешение).\n"
+"\n"
+"ВНИМАНИЕ: Если выбранный видеорежим приводит к потере сигнала на вашем видеопорте, нажмите и удерживайте кнопку ВЫХОД."
 
 msgid "Set time window to 1 hour"
 msgstr "Установка времени окна на 1 час"
@@ -14233,6 +14472,9 @@ msgstr "Показать PIP"
 
 msgid "Show Readers/Proxies"
 msgstr "Показать Ридеры/Прокси"
+
+msgid "Show results"
+msgstr "Показать результаты"
 
 msgid "Show SNR percentage instead of dB value"
 msgstr "Показать SNR проценты вместо dB значения"
@@ -14832,6 +15074,9 @@ msgstr "Настройки эмулятора"
 msgid "Software"
 msgstr "ПО"
 
+msgid "Software information"
+msgstr "Информация о программном обеспечении"
+
 msgid "Software management"
 msgstr "Менеджер управления ПО"
 
@@ -14970,6 +15215,9 @@ msgstr "Специальный 1"
 
 msgid "Special 2"
 msgstr "Специальный 2"
+
+msgid "Speed"
+msgstr "Скорость"
 
 msgid "Specify extra timeframe to ignore inactivity sleeptimer"
 msgstr "Экстра период времени игнорирования таймера неактивности"
@@ -15238,6 +15486,15 @@ msgstr "Запоминающее устройство недоступно ил�
 msgid "Stops timeshift being used if a recording is in progress. (Advisable for USB sticks)"
 msgstr "Использовать останов сдвига времени,если идет запись. (рекомендуется для USB-флэшь)"
 
+msgid "Storage / Disk Information"
+msgstr "Информация о хранилище/диске"
+
+msgid "Storage / Disk information"
+msgstr "Информация о хранилище/диске"
+
+msgid "Storage / Drive information"
+msgstr "Информация о хранилище/диске"
+
 msgid "Storage device manager"
 msgstr "Диспетчер устройств хранения"
 
@@ -15451,6 +15708,9 @@ msgstr "Включить дисплей в режиме глубокого ож�
 
 msgid "Switch on the display during operation."
 msgstr "Включить дисплей во время работы."
+
+msgid "Switch to 720p video?"
+msgstr "Переключиться на видео 720p?"
 
 msgid "Switch to Android"
 msgstr "Переключить на Android"
@@ -15681,6 +15941,9 @@ msgstr "Наземный"
 msgid "Test DiSEqC settings"
 msgstr "Настройки теста DiSEqC"
 
+msgid "Test completed, to test again press green button"
+msgstr "Тест завершен. Чтобы повторить тест, нажмите зеленую кнопку."
+
 msgid "Test mode"
 msgstr "Режим теста"
 
@@ -15695,6 +15958,12 @@ msgstr "Тест сетевой конфигурации Вашего ресив
 
 msgid "Test type"
 msgstr "Тип теста"
+
+msgid "Testing download from"
+msgstr "Тестовая загрузка с"
+
+msgid "Testing upload speed"
+msgstr "Тестирование скорости загрузки"
 
 msgid "Testscreens"
 msgstr "Проверка экрана"
@@ -15936,6 +16205,9 @@ msgid ""
 msgstr ""
 "Плагин для настройки беспроводной сети не инсталлирован!\n"
 "Пожалуйста установите его."
+
+msgid "This screen is not yet available."
+msgstr "Этот экран еще недоступен."
 
 msgid "There are at least "
 msgstr "Найдено по крайней мере "
@@ -16614,6 +16886,9 @@ msgstr "Всего файла подкачки:"
 msgid "Total clients streaming: "
 msgstr "Всего клиентов стриминга: "
 
+msgid "Transcoding"
+msgstr "Транскодирование"
+
 msgid "Total:"
 msgstr "Всего:"
 
@@ -16958,6 +17233,9 @@ msgstr "Не поддерживаемый"
 
 msgid "Unzipping Image"
 msgstr "Распаковка имиджа"
+
+msgid "Up / Active"
+msgstr "Вверх / Активно"
 
 msgid "Update"
 msgstr "Обновление"
@@ -17378,6 +17656,10 @@ msgstr "Видео выход"
 msgid "Video output mode"
 msgstr "Режим видеовыхода"
 
+msgctxt "Video output mode"
+msgid "Mode"
+msgstr "Режим"
+
 msgid ""
 "Video output port selection.\n"
 "\n"
@@ -17385,15 +17667,11 @@ msgid ""
 "\n"
 "The next output port will be automatically tried in 20 seconds."
 msgstr ""
-"Выбор порта вывода видео.\n"
+"Выбор порта видеовыхода.\n"
 "\n"
-"Нажмите OK, чтобы выбрать порт вывода видео.\n"
+"Нажмите ОК, чтобы выбрать видеопорт.\n"
 "\n"
-"Следующий порт вывода будет выбран автоматически через 20 секунд."
-
-msgctxt "Video output mode"
-msgid "Mode"
-msgstr "Режим"
+"Следующий выходной порт будет автоматически выбран через 20 секунд."
 
 msgid "Video output mode for FHD"
 msgstr "Режим видеовыхода для FHD"
@@ -17412,6 +17690,9 @@ msgstr "Настройки видео"
 
 msgid "Video wizard"
 msgstr "Мастер видео настроек"
+
+msgid "Video Wizard"
+msgstr "Мастер видео"
 
 msgid "Video: "
 msgstr "Видео: "
@@ -17574,6 +17855,9 @@ msgstr "Увеличение громкости"
 
 msgid "WARNING: feeds may be unstable."
 msgstr "ВНИМАНИЕ: возможны нестабильные (непроверенные) обновления."
+
+msgid "WAN Geolocation"
+msgstr "Геолокация глобальной сети"
 
 msgid "WLAN connection"
 msgstr "Беспроводная сеть WLAN"
@@ -18272,8 +18556,14 @@ msgstr "Вы можете отобразить PIP с или без экранн
 msgid "You can enable if will be displayed extended EPG description for item."
 msgstr "Вы можете включить,если будет отображаться расширенное описание ТВ-гида для элемента."
 
-msgid "%s\n\nYou can use the DNS provided by other servers in Static IP Router."
-msgstr "%s\n\nВы можете использовать DNS, предоставленный другими серверами в Статическом IP-маршрутизаторе."
+msgid ""
+"%s\n"
+"\n"
+"You can use the DNS provided by other servers in Static IP Router."
+msgstr ""
+"%s\n"
+"\n"
+"Вы можете использовать DNS, предоставленный другими серверами в Статическом IP-маршрутизаторе."
 
 msgid "You can install this plugin."
 msgstr "Вы можете установить этот плагин."
