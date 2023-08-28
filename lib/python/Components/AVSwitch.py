@@ -4,70 +4,42 @@ from Components.SystemInfo import BoxInfo, SystemInfo
 from os.path import isfile
 
 model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
 platform = BoxInfo.getItem("platform")
 
 MODULE_NAME = __name__.split(".")[-1]
 
 
 class AVSwitch:
-	def setAspect(self, configElement):
-		eAVControl.getInstance().setAspect(configElement.value, 1)
-
-
-	def setAspectRatio(self, value):
-		if value < 100:
-			eAVControl.getInstance().setAspectRatio(value)
-		else:  # Aspect Switcher
-			value -= 100
-			offset = config.av.aspectswitch.offsets[str(value)].value
-			newheight = 576 - offset
-			newtop = offset // 2
-			if value:
-				newwidth = 720
-			else:
-				newtop = 0
-				newwidth = 0
-				newheight = 0
-
-			eAVControl.getInstance().setAspectRatio(2)  # 16:9
-			eAVControl.getInstance().setVideoSize(newtop, 0, newwidth, newheight)
+	def setInput(self, input):
+		INPUT = {"ENCODER": 0, "SCART": 1, "AUX": 2}
+		eAVControl.getInstance().setInput(str(INPUT[input]))
 
 	def setColorFormat(self, value):
-		eAVControl.getInstance().setColorFormat(value)
+		eAVControl.getInstance().setColorFormat(str(value))
 
-	def setInput(self, input):
-		eAVControl.getInstance().setInput(input, 1)
-
-	def setSystem(self, value):
-		eAVControl.getInstance().setVideoMode(model)
+	def setAspectRatio(self, value):
+		eAVControl.getInstance().setAspectRatio(value)
 
 	def getOutputAspect(self):
 		valstr = config.av.aspectratio.value
-		if valstr in ("4_3_letterbox", "4_3_panscan"): # 4:3
+		if valstr in ("4_3_letterbox", "4_3_panscan"):  # 4:3
 			return (4, 3)
-		elif valstr == "16_9": # auto ... 4:3 or 16:9
-			if isfile("/proc/stb/vmpeg/0/aspect"):
-				try:
-					if "1" in open("/proc/stb/vmpeg/0/aspect", "r").read().split('\n', 1)[0]: # 4:3
-						return (4, 3)
-				except IOError:
-					print("[AVSwitch] Read /proc/stb/vmpeg/0/aspect failed!")
-			elif isfile("/sys/class/video/screen_mode"):
-				try:
-					if "1" in open("/sys/class/video/screen_mode", "r").read().split('\n', 1)[0]: # 4:3
-						return (4, 3)
-				except IOError:
-					print("[AVSwitch] Read /sys/class/video/screen_mode failed!")
-		elif valstr in ("16_9_always", "16_9_letterbox"): # 16:9
+		elif valstr == "16_9":  # auto ... 4:3 or 16:9
+			try:
+				print("[AVSwitch] Read /proc/stb/vmpeg/0/aspect")
+				if "1" in open("/proc/stb/vmpeg/0/aspect", "r").read().split('\n', 1)[0]:  # 4:3
+					return (4, 3)
+			except IOError:
+				print("[AVSwitch] Read /proc/stb/vmpeg/0/aspect failed.")
+		elif valstr in ("16_9_always", "16_9_letterbox"):  # 16:9
 			pass
-		elif valstr in ("16_10_letterbox", "16_10_panscan"): # 16:10
+		elif valstr in ("16_10_letterbox", "16_10_panscan"):  # 16:10
 			return (16, 10)
 		return (16, 9)
 
 	def getFramebufferScale(self):
-		aspect = self.getOutputAspect()
-		fb_size = getDesktop(0).size()
-		return (aspect[0] * fb_size.height(), aspect[1] * fb_size.width())
+		return (1, 1)
 
 	def getAspectRatioSetting(self):
 		valstr = config.av.aspectratio.value
@@ -89,18 +61,15 @@ class AVSwitch:
 
 	def setAspectWSS(self, aspect=None):
 		if not config.av.wss.value:
-			value = 2 # auto(4:3_off)
+			value = 2  # auto(4:3_off)
 		else:
-			value = 1 # auto
+			value = 1  # auto
 		eAVControl.getInstance().setWSS(value)
-
-
-iAVSwitch = AVSwitch()
 
 
 def InitAVSwitch():
 	config.av = ConfigSubsection()
-	if model == "vuduo" or BoxInfo.getItem("brand") == "ixuss":
+	if model == "vuduo" or brand == "Medi@link":
 		config.av.yuvenabled = ConfigBoolean(default=False)
 	else:
 		config.av.yuvenabled = ConfigBoolean(default=True)
@@ -111,7 +80,7 @@ def InitAVSwitch():
 		colorformat_choices["yuv"] = "YPbPr"
 	if BoxInfo.getItem("scart"):
 		colorformat_choices["rgb"] = "RGB"
-	if BoxInfo.getItem("svideo"):
+	if SystemInfo["HasSVideo"]:
 		colorformat_choices["svideo"] = "S-Video"
 
 	config.av.colorformat = ConfigSelection(choices=colorformat_choices, default="cvbs")
@@ -134,47 +103,49 @@ def InitAVSwitch():
 	# TRANSLATORS: (aspect ratio policy: black bars on top/bottom) in doubt, keep english term.
 	"letterbox": _("Letterbox"),
 	# TRANSLATORS: (aspect ratio policy: cropped content on left/right) in doubt, keep english term
-	"panscan": _("Panscan"),
+	"panscan": _("Pan&scan"),
 	# TRANSLATORS: (aspect ratio policy: scale as close to fullscreen as possible)
 	"scale": _("Just scale")}
-	try:
-		if "full" in open("/proc/stb/video/policy2_choices").read().split('\n', 1)[0]:
-			# TRANSLATORS: (aspect ratio policy: display as fullscreen, even if the content aspect ratio does not match the screen ratio)
-			policy2_choices.update({"full": _("Full screen")})
-	except:
-		print("[AVSwitch] Read /proc/stb/video/policy2_choices failed!")
-	try:
-		if "auto" in open("/proc/stb/video/policy2_choices").read().split('\n', 1)[0]:
-			# TRANSLATORS: (aspect ratio policy: automatically select the best aspect ratio mode)
-			policy2_choices.update({"auto": _("Auto")})
-	except:
-		print("[AVSwitch] Read /proc/stb/video/policy2_choices failed!")
+	if isfile("/proc/stb/video/policy2_choices"):
+		try:
+			if "full" in open("/proc/stb/video/policy2_choices").read().split('\n', 1)[0]:
+				# TRANSLATORS: (aspect ratio policy: display as fullscreen, even if the content aspect ratio does not match the screen ratio)
+				policy2_choices.update({"full": _("Full screen")})
+		except:
+			print("[AVSwitch] Read /proc/stb/video/policy2_choices failed.")
+		try:
+			if "auto" in open("/proc/stb/video/policy2_choices").read().split('\n', 1)[0]:
+				# TRANSLATORS: (aspect ratio policy: automatically select the best aspect ratio mode)
+				policy2_choices.update({"auto": _("Auto")})
+		except:
+			print("[AVSwitch] Read /proc/stb/video/policy2_choices failed.")
 	config.av.policy_169 = ConfigSelection(choices=policy2_choices, default="scale")
 	policy_choices = {
 	# TRANSLATORS: (aspect ratio policy: black bars on left/right) in doubt, keep english term.
 	"pillarbox": _("Pillarbox"),
 	# TRANSLATORS: (aspect ratio policy: cropped content on left/right) in doubt, keep english term
-	"panscan": _("Panscan"),
+	"panscan": _("Pan&scan"),
 	# TRANSLATORS: (aspect ratio policy: scale as close to fullscreen as possible)
 	"scale": _("Just scale")}
-	try:
-		if "nonlinear" in open("/proc/stb/video/policy_choices").read().split('\n', 1)[0]:
-			# TRANSLATORS: (aspect ratio policy: display as fullscreen, with stretching the left/right)
-			policy_choices.update({"nonlinear": _("Nonlinear")})
-	except:
-		print("[AVSwitch] Read /proc/stb/video/policy_choices failed!")
-	try:
-		if "full" in open("/proc/stb/video/policy_choices").read().split('\n', 1)[0]:
-			# TRANSLATORS: (aspect ratio policy: display as fullscreen, even if the content aspect ratio does not match the screen ratio)
-			policy_choices.update({"full": _("Full screen")})
-	except:
-		print("[AVSwitch] Read /proc/stb/video/policy_choices failed!")
-	try:
-		if "auto" in open("/proc/stb/video/policy_choices").read().split('\n', 1)[0]:
-			# TRANSLATORS: (aspect ratio policy: automatically select the best aspect ratio mode)
-			policy_choices.update({"auto": _("Auto")})
-	except:
-		print("[AVSwitch] Read /proc/stb/video/policy_choices failed!")
+	if isfile("/proc/stb/video/policy_choices"):
+		try:
+			if "nonlinear" in open("/proc/stb/video/policy_choices").read().split('\n', 1)[0]:
+				# TRANSLATORS: (aspect ratio policy: display as fullscreen, with stretching the left/right)
+				policy_choices.update({"nonlinear": _("Nonlinear")})
+		except:
+			print("[AVSwitch] Read /proc/stb/video/policy_choices failed.")
+		try:
+			if "full" in open("/proc/stb/video/policy_choices").read().split('\n', 1)[0]:
+				# TRANSLATORS: (aspect ratio policy: display as fullscreen, even if the content aspect ratio does not match the screen ratio)
+				policy_choices.update({"full": _("Full screen")})
+		except:
+			print("[AVSwitch] Read /proc/stb/video/policy_choices failed.")
+		try:
+			if "auto" in open("/proc/stb/video/policy_choices").read().split('\n', 1)[0]:
+				# TRANSLATORS: (aspect ratio policy: automatically select the best aspect ratio mode)
+				policy_choices.update({"auto": _("Auto")})
+		except:
+			print("[AVSwitch] Read /proc/stb/video/policy_choices failed.")
 	config.av.policy_43 = ConfigSelection(choices=policy_choices, default="scale")
 	config.av.tvsystem = ConfigSelection(choices={"pal": "PAL", "ntsc": "NTSC", "multinorm": "multinorm"}, default="pal")
 	config.av.wss = ConfigEnableDisable(default=True)
@@ -182,10 +153,12 @@ def InitAVSwitch():
 	config.av.generalPCMdelay = ConfigSelectionNumber(-1000, 1000, 5, default=0)
 	config.av.vcrswitch = ConfigEnableDisable(default=False)
 
+	iAVSwitch = AVSwitch()
+
 	def setColorFormat(configElement):
 		if model == "et6x00":
 			map = {"cvbs": 3, "rgb": 3, "svideo": 2, "yuv": 3}
-		elif platform == "gb7356" or model.startswith('et'):
+		elif model == "gb7356" or model.startswith('et'):
 			map = {"cvbs": 0, "rgb": 3, "svideo": 2, "yuv": 3}
 		else:
 			map = {"cvbs": 0, "rgb": 1, "svideo": 2, "yuv": 3}
@@ -195,19 +168,20 @@ def InitAVSwitch():
 		map = {"4_3_letterbox": 0, "4_3_panscan": 1, "16_9": 2, "16_9_always": 3, "16_10_letterbox": 4, "16_10_panscan": 5, "16_9_letterbox": 6}
 		iAVSwitch.setAspectRatio(map[configElement.value])
 
-	def setSystem(configElement):
-		map = {"pal": 0, "ntsc": 1, "multinorm": 2}
-		iAVSwitch.setSystem(map[configElement.value])
-
 	def setWSS(configElement):
 		iAVSwitch.setAspectWSS()
 
 	# this will call the "setup-val" initial
+	config.av.colorformat.addNotifier(setColorFormat)
 	config.av.aspectratio.addNotifier(setAspectRatio)
-	config.av.tvsystem.addNotifier(setSystem)
+
 	config.av.wss.addNotifier(setWSS)
 
-	iAVSwitch.setInput("encoder") # init on startup
+	iAVSwitch.setInput("ENCODER")  # init on startup
+	if model in ("gb7356", "et5x00", "et6x00", "ixussone", "ixusszero", "axodin", "axase3", "optimussos1", "optimussos2", "gb800seplus", "gb800ueplus", "gbultrase", "gbultraue", "gbultraueh", "twinboxlcd"):
+		detected = False
+	else:
+		detected = eAVControl.getInstance().hasScartSwitch()
 
 	SystemInfo["ScartSwitch"] = eAVControl.getInstance().hasScartSwitch()
 
