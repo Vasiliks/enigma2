@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 from Components.Element import Element
 
 # this is not a GUI renderer.
