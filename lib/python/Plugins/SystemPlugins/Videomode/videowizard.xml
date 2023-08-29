@@ -20,7 +20,7 @@ self.selectKey("OK")
 		<condition>
 self.condition = (self.port == "DVI" or self.port == "HDMI")
 		</condition>
-		<text value="Do you want to use auto mode detection?\n\nThis option reads all supported modes and automatically sets the highest resolution supported by your TV. Choose 'No' if you want to customize your settings.\n\nIf on the next screen you lose signal on your video port, long press EXIT to return to the list of video modes." />
+		<text value="Do you want to use auto mode detection?\n\nThis option reads all supported modes and automatically sets the highest resolution supported by your TV. Choose 'No' if you want to customize your settings.\n\nWARNING: If on the next screen you lose signal on your video mode, long press EXIT button to return to the list of video modes." />
 		<displaytext value="Use automatic mode detection" />
 		<list>
 			<listentry caption="Yes" step="modeauto" />
@@ -58,7 +58,7 @@ config.av.edid_override.save()
 	</step>
 
 	<step id="modeselection" nextstep="rateselection" timeout="20" timeoutaction="selectnext">
-		<text value="Select the video mode to be used on the TV.\n\nThe following video modes will change automatically in 20 seconds." />
+		<text value="Select the video mode to be used on the TV.\n\nThe following video modes will automatically change in 20 seconds.\n\nWARNING: If a video mode causes signal loss, hold the EXIT button to return to the mode video list." />
 		<displaytext value="Select video mode" />
 		<list type="dynamic" source="listModes" evaluation="modeSelectionMade" onselect="modeSelectionMoved" />
 		<code>
