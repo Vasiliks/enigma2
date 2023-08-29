@@ -2,7 +2,7 @@ from Components.config import config, ConfigSelection, ConfigSubDict, ConfigYesN
 from Components.SystemInfo import BoxInfo
 from Tools.CList import CList
 import os
-from enigma import getDesktop
+from enigma import eAVControl, getDesktop
 from Components.About import getChipSetNumber, getChipSetString
 from Tools.Directories import fileExists
 from Components.Console import Console
@@ -213,24 +213,13 @@ class VideoHardware:
 		config.av.policy_43.addNotifier(self.updateAspect)
 
 	def readAvailableModes(self):
-		try:
-			modes = open("/proc/stb/video/videomode_choices").read()[:-1]
-		except IOError:
-			print("[Videomode] couldn't read available videomodes.")
-			self.modes_available = []
-			return
-		self.modes_available = modes.split(' ')
+		modes = eAVControl.getInstance().getAvailableModes()
+		self.modes_available = modes.split()
 
 	def readPreferredModes(self):
 		if config.av.edid_override.value == False:
-			if fileExists("/proc/stb/video/videomode_preferred"):
-				modes = open("/proc/stb/video/videomode_preferred").read()[:-1]
-				self.modes_preferred = modes.split(' ')
-			elif fileExists("/proc/stb/video/videomode_edid"):
-				modes = open("/proc/stb/video/videomode_edid").read()[:-1]
-				self.modes_preferred = modes.split(' ')
-			else:
-				self.modes_preferred = self.modes_available
+			modes = eAVControl.getInstance().getPreferredModes(1)
+			self.modes_preferred = modes.split(' ')
 			if len(self.modes_preferred) <= 1:
 				self.modes_preferred = self.modes_available
 				print("[Videomode] reading preferred modes is empty, using all video modes")
