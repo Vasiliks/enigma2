@@ -193,11 +193,11 @@ class StandbyScreen(Screen):
 		SystemInfo["StandbyState"] = False
 		self.close(True)
 
-		if os.path.exists("/usr/script/StandbyLeave.sh"):
+		if isfile("/usr/script/StandbyLeave.sh"):
 			Console().ePopen("/usr/script/StandbyLeave.sh")
 		if brand in ("dinobot",) or SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
 			output = "/proc/stb/hdmi/output"
-			if os.path.isfile(output):
+			if isfile(output):
 				with open(output, "w") as hdmi:
 					hdmi.write("on")
 
@@ -391,13 +391,13 @@ class TryQuitMainloop(MessageBox):
 				config.misc.RestartUI.save()
 			if SystemInfo["Display"] and SystemInfo["LCDMiniTV"]:
 				mode = "/proc/stb/lcd/mode"
-				if os.path.isfile(mode):
+				if isfile(mode):
 					print("[Standby] LCDminiTV off")
 					with open(mode, "w") as lcd:
 						lcd.write("0")
 			if model == "vusolo4k":
 				oled_brightness = "/proc/stb/fp/oled_brightness"
-				if os.path.isfile(oled_brightness):
+				if isfile(oled_brightness):
 					print("[Standby] Brightness OLED off")
 					with open(oled_brightness, "w") as oled:
 						oled.write("0")
