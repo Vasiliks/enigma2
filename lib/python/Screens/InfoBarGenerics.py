@@ -35,7 +35,7 @@ from Screens.SubtitleDisplay import SubtitleDisplay
 from Screens.RdsDisplay import RdsInfoDisplay, RassInteractive
 from Screens.TimeDateInput import TimeDateInput
 from Screens.UnhandledKey import UnhandledKey
-from ServiceReference import ServiceReference, isPlayableForCur
+from ServiceReference import ServiceReference, isPlayableForCur, hdmiInServiceRef
 
 from Tools.ASCIItranslit import legacyEncode
 from Tools.Directories import fileExists, fileReadLines, fileReadLinesISO, getRecordingFilename, moveFiles
@@ -771,12 +771,12 @@ class InfoBarNumberZap:
 
 	def selectAndStartService(self, service, bouquet):
 		if service and not service.flags & eServiceReference.isMarker:
-			if self.servicelist.getRoot() != bouquet: #already in correct bouquet?
+			if self.servicelist.getRoot() != bouquet:  # already in correct bouquet?
 				self.servicelist.clearPath()
 				if self.servicelist.bouquet_root != bouquet:
 					self.servicelist.enterPath(self.servicelist.bouquet_root)
 				self.servicelist.enterPath(bouquet)
-			self.servicelist.setCurrentSelection(service) #select the service in servicelist
+			self.servicelist.setCurrentSelection(service)  # select the service in servicelist
 			self.servicelist.zap(enable_pipzap=True)
 			self.servicelist.correctChannelNumber()
 			self.servicelist.startRoot = None
@@ -1077,7 +1077,7 @@ class InfoBarSimpleEventView:
 		if epglist:
 			self.session.open(EventViewSimple, epglist[0], ServiceReference(ref), self.eventViewCallback)
 
-	def eventViewCallback(self, setEvent, setService, val): #used for now/next displaying
+	def eventViewCallback(self, setEvent, setService, val):  # used for now/next displaying
 		epglist = self.epglist
 		if len(epglist) > 1:
 			tmp = epglist[0]
@@ -1170,12 +1170,12 @@ class InfoBarEPG:
 		if self.servicelist.startServiceRef is None:
 			self.servicelist.startServiceRef = self.session.nav.getCurrentlyPlayingServiceOrGroup()
 		if service is not None:
-			if self.servicelist.getRoot() != self.epg_bouquet: #already in correct bouquet?
+			if self.servicelist.getRoot() != self.epg_bouquet:  # already in correct bouquet?
 				self.servicelist.clearPath()
 				if self.servicelist.bouquet_root != self.epg_bouquet:
 					self.servicelist.enterPath(self.servicelist.bouquet_root)
 				self.servicelist.enterPath(self.epg_bouquet)
-			self.servicelist.setCurrentSelection(service) #select the service in servicelist
+			self.servicelist.setCurrentSelection(service)  # select the service in servicelist
 		if not zapback or preview:
 			self.servicelist.zap(enable_pipzap=True)
 		if (self.servicelist.dopipzap or zapback) and not preview:
@@ -1190,9 +1190,9 @@ class InfoBarEPG:
 		if not servicelist is None:
 			while True:
 				service = servicelist.getNext()
-				if not service.valid(): #check if end of list
+				if not service.valid():  # check if end of list
 					break
-				if service.flags & (eServiceReference.isDirectory | eServiceReference.isMarker): #ignore non playable services
+				if service.flags & (eServiceReference.isDirectory | eServiceReference.isMarker):  # ignore non playable services
 					continue
 				services.append(ServiceReference(service))
 		return services
@@ -1252,7 +1252,7 @@ class InfoBarEPG:
 			self.openMultiServiceEPGSilent(bouquets, cnt, withCallback)
 
 	def openMultiServiceEPGAskBouquet(self, bouquets, cnt, withCallback):
-		if cnt > 1: # show bouquet list
+		if cnt > 1:  # show bouquet list
 			if withCallback:
 				self.bouquetSel = self.session.openWithCallback(self.closed, BouquetSelector, bouquets, self.openBouquetEPG, enableWrapAround=True)
 				self.dlg_stack.append(self.bouquetSel)
@@ -1271,7 +1271,7 @@ class InfoBarEPG:
 			current += 1
 		if current >= cnt:
 			current = 0
-		if cnt > 1: # create bouquet list for bouq+/-
+		if cnt > 1:  # create bouquet list for bouq+/-
 			self.bouquetSel = SilentBouquetSelector(bouquets, True, self.servicelist.getBouquetNumOffset(root))
 		if cnt >= 1:
 			self.openBouquetEPG(root, withCallback)
@@ -1290,7 +1290,7 @@ class InfoBarEPG:
 	def openSingleServiceEPG(self):
 		ref = self.servicelist.getCurrentSelection()
 		if ref:
-			if self.servicelist.getMutableList(): # bouquet in channellist
+			if self.servicelist.getMutableList():  # bouquet in channellist
 				current_path = self.servicelist.getRoot()
 				services = self.getBouquetServices(current_path)
 				self.serviceSel = SimpleServicelist(services)
@@ -1384,7 +1384,7 @@ class InfoBarEPG:
 			print("[InfoBarGenerics] no epg for the service avail.. so we show multiepg instead of eventinfo")
 			self.openMultiServiceEPG(False)
 
-	def eventViewCallback(self, setEvent, setService, val): #used for now/next displaying
+	def eventViewCallback(self, setEvent, setService, val):  # used for now/next displaying
 		epglist = self.epglist
 		if len(epglist) > 1:
 			tmp = epglist[0]
@@ -1656,7 +1656,7 @@ class InfoBarSeek:
 			self.setSeekState(self.SEEK_STATE_PAUSE)
 
 	def unPauseService(self):
-		print("unpause")
+		print("[InfoBarGenerics] unpause")
 		if self.seekstate == self.SEEK_STATE_PLAY:
 			return 0
 		self.setSeekState(self.SEEK_STATE_PLAY)
@@ -1689,7 +1689,7 @@ class InfoBarSeek:
 				self.session.open(MessageBox, _("No fast winding possible yet... but you can use the number buttons to skip forward/backward!"), MessageBox.TYPE_INFO, timeout=10)
 				self.fast_winding_hint_message_showed = True
 				return
-			return 0 # trade as unhandled action
+			return 0  # trade as unhandled action
 		if self.seekstate == self.SEEK_STATE_PLAY:
 			self.setSeekState(self.makeStateForward(int(config.seek.enter_forward.value)))
 		elif self.seekstate == self.SEEK_STATE_PAUSE:
@@ -1725,7 +1725,7 @@ class InfoBarSeek:
 				self.session.open(MessageBox, _("No fast winding possible yet... but you can use the number buttons to skip forward/backward!"), MessageBox.TYPE_INFO, timeout=10)
 				self.fast_winding_hint_message_showed = True
 				return
-			return 0 # trade as unhandled action
+			return 0  # trade as unhandled action
 		seekstate = self.seekstate
 		if seekstate == self.SEEK_STATE_PLAY:
 			self.setSeekState(self.makeStateBackward(int(config.seek.enter_backward.value)))
@@ -1811,11 +1811,11 @@ class InfoBarSeek:
 		if self.seekstate != self.SEEK_STATE_PAUSE:
 			self.setSeekState(self.SEEK_STATE_EOF)
 
-		if seekstate not in (self.SEEK_STATE_PLAY, self.SEEK_STATE_PAUSE): # if we are seeking
+		if seekstate not in (self.SEEK_STATE_PLAY, self.SEEK_STATE_PAUSE):  # if we are seeking
 			seekable = self.getSeek()
 			if seekable is not None:
 				seekable.seekTo(-1)
-		if seekstate == self.SEEK_STATE_PLAY: # regular EOF
+		if seekstate == self.SEEK_STATE_PLAY:  # regular EOF
 			self.doEofInternal(True)
 		else:
 			self.doEofInternal(False)
@@ -1992,7 +1992,7 @@ class InfoBarTimeshift:
 
 	def seekdef(self, key):
 		if self.seekstate == self.SEEK_STATE_PLAY:
-			return 0 # trade as unhandled action
+			return 0  # trade as unhandled action
 		time = (-config.seek.selfdefined_13.value, False, config.seek.selfdefined_13.value,
 			-config.seek.selfdefined_46.value, False, config.seek.selfdefined_46.value,
 			-config.seek.selfdefined_79.value, False, config.seek.selfdefined_79.value)[key - 1]
@@ -2048,11 +2048,11 @@ class InfoBarTimeshift:
 		else:
 			if not ts.startTimeshift():
 				# we remove the "relative time" for now.
-				#self.pvrStateDialog["timeshift"].setRelative(time.time())
+				# self.pvrStateDialog["timeshift"].setRelative(time.time())
 
 				if pauseService:
 					# PAUSE.
-					#self.setSeekState(self.SEEK_STATE_PAUSE)
+					# self.setSeekState(self.SEEK_STATE_PAUSE)
 					self.activateTimeshiftEnd(False)
 					self.showTimeshiftState = True
 				else:
@@ -2109,7 +2109,7 @@ class InfoBarTimeshift:
 			self.pauseService()
 		else:
 			print("[InfoBarGenerics] play, ...")
-			ts.activateTimeshift() # activate timeshift will automatically pause
+			ts.activateTimeshift()  # activate timeshift will automatically pause
 			self.setSeekState(self.SEEK_STATE_PAUSE)
 			seekable = self.getSeek()
 			if seekable is not None:
@@ -2509,6 +2509,10 @@ class InfoBarPiP:
 					if lastPiPServiceTimeout:
 						self.lastPiPServiceTimeoutTimer.startLongTimer(lastPiPServiceTimeout)
 				del self.session.pip
+				if SystemInfo["LCDMiniTV"] and int(config.lcd.modepip.value) >= 1:
+					print('[InfoBarGenerics] LCDMiniTV disable PIP')
+					print("[InfoBarGenerics] Write to /proc/stb/lcd/mode")
+					open("/proc/stb/lcd/mode", "w").write(config.lcd.modeminitv.value)
 				self.session.pipshown = False
 			if hasattr(self, "ScreenSaverTimerStart"):
 				self.ScreenSaverTimerStart()
@@ -2520,11 +2524,31 @@ class InfoBarPiP:
 			if self.session.pip.playService(newservice):
 				self.session.pipshown = True
 				self.session.pip.servicePath = slist and slist.getCurrentServicePath()
+				if SystemInfo["LCDMiniTVPiP"] and int(config.lcd.modepip.value) >= 1:
+					print('[InfoBarGenerics] LCDMiniTV enable PIP')
+					print("[InfoBarGenerics] Write to /proc/stb/lcd/mode")
+					open("/proc/stb/lcd/mode", "w").write(config.lcd.modepip.value)
+					print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_width")
+					open("/proc/stb/vmpeg/1/dst_width", "w").write("0")
+					print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_height")
+					open("/proc/stb/vmpeg/1/dst_height", "w").write("0")
+					print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_apply")
+					open("/proc/stb/vmpeg/1/dst_apply", "w").write("1")
 			else:
 				newservice = self.session.nav.getCurrentlyPlayingServiceOrGroup() or (slist and slist.servicelist.getCurrent())
 				if self.session.pip.playService(newservice):
 					self.session.pipshown = True
 					self.session.pip.servicePath = slist and slist.getCurrentServicePath()
+					if SystemInfo["LCDMiniTVPiP"] and int(config.lcd.modepip.value) >= 1:
+						print('[InfoBarGenerics] LCDMiniTV enable PIP')
+						print("[InfoBarGenerics] Write to /proc/stb/lcd/mode")
+						open("/proc/stb/lcd/mode", "w").write(config.lcd.modepip.value)
+						print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_width")
+						open("/proc/stb/vmpeg/1/dst_width", "w").write("0")
+						print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_height")
+						open("/proc/stb/vmpeg/1/dst_height", "w").write("0")
+						print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_apply")
+						open("/proc/stb/vmpeg/1/dst_apply", "w").write("1")
 				else:
 					self.session.pipshown = False
 					del self.session.pip
@@ -2937,10 +2961,6 @@ class InfoBarAudioSelection:
 				"audioSelectionLong": (self.audioSelectionLong, _("Toggle Digital downmix")),
 			}, description=_("Audio track selection, downmix and other audio options"))
 
-	def yellow_key(self):
-		from Screens.AudioSelection import AudioSelection
-		self.session.openWithCallback(self.audioSelected, AudioSelection, infobar=self)
-
 	def audioSelection(self):
 		from Screens.AudioSelection import AudioSelection
 		self.session.openWithCallback(self.audioSelected, AudioSelection, infobar=self)
@@ -2950,7 +2970,7 @@ class InfoBarAudioSelection:
 
 	def audioSelectionLong(self):
 		if SystemInfo["CanDownmixAC3"]:
-			config.av.downmix_ac3.handleKey(KEY_RIGHT)
+			config.av.downmix_ac3.handleKey(ACTIONKEY_RIGHT)
 			config.av.downmix_ac3.save()
 			message = _("Dolby digital downmix is now %s") % config.av.downmix_ac3.getText()
 			print("[InfoBarGenerics] Audio dolby digital downmix is now %s" % config.av.downmix_ac3.value)
@@ -3216,7 +3236,6 @@ class InfoBarAspectSelection:
 		VIDEO.setMode("HDMI", "720p", "50Hz")
 		self.session.openWithCallback(self.changeVideoMode, MessageBox, _("This function recovers your video signal in case it is lost.\nIf this is the case, after switching to 720p video:\nGo to Menu -> Setup -> Audio / Video -> A/V settings and set correct resolution.\nWant to switch to video 720p?"), MessageBox.TYPE_YESNO, timeout=30, simple=True)
 
-
 	def aspectSelected(self, aspect):
 		if not aspect is None:
 			if isinstance(aspect[1], str):
@@ -3244,12 +3263,12 @@ class InfoBarResolutionSelection:
 		xRes = avControl.getResolutionX(0)
 		resList = []
 		resList.append((_("Exit"), "exit"))
-		resList.append((_("Auto(not available)"), "auto"))
-		resList.append((_("Video: ") + "%dx%d@%gHz" % (xRes, yRes, fps), ""))
+		resList.append((_("Auto (not available)"), "auto"))
+		resList.append((_("Video: %dx%d@%gHz") % (xRes, yRes, fps), ""))
 		resList.append(("--", ""))
 		# Do we need a new sorting with this way here or should we disable some choices?
-		videoModes = iAVSwitch.readPreferredModes(readOnly=True)
-		videoModes = [x.replace("pal ", "").replace("ntsc ", "") for x in videoModes]  # Do we need this?
+		modes = eAVControl.getInstance().getAvailableModes()
+		videoModes = modes.split()
 		for videoMode in videoModes:
 			video = videoMode
 			if videoMode.endswith("23"):
@@ -3273,10 +3292,17 @@ class InfoBarResolutionSelection:
 				if videoMode[1] == "exit" or videoMode[1] == "" or videoMode[1] == "auto":
 					self.ExGreen_toggleGreen()
 				if videoMode[1] != "auto":
-					iAVSwitch.setVideoModeDirect(videoMode[1])
+					if fileWriteLine("/proc/stb/video/videomode", videoMode[1], source=MODULE_NAME):
+						print("[InfoBarGenerics] New video mode is %s." % videoMode[1])
+					else:
+						print("[InfoBarGenerics] Error: Unable to set new video mode of %s!" % videoMode[1])
+					# from enigma import gMainDC
+					# gMainDC.getInstance().setResolution(-1, -1)
 					self.ExGreen_doHide()
 		else:
 			self.ExGreen_doHide()
+		return
+
 
 class InfoBarTimerButton:
 	def __init__(self):
