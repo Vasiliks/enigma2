@@ -3271,11 +3271,12 @@ class InfoBarResolutionSelection:
 		videoModes = modes.split()
 		for videoMode in videoModes:
 			video = videoMode
-			if videoMode.endswith("23"):
-				video = "%s.976" % videoMode
-			if videoMode[-1].isdigit():
-				video = "%sHz" % videoMode
-			resList.append((video, videoMode))
+			if video not in ("pal", "ntsc"):
+				if videoMode.endswith("23"):
+					video = "%s.976" % videoMode
+				if videoMode[-1].isdigit():
+					video = "%sHz" % videoMode
+				resList.append((video, videoMode))
 		videoMode = avControl.getVideoMode("Unknown")
 		keys = ["green", "yellow", "blue", "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 		selection = 0
