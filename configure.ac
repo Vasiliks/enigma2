@@ -74,6 +74,11 @@ AC_ARG_WITH(platform,
 AC_SUBST(PLATFORM)
 AC_DEFINE_UNQUOTED(PLATFORM,"$PLATFORM",[platform])
 
+if test `echo "$BOXTYPE" | cut -b 1-2` == "dm" -o `echo "$BOXTYPE" | cut -b 1-5` == "dream"; then
+	AC_DEFINE(DREAMBOX, 1, [Dreambox hardware])
+	AC_DEFINE(KEY_PLAY_ACTUALLY_IS_KEY_PLAYPAUSE, 1,[define when rc sends a KEY_PLAY event for its KEY_PLAYPAUSE key])
+fi
+
 AC_ARG_WITH(nolcd,
 	AC_HELP_STRING([--with-nolcd], [disable ascii based lcd, yes or no]),
 	[[withnolcd=$withval]],
@@ -104,6 +109,16 @@ if test x"$with7segment" != xno ; then
 fi
 AM_CONDITIONAL(HAVE_7SEGMENT, test x"$with7segment" != xno)
 
+AC_ARG_WITH(colorlcd,
+	AC_HELP_STRING([--with-colorlcd], [use 96x64 16bpp color display, yes or no]),
+	[[withcolorlcd=$withval]],
+	[[withcolorlcd=no]]
+)
+if test x"$withcolorlcd" != xno ; then
+	AC_DEFINE(HAVE_COLORLCD, 1,[Define when using a 96x64 color display device])
+fi
+AM_CONDITIONAL(HAVE_COLORLCD, test x"$withcolorlcd" != xno)
+
 AC_ARG_WITH(colorlcd220,
 	AC_HELP_STRING([--with-colorlcd220], [use 220x176 16bpp color display, yes or no]),
 	[[withcolorlcd220=$withval]],
@@ -132,6 +147,7 @@ AC_ARG_WITH(colorlcd390,
 if test x"$withcolorlcd390" != xno ; then
 	AC_DEFINE(HAVE_COLORLCD390, 1,[Define when using a 390x240 color display device])
 fi
+
 AM_CONDITIONAL(HAVE_COLORLCD390, test x"$withcolorlcd390" != xno)
 
 AC_ARG_WITH(colorlcd400,
@@ -142,6 +158,7 @@ AC_ARG_WITH(colorlcd400,
 if test x"$withcolorlcd400" != xno ; then
 	AC_DEFINE(HAVE_COLORLCD400, 1,[Define when using a 400x176 color display device])
 fi
+
 AM_CONDITIONAL(HAVE_COLORLCD400, test x"$withcolorlcd400" != xno)
 
 AC_ARG_WITH(colorlcd480,
@@ -152,6 +169,7 @@ AC_ARG_WITH(colorlcd480,
 if test x"$withcolorlcd480" != xno ; then
 	AC_DEFINE(HAVE_COLORLCD480, 1,[Define when using a 480x320 color display device])
 fi
+
 AM_CONDITIONAL(HAVE_COLORLCD480, test x"$withcolorlcd480" != xno)
 
 AC_ARG_WITH(colorlcd720,
@@ -162,6 +180,7 @@ AC_ARG_WITH(colorlcd720,
 if test x"$withcolorlcd720" != xno ; then
 	AC_DEFINE(HAVE_COLORLCD720, 1,[Define when using a 720x576 color display device])
 fi
+
 AM_CONDITIONAL(HAVE_COLORLCD720, test x"$withcolorlcd720" != xno)
 
 AC_ARG_WITH(colorlcd800,
@@ -172,6 +191,7 @@ AC_ARG_WITH(colorlcd800,
 if test x"$withcolorlcd800" != xno ; then
 	AC_DEFINE(HAVE_COLORLCD800, 1,[Define when using a 800x480 color display device])
 fi
+
 AM_CONDITIONAL(HAVE_COLORLCD800, test x"$withcolorlcd800" != xno)
 
 AC_ARG_WITH(bwlcd128,

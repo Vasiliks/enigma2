@@ -111,7 +111,7 @@ def getResumePoint(session):
 	if (ref is not None) and (ref.type != 1):
 		try:
 			entry = resumePointCache[ref.toString()]
-			entry[0] = int(time()) # update LRU timestamp
+			entry[0] = int(time())  # update LRU timestamp
 			return entry[1]
 		except KeyError:
 			return None
@@ -237,7 +237,7 @@ class InfoBarUnhandledKey:
 	# This function is called on every keypress!
 	def actionA(self, key, flag):
 		print("[InfoBarGenerics] Key: %s (%s) KeyID='%s'." % (key, KEYFLAGS.get(flag, _("Unknown")), KEYIDNAMES.get(key, _("Unknown"))))
-		if flag != 2: # Don't hide on repeat.
+		if flag != 2:  # Don't hide on repeat.
 			self.unhandledKeyDialog.hide()
 			if self.closeSIB(key) and self.secondInfoBarScreen and self.secondInfoBarScreen.shown:
 				self.secondInfoBarScreen.hide()
@@ -1566,6 +1566,14 @@ class InfoBarSeek:
 	def __seekableStatusChanged(self):
 #		print("seekable status changed!")
 		if not self.isSeekable():
+			SystemInfo["SeekStatePlay"] = False
+			if isfile("/proc/stb/lcd/symbol_hdd"):
+				print("[InfoBarGenerics] Write to /proc/stb/lcd/symbol_hdd")
+				open("/proc/stb/lcd/symbol_hdd", "w").write("0")
+			if isfile("/proc/stb/lcd/symbol_hddprogress"):
+				print("[InfoBarGenerics] Write to /proc/stb/lcd/symbol_hddprogress")
+				with open("/proc/stb/lcd/symbol_hddprogress", "w") as f:
+					f.write("0")
 			self["SeekActions"].setEnabled(False)
 #			print("not seekable, return to play")
 			self.setSeekState(self.SEEK_STATE_PLAY)
