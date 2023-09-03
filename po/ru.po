@@ -4578,6 +4578,9 @@ msgstr "Закрыть экран"
 msgid "Close the current screen"
 msgstr "Закройте текущий экран"
 
+msgid "Close the Plugin Browser screen"
+msgstr "Закройте экран браузера плагинов"
+
 msgid "Close the screen"
 msgstr "Закрыть экран"
 
@@ -6823,8 +6826,14 @@ msgstr "Измените строку "
 msgid "Edit menu"
 msgstr "Редактировать меню"
 
-msgid "Edit mode off"
+msgid "Edit Mode Off"
 msgstr "Правка выкл"
+
+msgid "Edit Mode On"
+msgstr "Правка вкл"
+
+msgid "Edit mode off"
+msgstr "Правка вкл"
 
 msgid "Edit mode on"
 msgstr "Правка вкл"
@@ -10055,6 +10064,24 @@ msgstr "Настройки монтирования"
 msgid "Move"
 msgstr "Переместить"
 
+msgid "Move to the first item on the current line"
+msgstr "Перейти к первому элементу текущей строки"
+
+msgid "Move to the first item on the first screen"
+msgstr "Перейти к первому элементу на первом экране"
+
+msgid "Move to the last item on the current line"
+msgstr "Перейти к последнему элементу текущей строки"
+
+msgid "Move to the last item on the last screen"
+msgstr "Перейти к последнему элементу на последнем экране"
+
+msgid "Move to the next item in the list"
+msgstr "Перейти к следующему элементу в списке"
+
+msgid "Move to the previous item in list"
+msgstr "Перейти к предыдущему элементу в списке"
+
 msgid "Move %d elements"
 msgstr "Переместить %d элементы"
 
@@ -10063,6 +10090,12 @@ msgstr "Переместить 1 элемент"
 
 msgid "Move Left/Right"
 msgstr "Влево/Вправо"
+
+msgid "Move Mode Off"
+msgstr "Режим перемещения выключен"
+
+msgid "Move Mode On"
+msgstr "Режим перемещения включен"
 
 msgid "Move PiP"
 msgstr "Переместить PiP"
@@ -11042,6 +11075,9 @@ msgstr "Открыть список сервисов"
 msgid "Open setup tuner "
 msgstr "Открыть настройки тюнера "
 
+msgid "Open the Plugin Browser settings screen"
+msgstr "Откройте экран настроек браузера плагинов"
+
 msgid "OpenSSL version: "
 msgstr "Версия OpenSSL: "
 
@@ -11722,6 +11758,18 @@ msgstr "Браузер плагинов"
 
 msgid "Plugin browser"
 msgstr "Браузер плагинов"
+
+msgid "Plugin Browser Actions"
+msgstr "Действия браузера плагина"
+
+msgid "Plugin Browser Edit Actions"
+msgstr "Действия по редактированию браузера плагинов"
+
+msgid "Plugin Browser Navigation Actions"
+msgstr "Действия навигации в браузере плагина"
+
+msgid "Plugin Browser Select Actions"
+msgstr "Действия по выбору браузера плагинов"
 
 msgid "Plugin Browser Style (Need Restart GUI)"
 msgstr "Стиль браузера плагинов (нужен перезапуск GUI)"
@@ -12766,6 +12814,12 @@ msgstr "Зарезервировано"
 msgid "Reset"
 msgstr "Сброс"
 
+msgid "Reset Order"
+msgstr "Сбросить заказ"
+
+msgid "Reset sort order"
+msgstr "Сбросить порядок сортировки"
+
 msgid "Rescan"
 msgstr "Повторное сканирование"
 
@@ -13014,6 +13068,9 @@ msgstr "SDR"
 
 msgid "SINGLE LAYER DVD"
 msgstr "Однослойный DVD"
+
+msgid "SMS style QuickSelect entry selection"
+msgstr "Выбор записи QuickSelect в стиле SMS"
 
 msgid "SNR"
 msgstr "SNR"
@@ -14765,6 +14822,9 @@ msgstr "Показать список задач"
 msgid "Show the DreamPlex player..."
 msgstr "Показать DreamPlex плеер."
 
+msgid "Show the Plugin Browser screen"
+msgstr "Показать экран браузера плагинов"
+
 msgid "Show the Power Timer..."
 msgstr "Показать Таймер питания..."
 
@@ -15313,6 +15373,12 @@ msgstr "Начать резать"
 msgid "Start directory"
 msgstr "Начальный каталог"
 
+msgid "Start edit mode"
+msgstr "Запустить режим редактирования"
+
+msgid "Start the highlighted plugin"
+msgstr "Запустите выделенный плагин"
+
 msgid "Start from the beginning"
 msgstr "Начать с самого начала"
 
@@ -15426,6 +15492,9 @@ msgstr "Не останавливать текущее событие, но от
 
 msgid "Stop current stream"
 msgstr "Остановка текущего стрима"
+
+msgid "Stop edit mode"
+msgstr "Выключить режим редактирования"
 
 msgid "Stop entry"
 msgstr "Остановить"
@@ -16412,6 +16481,9 @@ msgstr "Эта опция позволяет показать путь к мен
 msgid "This option allows you to switch audio to BT speakers."
 msgstr "Эта опция позволяет показать путь к меню."
 
+msgid "This option allows you to view the Plugin Browser screen as a list or as a grid."
+msgstr "Эта опция позволяет вам просматривать экран браузера плагинов в виде списка или сетки."
+
 msgid "This option allows you to view the old and new settings side by side."
 msgstr "Эта опция позволяет вам просматривать старые и новые настройки рядом друг с другом."
 
@@ -16835,6 +16907,9 @@ msgstr "Показать/скрыть мигающую строку для эт�
 
 msgid "Toggle infoBar"
 msgstr "Смена инфобаров"
+
+msgid "Toggle move mode"
+msgstr "Переключить режим перемещения"
 
 msgid "Toggle new text inserts before or overwrites existing text"
 msgstr "Переключить новые текстовые вставки до или перезаписать существующий текст"
@@ -17742,6 +17817,12 @@ msgstr "Видеоразрешение"
 
 msgid "Viet Nam"
 msgstr "Viet Nam"
+
+msgid "View as grid"
+msgstr "Посмотреть в виде сетки"
+
+msgid "View as list"
+msgstr "Посмотреть как список"
 
 msgid "View Rass interactive..."
 msgstr "Просмотр интерактивного Rass..."

@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import os
 from enigma import eConsoleAppContainer
+from Components.config import config
 from Components.Harddisk import harddiskmanager
 from Tools.Directories import resolveFilename, SCOPE_LIBDIR
 
@@ -59,12 +59,12 @@ def enumPlugins(filter_start=''):
 	for feed in enumFeeds():
 		package = None
 		try:
-			for line in open(os.path.join(list_dir, feed), errors='ignore'):
+			for line in open(os.path.join(list_dir, feed)):
 				if line.startswith('Package:'):
 					package = line.split(":", 1)[1].strip()
 					version = ''
 					description = ''
-					if package.startswith(filter_start) and not package.endswith('-dev') and not package.endswith('-staticdev') and not package.endswith('-dbg') and not package.endswith('-doc') and not package.endswith('-src') and not package.endswith('--pycache--'):
+					if package.startswith(filter_start) and not package.endswith('-dev') and not package.endswith('-staticdev') and not package.endswith('-dbg') and not package.endswith('-doc') and not package.endswith('-src') and not package.endswith('-po') and not package.endswith('--pycache--'):
 						continue
 					package = None
 				if package is None:
@@ -185,7 +185,8 @@ class OpkgComponent:
 		self.cmd.dataAvail.remove(self.cmdData)
 
 	def cmdData(self, data):
-		data = data.decode()
+		if isinstance(data, bytes):
+			data = data.decode("UTF-8", "ignore")
 		print("[Opkg] data:", data)
 		if self.cache is None:
 			self.cache = data

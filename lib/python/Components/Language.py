@@ -103,6 +103,12 @@ class Language:
 	def getLanguageList(self):
 		return [(x, self.lang[x]) for x in self.langlist]
 
+	def getLanguageListSelection(self):
+		languageListSelection = []
+		for data in self.getLanguageList():
+			languageListSelection.append((data[0], data[1][0]))
+		return languageListSelection
+
 	def getActiveLanguage(self):
 		return self.activeLanguage
 

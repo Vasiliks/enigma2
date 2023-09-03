@@ -49,6 +49,11 @@ def InitUsageConfig():
 		("5", _("5")),
 		("6", _("6"))
 	])
+	config.usage.sort_pluginlist = ConfigYesNo(default=True)
+	config.pluginbrowser = ConfigSubsection()
+	config.pluginbrowser.languages_po = ConfigYesNo(default=False)
+	config.pluginbrowser.src = ConfigYesNo(default=False)
+
 
 	config.usage.alternative_number_mode = ConfigYesNo(default=False)
 
@@ -183,12 +188,17 @@ def InitUsageConfig():
 	config.usage.volume_instead_of_channelselection = ConfigYesNo(default=False)
 	config.usage.channelselection_preview = ConfigYesNo(default=False)
 	config.usage.show_spinner = ConfigYesNo(default=True)
+	config.usage.plugin_sort_weight = ConfigDictionarySet()
 	config.usage.menu_sort_weight = ConfigDictionarySet(default={"mainmenu": {"submenu": {}}})
 	config.usage.menu_sort_mode = ConfigSelection(default="default", choices=[
 		("a_z", _("Alphabetical")),
 		("default", _("Default")),
 		("user", _("User defined")),
 		("user_hidden", _("User defined hidden"))
+	])
+	config.usage.pluginListLayout = ConfigSelection(default="grid", choices=[
+		("list", _("View as list")),
+		("grid", _("View as grid"))
 	])
 	config.usage.show_genre_info = ConfigYesNo(default=False)
 	config.usage.menu_show_numbers = ConfigSelection(default="no", choices=[

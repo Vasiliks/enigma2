@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import xml.sax
 from Tools.Directories import crawlDirectory, resolveFilename, SCOPE_CONFIG, SCOPE_SKIN, copyfile, copytree
-from Components.Console import Console
 from Components.NimManager import nimmanager
 from Components.Opkg import OpkgComponent
 from Components.config import config, configfile
@@ -38,7 +37,7 @@ class InfoHandler(xml.sax.ContentHandler):
 
 		if name in ("hardware", "bcastsystem", "satellite", "tag", "flag"):
 			if "type" not in attrs:
-					self.printError(str(name) + " tag with no type attribute")
+				self.printError(str(name) + " tag with no type attribute")
 			if self.elements[-3] in ("default", "package"):
 				prerequisites = self.globalprerequisites
 			else:
@@ -242,10 +241,10 @@ class PackageInfoHandler:
 			if "tag" in prerequisites:
 				return False
 		elif self.neededTag == 'ALL_TAGS':
-				return True
+			return True
 		else:
 			if "tag" in prerequisites:
-				if not self.neededTag in prerequisites["tag"]:
+				if self.neededTag not in prerequisites["tag"]:
 					return False
 			else:
 				return False
@@ -255,7 +254,7 @@ class PackageInfoHandler:
 				return False
 		else:
 			if "flag" in prerequisites:
-				if not self.neededFlag in prerequisites["flag"]:
+				if self.neededFlag not in prerequisites["flag"]:
 					return False
 			else:
 				return True
@@ -342,7 +341,6 @@ class PackageInfoHandler:
 			self.installSkin(skin["directory"], skin["name"])
 		elif currentAttribute == "config":
 			if self.currentIndex == 0:
-				from Components.config import configfile
 				configfile.save()
 			config = attributes["config"][self.currentIndex]
 			self.mergeConfig(config["directory"], config["name"])
@@ -372,7 +370,7 @@ class PackageInfoHandler:
 
 	def installIPK(self, directory, name):
 		if self.blocking:
-			Console().ePopen("opkg install %s%s" % (directory, name))
+			os.system("opkg install " + directory + name)
 			self.installNext()
 		else:
 			self.opkg = OpkgComponent()
@@ -387,10 +385,10 @@ class PackageInfoHandler:
 
 	def installSkin(self, directory, name):
 		if self.blocking:
-			copytree(directory, resolveFilename(SCOPE_SKIN))
+			copytree(directory, resolveFilename(SCOPE_SKINS))
 			self.installNext()
 		else:
-			if self.console.execute("cp -a %s %s" % (directory, resolveFilename(SCOPE_SKIN))):
+			if self.console.execute("cp -a %s %s" % (directory, resolveFilename(SCOPE_SKINS))):
 				self.installNext()
 
 	def mergeServices(self, directory, name, merge=False):

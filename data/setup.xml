@@ -210,6 +210,7 @@
 	<setup key="PluginBrowser" title="Plugin Browser Setup">
 		<item level="2" text="Show packages languages" description="If set to 'yes', it will display 'languages' packs and 'PO' in browser'.">config.pluginbrowser.languages_po</item>
 		<item level="2" text="Show source packages" description="If set to 'yes' it will show the 'SRC' packages in browser.">config.pluginbrowser.src</item>
+		<item level="2" text="Show the Plugin Browser screen" description="This option allows you to view the Plugin Browser screen as a list or as a grid.">config.usage.pluginListLayout</item>
 	</setup>
 	<setup key="Recording" title="Recording Setup">
 		<item level="0" text="Default movie location" description="Set the default location for your recordings. Press OK to add new locations, LEFT/RIGHT to select from any existing locations.">config.usage.default_path</item>
