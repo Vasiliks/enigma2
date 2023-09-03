@@ -429,7 +429,7 @@ def parseFont(value, scale=((1, 1), (1, 1))):
 
 
 def parseGradient(value):
-	data = (x.strip() for x in value.split(","))
+	data = [x.strip() for x in value.split(",")]
 	if len(data) > 2:
 		options = {
 			"horizontal": ePixmap.GRADIENT_HORIZONTAL,
@@ -838,7 +838,7 @@ class AttributeParser:
 		if value in variables:
 			value = variables[value]
 		errors = []
-		flags = (x.strip() for x in value.split(","))
+		flags = [x.strip() for x in value.split(",")]
 		for flag in flags:
 			try:
 				self.guiObject.setFlag(eWindow.__dict__[flag])
@@ -1060,6 +1060,12 @@ class AttributeParser:
 			value = _(value)
 		self.guiObject.setText(value)
 
+	def textBorderColor(self, value):
+		self.guiObject.setTextBorderColor(parseColor(value, 0x00FFFFFF))
+
+	def textBorderWidth(self, value):
+		self.guiObject.setTextBorderWidth(self.applyVerticalScale(value))
+
 	def textOffset(self, value):
 		self.textPadding(value)
 		attribDeprecationWarning("textOffset", "textPadding")
@@ -1243,7 +1249,7 @@ def loadSingleSkinData(desktop, screenID, domSkin, pathSkin, scope=SCOPE_GUISKIN
 			name = parameter.attrib.get("name")
 			value = parameter.attrib.get("value")
 			if name and value:
-				parameters[name] = list(map(parseParameter, (x.strip() for x in value.split(",")))) if "," in value else parseParameter(value)
+				parameters[name] = list(map(parseParameter, [x.strip() for x in value.split(",")])) if "," in value else parseParameter(value)
 			else:
 				skinError("Tag 'parameter' needs a name and value, got name='%s' and size='%s'" % (name, value))
 	for tag in domSkin.findall("menus"):
