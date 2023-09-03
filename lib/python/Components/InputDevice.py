@@ -13,8 +13,6 @@ from Components.Console import Console
 from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.Directories import SCOPE_KEYMAPS, SCOPE_SKINS, fileReadLine, fileWriteLine, fileReadLines, fileReadXML, resolveFilename, pathExists
 
-from six import ensure_str
-
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
 
