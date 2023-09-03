@@ -213,6 +213,12 @@ bool eServiceEvent::loadLanguage(Event *evt, const std::string &lang, int tsidon
 
 	if(eServiceEvent::m_UTF8CorrectMode > 0)
 	{
+		if(m_event_name.size() > 0 && !isUTF8(m_event_name))
+		{
+			if(eServiceEvent::m_UTF8CorrectMode == 2)
+				eDebug("[eServiceEvent] event name is not UTF8\nhex output:%s\nstr output:%s\n",string_to_hex(m_event_name).c_str(),m_event_name.c_str());
+			m_event_name = repairUTF8(m_event_name.c_str(), m_event_name.size());
+		}
 		if(m_short_description.size() > 0 && !isUTF8(m_short_description))
 		{
 			if(eServiceEvent::m_UTF8CorrectMode == 2)
@@ -311,7 +317,7 @@ RESULT eServiceEvent::getGenreData(ePtr<eGenreData> &dest) const
 	return -1;
 }
 
-PyObject *eServiceEvent::getGenreDataList() const
+PyObject *eServiceEvent::getGenreData() const
 {
 	ePyObject ret = PyList_New(m_genres.size());
 	int cnt=0;
@@ -339,7 +345,7 @@ RESULT eServiceEvent::getParentalData(ePtr<eParentalData> &dest) const
 	return -1;
 }
 
-PyObject *eServiceEvent::getParentalDataList() const
+PyObject *eServiceEvent::getParentalData() const
 {
 	ePyObject ret = PyList_New(m_ratings.size());
 	int cnt = 0;
@@ -369,7 +375,7 @@ RESULT eServiceEvent::getComponentData(ePtr<eComponentData> &dest, int tagnum) c
 	return -1;
 }
 
-PyObject *eServiceEvent::getComponentDataList() const
+PyObject *eServiceEvent::getComponentData() const
 {
 	ePyObject ret = PyList_New(m_component_data.size());
 	int cnt = 0;
