@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-01 11:29+0330\n"
-"PO-Revision-Date: 2023-08-29 21:01+0300\n"
+"PO-Revision-Date: 2023-09-04 08:15+0300\n"
 "Last-Translator: foxbob <boris.fox.solovyev@gmail.com>\n"
 "Language-Team: RU locale edited by foxbob\n"
 "Language: ru\n"
@@ -8750,6 +8750,12 @@ msgstr "Если «никогда», произойдет принудитель
 msgid "If set to 'yes', allows you to use timeshift with alternative audio plugins."
 msgstr "Если установлено значение 'да', позволяет использовать таймшифт с альтернативными аудио-плагинами."
 
+msgid "If set to 'yes', it will display 'languages' packs and 'PO' in browser'."
+msgstr "Если установлено значение «да», в браузере будут отображаться «языковые пакеты» и «PO»."
+
+msgid "If set to 'yes' it will show the 'SRC' packages in browser."
+msgstr "Если установлено значение «да», пакеты «SRC» будут отображаться в браузере."
+
 msgid "If set as 'Yes', then audiofiles are played in 'list mode' only, instead in full screen player."
 msgstr "Если установлено «Да»,то аудиофайлы воспроизводятся только в «режиме списка»,а не в полноэкранном проигрывателе."
 
@@ -14732,6 +14738,9 @@ msgstr "Показать или скрыть расширенное описан
 msgid "Show packages to be updated"
 msgstr "Показать пакеты, которые будут обновлены"
 
+msgid "Show packages languages"
+msgstr "Показать языки пакетов"
+
 msgid "Show picons during channel number input"
 msgstr "Показывать пиконы при вводе номера канала"
 
@@ -14797,6 +14806,9 @@ msgstr "Показать одиночный ТВ-гид сервиса"
 
 msgid "Show softcam setup in extensions menu"
 msgstr "Показать настройки эмуляторов в меню дополнений"
+
+msgid "Show source packages"
+msgstr "Показать исходные пакеты"
 
 msgid "Show status icons in movie list"
 msgstr "Показать иконку статуса в списке видео"
@@ -16280,7 +16292,7 @@ msgstr ""
 "Пожалуйста установите его."
 
 msgid "This function recovers your video signal in case of loss. The video has been changed to 720p.\nIf this is your case, please keep the video at 720P and do the following:\nGo to Menu > Setup > Audio / Video > A/V settings and set the correct resolution.\nDo you want to keep the video at 720p?"
-msgstr "«Эта функция восстанавливает ваш видеосигнал в случае потери. Видео было изменено на 720p.\nЕсли это ваш случай, сохраните видео в разрешении 720P и выполните следующие действия:\nПерейдите в Меню > Настройка > Аудио/Видео > A /V и установите правильное разрешение.\nХотите сохранить видео в разрешении 720p?"
+msgstr "Эта функция восстанавливает ваш видеосигнал в случае потери. Видео было изменено на 720p.\nЕсли это ваш случай, сохраните видео в разрешении 720P и выполните следующие действия:\nПерейдите в Меню > Настройка > Аудио/Видео > Настройки A/V и установите правильное разрешение.\nВы хотите сохранить видео в разрешении 720p?"
 
 msgid "This screen is not yet available."
 msgstr "Этот экран еще недоступен."
