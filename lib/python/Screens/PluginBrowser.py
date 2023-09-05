@@ -104,11 +104,11 @@ class PluginBrowser(Screen, HelpableScreen, NumericalTextInput, ProtectedScreen)
 	moveFontColor = None
 
 	def __init__(self, session):
-		self.layout = "pluginList" if config.usage.pluginListLayout.value == "list" else "pluginGrid"
+		self.layout = "pluginGrid" if config.usage.pluginListLayout.value == "gridmode" else "pluginList"
 		Screen.__init__(self, session, mandatoryWidgets=[self.layout])
 		HelpableScreen.__init__(self)
 		NumericalTextInput.__init__(self, handleTimeout=False, mode="SearchUpper")
-		self.skinName = ["PluginBrowserList" if config.usage.pluginListLayout.value == "list" else "PluginBrowserGrid", "PluginBrowser"]
+		self.skinName = ["PluginBrowserGrid" if config.usage.pluginListLayout.value == "gridmode" else "PluginBrowserList", "PluginBrowser"]
 		self.setTitle(_("Plugin Browser"))
 		ProtectedScreen.__init__(self)
 		self.firsttime = True
@@ -140,7 +140,7 @@ class PluginBrowser(Screen, HelpableScreen, NumericalTextInput, ProtectedScreen)
 			"green": (self.keyGreen, _("Toggle move mode")),
 			"blue": (self.keyBlue, _("Stop edit mode"))
 		}, prio=0, description=_("Plugin Browser Edit Actions"))
-		if config.usage.pluginListLayout.value == "list":
+		if config.usage.pluginListLayout.value == "listmode":
 			self["navigationActions"] = HelpableActionMap(self, ["NavigationActions"], {
 				"top": (self.keyTop, _("Move to first line / screen")),
 				"left": (self.keyPageUp, _("Move up a screen")),

@@ -8265,6 +8265,9 @@ msgstr "Графический Мульти-ТВ-гид"
 msgid "Greece"
 msgstr "Греция"
 
+msgid "Grid mode"
+msgstr "Режим сетки"
+
 msgid "Greek"
 msgstr "Греческий"
 
@@ -17829,12 +17832,6 @@ msgstr "Видеоразрешение"
 
 msgid "Viet Nam"
 msgstr "Viet Nam"
-
-msgid "View as grid"
-msgstr "Посмотреть в виде сетки"
-
-msgid "View as list"
-msgstr "Посмотреть как список"
 
 msgid "View Rass interactive..."
 msgstr "Просмотр интерактивного Rass..."

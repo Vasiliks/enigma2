@@ -196,9 +196,9 @@ def InitUsageConfig():
 		("user", _("User defined")),
 		("user_hidden", _("User defined hidden"))
 	])
-	config.usage.pluginListLayout = ConfigSelection(default="grid", choices=[
-		("list", _("View as list")),
-		("grid", _("View as grid"))
+	config.usage.pluginListLayout = ConfigSelection(default="gridmode", choices=[
+		("gridmode", _("Grid mode")),
+		("listmode", _("List mode"))
 	])
 	config.usage.show_genre_info = ConfigYesNo(default=False)
 	config.usage.menu_show_numbers = ConfigSelection(default="no", choices=[
