@@ -839,7 +839,7 @@ class PluginDownloadBrowser(Screen):
 										plugin.append('')
 								plugin.append(plugin[0][15:])
 								self.pluginlist.append(plugin)
-			self.pluginlist.sort()
+		self.pluginlist.sort()
 
 	def updateList(self):
 		updatedlist = []
