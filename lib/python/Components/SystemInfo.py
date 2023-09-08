@@ -81,12 +81,12 @@ class BoxInformation:  # To maintain data integrity class variables should not b
 			value = value[1:-1]
 		elif value.startswith("(") and value.endswith(")"):
 			data = []
-			for item in (x.strip() for x in value[1:-1].split(",")):
+			for item in [x.strip() for x in value[1:-1].split(",")]:
 				data.append(self.processValue(item))
 			value = tuple(data)
 		elif value.startswith("[") and value.endswith("]"):
 			data = []
-			for item in (x.strip() for x in value[1:-1].split(",")):
+			for item in [x.strip() for x in value[1:-1].split(",")]:
 				data.append(self.processValue(item))
 			value = list(data)
 		elif valueTest == "NONE":

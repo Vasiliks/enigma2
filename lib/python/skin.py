@@ -917,6 +917,7 @@ class AttributeParser:
 
 	def overScan(self, value):
 		self.guiObject.setOverscan(value)
+
 	def padding(self, value):
 		leftPadding, topPadding, rightPadding, bottomPadding = parsePadding(value, "padding")
 		leftPadding = self.applyHorizontalScale(leftPadding)

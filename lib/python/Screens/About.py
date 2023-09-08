@@ -373,7 +373,7 @@ class DebugInformation(InformationBase):
 			else:
 				try:
 					with open(path) as fd:
-						info = (x.strip() for x in fd.readlines())[-LOG_MAX_LINES:]
+						info = [x.strip() for x in fd.readlines()][-LOG_MAX_LINES:]
 				except OSError as err:
 					info = "%s,%s" % (err.errno, err.strerror)
 			self.cachedDebugInfo[path] = info
@@ -1427,7 +1427,7 @@ class SystemInformation(InformationBase):
 		elif path:
 			try:
 				with open(path) as fd:
-					self.info = (x.strip() for x in fd.readlines())
+					self.info = [x.strip() for x in fd.readlines()]
 			except OSError as err:
 				self.info = [_("Error %d: System information file '%s' can't be read!  (%s)") % (err.errno, path, err.strerror)]
 			for callback in self.onInformationUpdated:
@@ -1473,7 +1473,7 @@ class TranslationInformation(InformationBase):
 		for translate in translateInfo:
 			if not translate:
 				continue
-			translate = (x.strip() for x in translate.split(":", 1))
+			translate = [x.strip() for x in translate.split(":", 1)]
 			if len(translate) == 1:
 				translate.append("")
 			info.append(formatLine("P1", translate[0], translate[1]))
