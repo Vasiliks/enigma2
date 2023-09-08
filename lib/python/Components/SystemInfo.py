@@ -301,7 +301,7 @@ except:
 	branch = ""
 branch_e2plugins = "?sha=python3"
 commitLogs = [
-	("openPli Enigma2", "https://api.github.com/repos/68foxboris/my-py3/commits"),
+	("openPli Enigma2", "https://api.github.com/repos/68foxboris/enigma2/commits"),
 	("Openpli Oe Core", "https://api.github.com/repos/openpli/openpli-oe-core/commits"),
 	("Enigma2 Plugins", "https://api.github.com/repos/openpli/enigma2-plugins/commits"),
 	("Aio Grab", "https://api.github.com/repos/openpli/aio-grab/commits"),
