@@ -22,7 +22,7 @@ from Tools.Directories import resolveFilename, SCOPE_GUISKIN, SCOPE_LCDSKIN, SCO
 class SkinSelector(Screen, HelpableScreen):
 	skin = ["""
 	<screen name="SkinSelector" position="center,center" size="%d,%d">
-		<widget name="preview" position="center,%d" size="%d,%d" alphatest="blend" />
+		<widget name="preview" position="center,%d" size="%d,%d" alphaTest="blend" />
 		<widget source="skins" render="Listbox" position="center,%d" size="%d,%d" enableWrapAround="1" scrollbarMode="showOnDemand">
 			<convert type="TemplatedMultiContent">
 				{
@@ -52,7 +52,7 @@ class SkinSelector(Screen, HelpableScreen):
 	]
 
 	def __init__(self, session, screenTitle=_("GUI Skin")):
-		Screen.__init__(self, session, mandatoryWidgets=["skins"])
+		Screen.__init__(self, session, mandatoryWidgets=["description", "skins"])
 		HelpableScreen.__init__(self)
 
 		element = domScreens.get("SkinSelector", (None, None))[0]
@@ -164,7 +164,7 @@ class SkinSelector(Screen, HelpableScreen):
 					list.append("%s (%s)" % (list[0], list[1]) if list[1] else list[0])
 					if list[1]:
 						list[1] = "<%s>" % list[1]
-					#0=SortKey, 1=Label, 2=Flag, 3=Directory, 4=Skin, 5=Resolution, 6=Preview, 7=Label + Flag
+					# 0=SortKey, 1=Label, 2=Flag, 3=Directory, 4=Skin, 5=Resolution, 6=Preview, 7=Label + Flag
 					skinList.append(tuple([list[0].upper()] + list))
 		skinList.sort()
 		self["skins"].setList(skinList)
@@ -265,16 +265,8 @@ class LcdSkinSelector(SkinSelector):
 
 
 class SkinSelectorSummary(ScreenSummary):
-	skin = '''
-	<screen name="SkinSelectorSummary" position="0,0" size="400,240"> 
-		<widget source="Name" render="Label" position="0,30" size="400,100" font="FdLcD;35" halign="center" valign="center" zPosition="2"/>
-		<widget source="value" render="Label" position="0,140" size="400,100" font="FdLcD;35" halign="center" zPosition="2"/>
-	</screen>
-	'''
 	def __init__(self, session, parent):
 		ScreenSummary.__init__(self, session, parent=parent)
-		self["entry"] = StaticText("")
-		self["value"] = StaticText("")
 		self["Name"] = StaticText("")
 		if self.addWatcher not in self.onShow:
 			self.onShow.append(self.addWatcher)
@@ -282,16 +274,13 @@ class SkinSelectorSummary(ScreenSummary):
 			self.onHide.append(self.removeWatcher)
 
 	def addWatcher(self):
-		if self.selectionChanged not in self.parent.onChangedEntry:
+		if hasattr(self.parent, "onChangedEntry"):
 			self.parent.onChangedEntry.append(self.selectionChanged)
-		self.selectionChanged()
+			self.selectionChanged()
 
 	def removeWatcher(self):
-		if self.selectionChanged in self.parent.onChangedEntry:
+		if hasattr(self.parent, "onChangedEntry"):
 			self.parent.onChangedEntry.remove(self.selectionChanged)
 
 	def selectionChanged(self):
-		currentEntry = self.parent["skins"].getCurrent()  # Label
-		self["entry"].setText(currentEntry[1])
-		self["value"].setText("%s   %s" % (currentEntry[5], currentEntry[2]) if currentEntry[5] and currentEntry[2] else currentEntry[5] or currentEntry[2])  # Resolution and/or Flag.
-		self["Name"].setText(self["entry"].getText())
+		self["Name"].text = self.parent.getCurrentName()
