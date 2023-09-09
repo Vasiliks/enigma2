@@ -643,7 +643,9 @@ class NumberZap(Screen):
 		self.handleServiceName()
 
 		if len(self.numberString) >= int(config.usage.maxchannelnumlen.value):
-			self.keyOK()
+			if self.Timer.isActive():
+				self.Timer.stop()
+			self.Timer.start(2000, True)  # two seconds to be able to establish numbers with tens of thousands. five digits
 
 	def __init__(self, session, number, searchNumberFunction=None):
 		Screen.__init__(self, session)
