@@ -977,6 +977,48 @@ msgid "%d ms"
 msgstr "%d мс"
 
 #, python-format
+msgid "%d package found."
+msgid_plural "%d packages found."
+msgstr[0] "Найдено %d пакет."
+msgstr[1] "Найдено %d пакета."
+msgstr[2] "Найдено %d пакетов."
+
+#, python-format
+msgid "%d package has an update"
+msgid_plural "%d packages have updates."
+msgstr[0] "%d пакет имеет обновление"
+msgstr[1] "%d пакета имеет обновление."
+msgstr[2] "%d пакетов имеет обновление."
+
+#, python-format
+msgid "%d package installable."
+msgid_plural "%d packages installable."
+msgstr[0] "%d пакет может быть установлен."
+msgstr[1] "%d пакета может быть установлено."
+msgstr[2] "%d пакетов может быть установлено."
+
+#, python-format
+msgid "%d package installed."
+msgid_plural "%d packages installed."
+msgstr[0] "%d пакет установлен."
+msgstr[1] "%d пакета установлено."
+msgstr[2] "%d пакетов установлено."
+
+#, python-format
+msgid "%d package marked for install."
+msgid_plural "%d packages marked for install."
+msgstr[0] "%d пакет помечен для установки."
+msgstr[1] "%d пакета, помеченных для установки."
+msgstr[2] "%d пакетов, помеченных для установки."
+
+#, python-format
+msgid "%d package marked for remove."
+msgid_plural "%d packages marked for remove."
+msgstr[0] "%d пакет помечен для удаления."
+msgstr[1] "%d пакета, помеченных для удаления."
+msgstr[2] "%d пакетов, помеченных для удаления."
+
+#, python-format
 msgid "%d package upgraded."
 msgid_plural "%d packages upgraded."
 msgstr[0] "%d Пакет обновлён."
@@ -1132,6 +1174,10 @@ msgstr "%m/%d/%Y"
 #, python-format
 msgid "%s  (%s)"
 msgstr "%s (%s)"
+
+#, python-format
+msgid "%s  -  %s    (%s%d Min)"
+msgstr "%s - %s (%s%d мин.)"
 
 #, python-format
 msgid "%s %02d.%02d."
@@ -1413,6 +1459,9 @@ msgstr "/с"
 msgid "/sec]"
 msgstr "/сек]"
 
+msgid "/usr/share/enigma2 directory"
+msgstr "Каталог /usr/share/enigma2"
+
 msgid "/var directory"
 msgstr "Каталог /var"
 
@@ -1440,39 +1489,6 @@ msgstr "10 минут"
 msgid "1024 Mb"
 msgstr "1024 Мб"
 
-msgid "1080i"
-msgstr "1080i"
-
-msgid "1080i 50Hz"
-msgstr "1080i 50Гц"
-
-msgid "1080i 60Hz"
-msgstr "1080i 60Гц"
-
-msgid "1080i50"
-msgstr "1080i50"
-
-msgid "1080i50: 24p/50i/60i"
-msgstr "1080i50: 24p/50i/60i"
-
-msgid "1080p 24Hz"
-msgstr "1080p 24Гц"
-
-msgid "1080p 25Hz"
-msgstr "1080p 25Гц"
-
-msgid "1080p 30Hz"
-msgstr "1080p 30Гц"
-
-msgid "1080p 50Hz"
-msgstr "1080p 50Гц"
-
-msgid "1080p 60Hz"
-msgstr "1080p 60Гц"
-
-msgid "1080p50: 24p/50p/60p"
-msgstr "1080p50: 24p/50p/60p"
-
 msgid "10bit"
 msgstr "10бит"
 
@@ -1484,9 +1500,6 @@ msgstr "12 часов"
 
 msgid "12, show Latin-1 characters except for greek and cyrillic, switch to 8 if needed."
 msgstr "12, показать символы Latin-1, кроме греческого и кириллицы, при необходимости переключиться на 8."
-
-msgid "128"
-msgstr "128"
 
 msgid "128 Mb"
 msgstr "128 Мб"
@@ -1511,12 +1524,6 @@ msgstr "15 минут"
 
 msgid "1536 Mb"
 msgstr "1536 Мб"
-
-msgid "16"
-msgstr "16"
-
-msgid "16:10"
-msgstr "16:10"
 
 msgid "16:10 Letterbox"
 msgstr "16:10 режим ящика"
@@ -1557,24 +1564,6 @@ msgstr "2 минуты"
 msgid "2048 Mb"
 msgstr "2048 Мб"
 
-msgid "2160p 24Hz"
-msgstr "2160p 24Гц"
-
-msgid "2160p 25Hz"
-msgstr "2160p 25Гц"
-
-msgid "2160p 30Hz"
-msgstr "2160p 30Гц"
-
-msgid "2160p 50Hz"
-msgstr "2160p 50Гц"
-
-msgid "2160p 60Hz"
-msgstr "2160p 60Гц"
-
-msgid "2160p50: 24p/50p/60p"
-msgstr "2160p50: 24p/50p/60p"
-
 msgid "23.976"
 msgstr "23.976"
 
@@ -1584,44 +1573,11 @@ msgstr "24"
 msgid "24 hours"
 msgstr "24 часа"
 
-msgid "24p/24p"
-msgstr "24p/24p"
-
-msgid "24p/25p"
-msgstr "24p/25p"
-
-msgid "24p/30p"
-msgstr "24p/50p"
-
-msgid "24p/50p"
-msgstr "24p/50p"
-
-msgid "24p/60p"
-msgstr "24p/60p"
-
 msgid "25"
 msgstr "25"
 
-msgid "256"
-msgstr "256"
-
 msgid "256 Mb"
 msgstr "256 Мб"
-
-msgid "25p/24p"
-msgstr "25p/24p"
-
-msgid "25p/25p"
-msgstr "25p/25p"
-
-msgid "25p/30p"
-msgstr "25p/30p"
-
-msgid "25p/50p"
-msgstr "24p/50p"
-
-msgid "25p/60p"
-msgstr "24p/60p"
 
 msgid "29.97"
 msgstr "29.97"
@@ -1667,24 +1623,6 @@ msgstr "30"
 
 msgid "30 minutes"
 msgstr "30 минут"
-
-msgid "30p/24p"
-msgstr "50p/24p"
-
-msgid "30p/25p"
-msgstr "50p/24p"
-
-msgid "30p/30p"
-msgstr "30p/30p"
-
-msgid "30p/50p"
-msgstr "30p/50p"
-
-msgid "30p/60p"
-msgstr "50p/60p"
-
-msgid "32"
-msgstr "32"
 
 msgid "32 Mb"
 msgstr "32 Мб"
@@ -1761,21 +1699,6 @@ msgstr "5 часов"
 msgid "5 minutes"
 msgstr "5 минут"
 
-msgid "50p/24p"
-msgstr "50p/24p"
-
-msgid "50p/25p"
-msgstr "50p/24p"
-
-msgid "50p/30p"
-msgstr "50p/30p"
-
-msgid "50p/50p"
-msgstr "50p/50p"
-
-msgid "50p/60p"
-msgstr "50p/60p"
-
 msgid "512 Mb"
 msgstr "512 Гб"
 
@@ -1788,24 +1711,6 @@ msgstr "6 часов"
 msgid "60 minutes"
 msgstr "60 минут"
 
-msgid "60p/24p"
-msgstr "60p/24p"
-
-msgid "60p/25p"
-msgstr "60p/24p"
-
-msgid "60p/30p"
-msgstr "60p/50p"
-
-msgid "60p/50p"
-msgstr "60p/50p"
-
-msgid "60p/60p"
-msgstr "60p/60p"
-
-msgid "64"
-msgstr "64"
-
 msgid "64 Mb"
 msgstr "64 Мб"
 
@@ -1814,18 +1719,6 @@ msgstr "7"
 
 msgid "7 hours"
 msgstr "7 часов"
-
-msgid "720p"
-msgstr "720p"
-
-msgid "720p 24Hz"
-msgstr "720p 24Гц"
-
-msgid "720p50"
-msgstr "720p50"
-
-msgid "720p50: 24p/50p/60p"
-msgstr "720p50: 24p/50p/60p"
 
 msgid "8"
 msgstr "8"
@@ -4084,6 +3977,9 @@ msgstr "Невозможно переместить в корзину"
 
 msgid "Capabilities: "
 msgstr "Возможности: "
+
+msgid "Capacity"
+msgstr "Ёмкость"
 
 msgid "Capacity: "
 msgstr "Объём: "
@@ -7974,6 +7870,9 @@ msgstr "Размер рамки при просмотре во весь экра
 msgid "France"
 msgstr "Франция"
 
+msgid "Free"
+msgstr "Свободно"
+
 msgid "Free flash"
 msgstr "Свободно флеш"
 
@@ -10107,6 +10006,9 @@ msgstr "Управление монтированием"
 msgid "Mount: "
 msgstr "Смонтирован "
 
+msgid "Mountpoint"
+msgstr "Точка монтирования"
+
 msgid "MountManager"
 msgstr "Установки монтирования"
 
@@ -11366,6 +11268,9 @@ msgstr "Частичный"
 
 msgid "Partial EPG"
 msgstr "Частично похожие события ТВ-гида"
+
+msgid "Partition"
+msgstr "Раздел"
 
 msgid "Partitions"
 msgstr "Разделы"
@@ -15122,6 +15027,9 @@ msgstr[0] "Таймер сна: осталось %d секунда."
 msgstr[1] "Таймер сна: осталось %d секунды."
 msgstr[2] "Таймер сна: осталось %d секунд."
 
+msgid "Sleeping"
+msgstr "Спящий"
+
 msgid "Slide drop"
 msgstr "Скольжение вниз"
 
@@ -17627,6 +17535,12 @@ msgstr "Использование корзины в списке видео"
 
 msgid "Used service scan type"
 msgstr "Используемый тип сканирования службы"
+
+msgid "Used"
+msgstr "Используется"
+
+msgid "Used flash"
+msgstr "Использовано флеш"
 
 msgid "Used:"
 msgstr "Используется:"

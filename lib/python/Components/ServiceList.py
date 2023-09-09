@@ -452,7 +452,7 @@ class ServiceList(GUIComponent):
 			channelNumberWidth = 0
 			channelNumberSpace = self.listMarginLeft
 		else:
-			channelNumberWidth = config.usage.alternative_number_mode.value and getTextBoundarySize(self.instance, self.ServiceNumberFont, self.instance.size(), "0" * int(config.usage.maxchannelnumlen.value)).width() or getTextBoundarySize(self.instance, self.ServiceNumberFont, self.instance.size(), "00000").width()
+			channelNumberWidth = config.usage.alternative_number_mode.value and getTextBoundarySize(self.instance, self.ServiceNumberFont, self.instance.size(), "0").width() or getTextBoundarySize(self.instance, self.ServiceNumberFont, self.instance.size(), "00000").width()
 			channelNumberSpace = self.fieldMargins + self.listMarginLeft
 
 		numberHeight = self.ItemHeight // 2 if twoLines and config.usage.servicelist_servicenumber_valign.value == "1" else self.ItemHeight
