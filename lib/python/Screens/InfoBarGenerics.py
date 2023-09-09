@@ -618,7 +618,7 @@ class NumberZap(Screen):
 	def handleServiceName(self):
 		if self.searchNumber:
 			self.service, self.bouquet = self.searchNumber(int(self["number"].getText()))
-			self["servicename"].text = self["servicename_summary"].text = ServiceReference(self.service).getServiceName()
+			self["servicename"].text = self["servicename_summary"].text = ServiceReference(self.service).getServiceName() if ServiceReference(self.service).getServiceName() else _("There is no service with this number")
 			self["Service"].newService(self.service)
 			if not self.startBouquet:
 				self.startBouquet = self.bouquet
@@ -631,7 +631,7 @@ class NumberZap(Screen):
 				self.service, self.bouquet = self.searchNumber(int(self["number"].getText()), firstBouquetOnly=True)
 			else:
 				self.service, self.bouquet = self.searchNumber(int(self["number"].getText()))
-			self["servicename"].text = self["servicename_summary"].text = ServiceReference(self.service).getServiceName()
+			self["servicename"].text = self["servicename_summary"].text = ServiceReference(self.service).getServiceName() if ServiceReference(self.service).getServiceName() else _("There is no service with this number")
 			self["Service"].newService(self.service)
 
 	def keyNumberGlobal(self, number):
@@ -642,10 +642,10 @@ class NumberZap(Screen):
 
 		self.handleServiceName()
 
-		if len(self.numberString) >= int(config.usage.maxchannelnumlen.value):
+		if len(self.numberString) >= int(config.misc.zapkey_delay.value) and int(config.misc.zapkey_delay.value) != 0:
 			if self.Timer.isActive():
 				self.Timer.stop()
-			self.Timer.start(2000, True)  # two seconds to be able to establish numbers with tens of thousands. five digits
+			self.Timer.start(2000, True)  # two seconds to be able to establish any number of digits for Zap
 
 	def __init__(self, session, number, searchNumberFunction=None):
 		Screen.__init__(self, session)
