@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from Screens.WizardLanguage import WizardLanguage
-+from Screens.HelpMenu import ShowRemoteControl
+from Screens.HelpMenu import ShowRemoteControl
 from Screens.MessageBox import MessageBox
 from Components.Pixmap import Pixmap
 from Components.Sources.Boolean import Boolean
