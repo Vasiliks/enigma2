@@ -219,7 +219,7 @@ class PluginBrowser(Screen, HelpableScreen, NumericalTextInput, ProtectedScreen)
 		self.pluginList.sort(key=lambda x: x[0].listWeight)
 		if self.sortMode:
 			self["key_red"].setText(_("Reset Order"))
-			self["key_green"].setText(_("Move Mode Off") if self.selectedPlugin else _("Move Mode On"))
+			self["key_green"].setText(_("Deactivate movement") if self.selectedPlugin else _("Activate movement"))
 			self["key_blue"].setText(_("Edit Mode Off"))
 			self["pluginRemoveActions"].setEnabled(False)
 			self["pluginDownloadActions"].setEnabled(False)
@@ -274,12 +274,12 @@ class PluginBrowser(Screen, HelpableScreen, NumericalTextInput, ProtectedScreen)
 						self.selectedPlugin = currentPlugin if select else None
 						break
 				if self.selectedPlugin:
-					self["key_green"].setText(_("Move Mode Off"))
+					self["key_green"].setText(_("Deactivate movement"))
 					self.currentList.master.master.instance.setBackgroundColorSelected(self.moveBackgroundColor)
 					if self.moveFontColor:
 						self.currentList.master.master.instance.setForegroundColorSelected(self.moveFontColor)
 				else:
-					self["key_green"].setText(_("Move Mode On"))
+					self["key_green"].setText(_("Activate movement"))
 					self.currentList.master.master.instance.clearBackgroundColorSelected()
 					if self.moveFontColor:
 						self.currentList.master.master.instance.clearForegroundColorSelected()

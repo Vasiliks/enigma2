@@ -1534,11 +1534,20 @@ msgstr "16:10 Панорама"
 msgid "16:9"
 msgstr "16:9"
 
+msgid "16:9 Always"
+msgstr "16:9 всегда"
+
+msgid "16:9 Combined"
+msgstr "16:9 Комбинированный"
+
+msgid "16:9 Ignore"
+msgstr "16:9 Игнорировать"
+
 msgid "16:9 Letterbox"
 msgstr "16:9 режим ящика"
 
-msgid "16:9 always"
-msgstr "Всегда 16:9"
+msgid "16:9 PanScan"
+msgstr "16:9 Панорамирование"
 
 msgid "16K"
 msgstr "16K"
@@ -2057,6 +2066,12 @@ msgstr "Точка доступа:"
 msgid "Access to geolocation information requires an Internet connection."
 msgstr "Для доступа к информации о геолокации требуется подключение к Интернету."
 
+msgid "Accessed"
+msgstr "Доступ"
+
+msgid "Action"
+msgstr "Действие"
+
 msgid "Access to geolocation information requires an internet connection."
 msgstr "Для доступа к информации о геолокации требуется подключение к Интернету."
 
@@ -2086,6 +2101,9 @@ msgstr "Запуск HbbTV (Красная кнопка)"
 
 msgid "Activate IPv6 configuration"
 msgstr "Активация установок IPv6 конфигурации"
+
+msgid "Activate movement"
+msgstr "Активировать движение"
 
 msgid "Activate MAC address configuration"
 msgstr "Активация установок MAC-адреса"
@@ -2268,7 +2286,7 @@ msgid "Additional cable of motorized LNB"
 msgstr "Дополнительный кабель от LNB на моторе"
 
 msgid "Address"
-msgstr "IP-адрес"
+msgstr "Адрес"
 
 msgid "Adjust 3D settings"
 msgstr "Настройте параметры 3D"
@@ -2301,7 +2319,7 @@ msgid "Advanced options"
 msgstr "Расширенные настройки"
 
 msgid "Advanced options and settings."
-msgstr "Дополнительные опции и настройки."
+msgstr "Дополнительные параметры и настройки."
 
 msgid "Advanced restore"
 msgstr "Расширенное восстановление"
@@ -3704,11 +3722,17 @@ msgstr "ЦП"
 msgid "CPU / Core %d type"
 msgstr "ЦП/ядро %d тип"
 
-msgid "CPU brand"
-msgstr "Марка процессора"
+msgid "CPU Control"
+msgstr "Управление процессором"
 
 msgid "CPU architecture"
 msgstr "Архитектура процессора"
+
+msgid "CPU benchmark"
+msgstr "Бенчмарк ЦП"
+
+msgid "CPU brand"
+msgstr "Марка процессора"
 
 msgid "CPU speed/cores"
 msgstr "Скорость процессора/ядра"
@@ -5717,6 +5741,9 @@ msgstr "Имя дня Год/ММ/Д"
 
 msgid "Dayname Year/MM/DD"
 msgstr "Имя дня Год/ММ/ДД"
+
+msgid "Deactivate movement"
+msgstr "Деактивировать движение"
 
 msgid "Debug"
 msgstr "Отладка"
@@ -10050,12 +10077,6 @@ msgstr "Переместить 1 элемент"
 
 msgid "Move Left/Right"
 msgstr "Влево/Вправо"
-
-msgid "Move Mode Off"
-msgstr "Режим перемещения выключен"
-
-msgid "Move Mode On"
-msgstr "Режим перемещения включен"
 
 msgid "Move PiP"
 msgstr "Переместить PiP"
