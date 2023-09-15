@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-01 11:29+0330\n"
-"PO-Revision-Date: 2023-09-04 08:15+0300\n"
+"PO-Revision-Date: 2023-09-13 20:32+0300\n"
 "Last-Translator: foxbob <boris.fox.solovyev@gmail.com>\n"
 "Language-Team: RU locale edited by foxbob\n"
 "Language: ru\n"
@@ -1367,9 +1367,8 @@ msgstr "( Все ридеры)"
 msgid "(Access to the '%s' commit log requires an Internet connection.)"
 msgstr "(Для доступа к журналу записей %s требуется подключение к Интернету.)"
 
-#, python-format
-msgid "(Attention: There will be a restart after %d crashes.)"
-msgstr "(Внимание: после сбоя %d произойдёт перезагрузка.)"
+msgid "(Attention! There will be a restart after %d crashes.)"
+msgstr "(Внимание! После сбоя %d произойдет перезагрузка.)"
 
 msgid "(Radio)"
 msgstr "(Радио)"
@@ -1799,7 +1798,7 @@ msgid "A background update check is in progress, please wait a few minutes and t
 msgstr "Идёт проверка обновления в фоновом режиме, пожалуйста подождите несколько минут и попробуйте снова."
 
 msgid "A crash log was %s created in '%s'"
-msgstr "Журнал лога сбоев был создан %s в '%s'"
+msgstr "Журнал сбоев был создан %s в '%s'"
 
 msgid "A completed recording timer is about to put your receiver in standby mode. Would you like to proceed?"
 msgstr "Запись по таймеру завершена, ресивер будет переведен в режим ожидания. Сделать это сейчас?"
@@ -4243,8 +4242,8 @@ msgstr "Проверьте подключение к интернет снова
 msgid "Check the internet connection"
 msgstr "Проверьте подключение к интернету"
 
-msgid "Check the internet connection again"
-msgstr "Проверьте подключение к интернету снова"
+msgid "Check the internet connection again."
+msgstr "Проверьте подключение к интернету снова."
 
 msgid "Check/Install online updates (you must have a working internet connection)"
 msgstr "Проверка, установка обновлений (требуется соединение с интернет)"
@@ -11494,18 +11493,20 @@ msgstr "Пожалуйста, выберите дополнение..."
 msgid "Please choose reader"
 msgstr "Пожалуйста выберите ридер"
 
-msgid "Please configure the fallback tuner setup?"
-msgstr "Пожалуйста настройте резервный тюнер?"
+msgid "Please configure the fallback tuner setup."
+msgstr "Пожалуйста настройте резервный тюнер."
 
 msgid ""
 "Please configure your internet connection by filling out the required values.\n"
+"\n"
 "When you are ready press OK to continue."
 msgstr ""
 "Пожалуйста, настройте интернет соединение,заполнив нужные данные.\n"
+"\n"
 "Когда будете готовы - нажмите ОК для продолжения."
 
-msgid "Please connect your %s %s to the internet"
-msgstr "Пожалуйста,подключите ваш %s %s к интернету"
+msgid "Connecting your [BRANDMODEL] to the internet."
+msgstr "Подключение вашего [BRANDMODEL] к Интернету."
 
 msgid "Please do not change any values unless you know what you are doing!"
 msgstr "Пожалуйста,не изменяйте любые параметры, пока не узнаете для чего это делается!"
@@ -11549,8 +11550,8 @@ msgstr "Пожалуйста введите новый пин-код"
 msgid "Please enter the old PIN code"
 msgstr "Пожалуйста введите старый пин-код"
 
-msgid "Please follow the instructions on the TV"
-msgstr "Пожалуйста следуйте инструкциям на ТВ"
+msgid "Please follow the instructions on the TV."
+msgstr "Пожалуйста следуйте инструкциям на ТВ."
 
 msgid "Please note that the previously selected media could not be accessed and therefore the default directory is being used instead."
 msgstr "Пожалуйста обратите внимание, что ранее выбранный носитель видео недоступен, и вместо него будет использована директория по умолчанию."
@@ -11612,47 +11613,14 @@ msgstr ""
 "\n"
 "Нажмите ОК для продолжения."
 
-msgid "Please set up tuner A"
-msgstr "Пожалуйста настройте тюнер А"
-
-msgid "Please set up tuner B"
-msgstr "Пожалуйста настройте тюнер B"
-
-msgid "Please set up tuner C"
-msgstr "Пожалуйста настройте тюнер C"
-
-msgid "Please set up tuner D"
-msgstr "Пожалуйста настройте тюнер D"
-
-msgid "Please set up tuner E"
-msgstr "Пожалуйста настройте тюнер E"
-
-msgid "Please set up tuner F"
-msgstr "Пожалуйста настройте тюнер F"
-
-msgid "Please set up tuner G"
-msgstr "Пожалуйста настройте тюнер G"
-
-msgid "Please set up tuner H"
-msgstr "Пожалуйста настройте тюнер H"
-
-msgid "Please set up tuner I"
-msgstr "Пожалуйста настройте тюнер I"
-
-msgid "Please set up tuner J"
-msgstr "Пожалуйста настройте тюнер J"
-
-msgid "Please set up tuner Q"
-msgstr "Пожалуйста настройте тюнер Q"
-
-msgid "Please set up tuner R"
-msgstr "Пожалуйста настройте тюнер R"
+msgid "Please set up tuner [TUNER]"
+msgstr "Пожалуйста, настройте тюнер [TUNER]"
 
 msgid "Please set your time zone"
 msgstr "Пожалуйста установите Вашу тайм-зону"
 
-msgid "Please setup the following basic configs!"
-msgstr "Пожалуйста настройте следующие основные конфигурации!"
+msgid "Please setup the following basic configs."
+msgstr "Пожалуйста настройте следующие основные конфигурации."
 
 msgid ""
 "Please set your time options.\n"
@@ -13407,6 +13375,9 @@ msgstr "Похоже, проверка фонового обновления в�
 
 msgid "Seems internet connection down, Or TMBD Plugin not on feed."
 msgstr "Кажется интернет не работает или плагина TMBD нет на фиде."
+
+msgid "Seems your receiver has a software problem. Since the last reboot it has occurred %d times.\n"
+msgstr "Похоже, у вашего ресивера проблема с программным обеспечением. С момента последней перезагрузки это произошло %d раз.\n"
 
 msgid "Select"
 msgstr "Выбор"
@@ -16063,11 +16034,13 @@ msgstr ""
 "Пожалуйста нажмите ОК для продолжения."
 
 msgid ""
-"Thank you for using the wizard. Your receiver is now ready for use.\n"
-"Press OK to start using your receiver."
+"Thank you for using the wizard. Your [BRANDMODEL] is now ready for use.\n"
+"\n"
+"Press OK to start."
 msgstr ""
-"Спасибо Вам за использование мастера настройки. Ваш ресивер готов к использованию.\n"
-"Пожалуйста нажмите OK для старта Вашего ресивера."
+"Благодарим вас за использование мастера. Ваш [BRANDMODEL] теперь готов к использованию.\n"
+"\n"
+"Нажмите ОК, чтобы начать."
 
 msgid "The %d min remaining before the end of the event."
 msgstr "Осталось %d мин до окончания текущего события."
@@ -16275,8 +16248,16 @@ msgstr ""
 "Плагин для настройки беспроводной сети не инсталлирован!\n"
 "Пожалуйста установите его."
 
-msgid "This function recovers your video signal in case of loss. The video has been changed to 720p.\nIf this is your case, please keep the video at 720P and do the following:\nGo to Menu > Setup > Audio / Video > A/V settings and set the correct resolution.\nDo you want to keep the video at 720p?"
-msgstr "Эта функция восстанавливает ваш видеосигнал в случае потери. Видео было изменено на 720p.\nЕсли это ваш случай, сохраните видео в разрешении 720P и выполните следующие действия:\nПерейдите в Меню > Настройка > Аудио/Видео > Настройки A/V и установите правильное разрешение.\nВы хотите сохранить видео в разрешении 720p?"
+msgid ""
+"This function recovers your video signal in case of loss. The video has been changed to 720p.\n"
+"If this is your case, please keep the video at 720P and do the following:\n"
+"Go to Menu > Setup > Audio / Video > A/V settings and set the correct resolution.\n"
+"Do you want to keep the video at 720p?"
+msgstr ""
+"Эта функция восстанавливает ваш видеосигнал в случае потери. Видео было изменено на 720p.\n"
+"Если это ваш случай, сохраните видео в разрешении 720P и выполните следующие действия:\n"
+"Перейдите в Меню > Настройка > Аудио/Видео > Настройки A/V и установите правильное разрешение.\n"
+"Вы хотите сохранить видео в разрешении 720p?"
 
 msgid "This screen is not yet available."
 msgstr "Этот экран еще недоступен."
@@ -17530,8 +17511,8 @@ msgstr "Использовать мастер настройки сети для
 msgid "Use the network wizard to configure your network\n"
 msgstr "Использовать мастер настройки сети для конфигурации Вашей сети.\n"
 
-msgid "Use the up/down keys on your remote control to select an option. After that, press OK."
-msgstr "Используйте кнопки вверх/вниз на Вашем пульте для выбора опций. После этого нажмите OK."
+msgid "Use the up/down keys on your remote control to select an option. After, press OK."
+msgstr "Используйте клавиши вверх/вниз на пульте дистанционного управления, чтобы выбрать опцию. После нажмите ОК."
 
 msgid "Use the wizard to set up basic features"
 msgstr "Пользуйтесь мастером для настройки основных параметров"
@@ -18157,26 +18138,24 @@ msgstr ""
 msgid ""
 "Welcome.\n"
 "\n"
-"If you want to connect your receiver to the Internet, this wizard will guide you through the basic network setup of your receiver.\n"
+"If you want to connect your [BRANDMODEL] to the Internet, this wizard will guide you through the basic network setup.\n"
 "\n"
-"Press OK to start configuring your network"
+"Press OK to start configuring your network."
 msgstr ""
 "Добро пожаловать.\n"
 "\n"
-"Если вы хотите подключить Ваш ресивер к интернету, этот мастер настройки проведет Вас через основные настройки сети Вашего ресивера.\n"
+"Если вы хотите подключить [BRANDMODEL] к Интернету, этот мастер поможет вам выполнить базовую настройку сети.\n"
 "\n"
-"Нажмите ОК для начала настройки сети"
+"Нажмите ОК для начала настройки сети."
 
 msgid ""
-"Welcome.\n"
-"\n"
-"This start wizard will guide you through the basic setup of your receiver.\n"
+"Welcome to your assistant [BRANDMODEL].\n"
+"This start wizard will guide you through the basic setup of your [BRANDMODEL].\n"
 "Press the OK button on your remote control to move to the next step."
 msgstr ""
-"Добро пожаловать.\n"
-"\n"
-"Этот стартовый мастер поможет Вам настроить основные параметры Вашего ресивера.\n"
-"Нажмите OK на пульте управления для перехода к следующему шагу."
+"Добро пожаловать к помощнику вашего [BRANDMODEL].\n"
+"Этот мастер запуска проведет вас через базовую настройку вашего [BRANDMODEL].\n"
+"Нажмите кнопку ОК на пульте дистанционного управления, чтобы перейти к следующему шагу."
 
 msgid "Welcome..."
 msgstr "Добро пожаловать..."
@@ -18815,9 +18794,11 @@ msgstr "Ваше оборудование может самостоятельн�
 
 msgid ""
 "Your internet connection is not working!\n"
+"\n"
 "Please choose what you want to do next."
 msgstr ""
 "Ваше интернет-соединение не работает!\n"
+"\n"
 "Пожалуйста, выберите, что будете делать дальше."
 
 msgid "Your internet connection is working (IP address: %s)"
@@ -18851,12 +18832,12 @@ msgid "Your receiver is not connected to the internet, please check your network
 msgstr "Ваш ресивер не подключен к Интернету, проверьте настройки сети и попробуйте снова."
 
 msgid ""
-"Your receiver is now ready to be used.\n"
+"Your [BRANDMODEL] is now ready to use.\n"
 "\n"
 "Your internet connection is working.\n"
 "\n"
 msgstr ""
-"Ваш ресивер теперь готов к использованию.\n"
+"Ваш [BRANDMODEL] теперь готова к использованию.\n"
 "\n"
 "Ваше интернет-соединение работает.\n"
 
@@ -18872,9 +18853,6 @@ msgstr ""
 "Ваше интернет-соединение сейчас работает.\n"
 "\n"
 "Пожалуйста, нажмите ОК для продолжения."
-
-msgid "Your Receiver has a Software problem detected. Since the last reboot it has occurred %d times.\n"
-msgstr "В Вашем ресивере обнаружена проблема с ПО. С момента последней перезагрузки это произошло %d раз.\n"
 
 msgid "Your %s %s is rebooting"
 msgstr "Ваш %s %s перезагружается"
@@ -18919,6 +18897,9 @@ msgstr "Ваш ресивер будет переведен в режим ожи
 
 msgid "Your receiver will restart after pressing OK on your remote control."
 msgstr "Ваш ресивер будет перезагружен после нажатия кнопки OK на Вашем пульте Д/У."
+
+msgid "Your [BRANDMODEL] does not have an internet connection."
+msgstr "У вашего [BRANDMODEL] нет подключения к Интернету."
 
 msgid "Your timezone in the area."
 msgstr "Ваш часовой пояс в этом районе."
