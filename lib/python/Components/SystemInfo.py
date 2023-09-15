@@ -5,6 +5,7 @@ from os.path import exists, isfile, join as pathjoin
 from re import findall
 from subprocess import PIPE, Popen
 
+from boxbranding import getMachineBuild
 from enigma import Misc_Options, eAVControl, eDVBCIInterfaces, eDVBResourceManager, eGetEnigmaDebugLvl, eDBoxLCD
 from Tools.Directories import SCOPE_LIBDIR, SCOPE_SKIN, fileCheck, fileContains, fileReadLine, fileReadLines, fileExists, resolveFilename
 from Tools.StbHardware import getBoxProc
@@ -160,6 +161,11 @@ BoxInfo = BoxInformation()
 
 from Tools.Multiboot import getMultibootStartupDevice, getMultibootslots  # This import needs to be here to avoid a SystemInfo load loop!
 
+
+def getBoxDisplayName():  # This function returns a tuple like ("BRANDNAME", "BOXNAME")
+	return (DISPLAYBRAND, DISPLAYMODEL)
+
+
 # Parse the boot commandline.
 cmdline = fileReadLine("/proc/cmdline", source=MODULE_NAME)
 cmdline = {k: v.strip('"') for k, v in findall(r'(\S+)=(".*?"|\S+)', cmdline)}
@@ -170,6 +176,14 @@ def getDemodVersion():
 	if exists("/proc/stb/info/nim_firmware_version"):
 		version = fileReadLine("/proc/stb/info/nim_firmware_version")
 	return version and version.strip()
+
+
+
+def getRCFile(ext):
+	filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", "%s.%s" % (BoxInfo.getItem("rcname"), ext)))
+	if not isfile(filename):
+		filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", "dmm1.%s" % ext))
+	return filename
 
 
 def getNumVideoDecoders():
@@ -197,12 +211,6 @@ def getBootdevice():
 		dev = dev[:-1]
 	return dev
 
-
-def getRCFile(ext):
-	filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", "%s.%s" % (BoxInfo.getItem("rcname"), ext)))
-	if not isfile(filename):
-		filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", "dmm1.%s" % ext))
-	return filename
 
 def getChipsetString():
 	if model in ("dm7080", "dm820"):
@@ -234,6 +242,7 @@ def getModuleLayout():
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
 platform = BoxInfo.getItem("platform")
+DISPLAYMODEL = getMachineBuild()
 displaytype = BoxInfo.getItem("displaytype")
 architecture = BoxInfo.getItem("architecture")
 socfamily = BoxInfo.getItem("socfamily")
