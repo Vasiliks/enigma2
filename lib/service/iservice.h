@@ -62,9 +62,11 @@ public:
 #ifndef SWIG
 	int data[8];
 	std::string path;
+	std::string suburi;
 #endif
 	std::string getPath() const { return path; }
 	void setPath( const std::string &n ) { path=n; }
+	void setSubUri( const std::string &n ) { suburi=n; }
 
 	unsigned int getUnsignedData(unsigned int num) const
 	{
@@ -738,6 +740,7 @@ public:
 		int page_number;
 		int magazine_number;
 		std::string language_code;
+		std::string title;
 	};
 
 	virtual RESULT enableSubtitles(iSubtitleUser *user, SubtitleTrack &track) = 0;
