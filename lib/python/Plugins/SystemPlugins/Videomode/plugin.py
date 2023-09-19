@@ -156,8 +156,8 @@ class VideoSetup(ConfigListScreen, Screen):
 					self.list.append((_("3D surround softlimiter"), config.av.surround_softlimiter_3d, _("This option allows you to enable 3D surround softlimiter.")))
 			if SystemInfo["CanBTAudio"]:
 				self.list.append((_("Enable BT audio"), config.av.btaudio, _("This option allows you to switch audio to bluetooth speakers.")))
-			if SystemInfo["CanBTAudioDelay"]:
-				self.list.append((_("General BT audio delay"), config.av.btaudiodelay, _("This option configures the general audio delay for bluetooth speakers.")))
+				if SystemInfo["CanBTAudioDelay"] and config.av.btaudio.value != "off":
+					self.list.append(getConfigListEntry(_("General bluetooth audio delay"), config.av.btaudiodelay, _("This option configures the general audio delay for bluetooth speakers.")))
 
 		if SystemInfo["CanChangeOsdAlpha"]:
 			self.list.append((_("OSD transparency"), config.av.osd_alpha, _("Configure the transparency of the OSD.")))
