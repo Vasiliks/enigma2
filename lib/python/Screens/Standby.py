@@ -10,7 +10,7 @@ from Components.config import config
 from Components.AVSwitch import AVSwitch
 from Components.Console import Console
 from Components.ImportChannels import ImportChannels
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName
 from Components.Sources.StreamService import StreamServiceList
 from Components.Task import job_manager
 from Tools.Directories import mediaFilesInUse
@@ -20,7 +20,6 @@ from GlobalActions import globalActionMap
 from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, quitMainloop, iRecordableService
 
 model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
 AmlogicFamily = BoxInfo.getItem("AmlogicFamily")
 LCDMiniTV = BoxInfo.getItem("LCDMiniTV")
 
@@ -128,7 +127,7 @@ class StandbyScreen(Screen):
 			self.avswitch.setInput("SCART")
 		else:
 			self.avswitch.setInput("AUX")
-		if brand in ("dinobot",) or SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
+		if SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
 			output = "/proc/stb/hdmi/output"
 			if os.path.isfile(output):
 				with open(output, "w") as hdmi:
@@ -287,13 +286,13 @@ class QuitMainloopScreen(Screen):
 		Screen.__init__(self, session)
 		from Components.Label import Label
 		text = {
-			QUIT_SHUTDOWN: _("Your %s %s is shutting down") % (brand, model),
-			QUIT_REBOOT: _("Your %s %s is rebooting") % (brand, model),
-			QUIT_RESTART: _("The user interface of your %s %s is restarting") % (brand, model),
-			QUIT_UPGRADE_FP: _("Your frontprocessor will be updated\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (brand, model),
-			QUIT_DEBUG_RESTART: _("The user interface of your %s %s is restarting in debug mode") % (brand, model),
-			QUIT_UPGRADE_PROGRAM: _("Unattended update in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % (brand, model),
-			QUIT_MANUFACTURER_RESET: _("Manufacturer reset in progress\nPlease wait until your %s %s restarts") % (brand, model),
+			QUIT_SHUTDOWN: _("Your %s %s is shutting down") % getBoxDisplayName(),
+			QUIT_REBOOT: _("Your %s %s is rebooting") % getBoxDisplayName(),
+			QUIT_RESTART: _("The user interface of your %s %s is restarting") % getBoxDisplayName(),
+			QUIT_UPGRADE_FP: _("Your front panel processor will be upgraded\nPlease wait until your %s %s reboots\nThis may take a few minutes") % getBoxDisplayName(),
+			QUIT_DEBUG_RESTART: _("The user interface of your %s %s is restarting\ndue to an error in StartEnigma.py") % getBoxDisplayName(),
+			QUIT_UPGRADE_PROGRAM: _("Unattended update in progress\nPlease wait until your %s %s reboots\nThis may take a few minutes") % getBoxDisplayName(),
+			QUIT_MANUFACTURER_RESET: _("Manufacturer reset in progress\nPlease wait until enigma2 restarts")
 		}.get(retvalue)
 		self["text"] = Label(text)
 
@@ -337,7 +336,7 @@ class TryQuitMainloop(MessageBox):
 				QUIT_RESTART: _("Really restart now?"),
 				QUIT_UPGRADE_FP: _("Really update the frontprocessor and reboot now?"),
 				QUIT_DEBUG_RESTART: _("Really restart in debug mode now?"),
-				QUIT_UPGRADE_PROGRAM: _("Really update your settop box and reboot now?"),
+				QUIT_UPGRADE_PROGRAM: _("Really update your %s and reboot now?") % getBoxDisplayName(),
 				QUIT_MANUFACTURER_RESET: _("Really perform a manufacturer reset now?")
 			}.get(retvalue, None)
 			if text:
@@ -404,6 +403,10 @@ class TryQuitMainloop(MessageBox):
 			self.quitMainloop()
 		else:
 			MessageBox.close(self, True)
+
+	def quitMainloopDelay(self):
+		self.session.nav.stopService()
+		quitMainloop(self.retval)
 
 	def quitMainloop(self):
 		self.session.nav.stopService()

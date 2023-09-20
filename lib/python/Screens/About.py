@@ -23,7 +23,7 @@ from Components.Pixmap import Pixmap
 from Components.ScrollLabel import ScrollLabel
 from Components.ProgressBar import ProgressBar
 from Components.GUIComponent import GUIComponent
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName
 from Screens.HelpMenu import HelpableScreen
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen, ScreenSummary
@@ -61,17 +61,6 @@ INFO_COLOR = {
 }
 LOG_MAX_LINES = 10000  # Maximum number of log lines to be displayed on screen.
 AUTO_REFRESH_TIME = 5000  # Streaming auto refresh timer (in milliseconds).
-
-
-def getTypeTuner():
-	typetuner = {
-		"00": _("OTT Model"),
-		"10": _("Single"),
-		"11": _("Twin"),
-		"12": _("Combo"),
-		"21": _("Twin Hybrid"),
-		"22": _("Single Hybrid")
-	}
 
 
 def getBoxProcTypeName():
@@ -459,13 +448,13 @@ class ImageInformation(InformationBase):
 			"blue": (self.showTranslation, _("Show translation information"))
 		}, prio=0, description=_("OpenPli Information Actions"))
 		self.resolutions = {
-			480: _("NTSC"),
-			576: _("PAL"),
-			720: _("HD"),
-			1080: _("FHD"),
-			2160: _("4K"),
-			4320: _("8K"),
-			8640: _("16K")
+			480: "NTSC",
+			576: "PAL",
+			720: "HD",
+			1080: "FHD",
+			2160: "4K",
+			4320: "8K",
+			8640: "16K"
 		}
 
 	def showCommitLogs(self):
@@ -496,18 +485,12 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("P1", _("Enigma2 version"), enigmaVersion))
 		compiledate = str(BoxInfo.getItem("compiledate"))
 		info.append(formatLine("P1", _("Last update"), formatDate("%s%s%s" % (compiledate[:4], compiledate[4:6], compiledate[6:]))))
+		info.append(formatLine("P1", _("Last flash"), formatDate(about.getFlashDateString())))
 		info.append(formatLine("P1", _("Enigma2 (re)starts"), config.misc.startCounter.value))
 		info.append(formatLine("P1", _("Enigma2 debug level"), eGetEnigmaDebugLvl()))
-		if isPluginInstalled("ServiceHisilicon") and not isPluginInstalled("ServiceMP3"):
-			mediaService = "ServiceHisilicon"
-		elif isPluginInstalled("ServiceMP3") and not isPluginInstalled("ServiceHisilicon"):
-			mediaService = "ServiceMP3"
-		else:
-			mediaService = _("Unknown")
-		info.append(formatLine("P1", _("Media service player"), "%s") % mediaService)
-		if isPluginInstalled("ServiceApp"):
-			extraService = "ServiceApp"
-			info.append(formatLine("P1", _("Extra service player"), "%s") % extraService)
+		mediaService = BoxInfo.getItem("mediaservice")
+		if mediaService:
+			info.append(formatLine("P1", _("Media service"), mediaService.replace("enigma2-plugin-systemplugins-", "")))
 		info.append("")
 		info.append(formatLine("S", _("Build information")))
 		if self.extraSpacing:
@@ -521,6 +504,7 @@ class ImageInformation(InformationBase):
 		if BoxInfo.getItem("imagefs"):
 			info.append(formatLine("P1", _("Distribution file system"), BoxInfo.getItem("imagefs").strip()))
 		info.append(formatLine("P1", _("Feed URL"), BoxInfo.getItem("feedsurl")))
+		info.append(formatLine("P1", _("Compiled by"), BoxInfo.getItem("developername")))
 		info.append("")
 		info.append(formatLine("S", _("Software information")))
 		if self.extraSpacing:
@@ -532,23 +516,43 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("P1", _("GStreamer version"), about.getGStreamerVersionString().replace("GStreamer ", "")))
 		info.append(formatLine("P1", _("FFmpeg version"), about.getFFmpegVersionString()))
 		info.append("")
-		info.append(formatLine("S", _("Boot information")))
-		if self.extraSpacing:
+		if BoxInfo.getItem("HiSilicon"):
 			info.append("")
-		if BoxInfo.getItem("mtdbootfs"):
-			info.append(formatLine("P1", _("MTD boot"), BoxInfo.getItem("mtdbootfs")))
-		if BoxInfo.getItem("mtdkernel"):
-			info.append(formatLine("P1", _("MTD kernel"), BoxInfo.getItem("mtdkernel")))
-		if BoxInfo.getItem("mtdrootfs"):
-			info.append(formatLine("P1", _("MTD root"), BoxInfo.getItem("mtdrootfs")))
-		if BoxInfo.getItem("kernelfile"):
-			info.append(formatLine("P1", _("Kernel file"), BoxInfo.getItem("kernelfile")))
-		if BoxInfo.getItem("rootfile"):
-			info.append(formatLine("P1", _("Root file"), BoxInfo.getItem("rootfile")))
-		if BoxInfo.getItem("mkubifs"):
-			info.append(formatLine("P1", _("MKUBIFS"), BoxInfo.getItem("mkubifs")))
-		if BoxInfo.getItem("ubinize"):
-			info.append(formatLine("P1", _("UBINIZE"), BoxInfo.getItem("ubinize")))
+			info.append(formatLine("H", _("HiSilicon specific information")))
+			info.append("")
+			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
+			stdout, stderr = process.communicate()
+			if process.returncode == 0:
+				missing = True
+				packageList = stdout.split("\n")
+				revision = self.findPackageRevision("grab", packageList)
+				if revision and revision != "r0":
+					info.append(formatLine("P1", _("Grab"), revision))
+					missing = False
+				revision = self.findPackageRevision("hihalt", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Halt"), revision))
+					missing = False
+				revision = self.findPackageRevision("libs", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Libs"), revision))
+					missing = False
+				revision = self.findPackageRevision("partitions", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Partitions"), revision))
+					missing = False
+				revision = self.findPackageRevision("reader", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Reader"), revision))
+					missing = False
+				revision = self.findPackageRevision("showiframe", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Showiframe"), revision))
+					missing = False
+				if missing:
+					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
+			else:
+				info.append(formatLine("P1", _("Package information currently not available!")))
 		self["information"].setText("\n".join(info))
 
 	def getSummaryInformation(self):
@@ -563,7 +567,7 @@ class GeolocationInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
-		info.append(formatLine("H", _("Geolocation information")))
+		info.append(formatLine("H", _("Geolocation information for %s %s") % getBoxDisplayName()))
 		info.append("")
 		geolocationData = geolocation.getGeolocationData(fields="continent,country,regionName,city,lat,lon,timezone,currency,isp,org,mobile,proxy,query", useCache=False)
 		if geolocationData.get("status", None) == "success":
@@ -650,7 +654,7 @@ class MemoryInformation(InformationBase):
 			return "%s %s" % (format_string(format, value, grouping=True), units) if units else format_string(format, value, grouping=True)
 
 		info = []
-		info.append(formatLine("H", _("Memory information")))
+		info.append(formatLine("H", _("Memory information for %s %s") % getBoxDisplayName()))
 		info.append("")
 		memInfo = fileReadLines("/proc/meminfo", source=MODULE_NAME)
 		info.append(formatLine("S", _("RAM (Summary)")))
@@ -702,26 +706,6 @@ class MemoryInformation(InformationBase):
 
 	def getSummaryInformation(self):
 		return "Memory Information Data"
-
-
-class MultiBootInformation(InformationBase):
-	def __init__(self, session):
-		InformationBase.__init__(self, session)
-		self.setTitle(_("MultiBoot Information"))
-		self.skinName.insert(0, "MultiBootInformation")
-
-	def fetchInformation(self):
-		self.informationTimer.stop()
-		for callback in self.onInformationUpdated:
-			callback()
-
-	def displayInformation(self):
-		info = []
-		info.append(_("This screen is not yet available."))
-		self["information"].setText("\n".join(info))
-
-	def getSummaryInformation(self):
-		return "MultiBoot Information Data"
 
 
 class NetworkInformation(InformationBase):
@@ -950,7 +934,7 @@ class NetworkInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
-		info.append(formatLine("H", _("Network information")))
+		info.append(formatLine("H", _("Network information for %s %s") % getBoxDisplayName()))
 		info.append("")
 		hostname = fileReadLine("/proc/sys/kernel/hostname", source=MODULE_NAME)
 		info.append(formatLine("S0S", _("Hostname"), hostname))
@@ -1014,7 +998,7 @@ class ReceiverInformation(InformationBase):
 		InformationBase.__init__(self, session)
 		self.setTitle(_("Receiver Information"))
 		self.skinName.insert(0, "ReceiverInformation")
-		self["key_yellow"] = StaticText(_("System"))
+		self["key_yellow"] = StaticText(_("System Information"))
 		self["key_blue"] = StaticText(_("Debug Information"))
 		self["receiverActions"] = HelpableActionMap(self, ["InfoActions", "ColorActions"], {
 			"yellow": (self.showSystemInformation, _("Show system information")),
@@ -1038,10 +1022,13 @@ class ReceiverInformation(InformationBase):
 			return revision
 
 		info = []
+		info.append(formatLine("H", _("Receiver information for %s %s") % getBoxDisplayName()))
 		info.append("")
 		info.append(formatLine("S", _("Hardware information")))
 		if self.extraSpacing:
 			info.append("")
+		info.append(formatLine("P1", _("Receiver name"), "%s %s" % getBoxDisplayName()))
+		info.append(formatLine("P1", _("Build Brand"), BoxInfo.getItem("brand")))
 		platform = BoxInfo.getItem("platform")
 		info.append(formatLine("P1", _("Build Model"), model))
 		if platform != model:
@@ -1058,7 +1045,7 @@ class ReceiverInformation(InformationBase):
 		if hwRelease:
 			info.append(formatLine("P1", _("Factory release"), hwRelease))
 		displaytype = BoxInfo.getItem("displaytype")
-		if not displaytype.startswith(" "):
+		if displaytype and not displaytype.startswith(" "):
 			info.append(formatLine("P1", _("Display type"), displaytype))
 		fpVersion = getFPVersion()
 		if fpVersion and fpVersion != "unknown":
@@ -1133,44 +1120,6 @@ class ReceiverInformation(InformationBase):
 		givenId = fileReadLine("/proc/device-tree/le-dt-id", source=MODULE_NAME)
 		if givenId:
 			info.append(formatLine("P1", _("Given device id"), givenId))
-		if BoxInfo.getItem("HiSilicon"):
-			info.append("")
-			info.append(formatLine("S", _("HiSilicon specific information")))
-			if self.extraSpacing:
-				info.append("")
-			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
-			stdout, stderr = process.communicate()
-			if process.returncode == 0:
-				missing = True
-				packageList = stdout.split("\n")
-				revision = findPackageRevision("grab", packageList)
-				if revision and revision != "r0":
-					info.append(formatLine("P1", _("Grab"), revision))
-					missing = False
-				revision = findPackageRevision("hihalt", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Halt"), revision))
-					missing = False
-				revision = findPackageRevision("libs", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Libs"), revision))
-					missing = False
-				revision = findPackageRevision("partitions", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Partitions"), revision))
-					missing = False
-				revision = findPackageRevision("reader", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Reader"), revision))
-					missing = False
-				revision = findPackageRevision("showiframe", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Showiframe"), revision))
-					missing = False
-				if missing:
-					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
-			else:
-				info.append(formatLine("P1", _("Package information currently not available!")))
 		info.append("")
 		info.append(formatLine("S", _("Tuner information")))
 		if self.extraSpacing:
@@ -1248,7 +1197,7 @@ class StorageInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
-		info.append(formatLine("H", _("Storage / Disk information")))
+		info.append(formatLine("H", _("Storage / Disk information for %s %s") % getBoxDisplayName()))
 		info.append("")
 		partitions = sorted(harddiskmanager.getMountedPartitions(), key=lambda partitions: partitions.device or "")
 		for partition in partitions:
@@ -1289,7 +1238,7 @@ class StorageInformation(InformationBase):
 			info.append("")
 			info.append(formatLine("S1", _("No storage or hard disks detected.")))
 		info.append("")
-		info.append(formatLine("H", _("Detected network servers")))
+		info.append(formatLine("H", "%s %s %s" % (_("Network storage on"), DISPLAY_BRAND, DISPLAY_MODEL)))
 		info.append("")
 		if self.mountInfo:
 			count = 0
@@ -1460,6 +1409,7 @@ class TranslationInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
+		info.append(formatLine("H", _("Translation information for %s %s") % getBoxDisplayName()))
 		info.append("")
 		translateInfo = _("TRANSLATOR_INFO")
 		if translateInfo != "TRANSLATOR_INFO":
@@ -1488,6 +1438,7 @@ class TunerInformation(InformationBase):
 		InformationBase.__init__(self, session)
 		self.setTitle(_("Tuner Information"))
 		self.skinName.insert(0, "TunerInformation")
+
 
 	def displayInformation(self):
 		info = []

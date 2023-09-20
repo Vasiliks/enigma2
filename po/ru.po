@@ -2056,6 +2056,9 @@ msgstr "Информация"
 msgid "Accept the current selection"
 msgstr "Принять текущий выбор"
 
+msgid "Access point"
+msgstr "Точка доступа"
+
 msgid "Access point:"
 msgstr "Точка доступа:"
 
@@ -4638,6 +4641,9 @@ msgstr "Коммуникация"
 msgid "Comoros"
 msgstr "Коморские острова"
 
+msgid "Compiled by"
+msgstr "Сборка от"
+
 msgid "Compact flash"
 msgstr "Компакт-флэш"
 
@@ -5158,6 +5164,9 @@ msgstr "Контент не соответствует DVD!"
 
 msgid "Continent: "
 msgstr "Континент: "
+
+msgid "Continent"
+msgstr "Континент"
 
 msgid "Continue"
 msgstr "Продолжить"
@@ -7085,6 +7094,9 @@ msgstr "Ревизия Enigma2"
 msgid "Enigma2 skin selector"
 msgstr "Селектор скинов Enigma2"
 
+msgid "Enigma2 version"
+msgstr "Версия Enigma2"
+
 msgid "Enigma (re)starts: %d\n"
 msgstr "Энигма (ре)стартов: %d\n"
 
@@ -7741,6 +7753,9 @@ msgstr "Ощущается как %s"
 msgid "Feeds are not accessible, please try again later."
 msgstr "Ленты недоступны, пожалуйста, попробуйте позже."
 
+msgid "Feed URL"
+msgstr "URL фида"
+
 msgid "Fiji"
 msgstr "Фиджи"
 
@@ -7813,6 +7828,9 @@ msgstr "Прошивка Имиджа"
 
 msgid "Flash image"
 msgstr "Прошивка Имиджа"
+
+msgid "Flash type"
+msgstr "Тип флеш"
 
 msgid "Flash directory '%s' not allowed!"
 msgstr "Каталог Flash '%s' запрещен!"
@@ -9376,6 +9394,9 @@ msgstr "Последний запрос."
 msgid "Last config"
 msgstr "Последнии настройки"
 
+msgid "Last flash"
+msgstr "Дата прошивки"
+
 msgid "Last page"
 msgstr "Последняя страница"
 
@@ -9384,6 +9405,9 @@ msgstr "Последняя скорость"
 
 msgid "Last update: "
 msgstr "Последнее обновление: "
+
+msgid "Last update"
+msgstr "Последнее обновление"
 
 msgid "Latest Commits"
 msgstr "Последние изменения"
@@ -9842,6 +9866,9 @@ msgstr "При воспроизведении оставшееся/истекш�
 msgid "Media player"
 msgstr "Медиаплеер"
 
+msgid "Media service"
+msgstr "Медиа сервис"
+
 msgid "Media scanner"
 msgstr "Медиа сканнер"
 
@@ -9865,6 +9892,10 @@ msgstr "Информация о памяти"
 
 msgid "Memory index"
 msgstr "Номер в памяти"
+
+#, python-format
+msgid "Memory information for %s %s"
+msgstr "Информация о памяти для %s %s"
 
 msgid "Menu"
 msgstr "Меню"
@@ -10418,6 +10449,10 @@ msgstr "Конфигурация сети..."
 
 msgid "Network information"
 msgstr "Информация о сети"
+
+#, python-format
+msgid "Network information for %s %s"
+msgstr "Сетевая информация для %s %s"
 
 msgid "Network menu"
 msgstr "Настройка сети"
@@ -12394,6 +12429,10 @@ msgstr "Запись"
 msgid "Recall to previous service"
 msgstr "Возврат на предыдущий сервис"
 
+#, python-format
+msgid "Receiver information for %s %s"
+msgstr "Информация о ресивере для %s %s"
+
 msgid "Reception"
 msgstr "Вид списка"
 
@@ -12759,6 +12798,12 @@ msgstr "Пересмотр таблицы разделов"
 
 msgid "Receiver Information"
 msgstr "Информация о приемнике"
+
+msgid "Receiver information"
+msgstr "Информация о приемнике"
+
+msgid "Receiver name"
+msgstr "Название приемника"
 
 msgid "Reserved"
 msgstr "Зарезервировано"
@@ -14948,6 +14993,9 @@ msgstr "Размер: "
 msgid "Skin & Resolution: %s (%sx%s)\n"
 msgstr "Скин & разрешение: %s (%sx%s)\n"
 
+msgid "Skin & Resolution"
+msgstr "Скин и разрешение"
+
 msgid "Skin Selection Actions"
 msgstr "Действия по выбору скина"
 
@@ -15394,6 +15442,10 @@ msgstr "Переход в режим ожидания при включении 
 msgid "Startup to Standby"
 msgstr "Режим ожидания при старте"
 
+#. TRANSLATORS: "State" is location information and not condition based information.
+msgid "State"
+msgstr "Регион"
+
 msgid "State: "
 msgstr "Штат: "
 
@@ -15531,6 +15583,10 @@ msgstr "Информация о хранилище/диске"
 
 msgid "Storage / Disk information"
 msgstr "Информация о хранилище/диске"
+
+#, python-format
+msgid "Storage / Disk information for %s %s"
+msgstr "Информация о хранилище/диске для %s %s"
 
 msgid "Storage / Drive information"
 msgstr "Информация о хранилище/диске"
@@ -15829,6 +15885,12 @@ msgstr "Система & Модуляция"
 
 msgid "System temperature:\t%s"
 msgstr "Температура системы: %s"
+
+msgid "System information"
+msgstr "Информация о системе"
+
+msgid "System temperature"
+msgstr "Температура системы"
 
 msgid ""
 "System temperature: %s%sC\n"
@@ -18754,6 +18816,10 @@ msgstr "У вашего %s %s (ядро %s) нет подключения к И�
 
 msgid "Your %s %s goes to WOL"
 msgstr "Ваш %s %s переходит в WOL"
+
+#, python-format
+msgid "Your %s %s is not connected to the Internet, please check your network settings and try again."
+msgstr "Ваш %s %s не подключён к Интернету, проверьте сетевые настройки и попробуйте снова."
 
 msgid "Your %s %s is rebooting into android mode"
 msgstr "Ваш %s %s перезагружается в режим Android"

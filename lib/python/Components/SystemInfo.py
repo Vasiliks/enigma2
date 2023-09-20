@@ -5,7 +5,6 @@ from os.path import exists, isfile, join as pathjoin
 from re import findall
 from subprocess import PIPE, Popen
 
-from boxbranding import getMachineBuild
 from enigma import Misc_Options, eAVControl, eDVBCIInterfaces, eDVBResourceManager, eGetEnigmaDebugLvl, eDBoxLCD
 from Tools.Directories import SCOPE_LIBDIR, SCOPE_SKIN, fileCheck, fileContains, fileReadLine, fileReadLines, fileExists, resolveFilename
 from Tools.StbHardware import getBoxProc
@@ -242,7 +241,8 @@ def getModuleLayout():
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
 platform = BoxInfo.getItem("platform")
-DISPLAYMODEL = getMachineBuild()
+DISPLAYMODEL = BoxInfo.getItem("displaymodel")
+DISPLAYBRAND = BoxInfo.getItem("displaybrand")
 displaytype = BoxInfo.getItem("displaytype")
 architecture = BoxInfo.getItem("architecture")
 socfamily = BoxInfo.getItem("socfamily")
@@ -265,7 +265,7 @@ def getBoxName():
 		box = "miraclebox-twin"
 	elif box == "xp1000" and machinename == "sf8 hd":
 		box = "sf8"
-	elif box.startswith('et') and not box in ('et8000', 'et8500', 'et8500s', 'et10000'):
+	elif box.startswith('et') and box not in ('et8000', 'et8500', 'et8500s', 'et10000'):
 		box = box[0:3] + 'x00'
 	elif box == "odinm9":
 		box = "maram9"

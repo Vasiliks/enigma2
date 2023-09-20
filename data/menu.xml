@@ -174,7 +174,6 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 		<item level="0" text="Storage" entryID="device_info_screen" weight="25"><screen module="About" screen="StorageInformation" /></item>
 		<item level="0" text="Memory" entryID="memory_info_screen" weight="30"><screen module="About" screen="MemoryInformation" /></item>
 		<item level="0" text="Network" entryID="network_info_screen" weight="35"><screen module="About" screen="NetworkInformation" /></item>
-		<item level="0" text="MultiBoot" entryID="multiboot_info_screen" weight="40"><screen module="About" screen="MultiBootInformation" /></item>
 		<item level="0" text="Geolocation" entryID="geolocation_info_screen" weight="45"><screen module="About" screen="GeolocationInformation" /></item>
 		<item level="2" text="Streaming clients info" entryID="streaming_clients_info_screen"><screen module="StreamingClientsInfo"/></item>
 	</menu>
