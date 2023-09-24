@@ -9,4 +9,5 @@ install_PYTHON = \
 	ValueBitTest.py TunerInfo.py ConfigEntryTest.py ClientsStreaming.py TemplatedMultiContent.py ProgressToText.py \
 	Combine.py SensorToText.py ValueToPixmap.py PliExtraInfo.py genre.py TransponderInfo.py \
 	RotorPosition.py VfdDisplay.py AnalogClock.py HddState.py HbbtvApplicationInfo.py TrackInfo.py \
-	BoxInfo.py VtiInfo.py VtiTempFan.py Audio.py ServiceInfoEX.py CaidInfo2.py CpuUsage.py ProgressDiskSpaceInfo.py
+	BoxInfo.py VtiInfo.py VtiTempFan.py Audio.py ServiceInfoEX.py CaidInfo2.py CpuUsage.py ProgressDiskSpaceInfo.py \
+	VAudioInfo.py

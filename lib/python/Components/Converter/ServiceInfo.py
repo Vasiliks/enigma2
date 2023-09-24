@@ -2,6 +2,7 @@ from Components.Converter.Converter import Converter
 from enigma import iServiceInformation, iPlayableService
 from Screens.InfoBarGenerics import hasActiveSubservicesForCurrentChannel
 from Components.Element import cached
+from Components.Converter.VAudioInfo import StdAudioDesc
 
 WIDESCREEN = [3, 4, 7, 8, 0xB, 0xC, 0xF, 0x10]
 
@@ -123,8 +124,8 @@ class ServiceInfo(Converter):
 					idx = 0
 					while idx < n:
 						i = audio.getTrackInfo(idx)
-						description = i.getDescription()
-						if description in ("AC3", "AC3+", "DTS", "DTS-HD", "AC-3"):
+						description = StdAudioDesc(i.getDescription())
+						if description and description.split()[0] in ("AC4", "AAC+", "AC3", "AC3+", "Dolby", "DTS", "DTS-HD", "HE-AAC", "IPCM", "LPCM", "WMA Pro"):
 							if self.type == self.IS_MULTICHANNEL:
 								return True
 							elif self.type == self.IS_STEREO:

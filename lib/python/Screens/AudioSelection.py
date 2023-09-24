@@ -14,6 +14,7 @@ from Components.SystemInfo import BoxInfo, SystemInfo
 from Components.VolumeControl import VolumeControl
 from Components.PluginComponent import plugins
 from Plugins.Plugin import PluginDescriptor
+from Components.Converter.VAudioInfo import StdAudioDesc
 from Components.UsageConfig import originalAudioTracks, visuallyImpairedCommentary
 from Tools.ISO639 import LanguageCodes
 
@@ -329,7 +330,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					number = str(x + 1)
 					i = audio.getTrackInfo(x)
 					languages = i.getLanguage().split('/')
-					description = i.getDescription()
+					description = StdAudioDesc(i.getDescription())
 					selected = ""
 					language = ""
 					if selectedAudio == x:
