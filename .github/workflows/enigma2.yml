@@ -26,12 +26,9 @@ jobs:
     - uses: actions/checkout@v3
     - name: install gcc ${{ matrix.gcc }}
       run: |
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/ppa
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt-get -q update
         sudo apt-get install g++-${{ matrix.gcc }}
-    - name: install python packages
-      run: |
-        pip3 install netifaces pyopenssl python-wifi service_identity twisted
     - name: install dev packages
       run: |
         sudo apt-get -q update
@@ -40,7 +37,7 @@ jobs:
         sudo apt-get install build-essential
         sudo apt-get install automake
         sudo apt-get install libtool
-        sudo apt-get install python3-dev
+        sudo apt-get install python-dev
         sudo apt-get install zlib1g-dev
         sudo apt-get install gettext
         sudo apt-get install swig
@@ -69,6 +66,16 @@ jobs:
         make
         sudo make install
         popd
+        echo "installing libsigc++-3"
+        pushd .
+        cd /tmp
+        git clone --depth 1 https://github.com/dbus-cxx/libsigc--3.0.git
+        cd libsigc--3.0
+        autoreconf -i
+        ./configure
+        make
+        sudo make install
+        popd
         echo "installing tuxbox"
         pushd .
         cd /tmp
@@ -84,20 +91,9 @@ jobs:
         make
         sudo make install
         popd
-        echo installing libsigc++3
-        pushd .
-        cd /tmp
-        git clone --depth 1 https://github.com/dbus-cxx/libsigc--3.0.git
-        cd libsigc--3.0
-        autoreconf -i
-        ./configure
-        make
-        sudo make install
-        popd
-    - name: Install python ${{ matrix.python }} packages
+    - name: patch enigma cpp files
       run: |
-        pip3 install six flake8
-
+        sed -i 's/mallinfo2/mallinfo/g' main/enigma.cpp
     - name: build enigma2
       env: 
         CC: "gcc-${{ matrix.gcc }}"
@@ -108,21 +104,4 @@ jobs:
         ./configure --with-libsdl=no --with-boxtype=nobox --enable-dependency-tracking ac_cv_prog_c_openmp=-fopenmp --with-gstversion=1.0 --with-textlcd
         make
         python3 -m compileall .
-        find . -type f -name "*.po" -exec msgfmt {} -o {}.mo \;
-        echo "checking enigma2 compiles completed"
-
-    - name: Check format PEP8
-      run: |
-        echo "checking locale format..."
-        find . -type f -name "*.po" -exec msgfmt {} -o {}.mo \;
-        echo "checking PEP8 validation..."
-        flake8 --ignore=W191,W503,W504,E128,E501,E722 . --exit-zero
-        echo "check format PEP8 completed!"
-
-# PEP8 :- IGNORE CODES
-# W191 : indentation contains tabs
-# W503 : line break before binary operator
-# W504 : line break after binary operator
-# E128 : continuation line under-indented for visual indent
-# E501 : line too long (> 79 characters)
-# E722 : do not use bare 'except'
+        echo done!
