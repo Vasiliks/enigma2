@@ -108,7 +108,6 @@ jobs:
         ./configure --with-libsdl=no --with-boxtype=nobox --enable-dependency-tracking ac_cv_prog_c_openmp=-fopenmp --with-gstversion=1.0 --with-textlcd
         make
         python3 -m compileall .
-        find . -type f -name "*.po" -exec msgfmt {} -o {}.mo \;
         echo "checking enigma2 compiles completed"
 
     - name: Check format PEP8
