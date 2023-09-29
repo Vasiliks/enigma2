@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
+from Components.SystemInfo import SystemInfo
 from Components.Console import Console
 from Tools.Directories import fileHas, fileExists
 import os
 import glob
 import tempfile
 import subprocess
-from Components.SystemInfo import SystemInfo, BoxInfo as BoxInfoRunningInstance, BoxInformation
 
 
 class tmp:
@@ -77,23 +76,22 @@ def getMultibootslots():
 def getCurrentImage():
 	if SystemInfo["canMultiBoot"]:
 		if SystemInfo["hasKexec"]:	# kexec kernel multiboot
-			rootsubdir = [x for x in open('/sys/firmware/devicetree/base/chosen/bootargs').read().split() if x.startswith("rootsubdir")]
+			rootsubdir = [x for x in open('/sys/firmware/devicetree/base/chosen/bootargs', 'r').read().split() if x.startswith("rootsubdir")]
 			char = "/" if "/" in rootsubdir[0] else "="
 			return int(rootsubdir[0].rsplit(char, 1)[1][11:])
 		else: #legacy multiboot
-			slot = [x[-1] for x in open('/sys/firmware/devicetree/base/chosen/bootargs').read().split() if x.startswith('rootsubdir')]
+			slot = [x[-1] for x in open('/sys/firmware/devicetree/base/chosen/bootargs', 'r').read().split() if x.startswith('rootsubdir')]
 			if slot:
 				return int(slot[0])
 			else:
-				device = getparam(open('/sys/firmware/devicetree/base/chosen/bootargs').read(), 'root')
+				device = getparam(open('/sys/firmware/devicetree/base/chosen/bootargs', 'r').read(), 'root')
 				for slot in SystemInfo["canMultiBoot"].keys():
 					if SystemInfo["canMultiBoot"][slot]['device'] == device:
 						return slot
 
 
 def getCurrentImageMode():
-	print("[Multiboot] Read /sys/firmware/devicetree/base/chosen/bootargs")
-	return bool(SystemInfo["canMultiBoot"]) and SystemInfo["canMode12"] and int(open('/sys/firmware/devicetree/base/chosen/bootargs').read().replace('\0', '').split('=')[-1])
+	return bool(SystemInfo["canMultiBoot"]) and SystemInfo["canMode12"] and int(open('/sys/firmware/devicetree/base/chosen/bootargs', 'r').read().replace('\0', '').split('=')[-1])
 
 
 def deleteImage(slot):
