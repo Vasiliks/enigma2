@@ -1,12 +1,13 @@
 noinst_LIBRARIES += gdi/libenigma_gdi.a
 
-gdi_libenigma_gdi_a_CXXFLAGS = $(LIBSDL_CFLAGS)
+gdi_libenigma_gdi_a_CXXFLAGS = -O3 $(LIBSDL_CFLAGS)
 
 gdi_libenigma_gdi_a_SOURCES = \
 	gdi/accel.cpp \
 	gdi/bcm.cpp \
 	gdi/color.cpp \
 	gdi/compositing.cpp \
+	gdi/drawing.cpp \
 	gdi/epng.cpp \
 	gdi/erect.cpp \
 	gdi/fb.cpp \
@@ -28,6 +29,7 @@ gdiinclude_HEADERS = \
 	gdi/accel.h \
 	gdi/color.h \
 	gdi/compositing.h \
+	gdi/drawing.h \
 	gdi/epng.h \
 	gdi/epoint.h \
 	gdi/erect.h \
@@ -45,11 +47,13 @@ gdiinclude_HEADERS = \
 	gdi/region.h
 
 if HAVE_LIBSDL
-gdi_libenigma_gdi_a_SOURCES += gdi/sdl.cpp
-gdiinclude_HEADERS += gdi/sdl.h
+gdi_libenigma_gdi_a_SOURCES += \
+	gdi/sdl.cpp \
+	gdi/sdl.h
 else
-gdi_libenigma_gdi_a_SOURCES += gdi/gfbdc.cpp
-gdiinclude_HEADERS += gdi/gfbdc.h
+gdi_libenigma_gdi_a_SOURCES += \
+	gdi/gfbdc.cpp \
+	gdi/gfbdc.h
 endif
 
 if LCD_FRAMEBUFFER_MODE
