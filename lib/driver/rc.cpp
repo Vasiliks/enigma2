@@ -46,6 +46,11 @@ eRCDevice::~eRCDevice()
 	eRCInput::getInstance()->removeDevice(id.c_str());
 }
 
+int eRCDevice::setKeyMapping(const std::unordered_map<unsigned int, unsigned int>& remaps)
+{
+	return eRCInput::remapUnsupported;
+}
+
 eRCDriver::eRCDriver(eRCInput *input): input(input), enabled(1)
 {
 }
@@ -94,7 +99,7 @@ void eRCInputEventDriver::keyPressed(int)
 	struct input_event ev;
 	while (1)
 	{
-		if (read(handle, &ev, sizeof(input_event))!=sizeof(input_event))
+		if (read(handle, &ev, sizeof(struct input_event))!=sizeof(struct input_event))
 			break;
 		if (enabled && !input->islocked())
 			for (std::list<eRCDevice*>::iterator i(listeners.begin()); i!=listeners.end(); ++i)
@@ -135,13 +140,12 @@ eRCInputEventDriver::eRCInputEventDriver(const char *filename): eRCDriver(eRCInp
 std::string eRCInputEventDriver::getDeviceName()
 {
 	char name[128]="";
-	if (handle >= 0) {
+	if (handle >= 0)
 		::ioctl(handle, EVIOCGNAME(128), name);
-		eDebug("[eRCInputEventDriver] devicename=%s", name);
-	}
 #ifdef FORCE_ADVANCED_REMOTE
 	if (!strcmp(name, "dreambox remote control (native)")) return "dreambox advanced remote control (native)";
 #endif
+	eDebug("[eRCInputEventDriver] devicename=%s", name);
 	return name;
 }
 
@@ -252,6 +256,26 @@ void eRCInput::addDevice(const std::string &id, eRCDevice *dev)
 void eRCInput::removeDevice(const std::string &id)
 {
 	devices.erase(id);
+}
+
+int eRCInput::setKeyMapping(const std::string &id, ePyObject keyRemap)
+{
+	eRCDevice *dev = getDevice(id);
+	if (dev)
+	{
+		std::unordered_map<unsigned int, unsigned int> remaps;
+		if (!PyDict_Check(keyRemap))
+			return remapFormatErr;
+		PyObject *from, *to;
+		Py_ssize_t pos=0;
+		while (PyDict_Next(keyRemap, &pos, &from, &to)) {
+			if (!PyLong_Check(from) || !PyLong_Check(to))
+				return remapFormatErr;
+			remaps[PyLong_AsLong(from)] = PyLong_AsLong(to);
+		}
+		return dev->setKeyMapping(remaps);
+	}
+	return remapNoSuchDevice;
 }
 
 eRCDevice *eRCInput::getDevice(const std::string &id)
