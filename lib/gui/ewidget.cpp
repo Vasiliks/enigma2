@@ -10,7 +10,6 @@ eWidget::eWidget(eWidget *parent): m_animation(this), m_parent(parent ? parent->
 	m_vis = 0;
 	m_layer = 0;
 	m_desktop = 0;
-	m_have_background_color = 0;
 	m_z_position = 0;
 	m_lowered = 0;
 	m_client_offset = eSize(0, 0);
@@ -114,7 +113,9 @@ void eWidget::invalidate(const gRegion &region)
 	res.moveBy(abspos);
 //	eDebug("[eWidget] region to invalidate:");
 //	dumpRegion(res);
-	root->m_desktop->invalidate(res, this, target_layer);
+	if (root && root->m_desktop){
+		root->m_desktop->invalidate(res, this, target_layer);
+	}
 }
 
 void eWidget::show()
@@ -148,11 +149,13 @@ void eWidget::show()
 		abspos += root->position();
 	}
 
-	root->m_desktop->recalcClipRegions(root);
+	if (root && root->m_desktop){
+		root->m_desktop->recalcClipRegions(root);
 
-	gRegion abs = m_visible_with_childs;
-	abs.moveBy(abspos);
-	root->m_desktop->invalidate(abs, this, target_layer);
+		gRegion abs = m_visible_with_childs;
+		abs.moveBy(abspos);
+		root->m_desktop->invalidate(abs, this, target_layer);
+	}
 }
 
 void eWidget::hide()
@@ -182,11 +185,13 @@ void eWidget::hide()
 	}
 	ASSERT(root->m_desktop);
 
-	gRegion abs = m_visible_with_childs;
-	abs.moveBy(abspos);
+        if (root && root->m_desktop){
+		gRegion abs = m_visible_with_childs;
+		abs.moveBy(abspos);
 
-	root->m_desktop->recalcClipRegions(root);
-	root->m_desktop->invalidate(abs);
+		root->m_desktop->recalcClipRegions(root);
+		root->m_desktop->invalidate(abs);
+	}
 }
 
 void eWidget::raise()
@@ -212,12 +217,12 @@ void eWidget::destruct()
 void eWidget::setBackgroundColor(const gRGB &col)
 {
 	m_background_color = col;
-	m_have_background_color = 1;
+	m_have_background_color = true;
 }
 
 void eWidget::clearBackgroundColor()
 {
-	m_have_background_color = 0;
+	m_have_background_color = false;
 }
 
 void eWidget::setZPosition(int z)
@@ -341,9 +346,13 @@ void eWidget::recalcClipRegionsWhenVisible()
 			t->m_desktop->recalcClipRegions(t);
 			break;
 		}
+		if (!t->m_parent)
+		{
+			eLogNoNewLineStart(lvlError, "[eWidget] RecalcClipRegions for widget at (%d,%d)=>(%d,%d).", this->position().x(), this->position().y(), this->size().width(), this->size().height());
+			eLogNoNewLine(lvlError, "Top level parent at (%d,%d)=>(%d,%d) has no desktop", t->position().x(), t->position().y(), t->size().width(), t->size().height());
+		}
 		t = t->m_parent;
-		ASSERT(t);
-	} while(1);
+	} while(t);
 }
 
 void eWidget::parentRemoved()
@@ -379,7 +388,7 @@ int eWidget::event(int event, void *data, void *data2)
 					painter.drawRectangle(eRect(ePoint(0, 0), size()));
 					if (r)
 						painter.setRadius(r, m_cornerRadiusEdges);
-					painter.setBackgroundColor((m_have_background_color) ? m_background_color : gRGB(0, 0, 0));
+					painter.setBackgroundColor(m_have_background_color ? m_background_color : gRGB(0, 0, 0));
 					painter.drawRectangle(eRect(m_border_width, m_border_width, size().width() - m_border_width * 2, size().height() - m_border_width * 2));
 					drawborder = false;
 				}
