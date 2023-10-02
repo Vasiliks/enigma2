@@ -55,8 +55,9 @@ class ScrollLabel(GUIComponent):
 		sliderScroll = scrollLabelStyle["scrollbarScroll"]
 		sliderOffset = scrollLabelStyle["scrollbarOffset"]
 		sliderWidth = scrollLabelStyle["scrollbarWidth"]
-		scrollbarRadius = scrollLabelStyle["scrollbarRadius"]
+		scrollbarRadius = scrollLabelStyle["scrollbarRadius"] if "scrollbarRadius" in scrollLabelStyle else parseRadius("0")  # norhap check attributes
 		scrollbarGradient = None
+		noWrap = False
 		if self.skinAttributes:
 			sliderProperties = (
 				"scrollbarBorderColor",
