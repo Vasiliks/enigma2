@@ -194,11 +194,13 @@ class StandbyScreen(Screen):
 
 		if isfile("/usr/script/StandbyLeave.sh"):
 			Console().ePopen("/usr/script/StandbyLeave.sh")
-		if brand in ("dinobot",) or SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
-			output = "/proc/stb/hdmi/output"
-			if isfile(output):
-				with open(output, "w") as hdmi:
-					hdmi.write("on")
+
+		if isfile("/proc/stb/hdmi/output"):
+			try:
+				print("[Standby] Write to /proc/stb/hdmi/output")
+				open("/proc/stb/hdmi/output", "w").write("on")
+			except:
+				print("[Standby] Write to /proc/stb/hdmi/output failed.")
 
 	def setMute(self):
 		self.wasMuted = eDVBVolumecontrol.getInstance().isMuted()
