@@ -84,7 +84,7 @@ class Harddisk:
 		self.removable = removable
 		self.internal = "pci" in self.phys_path or "ahci" in self.phys_path or "sata" in self.phys_path
 		try:
-			data = open("/sys/block/%s/queue/rotational" % device).read().strip()
+			data = open("/sys/block/%s/queue/rotational" % device, "r").read().strip()
 			self.rotational = int(data)
 		except:
 			self.rotational = True
@@ -406,7 +406,7 @@ class Harddisk:
 			task.setTool("mkfs.ext4")
 			if size > 20000:
 				try:
-					version = list(map(int, open("/proc/version").read().split(' ', 4)[2].split('.', 2)[:2]))
+					version = list(map(int, open("/proc/version", "r").read().split(' ', 4)[2].split('.', 2)[:2]))
 					if (version[0] > 3) or (version[0] > 2 and version[1] >= 2):
 						# Linux version 3.2 supports bigalloc and -C option, use 256k blocks
 						task.args += ["-C", "262144"]

@@ -91,7 +91,7 @@ def enumPlugins(filter_start=''):
 
 def listsDirPath():
 	try:
-		for line in open('/etc/opkg/opkg.conf'):
+		for line in open('/etc/opkg/opkg.conf', "r"):
 			if line.startswith('option'):
 				line = line.split(' ', 2)
 				if len(line) > 2 and line[1] == ('lists_dir'):

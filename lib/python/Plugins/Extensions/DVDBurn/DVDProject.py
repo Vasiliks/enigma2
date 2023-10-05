@@ -116,7 +116,7 @@ class DVDProject:
 			if not fileExists(filename):
 				self.error = "xml file not found!"
 				#raise AttributeError
-			file = open(filename)
+			file = open(filename, "r")
 			data = file.read().replace('&', "&amp;").encode("ascii", 'xmlcharrefreplace').decode("utf-8")
 			file.close()
 			projectfiledom = xml.dom.minidom.parseString(data)

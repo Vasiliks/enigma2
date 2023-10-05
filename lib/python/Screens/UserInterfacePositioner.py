@@ -75,7 +75,7 @@ def InitOsd():
 			print('[UserInterfacePositioner] Setting 3D mode: %s' % str(value))
 			try:
 				if SystemInfo["CanUse3DModeChoices"]:
-					f = open("/proc/stb/fb/3dmode_choices")
+					f = open("/proc/stb/fb/3dmode_choices", "r")
 					choices = f.readlines()[0].split()
 					f.close()
 					if value not in choices:

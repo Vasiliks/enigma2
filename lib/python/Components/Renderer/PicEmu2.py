@@ -122,7 +122,7 @@ class PicEmu2(Renderer, Poll):
 								else:
 									if isfile("/tmp/ecm.info"):
 										try:
-											content = open("/tmp/ecm.info").read()
+											content = open("/tmp/ecm.info", "r").read()
 										except:
 											content = ""
 										contentInfo = content.split("\n")

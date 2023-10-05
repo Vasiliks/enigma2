@@ -475,7 +475,7 @@ class NetworkMacSetup(Screen, ConfigListScreen, HelpableScreen):
                 self.session.open(MessageBox, _("Not a valid MAC address"), MessageBox.TYPE_INFO, timeout=10)
 
     def checkInterfaces(self):
-        with open("/etc/network/interfaces") as interfaces:
+        with open("/etc/network/interfaces", "r") as interfaces:
                         interfacesdata = interfaces.read()
         if "hwaddress ether" in interfacesdata:
                         oldMac = re.findall(r"hwaddress ether (\w{2}:\w{2}:\w{2}:\w{2}:\w{2}:\w{2})", interfacesdata)[0]

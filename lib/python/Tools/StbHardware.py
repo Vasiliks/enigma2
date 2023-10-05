@@ -44,10 +44,10 @@ def getBoxProc():
 def getProcInfoTypeTuner():
 	typetuner = ""
 	if isfile(INFO_TYPE):
-		with open(INFO_TYPE) as fd:
+		with open(INFO_TYPE, "r") as fd:
 			typetuner = fd.read().split('\n', 1)[0]
 	elif isfile(INFO_SUBTYPE):
-		with open(INFO_SUBTYPE) as fd:
+		with open(INFO_SUBTYPE, "r") as fd:
 			typetuner = fd.read().split('\n', 1)[0]
 	return typetuner
 

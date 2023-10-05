@@ -28,7 +28,7 @@ class AVSwitch:
 		elif valstr == "16_9":  # auto ... 4:3 or 16:9
 			try:
 				print("[AVSwitch] Read /proc/stb/vmpeg/0/aspect")
-				if "1" in open("/proc/stb/vmpeg/0/aspect").read().split('\n', 1)[0]:  # 4:3
+				if "1" in open("/proc/stb/vmpeg/0/aspect", "r").read().split('\n', 1)[0]:  # 4:3
 					return (4, 3)
 			except IOError:
 				print("[AVSwitch] Read /proc/stb/vmpeg/0/aspect failed.")
@@ -239,7 +239,7 @@ def InitAVSwitch():
 		def setHDMIColorspace(configElement):
 			open(SystemInfo["HasColorspace"], "w").write(configElement.value)
 		if SystemInfo["HasColorspaceChoices"] and SystemInfo["CanProc"]:
-			with open(SystemInfo["HasColorspaceChoices"]) as hdmicolorspace:
+			with open(SystemInfo["HasColorspaceChoices"], "r") as hdmicolorspace:
 				hdmicolorspace.read().split('\n', 1)[0]
 				hdmicolorspace.close()
 		config.av.hdmicolorspace = ConfigSelection(choices=choices, default=default)
@@ -259,7 +259,7 @@ def InitAVSwitch():
 		def setHDMIColorimetry(configElement):
 			open(SystemInfo["HasColorimetry"], "w").write(configElement.value)
 		if SystemInfo["HasColorimetryChoices"] and SystemInfo["CanProc"]:
-			with open(SystemInfo["HasColorimetryChoices"]) as hdmicolorimetry:
+			with open(SystemInfo["HasColorimetryChoices"], "r") as hdmicolorimetry:
 				hdmicolorimetry.read().split('\n', 1)[0]
 				hdmicolorimetry.close()
 		config.av.hdmicolorimetry = ConfigSelection(choices=choices, default=default)
@@ -279,7 +279,7 @@ def InitAVSwitch():
 		def setHdmiColordepth(configElement):
 			open(SystemInfo["HasColordepth"], "w").write(configElement.value)
 		if SystemInfo["HasColordepthChoices"] and SystemInfo["CanProc"]:
-			with open(SystemInfo["HasColordepthChoices"]) as hdmicolordepth:
+			with open(SystemInfo["HasColordepthChoices"], "r") as hdmicolordepth:
 				hdmicolordepth.read().split('\n', 1)[0]
 				hdmicolordepth.close()
 		config.av.hdmicolordepth = ConfigSelection(choices=choices, default=default)
@@ -412,7 +412,7 @@ def InitAVSwitch():
 				SystemInfo["CanPcmMultichannel"] = False
 
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/ac3_choices") as ac3_choices:
+			with open("/proc/stb/audio/ac3_choices", "r") as ac3_choices:
 				ac3_choices.read().split('\n', 1)[0]
 				ac3_choices.close()
 		config.av.downmix_ac3 = ConfigSelection(choices=choices, default=default)
@@ -431,7 +431,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/aac failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/aac_choices") as aac_choices:
+			with open("/proc/stb/audio/aac_choices", "r") as aac_choices:
 				aac_choices.read().split('\n', 1)[0]
 				aac_choices.close()
 		config.av.downmix_aac = ConfigSelection(choices=choices, default=default)
@@ -456,7 +456,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/aacplus failed!")
 		if SystemInfo["CanProc"]:
-			with open(SystemInfo["CanDownmixAACPlus"]) as aacplus_choices:
+			with open(SystemInfo["CanDownmixAACPlus"], "r") as aacplus_choices:
 				aacplus_choices.read().split('\n', 1)[0]
 				aacplus_choices.close()
 		config.av.downmix_aacplus = ConfigSelection(choices=choices, default=default)
@@ -475,7 +475,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/dts failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/dts_choices") as dts_choices:
+			with open("/proc/stb/audio/dts_choices", "r") as dts_choices:
 				dts_choices.read().split('\n', 1)[0]
 				dts_choices.close()
 		config.av.downmix_dts = ConfigSelection(choices=choices, default=default)
@@ -504,7 +504,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/dtshd failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/dtshd_choices") as dtshd_choices:
+			with open("/proc/stb/audio/dtshd_choices", "r") as dtshd_choices:
 				dtshd_choices.read().split('\n', 1)[0]
 				dtshd_choices.close()
 		config.av.dtshd = ConfigSelection(choices=choices, default=default)
@@ -524,7 +524,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/aac_transcode failed!")
 		if SystemInfo["CanProc"]:
-			with open(SystemInfo["CanAACTranscode"]) as aac_transcode_choices:
+			with open(SystemInfo["CanAACTranscode"], "r") as aac_transcode_choices:
 				aac_transcode_choices.read().split('\n', 1)[0]
 				aac_transcode_choices.close()
 		config.av.transcodeaac = ConfigSelection(choices=choices, default=default)
@@ -564,7 +564,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/ac3plus failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/ac3plus_choices") as ac3plus_choices:
+			with open("/proc/stb/audio/ac3plus_choices", "r") as ac3plus_choices:
 				ac3plus_choices.read().split('\n', 1)[0]
 				ac3plus_choices.close()
 		config.av.transcodeac3plus = ConfigSelection(choices=choices, default=default)
@@ -582,7 +582,7 @@ def InitAVSwitch():
 		def setWMAPRO(configElement):
 			open(SystemInfo["CanWMAPRO"], "w").write(configElement.value)
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/wmapro_choices") as wmapro_choices:
+			with open("/proc/stb/audio/wmapro_choices", "r") as wmapro_choices:
 				wmapro_choices.read().split('\n', 1)[0]
 				wmapro_choices.close()
 		config.av.wmapro = ConfigSelection(choices=choices, default=default)
@@ -641,7 +641,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/3d_surround failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/3d_surround_choices") as surround:
+			with open("/proc/stb/audio/3d_surround_choices", "r") as surround:
 				surround.read().split('\n', 1)[0]
 				surround.close()
 		config.av.surround_3d = ConfigSelection(choices=choices, default=default)
@@ -663,7 +663,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/3d_surround_speaker_position failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/3d_surround_speaker_position_choices") as speaker:
+			with open("/proc/stb/audio/3d_surround_speaker_position_choices", "r") as speaker:
 				speaker.read().split('\n', 1)[0]
 				speaker.close()
 		config.av.speaker_3d = ConfigSelection(choices=choices, default=default)
@@ -686,7 +686,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/3dsurround failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/3dsurround_choices") as surroundspeaker:
+			with open("/proc/stb/audio/3dsurround_choices", "r") as surroundspeaker:
 				surroundspeaker.read().split('\n', 1)[0]
 				surroundspeaker.close()
 		config.av.surround_3d_speaker = ConfigSelection(choices=choices, default=default)
@@ -709,7 +709,7 @@ def InitAVSwitch():
 			except:
 				print("[AVSwitch] Write to /proc/stb/audio/avl failed!")
 		if SystemInfo["CanProc"]:
-			with open("/proc/stb/audio/avl_choices") as avl_choices:
+			with open("/proc/stb/audio/avl_choices", "r") as avl_choices:
 				avl_choices.read().split('\n', 1)[0]
 				avl_choices.close()
 		config.av.autovolume = ConfigSelection(choices=choices, default=default)
