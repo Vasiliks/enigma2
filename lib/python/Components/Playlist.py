@@ -48,7 +48,7 @@ class PlaylistIOInternal(PlaylistIO):
 	def open(self, filename):
 		self.clear()
 		try:
-			file = open(filename, "r")
+			file = open(filename)
 		except IOError:
 			return None
 		while True:
@@ -77,7 +77,7 @@ class PlaylistIOM3U(PlaylistIO):
 		self.clear()
 		self.displayname = None
 		try:
-			file = open(filename, "r")
+			file = open(filename)
 		except IOError:
 			return None
 		while True:

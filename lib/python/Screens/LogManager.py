@@ -81,7 +81,7 @@ class LogManagerPoller:
 		mounts = []
 		matches = []
 		print("[LogManager] probing folders")
-		with open("/proc/mounts", "r") as f:
+		with open("/proc/mounts") as f:
 			for line in f.readlines():
 				parts = line.strip().split()
 				mounts.append(parts[1])

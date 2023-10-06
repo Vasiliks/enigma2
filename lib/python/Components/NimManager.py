@@ -1703,14 +1703,14 @@ def InitNimManager(nimmgr, update_slots=[]):
 					if not hasattr(config.misc, 'firstrun') or not config.misc.firstrun.value:
 						configElement.save()
 				elif is_changed_mode:
-					cur_type = int(open("/proc/stb/frontend/%d/mode" % (fe_id), "r").read())
+					cur_type = int(open("/proc/stb/frontend/%d/mode" % (fe_id)).read())
 					if cur_type != int(configElement.value):
 						print("[NimManager] InitNimManager tunerTypeChanged feid %d from %d to mode %d" % (fe_id, cur_type, int(configElement.value)))
 
 						is_dvb_shutdown_timeout = os.path.exists("/sys/module/dvb_core/parameters/dvb_shutdown_timeout")
 						if is_dvb_shutdown_timeout:
 							try:
-								oldvalue = open("/sys/module/dvb_core/parameters/dvb_shutdown_timeout", "r").readline()
+								oldvalue = open("/sys/module/dvb_core/parameters/dvb_shutdown_timeout").readline()
 								open("/sys/module/dvb_core/parameters/dvb_shutdown_timeout", "w").write("0")
 							except:
 								print("[NimManager] InitNimManager tunerTypeChanged read /sys/module/dvb_core/parameters/dvb_shutdown_timeout failed")

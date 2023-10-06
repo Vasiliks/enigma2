@@ -25,7 +25,7 @@ import xml.etree.ElementTree
 from Screens.Setup import Setup, getSetupTitle
 
 # read the menu
-file = open(resolveFilename(SCOPE_SKIN, "menu.xml"), "r")
+file = open(resolveFilename(SCOPE_SKIN, "menu.xml"))
 mdom = parse(file)
 file.close()
 

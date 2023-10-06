@@ -103,11 +103,11 @@ class FanControl:
 
 	def getFanSpeed(self, fanid):
 		print("[FanControl] Read /proc/stb/fp/fan_speed")
-		return int(open("/proc/stb/fp/fan_speed", "r").readline().strip()[:-4])
+		return int(open("/proc/stb/fp/fan_speed").readline().strip()[:-4])
 
 	def getVoltage(self, fanid):
 		print("[FanControl] Read /proc/stb/fp/fan_vlt")
-		return int(open("/proc/stb/fp/fan_vlt", "r").readline().strip(), 16)
+		return int(open("/proc/stb/fp/fan_vlt").readline().strip(), 16)
 
 	def setVoltage(self, fanid, value):
 		if model == "beyonwizu4":
@@ -119,7 +119,7 @@ class FanControl:
 
 	def getPWM(self, fanid):
 		print("[FanControl] Read /proc/stb/fp/fan_pwm")
-		return int(open("/proc/stb/fp/fan_pwm", "r").readline().strip(), 16)
+		return int(open("/proc/stb/fp/fan_pwm").readline().strip(), 16)
 
 	def setPWM(self, fanid, value):
 		if value > 255:
