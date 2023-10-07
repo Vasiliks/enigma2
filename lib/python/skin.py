@@ -40,6 +40,7 @@ fonts = {  # Dictionary of predefined and skin defined font aliases.
 	"ChoiceList": ("Regular", 20, 24, 18)
 }
 menus = {}  # Dictionary of images associated with menu entries.
+menuicons = {}  # Dictionary of icons associated with menu items.
 parameters = {}  # Dictionary of skin parameters used to modify code behavior.
 setups = {}  # Dictionary of images associated with setup menus.
 switchPixmap = {}  # Dictionary of switch images.
@@ -221,6 +222,7 @@ def reloadSkins():
 		"ChoiceList": ("Regular", 20, 24, 18)
 	}
 	menus.clear()
+	menuicons.clear()
 	parameters.clear()
 	setups.clear()
 	switchPixmap.clear()
@@ -1336,6 +1338,15 @@ def loadSingleSkinData(desktop, screenID, domSkin, pathSkin, scope=SCOPE_GUISKIN
 				# print(f"[Skin] DEBUG: Menu key='{key}', image='{image}'.")
 			else:
 				skinError(f"Tag 'menu' needs key and image, got key='{key}' and image='{image}'")
+	for tag in domSkin.findall("menuicons"):
+		for menuicon in tag.findall("menuicon"):
+			key = menuicon.attrib.get("key")
+			image = menuicon.attrib.get("image")
+			if key and image:
+				menuicons[key] = image
+				# print("[Skin] DEBUG: Menu key='%s', image='%s'." % (key, image))
+			else:
+				raise SkinError("Tag 'menuicon' needs key and image, got key='%s' and image='%s'" % (key, image))
 	for tag in domSkin.findall("setups"):
 		for setup in tag.findall("setup"):
 			key = setup.attrib.get("key")
