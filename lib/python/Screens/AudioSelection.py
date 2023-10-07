@@ -17,6 +17,8 @@ from Plugins.Plugin import PluginDescriptor
 from Components.Converter.VAudioInfo import StdAudioDesc
 from Components.UsageConfig import originalAudioTracks, visuallyImpairedCommentary
 from Tools.ISO639 import LanguageCodes
+from Tools.Directories import resolveFilename, SCOPE_GUISKIN
+from Tools.LoadPixmap import LoadPixmap
 
 from enigma import iPlayableService, eTimer, eSize, eDVBDB, eServiceReference, eServiceCenter, iServiceInformation
 
@@ -24,6 +26,9 @@ from Tools.BoundFunction import boundFunction
 
 FOCUS_CONFIG, FOCUS_STREAMS = range(2)
 [PAGE_AUDIO, PAGE_SUBTITLES] = ["audio", "subtitles"]
+
+
+selectionpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_GUISKIN, "icons/audioselectionmark.png"))
 
 
 class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
@@ -351,7 +356,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 						else:
 							language += lang
 						cnt += 1
-					streams.append((x, "", number, description, language, selected))
+					streams.append((x, "", number, description, language, selected, selectionpng if selected == "X" else None))
 			else:
 				conflist.append(("",))
 			if SystemInfo["HasBypassEdidChecking"]:
@@ -414,7 +419,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 						except Exception:
 							description = _("unknown") + ": %s" % x[2]
 						number = str(int(number) + 1)
-					streams.append((x, "", number, description, language, selected))
+					streams.append((x, "", number, description, language, selected, selectionpng if selected == "X" else None))
 					idx += 1
 			conflist.append((_("To audio selection"), self.settings.menupage))
 
