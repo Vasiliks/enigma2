@@ -8,7 +8,7 @@ from Components.DiskInfo import DiskInfo
 from Components.Pixmap import Pixmap, MultiPixmap
 from Components.Label import Label
 from Components.PluginComponent import plugins
-from Components.config import config, ConfigSubsection, ConfigText, ConfigInteger, ConfigLocations, ConfigSet, ConfigYesNo, ConfigSelection
+from Components.config import config, ConfigSubsection, ConfigText, ConfigInteger, ConfigLocations, ConfigSet, ConfigYesNo, ConfigSelection, getConfigListEntry
 from Components.ConfigList import ConfigListScreen
 from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
 from Components.Sources.Boolean import Boolean
@@ -37,6 +37,7 @@ import RecordTimer
 from enigma import eServiceReference, eServiceCenter, eTimer, eSize, iPlayableService, iServiceInformation, getPrevAsciiCode, eRCInput
 import os
 import time
+from time import localtime, strftime
 import pickle
 
 config.movielist = ConfigSubsection()
@@ -79,7 +80,7 @@ l_listtype = [(str(MovieList.LISTTYPE_ORIGINAL), _("list style default")),
 try:
 	from Plugins.Extensions import BlurayPlayer
 except Exception as e:
-	print("[MovieSelection] BlurayPlayer not installed:", e)
+	print("[ML] BlurayPlayer not installed:", e)
 	BlurayPlayer = None
 
 
@@ -92,9 +93,9 @@ def setPreferredTagEditor(te):
 	global preferredTagEditor
 	if preferredTagEditor is None:
 		preferredTagEditor = te
-		print("[MovieSelection] Preferred tag editor changed to", preferredTagEditor)
+		print("Preferred tag editor changed to", preferredTagEditor)
 	else:
-		print("[MovieSelection] Preferred tag editor already set to", preferredTagEditor, "ignoring", te)
+		print("Preferred tag editor already set to", preferredTagEditor, "ignoring", te)
 
 
 def getPreferredTagEditor():
@@ -463,6 +464,13 @@ class SelectionEventInfo:
 	def updateEventInfo(self):
 		serviceref = self.getCurrent()
 		self["Service"].newService(serviceref)
+		info = serviceref and eServiceCenter.getInstance().info(serviceref)
+		if info:
+			timeCreate =  strftime("%A %d %b %Y", localtime(info.getInfo(serviceref, iServiceInformation.sTimeCreate)))
+			duration = "%d min" % (info.getLength(serviceref) / 60)
+			filesize = "%d MB" % (info.getInfoObject(serviceref, iServiceInformation.sFileSize) / (1024*1024))
+			moviedetails = "%s  •  %s  •  %s" % (timeCreate, duration, filesize)
+			self["moviedetails"].setText(moviedetails)
 
 
 class MovieSelectionSummary(Screen):
@@ -537,6 +545,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 		self["chosenletter"].visible = False
 
 		self["waitingtext"] = Label(_("Please wait... Loading list..."))
+		self["moviedetails"] = Label()
 
 		# create optional description border and hide immediately
 		self["DescriptionBorder"] = Pixmap()
@@ -900,7 +909,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 		try:
 			NavigationInstance.instance.RecordTimer.on_state_change.remove(self.list.updateRecordings)
 		except Exception as e:
-			print("[MovieSelection] failed to unsubscribe:", e)
+			print("[ML] failed to unsubscribe:", e)
 			pass
 
 	def createSummary(self):
@@ -1005,7 +1014,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 			self.session.open(BlurayUi.BlurayMain, path)
 			return True
 		except Exception as e:
-			print("[MovieSelection] Cannot open BlurayPlayer:", e)
+			print("[ML] Cannot open BlurayPlayer:", e)
 
 	def playAsDVD(self, path):
 		try:
@@ -1013,7 +1022,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 			self.session.open(DVD.DVDPlayer, dvd_filelist=[path])
 			return True
 		except Exception as e:
-			print("[MovieSelection] DVD Player not installed:", e)
+			print("[ML] DVD Player not installed:", e)
 
 	def playSuburi(self, path):
 		suburi = os.path.splitext(path)[0][:-7]
@@ -1066,7 +1075,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 	def __evEOF(self):
 		playInBackground = self.list.playInBackground
 		if not playInBackground:
-			print("[MovieSelection] Not playing anything in background")
+			print("Not playing anything in background")
 			return
 		self.session.nav.stopService()
 		self.list.playInBackground = None
@@ -1079,7 +1088,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 				return
 			path = next.getPath()
 			ext = os.path.splitext(path)[1].lower()
-			print("[MovieSelection] Next up:", path)
+			print("Next up:", path)
 			if ext in AUDIO_EXTENSIONS:
 				self.nextInBackground = next
 				self.callLater(self.preview)
@@ -1166,7 +1175,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 								filelist.append(((p, False), None))
 						self.session.open(ui.Pic_Full_View, filelist, index, path)
 					except Exception as ex:
-						print("[MovieSelection] Cannot display", str(ex))
+						print("[ML] Cannot display", str(ex))
 					return
 				Screens.InfoBar.InfoBar.instance.checkTimeshiftRunning(boundFunction(self.itemSelectedCheckTimeshiftCallback, ext, path))
 
@@ -1178,7 +1187,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 					if blurayinfo.isBluray(path) == 1:
 						ext = 'bluray'
 				except Exception as e:
-					print("[MovieSelection] Error in blurayinfo:", e)
+					print("[ML] Error in blurayinfo:", e)
 			if ext == 'bluray':
 				if self.playAsBLURAY(path):
 					return
@@ -1212,7 +1221,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 				path = os.path.join(config.movielist.last_videodir.value, ".e2settings.pkl")
 				pickle.dump(self.settings, open(path, "wb"))
 			except Exception as e:
-				print("[MovieSelection] Failed to save settings to %s: %s" % (path, e))
+				print("Failed to save settings to %s: %s" % (path, e))
 		# Also set config items, in case the user has a read-only disk
 		config.movielist.moviesort.value = self.settings["moviesort"]
 		config.movielist.listtype.value = self.settings["listtype"]
@@ -1239,7 +1248,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 				self.applyConfigSettings(updates)
 				pass # ignore fail to open errors
 			except Exception as e:
-				print("[MovieSelection] Failed to load settings from %s: %s" % (path, e))
+				print("Failed to load settings from %s: %s" % (path, e))
 		else:
 			updates = {
 				"listtype": config.movielist.listtype.value,
@@ -1383,16 +1392,18 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 		self.updateTags()
 		title = _("Recorded files...")
 		if config.usage.setup_level.index >= 2: # expert+
-			title += "  " + config.movielist.last_videodir.value
+			title += "  •  " + config.movielist.last_videodir.value
 		if self.selected_tags:
 			title += " - " + ','.join(self.selected_tags)
-		self.setTitle(title)
+
 		self.displayMovieOffStatus()
 		self.displaySortStatus()
 		if not (self.reload_sel and self["list"].moveTo(self.reload_sel)):
 			if self.reload_home:
 				self["list"].moveToFirstMovie()
 		self["freeDiskSpace"].update()
+		title += "  •  " + self.diskinfo.getText()
+		self.setTitle(title)
 		self["waitingtext"].visible = False
 		self.createPlaylist()
 		if self.playGoTo:
@@ -1563,7 +1574,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 							fileSize = size
 							self.playfile = folder + name
 				except:
-					print("[MovieSelection] Error calculate size for %s" % (folder + name))
+					print("[ML] Error calculate size for %s" % (folder + name))
 			if self.playfile:
 				return True
 		return False
@@ -1621,13 +1632,13 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 				path += '/'
 			self.reloadList(sel=eServiceReference("2:0:1:0:0:0:0:0:0:0:" + path))
 		except OSError as e:
-			print("[MovieSelection] Error %s:" % e.errno, e)
+			print("Error %s:" % e.errno, e)
 			if e.errno == 17:
 				msg = _("The path %s already exists.") % name
 			else:
 				msg = _("Error") + '\n' + str(e)
 		except Exception as e:
-			print("[MovieSelection] Unexpected error:", e)
+			print("[ML] Unexpected error:", e)
 			msg = _("Error") + '\n' + str(e)
 		if msg:
 			self.session.open(MessageBox, msg, type=MessageBox.TYPE_ERROR, timeout=5)
@@ -1713,7 +1724,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 				path, filename = os.path.split(oldfilename)
 				if item[0].flags & eServiceReference.mustDescent: # directory
 					newfilename = os.path.join(path, newbasename)
-					print("[MovieSelection] rename dir", oldfilename, "to", newfilename)
+					print("[ML] rename dir", oldfilename, "to", newfilename)
 					os.rename(oldfilename, newfilename)
 				else:
 					if oldfilename.endswith(self.extension):
@@ -1733,15 +1744,15 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 							break
 					if not dont_rename:
 						for r in renamelist:
-							print("[MovieSelection] rename", r[0], "to", r[1])
+							print("[ML] rename", r[0], "to", r[1])
 							os.rename(r[0], r[1])
 				self.reloadList(sel=eServiceReference("2:0:1:0:0:0:0:0:0:0:" + newfilename))
 			except OSError as e:
-				print("[MovieSelection] Error %s:" % e.errno, e)
+				print("Error %s:" % e.errno, e)
 				msg = _("Error") + '\n' + str(e)
 			except Exception as e:
 				import traceback
-				print("[MovieSelection] Unexpected error:", e)
+				print("[ML] Unexpected error:", e)
 				traceback.print_exc()
 				msg = _("Error") + '\n' + str(e)
 			if msg:
@@ -2069,7 +2080,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 		self.diskinfo.setText(text)
 
 	def hideActionFeedback(self):
-		print("[MovieSelection] Hide feedback")
+		print("[ML] hide feedback")
 		self.diskinfo.update()
 
 	def can_gohome(self, item):

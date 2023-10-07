@@ -57,7 +57,7 @@ class PluginComponent:
 							plugin = my_import('.'.join(["Plugins", c, pluginname, "plugin"]))
 							plugins = plugin.Plugins(path=path)
 						except Exception as exc:
-							print("[PluginComponent] Plugin ", c + "/" + pluginname, "failed to load:", exc)
+							print("Plugin ", c + "/" + pluginname, "failed to load:", exc)
 							# supress errors due to missing plugin.py* files (badly removed plugin)
 							for fn in ('plugin.py', 'plugin.pyc'):
 								if os.path.exists(os.path.join(path, fn)):
@@ -66,7 +66,7 @@ class PluginComponent:
 									print_exc()
 									break
 							else:
-								print("[PluginComponent] Plugin probably removed, but not cleanly in", path)
+								print("Plugin probably removed, but not cleanly in", path)
 								try:
 									os.rmdir(path)
 								except:
@@ -88,7 +88,7 @@ class PluginComponent:
 							try:
 								keymapparser.readKeymap(keymap)
 							except Exception as exc:
-								print("[PluginComponent] keymap for plugin %s/%s failed to load: " % (c, pluginname), exc)
+								print("keymap for plugin %s/%s failed to load: " % (c, pluginname), exc)
 								self.pluginWarnings.append((c + "/" + pluginname, str(exc)))
 
 		# build a diff between the old list of plugins and the new one
@@ -138,6 +138,16 @@ class PluginComponent:
 		for p in self.getPlugins(PluginDescriptor.WHERE_MENU):
 			res += p(menuid)
 		return res
+
+	def getDescriptionForMenuEntryID(self, menuid, entryid ):
+		for p in self.getPlugins(PluginDescriptor.WHERE_MENU):
+			if p(menuid) and isinstance(p(menuid), (list,tuple)):
+				if p(menuid)[0][2] == entryid:
+					return p.description
+		return None
+
+	def getPluginsForMenuWithDescription(self, menuid):
+		return [(x[0], p.description) for p in self.getPlugins(PluginDescriptor.WHERE_MENU) if (x := p(menuid))]
 
 	def clearPluginList(self):
 		self.pluginList = []
