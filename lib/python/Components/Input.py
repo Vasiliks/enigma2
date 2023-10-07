@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Components.GUIComponent import GUIComponent
 from Components.VariableText import VariableText
 
@@ -83,7 +84,7 @@ class Input(VariableText, GUIComponent, NumericalTextInput):
 		self.allmarked = True
 		self.update()
 
-	def innerright(self):
+	def innerRight(self):
 		if self.allmarked:
 			self.currPos = 0
 			self.allmarked = False
@@ -97,7 +98,7 @@ class Input(VariableText, GUIComponent, NumericalTextInput):
 	def right(self):
 		if self.type == self.TEXT:
 			self.timeout()
-		self.innerright()
+		self.innerRight()
 		self.update()
 
 	def left(self):
@@ -202,7 +203,7 @@ class Input(VariableText, GUIComponent, NumericalTextInput):
 			self.allmarked = False
 		else:
 			self.insertChar(" ", self.currPos, False, True)
-			self.innerright()
+			self.innerRight()
 		self.update()
 
 	def delete(self):
@@ -214,7 +215,7 @@ class Input(VariableText, GUIComponent, NumericalTextInput):
 		else:
 			self.deleteChar(self.currPos)
 			if self.maxSize and self.overwrite:
-				self.innerright()
+				self.innerRight()
 		self.update()
 
 	def deleteBackward(self):
@@ -254,7 +255,7 @@ class Input(VariableText, GUIComponent, NumericalTextInput):
 			self.deleteAllChars()
 			self.allmarked = False
 		self.insertChar(chr(code), self.currPos, False, False)
-		self.innerright()
+		self.innerRight()
 		self.update()
 
 	def number(self, number):
@@ -269,7 +270,7 @@ class Input(VariableText, GUIComponent, NumericalTextInput):
 			self.allmarked = False
 		self.insertChar(newChar, self.currPos, owr, False)
 		if self.type == self.PIN or self.type == self.NUMBER:
-			self.innerright()
+			self.innerRight()
 		self.update()
 
 	def char(self, char):
@@ -277,5 +278,5 @@ class Input(VariableText, GUIComponent, NumericalTextInput):
 			self.deleteAllChars()
 			self.allmarked = False
 		self.insertChar(char)
-		self.innerright()
+		self.innerRight()
 		self.update()
