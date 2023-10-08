@@ -127,8 +127,8 @@ class DiseqcTester(Screen, TuneTest, ResultParser):
 			<widget source="progress_list" render="Listbox" position="0,0" size="510,150" scrollbarMode="showOnDemand">
 				<convert type="TemplatedMultiContent">
 					{"template": [
-							MultiContentEntryText(pos = (10, 0), size = (330, 25), flags = RT_HALIGN_LEFT, text = 1),  # index 1 is the index name,
-							MultiContentEntryText(pos = (330, 0), size = (150, 25), flags = RT_HALIGN_RIGHT, text = 2)  # index 2 is the status,
+							MultiContentEntryText(pos = (10, 0), size = (330, 25), flags = RT_HALIGN_LEFT, text = 1), # index 1 is the index name,
+							MultiContentEntryText(pos = (330, 0), size = (150, 25), flags = RT_HALIGN_RIGHT, text = 2) # index 2 is the status,
 						],
 					"fonts": [gFont("Regular", 20)],
 					"itemHeight": 25
@@ -233,9 +233,9 @@ class DiseqcTester(Screen, TuneTest, ResultParser):
 
 	def getIndexForTransponder(self, transponder):
 		if transponder[0] < 11700:
-			band = 1  # low
+			band = 1 # low
 		else:
-			band = 0  # high
+			band = 0 # high
 		polarisation = transponder[2]
 		sat = transponder[5]
 		index = (band, polarisation, sat)
@@ -292,7 +292,7 @@ class DiseqcTester(Screen, TuneTest, ResultParser):
 		if self.test_type == self.TEST_TYPE_QUICK:
 			self.myindex = 0
 			keys = list(self.indexlist.keys())
-			keys.sort(key=lambda a: a[2])  # sort by orbpos
+			keys.sort(key=lambda a: a[2]) # sort by orbpos
 			self["overall_progress"].setRange(len(keys))
 			self["overall_progress"].setValue(self.myindex)
 			return keys[0]
@@ -341,7 +341,7 @@ class DiseqcTester(Screen, TuneTest, ResultParser):
 		if self.test_type == self.TEST_TYPE_QUICK:
 			self.myindex += 1
 			keys = list(self.indexlist.keys())
-			keys.sort(key=lambda a: a[2])  # sort by orbpos
+			keys.sort(key=lambda a: a[2]) # sort by orbpos
 
 			self["overall_progress"].setValue(self.myindex)
 			if self.myindex < len(keys):
@@ -512,11 +512,11 @@ class DiseqcTesterTestTypeSelection(ConfigListScreen, Screen):
 
 		self["actions"] = ActionMap(["SetupActions", "MenuActions"],
 			{
-			"cancel": self.keyCancel,
-			"save": self.keyOK,
-			"ok": self.keyOK,
-			"menu": self.closeRecursive,
-		}, -2)
+				"cancel": self.keyCancel,
+				"save": self.keyOK,
+				"ok": self.keyOK,
+				"menu": self.closeRecursive,
+			}, -2)
 
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("OK"))

@@ -9,7 +9,7 @@ class InfoBarBase:
 
 	@staticmethod
 	def connectInfoBarOpened(fnc):
-		if fnc not in InfoBarBase.onInfoBarOpened:
+		if not fnc in InfoBarBase.onInfoBarOpened:
 			InfoBarBase.onInfoBarOpened.append(fnc)
 
 	@staticmethod
@@ -24,7 +24,7 @@ class InfoBarBase:
 
 	@staticmethod
 	def connectInfoBarClosed(fnc):
-		if fnc not in InfoBarBase.onInfoBarClosed:
+		if not fnc in InfoBarBase.onInfoBarClosed:
 			InfoBarBase.onInfoBarClosed.append(fnc)
 
 	@staticmethod
@@ -78,8 +78,8 @@ class ServiceEventTracker:
 			stack = set.InfoBarStack
 			for func in func_list:
 				if (func[0] or  # let pass all events to screens not derived from InfoBarBase
-					(not old_service_running and stack[ssize - 1] == func[1]) or  # let pass events from currently running service just to current active screen (derived from InfoBarBase)
-					(old_service_running and ssize > 1 and stack[ssize - 2] == func[1])):  # let pass events from old running service just to previous active screen (derived from InfoBarBase)
+					(not old_service_running and stack[ssize - 1] == func[1]) or # let pass events from currently running service just to current active screen (derived from InfoBarBase)
+					(old_service_running and ssize > 1 and stack[ssize - 2] == func[1])): # let pass events from old running service just to previous active screen (derived from InfoBarBase)
 					func[2]()
 
 	@staticmethod
@@ -90,7 +90,7 @@ class ServiceEventTracker:
 		assert infobar not in set.InfoBarStack, "FATAL: Infobar '" + str(infobar) + "' is already active!"
 		set.InfoBarStack.append(infobar)
 		set.InfoBarStackSize += 1
-		# print("ServiceEventTracker set active '" + str(infobar) + "'")
+#		print("ServiceEventTracker set active '" + str(infobar) + "'")
 
 	@staticmethod
 	def popActiveInfoBar():
@@ -103,13 +103,13 @@ class ServiceEventTracker:
 			old_service = nav.getCurrentService()
 			set.oldServiceStr = old_service and old_service.getPtrString()
 			set.oldRef = nav.getCurrentlyPlayingServiceOrGroup()
-			# if set.InfoBarStackSize:
-			# print("ServiceEventTracker reset active '" + str(stack[set.InfoBarStackSize-1]) + "'")
+#			if set.InfoBarStackSize:
+#				print("ServiceEventTracker reset active '" + str(stack[set.InfoBarStackSize-1]) + "'")
 
 	def __init__(self, screen, eventmap):
 		self.__screen = screen
 		self.__eventmap = eventmap
-		self.__passall = not isinstance(screen, InfoBarBase)  # let pass all events to screens not derived from InfoBarBase
+		self.__passall = not isinstance(screen, InfoBarBase) # let pass all events to screens not derived from InfoBarBase
 		EventMap = ServiceEventTracker.EventMap
 		if not len(EventMap):
 			screen.session.nav.event.append(ServiceEventTracker.event)

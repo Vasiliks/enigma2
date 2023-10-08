@@ -6,22 +6,22 @@ import NavigationInstance
 from os.path import isfile
 from Components.ParentalControl import parentalControl
 from Components.ServiceEventTracker import ServiceEventTracker
-from Components.SystemInfo import BoxInfo, SystemInfo
-from time import sleep
+from Components.SystemInfo import BoxInfo
+from time import time, sleep
 
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
 platform = BoxInfo.getItem("platform")
 
-POLLTIME = 5  # seconds
+POLLTIME = 5 # seconds
 
 
 def SymbolsCheck(session, **kwargs):
-	global symbolspoller, POLLTIME
-	if SystemInfo["FirstCheckModel"] or SystemInfo["SecondCheckModel"] or SystemInfo["DefineSat"]:
-		POLLTIME = 1
-	symbolspoller = SymbolsCheckPoller(session)
-	symbolspoller.start()
+		global symbolspoller, POLLTIME
+		if BoxInfo.getItem("VFDSymbol"):
+			POLLTIME = 1
+		symbolspoller = SymbolsCheckPoller(session)
+		symbolspoller.start()
 
 
 class SymbolsCheckPoller:
@@ -32,8 +32,8 @@ class SymbolsCheckPoller:
 		self.timer = eTimer()
 		self.onClose = []
 		self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
-			iPlayableService.evUpdatedInfo: self.__evUpdatedInfo,
-		})
+				iPlayableService.evUpdatedInfo: self.__evUpdatedInfo,
+			})
 
 	def __onClose(self):
 		pass
@@ -167,11 +167,11 @@ class SymbolsCheckPoller:
 					open("/proc/stb/fp/ledpowercolor", "w").write("2")
 				elif config.usage.frontledrec_color.value == "4":
 					open("/proc/stb/fp/ledpowercolor", "w").write("0")
-					sleep(10)  # blinking
+					sleep(10) # blinking
 					open("/proc/stb/fp/ledpowercolor", "w").write("2")
 				elif config.usage.frontledrec_color.value == "3":
 					open("/proc/stb/fp/ledpowercolor", "w").write("0")
-					sleep(10)  # blinking
+					sleep(10) # blinking
 					open("/proc/stb/fp/ledpowercolor", "w").write("1")
 				elif config.usage.frontledrec_color.value == "1":
 					open("/proc/stb/fp/ledpowercolor", "w").write("1")
@@ -182,11 +182,11 @@ class SymbolsCheckPoller:
 					open("/proc/stb/fp/ledpowercolor", "w").write("2")
 				elif config.usage.frontledrecstdby_color.value == "4":
 					open("/proc/stb/fp/ledpowercolor", "w").write("0")
-					sleep(10)  # blinking standby
+					sleep(10) # blinking standby
 					open("/proc/stb/fp/ledpowercolor", "w").write("2")
 				elif config.usage.frontledrecstdby_color.value == "3":
 					open("/proc/stb/fp/ledpowercolor", "w").write("0")
-					sleep(10)  # blinking standby
+					sleep(10) # blinking standby
 					open("/proc/stb/fp/ledpowercolor", "w").write("1")
 				elif config.usage.frontledrecstdby_color.value == "1":
 					open("/proc/stb/fp/ledpowercolor", "w").write("1")
@@ -196,11 +196,11 @@ class SymbolsCheckPoller:
 				if Screens.Standby.inStandby:
 					if config.usage.frontledstdby_color.value == "4":
 						open("/proc/stb/fp/ledpowercolor", "w").write("0")
-						sleep(10)  # blinking standby
+						sleep(10) # blinking standby
 						open("/proc/stb/fp/ledpowercolor", "w").write("2")
 					elif config.usage.frontledstdby_color.value == "3":
 						open("/proc/stb/fp/ledpowercolor", "w").write("0")
-						sleep(10)  # blinking standby
+						sleep(10) # blinking standby
 						open("/proc/stb/fp/ledpowercolor", "w").write("1")
 					open("/proc/stb/fp/ledpowercolor", "w").write(config.usage.frontledstdby_color.value)
 				else:

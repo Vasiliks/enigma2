@@ -1,7 +1,7 @@
 from Components.config import config, ConfigSlider, ConfigSelection, ConfigYesNo, ConfigEnableDisable, ConfigSubsection, ConfigBoolean, ConfigSelectionNumber, ConfigNothing, NoSave
-from enigma import eAVControl, eDVBVolumecontrol
+from enigma import eAVControl, eDVBVolumecontrol, getDesktop
 from Components.SystemInfo import BoxInfo, SystemInfo
-from os.path import exists
+from os.path import isfile
 
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
@@ -85,28 +85,28 @@ def InitAVSwitch():
 
 	config.av.colorformat = ConfigSelection(choices=colorformat_choices, default="cvbs")
 	config.av.aspectratio = ConfigSelection(choices={
-		"4_3_letterbox": _("4:3 Letterbox"),
-		"4_3_panscan": _("4:3 PanScan"),
-		"16_9": _("16:9"),
-		"16_9_always": _("16:9 always"),
-		"16_10_letterbox": _("16:10 Letterbox"),
-		"16_10_panscan": _("16:10 PanScan"),
-		"16_9_letterbox": _("16:9 Letterbox")},
-		default="16_9")
+			"4_3_letterbox": _("4:3 Letterbox"),
+			"4_3_panscan": _("4:3 PanScan"),
+			"16_9": _("16:9"),
+			"16_9_always": _("16:9 always"),
+			"16_10_letterbox": _("16:10 Letterbox"),
+			"16_10_panscan": _("16:10 PanScan"),
+			"16_9_letterbox": _("16:9 Letterbox")},
+			default="16_9")
 	config.av.aspect = ConfigSelection(choices={
-		"4_3": _("4:3"),
-		"16_9": _("16:9"),
-		"16_10": _("16:10"),
-		"auto": _("Automatic")},
-		default="auto")
+			"4_3": _("4:3"),
+			"16_9": _("16:9"),
+			"16_10": _("16:10"),
+			"auto": _("Automatic")},
+			default="auto")
 	policy2_choices = {
-		# TRANSLATORS: (aspect ratio policy: black bars on top/bottom) in doubt, keep english term.
-		"letterbox": _("Letterbox"),
-		# TRANSLATORS: (aspect ratio policy: cropped content on left/right) in doubt, keep english term
-		"panscan": _("Pan&scan"),
-		# TRANSLATORS: (aspect ratio policy: scale as close to fullscreen as possible)
-		"scale": _("Just scale")}
-	if exists("/proc/stb/video/policy2_choices"):
+	# TRANSLATORS: (aspect ratio policy: black bars on top/bottom) in doubt, keep english term.
+	"letterbox": _("Letterbox"),
+	# TRANSLATORS: (aspect ratio policy: cropped content on left/right) in doubt, keep english term
+	"panscan": _("Pan&scan"),
+	# TRANSLATORS: (aspect ratio policy: scale as close to fullscreen as possible)
+	"scale": _("Just scale")}
+	if isfile("/proc/stb/video/policy2_choices"):
 		try:
 			if "full" in open("/proc/stb/video/policy2_choices").read().split('\n', 1)[0]:
 				# TRANSLATORS: (aspect ratio policy: display as fullscreen, even if the content aspect ratio does not match the screen ratio)
@@ -121,13 +121,13 @@ def InitAVSwitch():
 			print("[AVSwitch] Read /proc/stb/video/policy2_choices failed.")
 	config.av.policy_169 = ConfigSelection(choices=policy2_choices, default="scale")
 	policy_choices = {
-		# TRANSLATORS: (aspect ratio policy: black bars on left/right) in doubt, keep english term.
-		"pillarbox": _("Pillarbox"),
-		# TRANSLATORS: (aspect ratio policy: cropped content on left/right) in doubt, keep english term
-		"panscan": _("Pan&scan"),
-		# TRANSLATORS: (aspect ratio policy: scale as close to fullscreen as possible)
-		"scale": _("Just scale")}
-	if exists("/proc/stb/video/policy_choices"):
+	# TRANSLATORS: (aspect ratio policy: black bars on left/right) in doubt, keep english term.
+	"pillarbox": _("Pillarbox"),
+	# TRANSLATORS: (aspect ratio policy: cropped content on left/right) in doubt, keep english term
+	"panscan": _("Pan&scan"),
+	# TRANSLATORS: (aspect ratio policy: scale as close to fullscreen as possible)
+	"scale": _("Just scale")}
+	if isfile("/proc/stb/video/policy_choices"):
 		try:
 			if "nonlinear" in open("/proc/stb/video/policy_choices").read().split('\n', 1)[0]:
 				# TRANSLATORS: (aspect ratio policy: display as fullscreen, with stretching the left/right)
@@ -183,7 +183,7 @@ def InitAVSwitch():
 	else:
 		detected = eAVControl.getInstance().hasScartSwitch()
 
-	SystemInfo["ScartSwitch"] = detected
+	SystemInfo["ScartSwitch"] = eAVControl.getInstance().hasScartSwitch()
 
 	if SystemInfo["HasBypassEdidChecking"]:
 		choices = [
@@ -241,6 +241,7 @@ def InitAVSwitch():
 		if SystemInfo["HasColorspaceChoices"] and SystemInfo["CanProc"]:
 			with open(SystemInfo["HasColorspaceChoices"]) as hdmicolorspace:
 				hdmicolorspace.read().split('\n', 1)[0]
+				hdmicolorspace.close()
 		config.av.hdmicolorspace = ConfigSelection(choices=choices, default=default)
 		config.av.hdmicolorspace.addNotifier(setHDMIColorspace)
 	else:
@@ -260,6 +261,7 @@ def InitAVSwitch():
 		if SystemInfo["HasColorimetryChoices"] and SystemInfo["CanProc"]:
 			with open(SystemInfo["HasColorimetryChoices"]) as hdmicolorimetry:
 				hdmicolorimetry.read().split('\n', 1)[0]
+				hdmicolorimetry.close()
 		config.av.hdmicolorimetry = ConfigSelection(choices=choices, default=default)
 		config.av.hdmicolorimetry.addNotifier(setHDMIColorimetry)
 	else:
@@ -279,6 +281,7 @@ def InitAVSwitch():
 		if SystemInfo["HasColordepthChoices"] and SystemInfo["CanProc"]:
 			with open(SystemInfo["HasColordepthChoices"]) as hdmicolordepth:
 				hdmicolordepth.read().split('\n', 1)[0]
+				hdmicolordepth.close()
 		config.av.hdmicolordepth = ConfigSelection(choices=choices, default=default)
 		config.av.hdmicolordepth.addNotifier(setHdmiColordepth)
 	else:
@@ -379,6 +382,7 @@ def InitAVSwitch():
 			try:
 				with open(SystemInfo["CanSyncMode"], "w") as syncmode:
 					syncmode.write(configElement.value)
+					syncmode.close()
 			except (IOError, OSError):
 				print("[AVSwitch] Write to /proc/stb/video/sync_mode_choices failed!")
 		config.av.sync_mode.addNotifier(setSyncMode)
@@ -410,6 +414,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/ac3_choices") as ac3_choices:
 				ac3_choices.read().split('\n', 1)[0]
+				ac3_choices.close()
 		config.av.downmix_ac3 = ConfigSelection(choices=choices, default=default)
 		config.av.downmix_ac3.addNotifier(setAC3Downmix)
 
@@ -428,6 +433,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/aac_choices") as aac_choices:
 				aac_choices.read().split('\n', 1)[0]
+				aac_choices.close()
 		config.av.downmix_aac = ConfigSelection(choices=choices, default=default)
 		config.av.downmix_aac.addNotifier(setAACDownmix)
 
@@ -452,6 +458,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open(SystemInfo["CanDownmixAACPlus"]) as aacplus_choices:
 				aacplus_choices.read().split('\n', 1)[0]
+				aacplus_choices.close()
 		config.av.downmix_aacplus = ConfigSelection(choices=choices, default=default)
 		config.av.downmix_aacplus.addNotifier(setAACDownmixPlus)
 
@@ -470,6 +477,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/dts_choices") as dts_choices:
 				dts_choices.read().split('\n', 1)[0]
+				dts_choices.close()
 		config.av.downmix_dts = ConfigSelection(choices=choices, default=default)
 		config.av.downmix_dts.addNotifier(setDTSDownmix)
 
@@ -498,6 +506,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/dtshd_choices") as dtshd_choices:
 				dtshd_choices.read().split('\n', 1)[0]
+				dtshd_choices.close()
 		config.av.dtshd = ConfigSelection(choices=choices, default=default)
 		config.av.dtshd.addNotifier(setDTSHD)
 
@@ -517,6 +526,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open(SystemInfo["CanAACTranscode"]) as aac_transcode_choices:
 				aac_transcode_choices.read().split('\n', 1)[0]
+				aac_transcode_choices.close()
 		config.av.transcodeaac = ConfigSelection(choices=choices, default=default)
 		config.av.transcodeaac.addNotifier(setAACTranscode)
 	else:
@@ -556,6 +566,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/ac3plus_choices") as ac3plus_choices:
 				ac3plus_choices.read().split('\n', 1)[0]
+				ac3plus_choices.close()
 		config.av.transcodeac3plus = ConfigSelection(choices=choices, default=default)
 		config.av.transcodeac3plus.addNotifier(setAC3plusTranscode)
 
@@ -573,6 +584,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/wmapro_choices") as wmapro_choices:
 				wmapro_choices.read().split('\n', 1)[0]
+				wmapro_choices.close()
 		config.av.wmapro = ConfigSelection(choices=choices, default=default)
 		config.av.wmapro.addNotifier(setWMAPRO)
 
@@ -631,6 +643,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/3d_surround_choices") as surround:
 				surround.read().split('\n', 1)[0]
+				surround.close()
 		config.av.surround_3d = ConfigSelection(choices=choices, default=default)
 		config.av.surround_3d.addNotifier(set3DSurround)
 	else:
@@ -652,6 +665,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/3d_surround_speaker_position_choices") as speaker:
 				speaker.read().split('\n', 1)[0]
+				speaker.close()
 		config.av.speaker_3d = ConfigSelection(choices=choices, default=default)
 		config.av.speaker_3d.addNotifier(set3DPosition)
 	else:
@@ -674,6 +688,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/3dsurround_choices") as surroundspeaker:
 				surroundspeaker.read().split('\n', 1)[0]
+				surroundspeaker.close()
 		config.av.surround_3d_speaker = ConfigSelection(choices=choices, default=default)
 		config.av.surround_3d_speaker.addNotifier(set3DPositionDisable)
 	else:
@@ -696,6 +711,7 @@ def InitAVSwitch():
 		if SystemInfo["CanProc"]:
 			with open("/proc/stb/audio/avl_choices") as avl_choices:
 				avl_choices.read().split('\n', 1)[0]
+				avl_choices.close()
 		config.av.autovolume = ConfigSelection(choices=choices, default=default)
 		config.av.autovolume.addNotifier(setAutoVolume)
 	else:

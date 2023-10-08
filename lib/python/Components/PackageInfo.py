@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import xml.sax
 from Tools.Directories import crawlDirectory, resolveFilename, SCOPE_CONFIG, SCOPE_SKIN, copyfile, copytree
-from Components.Console import Console
 from Components.NimManager import nimmanager
 from Components.Opkg import OpkgComponent
 from Components.config import config, configfile
@@ -66,8 +65,10 @@ class InfoHandler(xml.sax.ContentHandler):
 				if "name" not in attrs:
 					self.printError("file tag with no name attribute")
 				else:
+					if "directory" not in attrs:
+						directory = self.directory
 					type = attrs["type"]
-					if type not in self.validFileTypes:
+					if not type in self.validFileTypes:
 						self.printError("file tag with invalid type attribute")
 					else:
 						self.filetype = type
@@ -190,7 +191,7 @@ class PackageInfoHandler:
 			self.directory = [self.directory]
 
 		for directory in self.directory:
-			packages += crawlDirectory(directory, r".*\.info$")
+			packages += crawlDirectory(directory, ".*\.info$")
 
 		for package in packages:
 			self.readInfo(package[0] + "/", package[0] + "/" + package[1])
@@ -235,6 +236,7 @@ class PackageInfoHandler:
 		return self.packageDetails
 
 	def prerequisiteMet(self, prerequisites):
+		met = True
 		if self.neededTag is None:
 			if "tag" in prerequisites:
 				return False
@@ -303,7 +305,7 @@ class PackageInfoHandler:
 	def installNext(self, *args, **kwargs):
 		if self.reloadFavourites:
 			self.reloadFavourites = False
-			eDVBDB.getInstance().reloadBouquets()
+			db = eDVBDB.getInstance().reloadBouquets()
 
 		self.currentIndex += 1
 		attributes = self.installingAttributes
@@ -339,7 +341,6 @@ class PackageInfoHandler:
 			self.installSkin(skin["directory"], skin["name"])
 		elif currentAttribute == "config":
 			if self.currentIndex == 0:
-				from Components.config import configfile
 				configfile.save()
 			config = attributes["config"][self.currentIndex]
 			self.mergeConfig(config["directory"], config["name"])
@@ -369,7 +370,7 @@ class PackageInfoHandler:
 
 	def installIPK(self, directory, name):
 		if self.blocking:
-			Console().ePopen("opkg install %s%s" % (directory, name))
+			os.system("opkg install " + directory + name)
 			self.installNext()
 		else:
 			self.opkg = OpkgComponent()

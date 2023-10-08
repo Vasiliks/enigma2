@@ -39,7 +39,7 @@ class DirectoryBrowser(Screen, HelpableScreen):
 				"red": self.exit,
 				"ok": self.ok,
 				"cancel": self.exit
-		})
+			})
 
 	def ok(self):
 		if self.filelist.canDescent():
@@ -105,5 +105,5 @@ class MediaPlayerSettings(ConfigListScreen, Screen):
 
 	def DirectoryBrowserClosed(self, path):
 		print("[MediaPlayer] PathBrowserClosed:" + str(path))
-		if path:
+		if path != False:
 			config.mediaplayer.defaultDir.setValue(path)

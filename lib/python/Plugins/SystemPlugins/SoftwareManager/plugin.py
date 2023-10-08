@@ -33,7 +33,6 @@ from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER, eListbox, gFont, getDesktop
 from twisted.web import client
 from Plugins.SystemPlugins.SoftwareManager.BackupRestore import BackupSelection, RestoreMenu, BackupScreen, RestoreScreen, getBackupPath, getBackupFilename
 from Plugins.SystemPlugins.SoftwareManager.SoftwareTools import iSoftwareTools
-from gettext import ngettext
 
 config.plugins.configurationbackup = ConfigSubsection()
 config.plugins.configurationbackup.backuplocation = ConfigText(default='/media/hdd/', visible_width=50, fixed_size=False)
@@ -41,11 +40,11 @@ config.plugins.configurationbackup.backupdirs = ConfigLocations(default=[eEnv.re
 
 config.plugins.softwaremanager = ConfigSubsection()
 config.plugins.softwaremanager.overwriteConfigFiles = ConfigSelection(
-	[
-		("Y", _("Yes, always")),
-		("N", _("No, never")),
-		("ask", _("Always ask"))
-	], "Y")
+				[
+					("Y", _("Yes, always")),
+					("N", _("No, never")),
+					("ask", _("Always ask"))
+				], "Y")
 config.plugins.softwaremanager.onSetupMenu = ConfigYesNo(default=True)
 config.plugins.softwaremanager.onBlueButton = ConfigYesNo(default=False)
 config.plugins.softwaremanager.epgcache = ConfigYesNo(default=False)
@@ -62,7 +61,7 @@ def write_cache(cache_file, cache_data):
 
 
 def valid_cache(cache_file, cache_ttl):
-	# See if the cache file exists and is still living
+	#See if the cache file exists and is still living
 	try:
 		mtime = os.stat(cache_file)[os.stat.ST_MTIME]
 	except:
@@ -87,7 +86,7 @@ class UpdatePluginMenu(Screen):
 			<widget source="menu" render="Listbox" position="15,60" size="330,290" scrollbarMode="showOnDemand">
 				<convert type="TemplatedMultiContent">
 					{"template": [
-							MultiContentEntryText(pos = (2, 2), size = (330, 24), flags = RT_HALIGN_LEFT, text = 1),  # index 0 is the MenuText,
+							MultiContentEntryText(pos = (2, 2), size = (330, 24), flags = RT_HALIGN_LEFT, text = 1), # index 0 is the MenuText,
 						],
 					"fonts": [gFont("Regular", 22)],
 					"itemHeight": 25
@@ -97,7 +96,7 @@ class UpdatePluginMenu(Screen):
 			<widget source="menu" render="Listbox" position="360,50" size="240,300" scrollbarMode="showNever" selection="1">
 				<convert type="TemplatedMultiContent">
 					{"template": [
-							MultiContentEntryText(pos = (2, 2), size = (240, 300), flags = RT_HALIGN_CENTER|RT_VALIGN_CENTER|RT_WRAP, text = 2),  # index 2 is the Description,
+							MultiContentEntryText(pos = (2, 2), size = (240, 300), flags = RT_HALIGN_CENTER|RT_VALIGN_CENTER|RT_WRAP, text = 2), # index 2 is the Description,
 						],
 					"fonts": [gFont("Regular", 22)],
 					"itemHeight": 300
@@ -137,13 +136,13 @@ class UpdatePluginMenu(Screen):
 						else:
 							menuEntryDescription = _('Extended Software Plugin')
 						self.list.append(('default-plugin', menuEntryName, menuEntryDescription + self.oktext, callFnc))
-			if config.usage.setup_level.index >= 2:  # expert+
+			if config.usage.setup_level.index >= 2: # expert+
 				self.list.append(("advanced", _("Advanced options"), _("Advanced options and settings.") + self.oktext, None))
 		elif self.menu == 1:
 			self.list.append(("advancedrestore", _("Advanced restore"), _("Restore your backups by date.") + self.oktext, None))
 			self.list.append(("backuplocation", _("Select backup location"), _("Select your backup device.\nCurrent device: ") + config.plugins.configurationbackup.backuplocation.value + self.oktext, None))
 			self.list.append(("backupfiles", _("Select backup files"), _("Select files for backup.") + self.oktext + "\n\n" + self.infotext, None))
-			if config.usage.setup_level.index >= 2:  # expert+
+			if config.usage.setup_level.index >= 2: # expert+
 				self.list.append(("opkg-manager", _("Packet management"), _("View, install and remove available or installed packages.") + self.oktext, None))
 			self.list.append(("opkg-source", _("Select update source"), _("Edit the update source address.") + self.oktext, None))
 			for p in plugins.getPlugins(PluginDescriptor.WHERE_SOFTWAREMANAGER):
@@ -218,7 +217,7 @@ class UpdatePluginMenu(Screen):
 			if iSoftwareTools.available_updates != 0:
 				self.text = _("There are at least %d updates available.") % iSoftwareTools.available_updates
 			else:
-				self.text = ""  #_("There are no updates available.")
+				self.text = "" #_("There are no updates available.")
 			if iSoftwareTools.list_updating:
 				self.text += "\n" + _("A search for available updates is currently in progress.")
 		else:
@@ -317,7 +316,7 @@ class UpdatePluginMenu(Screen):
 		self.session.open(MessageBox, _("Backup completed.") if retval else _("Backup failed."), MessageBox.TYPE_INFO, timeout=10)
 
 	def startRestore(self, ret=False):
-		if ret:
+		if (ret == True):
 			self.exe = True
 			self.session.open(RestoreScreen, runRestore=True)
 
@@ -355,10 +354,11 @@ class SoftwareManagerSetup(ConfigListScreen, Screen):
 
 		self["actions"] = ActionMap(["SetupActions", "MenuActions"],
 			{
-			"cancel": self.keyCancel,
-			"save": self.apply,
-			"menu": self.closeRecursive,
-		}, -2)
+				"cancel": self.keyCancel,
+				"save": self.apply,
+				"menu": self.closeRecursive,
+			}, -2)
+
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("OK"))
 		self["key_yellow"] = StaticText()
@@ -456,7 +456,7 @@ class SoftwareManagerInfo(Screen):
 			<widget source="list" render="Listbox" position="5,50" size="550,340" scrollbarMode="showOnDemand" selection="0">
 				<convert type="TemplatedMultiContent">
 					{"template": [
-							MultiContentEntryText(pos = (5, 0), size = (540, 26), font=0, flags = RT_HALIGN_LEFT | RT_HALIGN_CENTER, text = 0),  # index 0 is the name
+							MultiContentEntryText(pos = (5, 0), size = (540, 26), font=0, flags = RT_HALIGN_LEFT | RT_HALIGN_CENTER, text = 0), # index 0 is the name
 						],
 					"fonts": [gFont("Regular", 24),gFont("Regular", 22)],
 					"itemHeight": 26
@@ -477,9 +477,9 @@ class SoftwareManagerInfo(Screen):
 
 		self["actions"] = ActionMap(["ShortcutActions", "WizardActions"],
 			{
-			"back": self.close,
-			"red": self.close,
-		}, -2)
+				"back": self.close,
+				"red": self.close,
+			}, -2)
 
 		self.list = []
 		self["list"] = List(self.list)
@@ -522,15 +522,15 @@ class PluginManager(Screen, PackageInfoHandler):
 				<convert type="TemplatedMultiContent">
 				{"templates":
 					{"default": (51,[
-							MultiContentEntryText(pos = (0, 1), size = (470, 24), font=0, flags = RT_HALIGN_LEFT, text = 0),  # index 0 is the name
-							MultiContentEntryText(pos = (0, 25), size = (470, 24), font=1, flags = RT_HALIGN_LEFT, text = 2),  # index 2 is the description
-							MultiContentEntryPixmapAlphaTest(pos = (475, 0), size = (48, 48), png = 5),  # index 5 is the status pixmap
-							MultiContentEntryPixmapAlphaTest(pos = (0, 49), size = (550, 2), png = 6),  # index 6 is the div pixmap
+							MultiContentEntryText(pos = (0, 1), size = (470, 24), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 0 is the name
+							MultiContentEntryText(pos = (0, 25), size = (470, 24), font=1, flags = RT_HALIGN_LEFT, text = 2), # index 2 is the description
+							MultiContentEntryPixmapAlphaBlend(pos = (475, 0), size = (48, 48), png = 5), # index 5 is the status pixmap
+							MultiContentEntryPixmapAlphaBlend(pos = (0, 49), size = (550, 2), png = 6), # index 6 is the div pixmap
 						]),
 					"category": (40,[
-							MultiContentEntryText(pos = (30, 0), size = (500, 22), font=0, flags = RT_HALIGN_LEFT, text = 0),  # index 0 is the name
-							MultiContentEntryText(pos = (30, 22), size = (500, 16), font=2, flags = RT_HALIGN_LEFT, text = 1),  # index 1 is the description
-							MultiContentEntryPixmapAlphaTest(pos = (0, 38), size = (550, 2), png = 3),  # index 3 is the div pixmap
+							MultiContentEntryText(pos = (30, 0), size = (500, 22), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 0 is the name
+							MultiContentEntryText(pos = (30, 22), size = (500, 16), font=2, flags = RT_HALIGN_LEFT, text = 1), # index 1 is the description
+							MultiContentEntryPixmapAlphaBlend(pos = (0, 38), size = (550, 2), png = 3), # index 3 is the div pixmap
 						])
 					},
 					"fonts": [gFont("Regular", 22),gFont("Regular", 20),gFont("Regular", 16)],
@@ -573,7 +573,7 @@ class PluginManager(Screen, PackageInfoHandler):
 
 		self.cmdList = []
 		self.oktext = _("\nAfter pressing OK, please wait!")
-		if self.selectionChanged not in self["list"].onSelectionChanged:
+		if not self.selectionChanged in self["list"].onSelectionChanged:
 			self["list"].onSelectionChanged.append(self.selectionChanged)
 
 		self.currList = ""
@@ -722,7 +722,7 @@ class PluginManager(Screen, PackageInfoHandler):
 				if current[7] != '':
 					idx = self["list"].getIndex()
 					detailsFile = self.list[idx][1]
-					if self.list[idx][7]:
+					if self.list[idx][7] == True:
 						for entry in self.selectedFiles:
 							if entry[0] == detailsFile:
 								self.selectedFiles.remove(entry)
@@ -883,7 +883,7 @@ class PluginManager(Screen, PackageInfoHandler):
 				return ((_("Electronic Program Guide"), _("View list of available EPG extensions."), tag, divpng))
 			elif tag == 'Communication':
 				return ((_("Communication"), _("View list of available communication extensions."), tag, divpng))
-			else:  # dynamically generate non existent tags
+			else: # dynamically generate non existent tags
 				return ((str(tag), _("View list of available %s extensions.") % str(tag), tag, divpng))
 
 	def prepareInstall(self):
@@ -961,10 +961,10 @@ class PluginManagerInfo(Screen):
 			<widget source="list" render="Listbox" position="5,50" size="550,350" scrollbarMode="showOnDemand" selection="1">
 				<convert type="TemplatedMultiContent">
 					{"template": [
-							MultiContentEntryText(pos = (50, 0), size = (150, 26), font=0, flags = RT_HALIGN_LEFT, text = 0),  # index 0 is the name
-							MultiContentEntryText(pos = (50, 27), size = (540, 23), font=1, flags = RT_HALIGN_LEFT, text = 1),  # index 1 is the state
-							MultiContentEntryPixmapAlphaTest(pos = (0, 1), size = (48, 48), png = 2),  # index 2 is the status pixmap
-							MultiContentEntryPixmapAlphaTest(pos = (0, 48), size = (550, 2), png = 3),  # index 3 is the div pixmap
+							MultiContentEntryText(pos = (50, 0), size = (150, 26), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 0 is the name
+							MultiContentEntryText(pos = (50, 27), size = (540, 23), font=1, flags = RT_HALIGN_LEFT, text = 1), # index 1 is the state
+							MultiContentEntryPixmapAlphaBlend(pos = (0, 1), size = (48, 48), png = 2), # index 2 is the status pixmap
+							MultiContentEntryPixmapAlphaBlend(pos = (0, 48), size = (550, 2), png = 3), # index 3 is the div pixmap
 						],
 					"fonts": [gFont("Regular", 24),gFont("Regular", 22)],
 					"itemHeight": 50
@@ -1062,10 +1062,10 @@ class PluginManagerHelp(Screen):
 			<widget source="list" render="Listbox" position="5,50" size="550,350" scrollbarMode="showOnDemand" selection="1">
 				<convert type="TemplatedMultiContent">
 					{"template": [
-							MultiContentEntryText(pos = (50, 0), size = (540, 26), font=0, flags = RT_HALIGN_LEFT, text = 0),  # index 0 is the name
-							MultiContentEntryText(pos = (50, 27), size = (540, 23), font=1, flags = RT_HALIGN_LEFT, text = 1),  # index 1 is the state
-							MultiContentEntryPixmapAlphaTest(pos = (0, 1), size = (48, 48), png = 2),  # index 2 is the status pixmap
-							MultiContentEntryPixmapAlphaTest(pos = (0, 48), size = (550, 2), png = 3),  # index 3 is the div pixmap
+							MultiContentEntryText(pos = (50, 0), size = (540, 26), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 0 is the name
+							MultiContentEntryText(pos = (50, 27), size = (540, 23), font=1, flags = RT_HALIGN_LEFT, text = 1), # index 1 is the state
+							MultiContentEntryPixmapAlphaBlend(pos = (0, 1), size = (48, 48), png = 2), # index 2 is the status pixmap
+							MultiContentEntryPixmapAlphaBlend(pos = (0, 48), size = (550, 2), png = 3), # index 3 is the div pixmap
 						],
 					"fonts": [gFont("Regular", 24),gFont("Regular", 22)],
 					"itemHeight": 50
@@ -1144,7 +1144,7 @@ class PluginDetails(Screen, PackageInfoHandler):
 	def __init__(self, session, plugin_path, packagedata=None):
 		Screen.__init__(self, session)
 		self.skin_path = plugin_path
-		self.language = language.getLanguage()[:2]  # getLanguage returns e.g. "fi_FI" for "language_country"
+		self.language = language.getLanguage()[:2] # getLanguage returns e.g. "fi_FI" for "language_country"
 		self.attributes = None
 		PackageInfoHandler.__init__(self, self.statusCallback)
 		self.directory = resolveFilename(SCOPE_METADIR)
@@ -1505,10 +1505,10 @@ class PacketManager(Screen, NumericalTextInput):
 			<widget source="list" render="Listbox" position="5,50" size="520,365" scrollbarMode="showOnDemand">
 				<convert type="TemplatedMultiContent">
 					{"template": [
-							MultiContentEntryText(pos = (5, 1), size = (440, 28), font=0, flags = RT_HALIGN_LEFT, text = 0),  # index 0 is the name
-							MultiContentEntryText(pos = (5, 26), size = (440, 20), font=1, flags = RT_HALIGN_LEFT, text = 2),  # index 2 is the description
-							MultiContentEntryPixmapAlphaTest(pos = (445, 2), size = (48, 48), png = 4),  # index 4 is the status pixmap
-							MultiContentEntryPixmapAlphaTest(pos = (5, 50), size = (510, 2), png = 5),  # index 4 is the div pixmap
+							MultiContentEntryText(pos = (5, 1), size = (440, 28), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 0 is the name
+							MultiContentEntryText(pos = (5, 26), size = (440, 20), font=1, flags = RT_HALIGN_LEFT, text = 2), # index 2 is the description
+							MultiContentEntryPixmapAlphaBlend(pos = (445, 2), size = (48, 48), png = 4), # index 4 is the status pixmap
+							MultiContentEntryPixmapAlphaBlend(pos = (5, 50), size = (510, 2), png = 5), # index 4 is the div pixmap
 						],
 					"fonts": [gFont("Regular", 22),gFont("Regular", 14)],
 					"itemHeight": 52
@@ -1557,8 +1557,8 @@ class PacketManager(Screen, NumericalTextInput):
 		self.Console = Console()
 		self.cmdList = []
 		self.cachelist = []
-		self.cache_ttl = 86400  # 600 is default, 0 disables, Seconds cache is considered valid (24h should be ok for caching opkgs)
-		self.cache_file = eEnv.resolve('${libdir}/enigma2/python/Plugins/SystemPlugins/SoftwareManager/packetmanager.cache')  # Path to cache directory
+		self.cache_ttl = 86400  #600 is default, 0 disables, Seconds cache is considered valid (24h should be ok for caching opkgs)
+		self.cache_file = eEnv.resolve('${libdir}/enigma2/python/Plugins/SystemPlugins/SoftwareManager/packetmanager.cache') #Path to cache directory
 		self.oktext = _("\nAfter pressing OK, please wait!")
 		self.unwanted_extensions = ('-dev', '-staticdev', '-dbg', '-doc', '-src', '-po', '--pycache--')
 

@@ -104,7 +104,7 @@ class picshow(Screen):
 			self["key_yellow"].setText("")
 
 	def KeyGreen(self):
-		# if not self.filelist.canDescent():
+		#if not self.filelist.canDescent():
 		self.session.openWithCallback(self.callbackView, Pic_Thumb, self.filelist.getFileList(), self.filelist.getSelectionIndex(), self.filelist.getCurrentDirectory())
 
 	def KeyYellow(self):
@@ -121,7 +121,7 @@ class picshow(Screen):
 			self.session.openWithCallback(self.callbackView, Pic_Full_View, self.filelist.getFileList(), self.filelist.getSelectionIndex(), self.filelist.getCurrentDirectory())
 
 	def setConf(self, retval=None):
-		# 0=Width 1=Height 2=Aspect 3=use_cache 4=resize_type 5=Background(#AARRGGBB)
+		#0=Width 1=Height 2=Aspect 3=use_cache 4=resize_type 5=Background(#AARRGGBB)
 		self.picload.setPara((self["thn"].instance.size().width(), self["thn"].instance.size().height(), 1, 1, config.pic.cache.value, int(config.pic.resize.value), "#00000000", config.pic.autoOrientation.value))
 
 	def callbackView(self, val=0):
@@ -149,11 +149,11 @@ class Pic_Setup(ConfigListScreen, Screen):
 		self.setTitle(_("Settings"))
 		self["actions"] = ActionMap(["SetupActions", "MenuActions"],
 			{
-			"cancel": self.keyCancel,
-			"save": self.keySave,
-			"ok": self.keySave,
-			"menu": self.closeRecursive,
-		}, -2)
+				"cancel": self.keyCancel,
+				"save": self.keySave,
+				"ok": self.keySave,
+				"menu": self.closeRecursive,
+			}, -2)
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("Save"))
 
@@ -194,7 +194,7 @@ class Pic_Exif(Screen):
 		self.setTitle(_("Info"))
 
 		self["actions"] = ActionMap(["SetupActions", "ColorActions"],
-			{
+		{
 			"cancel": self.close
 		}, -1)
 
@@ -230,9 +230,9 @@ class Pic_Thumb(Screen):
 
 		size_w = getDesktop(0).size().width()
 		size_h = getDesktop(0).size().height()
-		self.thumbsX = size_w // (self.spaceX + self.picX)  # thumbnails in X
-		self.thumbsY = size_h // (self.spaceY + self.picY)  # thumbnails in Y
-		self.thumbsC = self.thumbsX * self.thumbsY  # all thumbnails
+		self.thumbsX = size_w // (self.spaceX + self.picX) # thumbnails in X
+		self.thumbsY = size_h // (self.spaceY + self.picY) # thumbnails in Y
+		self.thumbsC = self.thumbsX * self.thumbsY # all thumbnails
 
 		self.positionlist = []
 		skincontent = ""
@@ -285,7 +285,7 @@ class Pic_Thumb(Screen):
 		framePos = 0
 		Page = 0
 		for x in piclist:
-			if not x[0][1]:
+			if x[0][1] == False:
 				self.filelist.append((index, framePos, Page, x[0][0], path + x[0][0]))
 				index += 1
 				framePos += 1
@@ -313,7 +313,7 @@ class Pic_Thumb(Screen):
 		self.paintFrame()
 
 	def paintFrame(self):
-		# print("index=" + str(self.index))
+		#print("index=" + str(self.index))
 		if self.maxentry < self.index or self.index < 0:
 			return
 
@@ -327,23 +327,23 @@ class Pic_Thumb(Screen):
 
 	def newPage(self):
 		self.Thumbnaillist = []
-		# clear Labels and Thumbnail
+		#clear Labels and Thumbnail
 		for x in range(self.thumbsC):
 			self["label" + str(x)].setText("")
 			self["thumb" + str(x)].hide()
-		# paint Labels and fill Thumbnail-List
+		#paint Labels and fill Thumbnail-List
 		for x in self.filelist:
 			if x[T_PAGE] == self.currPage:
 				self["label" + str(x[T_FRAME_POS])].setText("(" + str(x[T_INDEX] + 1) + ") " + x[T_NAME])
 				self.Thumbnaillist.append([0, x[T_FRAME_POS], x[T_FULL]])
 
-		# paint Thumbnail start
+		#paint Thumbnail start
 		self.showPic()
 
 	def showPic(self, picInfo=""):
 		for x in range(len(self.Thumbnaillist)):
 			if self.Thumbnaillist[x][0] == 0:
-				if self.picload.getThumbnail(self.Thumbnaillist[x][2]) == 1:  # zu tun probier noch mal
+				if self.picload.getThumbnail(self.Thumbnaillist[x][2]) == 1: #zu tun probier noch mal
 					self.ThumbTimer.start(500, True)
 				else:
 					self.Thumbnaillist[x][0] = 1
@@ -449,17 +449,17 @@ class Pic_Full_View(Screen):
 		self.dirlistcount = 0
 
 		for x in filelist:
-			if len(filelist[0]) == 3:  # orig. filelist
+			if len(filelist[0]) == 3: #orig. filelist
 				if x[0][1] == False:
 					self.filelist.append(path + x[0][0])
 				else:
 					self.dirlistcount += 1
-			elif len(filelist[0]) == 2:  # scanlist
+			elif len(filelist[0]) == 2: #scanlist
 				if x[0][1] == False:
 					self.filelist.append(x[0][0])
 				else:
 					self.dirlistcount += 1
-			else:  # thumbnaillist
+			else: # thumbnaillist
 				self.filelist.append(x[T_FULL])
 
 		self.maxentry = len(self.filelist) - 1
@@ -483,12 +483,12 @@ class Pic_Full_View(Screen):
 			self.session.nav.stopService()
 		self.setConf()
 		self["play_icon"].hide()
-		if not config.pic.infoline.value:
+		if config.pic.infoline.value == False:
 			self["file"].setText("")
 		self.start_decode()
 
 	def setConf(self, retval=None):
-		# 0=Width 1=Height 2=Aspect 3=use_cache 4=resize_type 5=Background(#AARRGGBB)
+		#0=Width 1=Height 2=Aspect 3=use_cache 4=resize_type 5=Background(#AARRGGBB)
 		self.picload.setPara([self["pic"].instance.size().width(), self["pic"].instance.size().height(), 1, 1, 0, int(config.pic.resize.value), self.bgcolor, config.pic.autoOrientation.value])
 
 	def ShowPicture(self):
@@ -537,7 +537,7 @@ class Pic_Full_View(Screen):
 
 	def slidePic(self):
 		print("[PicturePlayer] slide to next Picture index=" + str(self.lastindex))
-		if not config.pic.loop.value and self.lastindex == self.maxentry:
+		if config.pic.loop.value == False and self.lastindex == self.maxentry:
 			self.PlayPause()
 		self.shownow = True
 		self.ShowPicture()

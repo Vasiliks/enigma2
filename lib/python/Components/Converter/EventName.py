@@ -8,7 +8,6 @@ from Components.UsageConfig import dropEPGNewLines, replaceEPGSeparator
 from Components.config import config
 from Tools.Directories import resolveFilename, SCOPE_CURRENT_SKIN
 from time import localtime, mktime, strftime
-from gettext import pgettext
 
 
 class ETSIClassifications(dict):

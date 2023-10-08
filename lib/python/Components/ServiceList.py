@@ -213,7 +213,7 @@ class ServiceList(GUIComponent):
 		return rc
 
 	def connectSelChanged(self, fnc):
-		if fnc not in self.onSelectionChanged:
+		if not fnc in self.onSelectionChanged:
 			self.onSelectionChanged.append(fnc)
 
 	def disconnectSelChanged(self, fnc):

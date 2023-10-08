@@ -96,12 +96,12 @@ class Listbox(Renderer):
 	def getScrollbarMode(self):
 		mode = self.instance and self.instance.getScrollbarMode()
 		mode = {
-			eListbox.showOnDemand: "showOnDemand",
-			eListbox.showAlways: "showAlways",
-			eListbox.showNever: "showNever",
-			eListbox.showLeftOnDemand: "showLeftOnDemand",
-			eListbox.showLeftAlways: "showLeftAlways",
-		}.get(mode, "showNever")
+				eListbox.showOnDemand: "showOnDemand",
+				eListbox.showAlways: "showAlways",
+				eListbox.showNever: "showNever",
+				eListbox.showLeftOnDemand: "showLeftOnDemand",
+				eListbox.showLeftAlways: "showLeftAlways",
+			}.get(mode, "showNever")
 		return mode
 
 	scrollbarMode = property(getScrollbarMode, setScrollbarMode)

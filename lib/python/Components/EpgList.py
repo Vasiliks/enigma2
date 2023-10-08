@@ -113,22 +113,22 @@ class EPGList(GUIComponent):
 	def moveDown(self):
 		self.instance.moveSelection(self.instance.moveDown)
 
-	def connectSelectionChanged(self, func):
+	def connectSelectionChanged(func):
 		if not self.onSelChanged.count(func):
 			self.onSelChanged.append(func)
 
-	def disconnectSelectionChanged(self, func):
+	def disconnectSelectionChanged(func):
 		self.onSelChanged.remove(func)
 
 	def selectionChanged(self):
 		for x in self.onSelChanged:
 			if x is not None:
 				x()
-				# try:
-				# x()
-				# except:  # FIXME!!!
-				# print("FIXME in EPGList.selectionChanged")
-				# pass
+#				try:
+#					x()
+#				except: # FIXME!!!
+#					print("FIXME in EPGList.selectionChanged")
+#					pass
 
 	GUI_WIDGET = eListbox
 
@@ -184,7 +184,7 @@ class EPGList(GUIComponent):
 				xpos += w
 				w = width / 10 * 5
 				self.descr_rect = Rect(xpos, 0, width, height)
-		else:  # EPG_TYPE_SIMILAR
+		else: # EPG_TYPE_SIMILAR
 			if self.skinColumns:
 				x = 0
 				self.weekday_rect = Rect(0, 0, self.gap(self.col[0] + 120), height)
@@ -218,7 +218,7 @@ class EPGList(GUIComponent):
 		t = localtime(beginTime)
 		et = localtime(beginTime + duration)
 		res = [
-			None,  # no private data needed
+			None, # no private data needed
 			(eListboxPythonMultiContent.TYPE_TEXT, r1.x, r1.y, r1.w, r1.h, 0, RT_HALIGN_LEFT | RT_VALIGN_CENTER, strftime(config.usage.date.dayshort.value, t)),
 			(eListboxPythonMultiContent.TYPE_TEXT, r2.x, r2.y, split, r2.h, 0, RT_HALIGN_RIGHT | RT_VALIGN_CENTER, strftime(config.usage.time.short.value + " -", t)),
 			(eListboxPythonMultiContent.TYPE_TEXT, r2.x + split, r2.y, r2.w - split, r2.h, 0, RT_HALIGN_RIGHT | RT_VALIGN_CENTER, strftime(config.usage.time.short.value, et))
@@ -283,7 +283,7 @@ class EPGList(GUIComponent):
 					prefix = ""
 				res.extend((
 					(eListboxPythonMultiContent.TYPE_PROGRESS, r2.x, r2.y, self.tw, r2.h, percent),
-					(eListboxPythonMultiContent.TYPE_TEXT, r3.x, r3.y, self.gap(self.tw), r3.h, 1, RT_HALIGN_CENTER, prefix + _("%d min") % remaining),
+					(eListboxPythonMultiContent.TYPE_TEXT, r3.x, r3.y, self.gap(self.tw), r3.h, 1, RT_HALIGN_CENTER, _("%s%d min") % (prefix, remaining)),
 					(eListboxPythonMultiContent.TYPE_TEXT, r3.x + self.tw, r3.y, r3.w, r3.h, 0, RT_HALIGN_LEFT | RT_VALIGN_CENTER, EventName)
 				))
 		return res
@@ -297,16 +297,16 @@ class EPGList(GUIComponent):
 		return []
 
 	def fillMultiEPG(self, services, stime=-1):
-		# t = time()
+		#t = time()
 		test = [(service.ref.toString(), 0, stime) for service in services]
 		test.insert(0, 'X0RIBDTCn')
 		self.list = self.queryEPG(test)
 		self.l.setList(self.list)
-		# print(time() - t)
+		#print(time() - t)
 		self.selectionChanged()
 
 	def updateMultiEPG(self, direction):
-		# t = time()
+		#t = time()
 		test = [x[3] and (x[1], direction, x[3]) or (x[1], direction, 0) for x in self.list]
 		test.insert(0, 'XRIBDTCn')
 		tmp = self.queryEPG(test)
@@ -318,7 +318,7 @@ class EPGList(GUIComponent):
 					self.list[cnt] = (changecount, x[0], x[1], x[2], x[3], x[4], x[5], x[6])
 			cnt += 1
 		self.l.setList(self.list)
-		# print(time() - t)
+		#print(time() - t)
 		self.selectionChanged()
 
 	def fillSingleEPG(self, service):
@@ -356,6 +356,7 @@ class EPGList(GUIComponent):
 		if not serviceref:
 			return
 		index = 0
+		refstr = serviceref.toString()
 		for x in self.list:
 			if CompareWithAlternatives(x[1], serviceref):
 				self.instance.moveSelectionTo(index)

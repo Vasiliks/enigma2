@@ -1,9 +1,12 @@
 from Components.config import config, ConfigSelection, ConfigSubDict, ConfigYesNo
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo
 from Tools.CList import CList
 import os
-from enigma import eAVControl
+from enigma import eAVControl, getDesktop
 from Components.About import getChipSetNumber, getChipSetString
+from Tools.Directories import fileExists
+from Components.Console import Console
+import re
 
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
@@ -76,9 +79,9 @@ class VideoHardware:
 								"auto": {50: "2160p50", 60: "2160p", 24: "2160p24"}}
 		if brand != "Vu+":
 			rates["2160p30"] = {"25Hz": {50: "2160p25"},
-									"30Hz": {60: "2160p30"},
-									"multi": {50: "2160p25", 60: "2160p30"},
-									"auto": {50: "2160p25", 60: "2160p30", 24: "2160p24"}}
+									  "30Hz": {60: "2160p30"},
+									  "multi": {50: "2160p25", 60: "2160p30"},
+									  "auto": {50: "2160p25", 60: "2160p30", 24: "2160p24"}}
 		else:
 			rates["2160p30"] = {"30Hz": {60: "2160p30"}}
 	rates["smpte"] = {"50Hz": {50: "smpte50hz"},
@@ -190,7 +193,7 @@ class VideoHardware:
 		if "YPbPr" in self.modes and not BoxInfo.getItem("yuv"):
 			del self.modes["YPbPr"]
 		if "Scart" in self.modes and not BoxInfo.getItem("scart") and (BoxInfo.getItem("rca") or BoxInfo.getItem("avjack")):
-			self.modes["RCA"] = self.modes["Scart"]
+			modes["RCA"] = modes["Scart"]
 			del self.modes["Scart"]
 		if "Scart" in self.modes and not BoxInfo.getItem("rca") and not BoxInfo.getItem("scart") and not BoxInfo.getItem("avjack"):
 			del self.modes["Scart"]
@@ -214,7 +217,7 @@ class VideoHardware:
 		self.modes_available = modes.split()
 
 	def readPreferredModes(self):
-		if not config.av.edid_override.value:
+		if config.av.edid_override.value == False:
 			modes = eAVControl.getInstance().getPreferredModes(1)
 			self.modes_preferred = modes.split(' ')
 			if len(self.modes_preferred) <= 1:

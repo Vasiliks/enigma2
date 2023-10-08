@@ -1,5 +1,6 @@
 import os
 from enigma import eConsoleAppContainer
+from Components.config import config
 from Components.Harddisk import harddiskmanager
 from Tools.Directories import resolveFilename, SCOPE_LIBDIR
 

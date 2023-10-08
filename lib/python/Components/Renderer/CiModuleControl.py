@@ -33,7 +33,7 @@ class CiModuleControl(Renderer, VariableText):
 		self.changed(True)
 
 	def changed(self, what):
-		if what or what[0] == self.CHANGED_SPECIFIC and what[1] == iPlayableService.evStart:
+		if what == True or what[0] == self.CHANGED_SPECIFIC and what[1] == iPlayableService.evStart:
 			string = ""
 			NUM_CI = SystemInfo["CommonInterface"]
 			if NUM_CI and NUM_CI > 0:

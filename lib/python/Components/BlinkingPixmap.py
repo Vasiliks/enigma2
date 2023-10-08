@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from Components.Pixmap import PixmapConditional
 from Components.ConditionalWidget import BlinkingWidgetConditional, BlinkingWidget
 
 
 class BlinkingPixmap(BlinkingWidget):
 	def __init__(self):
-		BlinkingWidget.__init__(self)
+		Widget.__init__(self)
 
 
 class BlinkingPixmapConditional(BlinkingWidgetConditional, PixmapConditional):
