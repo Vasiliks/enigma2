@@ -178,14 +178,14 @@ def getPossibleSubservicesForCurrentChannel(current_service):
 	return []
 
 
-def getActiveSubservicesForCurrentChannel(service):
-	info = service and service.info()
-	current_service = info and ':'.join(info.getInfoString(iServiceInformation.sServiceref).split(':')[:11])
-	activeSubservices = []
+def getActiveSubservicesForCurrentChannel(current_service):
 	if current_service:
 		possibleSubservices = getPossibleSubservicesForCurrentChannel(current_service)
+		activeSubservices = []
+		epgCache = eEPGCache.getInstance()
 		for subservice in possibleSubservices:
-			events = eEPGCache.getInstance().lookupEvent(['BDTS', (subservice, 0, -1)])
+			servicename = ServiceReference(subservice).getServiceName()
+			events = epgCache.lookupEvent(['BDTS', (subservice, 0, -1)])
 			if events and len(events) == 1:
 				event = events[0]
 				title = event[2]
@@ -193,18 +193,18 @@ def getActiveSubservicesForCurrentChannel(service):
 					starttime = datetime.datetime.fromtimestamp(event[0]).strftime('%H:%M')
 					endtime = datetime.datetime.fromtimestamp(event[0] + event[1]).strftime('%H:%M')
 					schedule = str(starttime) + "-" + str(endtime)
-					activeSubservices.append(("%s [%s] %s" % (ServiceReference(subservice).getServiceName(), schedule, title), subservice))
-	if not activeSubservices:
-		subservices = service and service.subServices()
-		if subservices:
-			for idx in range(0, subservices.getNumberOfSubservices()):
-				subservice = subservices.getSubservice(idx)
-				activeSubservices.append((subservice.getName(), subservice.toString()))
-	return activeSubservices
+					activeSubservices.append((servicename + " " + schedule + " " + title, subservice))
+				elif title:
+					activeSubservices.append((servicename + " " + title, subservice))
+			activeSubservices.append((servicename, subservice))
+		return activeSubservices
 
 
-def hasActiveSubservicesForCurrentChannel(service):
-	return bool(getActiveSubservicesForCurrentChannel(service))
+def hasActiveSubservicesForCurrentChannel(current_service):
+	if current_service and "%3a" not in current_service:
+		current_service = ':'.join(current_service.split(':')[:11])
+	subservices = getPossibleSubservicesForCurrentChannel(current_service)
+	return bool(subservices and len(subservices) > 1)
 
 
 class InfoBarDish:
@@ -3044,9 +3044,8 @@ class InfoBarSubserviceSelection:
 		self.session.nav.event.remove(self.checkSubservicesAvail)
 
 	def checkSubservicesAvail(self):
-		serviceRef = self.session.nav.getCurrentlyPlayingServiceReference()
-		service = self.session.nav.getCurrentService()
-		if not serviceRef or not hasActiveSubservicesForCurrentChannel(service):
+		refstr = self.session.nav.getCurrentlyPlayingServiceReference() and self.session.nav.getCurrentlyPlayingServiceReference().toString()
+		if not refstr or not hasActiveSubservicesForCurrentChannel(refstr):
 			self["SubserviceQuickzapAction"].setEnabled(False)
 			self.bouquets = self.bsel = self.selectedSubservice = None
 
@@ -3057,17 +3056,18 @@ class InfoBarSubserviceSelection:
 		self.changeSubservice(-1)
 
 	def playSubservice(self, ref):
-		if ref.getUnsignedData(6) == 0:
+		if ref.getUnsignedData(6) == 0 and "%3a" not in ref.toString():
 			ref.setName("")
 		self.session.nav.playService(ref, checkParentalControl=False, adjust=False)
 
 	def changeSubservice(self, direction):
-		serviceRef = self.session.nav.getCurrentlyPlayingServiceReference()
-		if serviceRef:
-			service = self.session.nav.getCurrentService()
-			subservices = getActiveSubservicesForCurrentChannel(service)
-			if subservices and len(subservices) >= 2 and serviceRef.toString() in [x[1] for x in subservices]:
-				selection = [x[1] for x in subservices].index(serviceRef.toString())
+		refstr = self.session.nav.getCurrentlyPlayingServiceReference() and self.session.nav.getCurrentlyPlayingServiceReference().toCompareString()
+		if refstr:
+			if "%3a" in refstr:
+				refstr = self.session.nav.getCurrentlyPlayingServiceReference().toString()
+			subservices = getActiveSubservicesForCurrentChannel(refstr)
+			if subservices and len(subservices) > 1 and refstr in [x[1] for x in subservices]:
+				selection = [x[1] for x in subservices].index(refstr)
 				selection += direction % len(subservices)
 				try:
 					newservice = eServiceReference(subservices[selection][0])
@@ -3077,15 +3077,13 @@ class InfoBarSubserviceSelection:
 					self.playSubservice(newservice)
 
 	def subserviceSelection(self):
-		serviceRef = self.session.nav.getCurrentlyPlayingServiceReference()
-		if serviceRef:
-			service = self.session.nav.getCurrentService()
-			subservices = getActiveSubservicesForCurrentChannel(service)
-			if subservices and len(subservices) >= 2 and (serviceRef.toString() in [x[1] for x in subservices] or service.subServices()):
-				try:
-					selection = [x[1] for x in subservices].index(serviceRef.toString())
-				except:
-					selection = 0
+		refstr = self.session.nav.getCurrentlyPlayingServiceReference() and self.session.nav.getCurrentlyPlayingServiceReference().toCompareString()
+		if refstr:
+			if "%3a" in refstr:
+				refstr = self.session.nav.getCurrentlyPlayingServiceReference().toString()
+			subservices = getActiveSubservicesForCurrentChannel(refstr)
+			if subservices and len(subservices) > 1 and refstr in [x[1] for x in subservices]:
+				selection = [x[1] for x in subservices].index(refstr)
 				self.bouquets = self.servicelist and self.servicelist.getBouquetList()
 				tlist = None
 				if self.bouquets and len(self.bouquets):
