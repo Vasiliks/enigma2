@@ -43,7 +43,7 @@ def InitParentalControl():
 	config.ParentalControl.config_sections.context_menus = ConfigYesNo(default=False)
 	config.ParentalControl.config_sections.menu_sort = ConfigYesNo(default=False)
 
-	#Added for backwards compatibility with some 3rd party plugins that depend on this config
+	# Added for backwards compatibility with some 3rd party plugins that depend on this config
 	config.ParentalControl.servicepinactive = config.ParentalControl.configured
 	config.ParentalControl.setuppin = config.ParentalControl.servicepin[0]
 	config.ParentalControl.retries.setuppin = config.ParentalControl.retries.servicepin
@@ -195,7 +195,7 @@ class ParentalControl:
 			self.setSessionPinCached()
 			self.hideBlacklist()
 			self.callback(ref=service)
-		elif result == False:
+		elif not result:
 			messageText = _("The PIN code you entered is wrong.")
 			if self.session:
 				self.session.open(MessageBox, messageText, MessageBox.TYPE_INFO, timeout=5)
@@ -221,7 +221,7 @@ class ParentalControl:
 
 	def addServiceToList(self, service, type, vList):
 		if service in vList:
-			if not type in vList[service]:
+			if type not in vList[service]:
 				vList[service].append(type)
 		else:
 			vList[service] = [type]

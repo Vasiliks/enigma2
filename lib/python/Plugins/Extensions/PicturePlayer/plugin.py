@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Plugins.Plugin import PluginDescriptor
 
-#------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------
 
 
 def Pic_Thumb(*args, **kwa):
@@ -38,13 +38,11 @@ def filescan(**kwargs):
 	return \
 		LocalScanner(mimetypes=["image/jpeg", "image/png", "image/gif", "image/bmp"],
 			paths_to_scan=[
-					ScanPath(path="DCIM", with_subdirs=True),
-					ScanPath(path="", with_subdirs=False),
-				],
+				ScanPath(path="DCIM", with_subdirs=True),
+				ScanPath(path="", with_subdirs=False),],
 			name="Pictures",
 			description=_("View photos..."),
-			openfnc=filescan_open,
-		)
+			openfnc=filescan_open,)
 
 
 def Plugins(**kwargs):

@@ -59,11 +59,11 @@ class Cover(Renderer):
 					if self.picload:
 						self.picload.setPara((size.width(),
 						size.height(),
-						1,
-						1,
-						False,
-						1,
-						'#00000000'))
+							1,
+							1,
+							False,
+							1,
+							'#00000000'))
 						if self.picload.startDecode(picname) != 0:
 							del self.picload
 				else:
@@ -73,7 +73,7 @@ class Cover(Renderer):
 	def showCoverCallback(self, picInfo=None):
 		if self.picload:
 			ptr = self.picload.getData()
-			if ptr != None:
+			if ptr:
 				self.instance.setPixmap(ptr)
 				self.instance.show()
 			del self.picload

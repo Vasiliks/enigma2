@@ -175,21 +175,21 @@ class Network:
 					ifaces[currif]["dhcp"] = True
 				else:
 					ifaces[currif]["dhcp"] = False
-			if currif == iface: #read information only for available interfaces
+			if currif == iface:  # read information only for available interfaces
 				if split[0] == "address":
 					ifaces[currif]["address"] = list(map(int, split[1].split('.')))
 					if "ip" in self.ifaces[currif]:
-						if self.ifaces[currif]["ip"] != ifaces[currif]["address"] and ifaces[currif]["dhcp"] == False:
+						if self.ifaces[currif]["ip"] != ifaces[currif]["address"] and not ifaces[currif]["dhcp"]:
 							self.ifaces[currif]["ip"] = list(map(int, split[1].split('.')))
 				if split[0] == "netmask":
 					ifaces[currif]["netmask"] = list(map(int, split[1].split('.')))
 					if "netmask" in self.ifaces[currif]:
-						if self.ifaces[currif]["netmask"] != ifaces[currif]["netmask"] and ifaces[currif]["dhcp"] == False:
+						if self.ifaces[currif]["netmask"] != ifaces[currif]["netmask"] and not ifaces[currif]["dhcp"]:
 							self.ifaces[currif]["netmask"] = list(map(int, split[1].split('.')))
 				if split[0] == "gateway":
 					ifaces[currif]["gateway"] = list(map(int, split[1].split('.')))
 					if "gateway" in self.ifaces[currif]:
-						if self.ifaces[currif]["gateway"] != ifaces[currif]["gateway"] and ifaces[currif]["dhcp"] == False:
+						if self.ifaces[currif]["gateway"] != ifaces[currif]["gateway"] and not ifaces[currif]["dhcp"]:
 							self.ifaces[currif]["gateway"] = list(map(int, split[1].split('.')))
 				if split[0] == "pre-up":
 					if "preup" in self.ifaces[currif]:
@@ -212,7 +212,7 @@ class Network:
 			safe_ifaces = self.ifaces.copy()
 			for intf in safe_ifaces:
 				if 'preup' in safe_ifaces[intf] and safe_ifaces[intf]['preup']:
-					safe_ifaces[intf]['preup'] = re.sub(' -k "\S*" ', ' -k ********* ', safe_ifaces[intf]['preup'])
+					safe_ifaces[intf]['preup'] = re.sub(r' -k "\S*" ', ' -k ********* ', safe_ifaces[intf]['preup'])
 			print("[Network] self.ifaces after loading:", safe_ifaces)
 			self.config_ready = True
 			self.msgPlugins()
@@ -526,7 +526,7 @@ class Network:
 		def buildCommands(iface):
 			commands.append((self.ifdown_bin, self.ifdown_bin, "-f", iface))
 			commands.append((self.ip_bin, self.ip_bin, "addr", "flush", "dev", iface, "scope", "global"))
-			#wpa_supplicant sometimes doesn't quit properly on SIGTERM
+			# wpa_supplicant sometimes doesn't quit properly on SIGTERM
 			if exists('/var/run/wpa_supplicant/' + iface):
 				commands.append("wpa_cli -i" + iface + " terminate")
 
@@ -646,7 +646,6 @@ class Network:
 		from struct import pack
 		from socket import inet_ntoa
 		mask = 1 << 31
-		xnet = (1 << 32) - 1
 		cidr_range = range(0, 32)
 		cidr = int(nmask)
 		if cidr not in cidr_range:

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 from os.path import isfile, join
 
 from enigma import ePixmap, iServiceInformation
 
 from Components.Renderer.Renderer import Renderer
-from Tools.Directories import SCOPE_GUISKIN, fileReadLines, resolveFilename
+from Tools.Directories import SCOPE_GUISKIN, resolveFilename, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
 
@@ -15,12 +14,38 @@ class PicCript(Renderer):
 	condAccessIds = {
 		"26": "BiSS",
 		"01": "SEC",
+		"10": "SEC",
+		"x6": "IRD",
 		"06": "IRD",
+		"64": "IRD",
 		"17": "BET",
+		"18": "NAG",
 		"05": "VIA",
+		"50": "VIA",
+		"09": "NDS",
+		"9c": "NDS",
+		"98": "NDS",
+		"0B": "CONN",
+		"b0": "CONN",
+		"d9": "CRW",
+		"0D": "CRW",
+		"4A": "DRE",
+		"0E": "PowerVU",
+		"22": "Codicrypt",
+		"07": "DigiCipher",
+		"A1": "Rosscrypt",
+		"56": "Verimatrix"
+	}
+	condAccessIdsMgcamd = {
+		"26": "BiSS",
+		"10": "SEC",
+		"x0": "IRD",
+		"17": "BET",
+		"18": "NAG",
+		" 0": "VIA",
 		"09": "NDS",
 		"0B": "CONN",
-		"0D": "CRW",
+		"aI": "CRW",
 		"4A": "DRE",
 		"0E": "PowerVU",
 		"22": "Codicrypt",
@@ -54,7 +79,7 @@ class PicCript(Renderer):
 		if self.instance:
 			pngName = ""
 			if (what[0] != self.CHANGED_CLEAR) and isfile("/tmp/ecm.info"):
-				sName = "NAG"
+				sName = ""
 				service = self.source.service
 				if service:
 					info = service and service.info()
@@ -82,13 +107,28 @@ class PicCript(Renderer):
 
 	def matchCAId(self, caids):
 		lines = []
-		for line in fileReadLines("/tmp/ecm.info", lines, source=MODULE_NAME):
-			if line.startswith("caid: 0x"):
-				for caid in caids:
-					sName = self.condAccessIds.get(line[8:10])
-					if sName is not None:
-						return sName
-		return "NAG"
+		from process import ProcessList
+		mgcamd = str(ProcessList().named("mgcamd_1.38")).strip("[]")
+		cccam = str(ProcessList().named("CCcam")).strip("[]")
+		try:
+			for line in fileReadLines("/tmp/ecm.info", lines, source=MODULE_NAME):
+				if not mgcamd and not cccam:
+					for caid in caids:
+						sName = self.condAccessIds.get(line[8:10])
+						if sName:
+							return sName
+				if cccam:
+					for caid in caids:
+						sName = self.condAccessIds.get(line[14:16])
+						if sName:
+							return sName
+				else:
+					for caid in caids:
+						sName = self.condAccessIdsMgcamd.get(line[26:28])
+						if sName:
+							return sName
+		except IOError as err:
+			print("[PicCript] %s" % err)
 
 	def findPicon(self, serviceName):
 		for path in self.searchPaths:

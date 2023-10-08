@@ -2,13 +2,10 @@ from Screens.Wizard import WizardSummary
 from Screens.WizardLanguage import WizardLanguage
 from Screens.HelpMenu import ShowRemoteControl
 from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
-from Components.config import ConfigBoolean, config, configfile
+from Components.config import config, configfile
 from Components.Pixmap import Pixmap
 from Components.Sources.StaticText import StaticText
-from Components.SystemInfo import BoxInfo
-from Screens.HelpMenu import ShowRemoteControl
-from Screens.Wizard import WizardSummary
-from Screens.WizardLanguage import WizardLanguage
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.Directories import SCOPE_PLUGINS, resolveFilename
 
 brand = BoxInfo.getItem("brand")

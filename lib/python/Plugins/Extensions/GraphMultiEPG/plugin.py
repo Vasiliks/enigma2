@@ -19,7 +19,7 @@ ref = None
 def zapToService(service, preview=False, zapback=False):
 	if Servicelist.startServiceRef is None:
 		Servicelist.startServiceRef = Session.nav.getCurrentlyPlayingServiceOrGroup()
-	if not service is None:
+	if service:
 		if not preview and not zapback:
 			if Servicelist.getRoot() != epg_bouquet:
 				Servicelist.clearPath()
@@ -42,12 +42,12 @@ def zapToService(service, preview=False, zapback=False):
 def getBouquetServices(bouquet):
 	services = []
 	Servicelist = eServiceCenter.getInstance().list(bouquet)
-	if not Servicelist is None:
+	if Servicelist:
 		while True:
 			service = Servicelist.getNext()
-			if not service.valid(): #check if end of list
+			if not service.valid():  # check if end of list
 				break
-			if service.flags & (eServiceReference.isDirectory | eServiceReference.isMarker): #ignore non playable services
+			if service.flags & (eServiceReference.isDirectory | eServiceReference.isMarker):  # ignore non playable services
 				continue
 			services.append(ServiceReference(service))
 	return services

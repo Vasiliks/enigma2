@@ -48,7 +48,7 @@ def processHotplugData(self, v):
 		# Removing the invalid playlist.e2pls If its still the audio cd's list
 		# Default setting is to save last playlist on closing Mediaplayer.
 		# If audio cd is removed after Mediaplayer was closed,
-	# the playlist remains in if no other media was played.
+		# the playlist remains in if no other media was played.
 		if os.path.isfile('/etc/enigma2/playlist.e2pls'):
 			with open('/etc/enigma2/playlist.e2pls') as f:
 				file = f.readline().strip()
@@ -151,7 +151,7 @@ class OpkgInstaller(Screen):
 
 def filescan_open(list, session, **kwargs):
 	filelist = [x.path for x in list]
-	session.open(OpkgInstaller, filelist) # list
+	session.open(OpkgInstaller, filelist)  # list
 
 
 def autostart(reason, **kwargs):
@@ -172,12 +172,11 @@ def filescan(**kwargs):
 	return \
 		Scanner(mimetypes=["application/x-debian-package"],
 			paths_to_scan=[
-					ScanPath(path="ipk", with_subdirs=True),
-					ScanPath(path="", with_subdirs=False),
-				],
+				ScanPath(path="ipk", with_subdirs=True),
+				ScanPath(path="", with_subdirs=False),],
 			name="Opkg",
 			description=_("Install extensions"),
-			openfnc=filescan_open, )
+			openfnc=filescan_open,)
 
 
 def Plugins(**kwargs):

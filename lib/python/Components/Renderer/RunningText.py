@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 from enigma import eWidget, eLabel, eTimer, ePoint, eSize, gFont, RT_HALIGN_LEFT, RT_HALIGN_CENTER, RT_HALIGN_RIGHT, RT_HALIGN_BLOCK, RT_VALIGN_TOP, RT_VALIGN_CENTER, RT_VALIGN_BOTTOM, RT_WRAP
 from Components.Renderer.Renderer import Renderer
@@ -16,8 +15,8 @@ RIGHT = 1
 TOP = 2
 BOTTOM = 3
 # halign:
-#LEFT     = 0
-#RIGHT    = 1
+# LEFT     = 0
+# RIGHT    = 1
 CENTER = 2
 BLOCK = 3
 
@@ -32,14 +31,14 @@ class RunningText(Renderer):
 		self.txtext = ""
 		self.scroll_label = self.mTimer = self.mStartPoint = None
 		self.X = self.Y = self.W = self.H = self.mStartDelay = 0
-		self.mAlways = 1		# always move text
-		self.mStep = 1			# moving step: 1 pixel per 1 time
-		self.mStepTimeout = 50		# step timeout: 1 step per 50 milliseconds ( speed: 20 pixel per second )
+		self.mAlways = 1  # always move text
+		self.mStep = 1  # moving step: 1 pixel per 1 time
+		self.mStepTimeout = 50  # step timeout: 1 step per 50 milliseconds ( speed: 20 pixel per second )
 		self.direction = LEFT
 		self.mLoopTimeout = self.mOneShot = 0
 		self.mRepeat = 0
 		self.mPageDelay = self.mPageLength = 0
-		self.lineHeight = 0		# for text height auto correction on dmm-enigma2
+		self.lineHeight = 0  # for text height auto correction on dmm-enigma2
 		self.mShown = 0
 
 	GUI_WIDGET = eWidget
@@ -69,12 +68,11 @@ class RunningText(Renderer):
 				else:
 					x = max(limit, int(val))
 			except:
-					x = default
+				x = default
 			return x
 
 		def setWrapFlag(attrib, value):
-			if (attrib.lower() == "wrap" and value == "0") or \
-			   (attrib.lower() == "nowrap" and value != "0"):
+			if attrib.lower() == "wrap" and value == "0" or attrib.lower() == "nowrap" and value != "0":
 				self.txtflags &= ~RT_WRAP
 			else:
 				self.txtflags |= RT_WRAP
@@ -87,7 +85,7 @@ class RunningText(Renderer):
 					self.txfont = parseFont(value, screen.scale)
 				elif attrib == "foregroundColor":
 					self.scroll_label.setForegroundColor(parseColor(value))
-				elif attrib in ("shadowColor", "borderColor"):	# fake for openpli-enigma2
+				elif attrib in ("shadowColor", "borderColor"):  # fake for openpli-enigma2
 					self.scroll_label.setShadowColor(parseColor(value))
 				elif attrib == "shadowOffset":
 					x, y = value.split(',')
@@ -184,7 +182,7 @@ class RunningText(Renderer):
 		Renderer.connect(self, source)
 
 	def changed(self, what):
-		if not self.mTimer is None:
+		if self.mTimer:
 			self.mTimer.stop()
 		if what[0] == self.CHANGED_CLEAR:
 			self.txtext = ""
@@ -209,11 +207,11 @@ class RunningText(Renderer):
 
 		if self.txtext == "" or \
 			self.type == NONE or \
-			self.scroll_label is None:
+			not self.scroll_label:
 			return False
 
 		if self.direction in (LEFT, RIGHT) or not (self.txtflags & RT_WRAP):
-			self.scroll_label.resize(eSize(self.txfont.pointSize * len(self.txtext), self.H)) # stupid workaround, have no better idea right now...
+			self.scroll_label.resize(eSize(self.txfont.pointSize * len(self.txtext), self.H))  # stupid workaround, have no better idea right now...
 
 		text_size = self.scroll_label.calculateSize()
 		text_width = text_size.width()
@@ -227,10 +225,9 @@ class RunningText(Renderer):
 		if self.lineHeight and self.direction in (TOP, BOTTOM):
 			text_height = max(text_height, (text_height + self.lineHeight - 1) / self.lineHeight * self.lineHeight)
 
-
-#		self.type =		0 - NONE; 1 - RUNNING; 2 - SWIMMING; 3 - AUTO(???)
-#		self.direction =	0 - LEFT; 1 - RIGHT;   2 - TOP;      3 - BOTTOM
-#		self.halign =		0 - LEFT; 1 - RIGHT;   2 - CENTER;   3 - BLOCK
+		# self.type =		0 - NONE; 1 - RUNNING; 2 - SWIMMING; 3 - AUTO(???)
+		# self.direction =	0 - LEFT; 1 - RIGHT;   2 - TOP;      3 - BOTTOM
+		# self.halign =		0 - LEFT; 1 - RIGHT;   2 - CENTER;   3 - BLOCK
 
 		if self.direction in (LEFT, RIGHT):
 			if not self.mAlways and text_width <= self.W:
@@ -246,7 +243,7 @@ class RunningText(Renderer):
 					self.mStep = abs(self.mStep)
 					self.mStop = self.B - text_width + self.soffset[0] - self.mStep
 					self.P = self.A
-				if not self.mStartPoint is None:
+				if self.mStartPoint:
 					if self.direction == LEFT:
 						self.mStop = self.P = max(self.A, min(self.W, self.mStartPoint))
 					else:
@@ -254,14 +251,14 @@ class RunningText(Renderer):
 			elif self.type == SWIMMING:
 				if text_width < self.W:
 					self.A = self.X + 1			# incomprehensible indent '+ 1' ???
-					self.B = self.W - text_width - 1	# incomprehensible indent '- 1' ???
+					self.B = self.W - text_width - 1  # incomprehensible indent '- 1' ???
 					if self.halign == LEFT:
 						self.P = self.A
 						self.mStep = abs(self.mStep)
 					elif self.halign == RIGHT:
 						self.P = self.B
 						self.mStep = -abs(self.mStep)
-					else: # if self.halign in (CENTER, BLOCK):
+					else:  # if self.halign in (CENTER, BLOCK):
 						self.P = int(self.B / 2)
 						self.mStep = (self.direction == RIGHT) and abs(self.mStep) or -abs(self.mStep)
 				else:
@@ -275,7 +272,7 @@ class RunningText(Renderer):
 					elif self.halign == RIGHT:
 						self.P = self.A
 						self.mStep = abs(self.mStep)
-					else: # if self.halign in (CENTER, BLOCK):
+					else:  # if self.halign in (CENTER, BLOCK):
 						self.P = int(self.A / 2)
 						self.mStep = (self.direction == RIGHT) and abs(self.mStep) or -abs(self.mStep)
 			else:
@@ -294,7 +291,7 @@ class RunningText(Renderer):
 					self.mStep = abs(self.mStep)
 					self.mStop = self.B - text_height + self.soffset[1] - self.mStep
 					self.P = self.A
-				if not self.mStartPoint is None:
+				if self.mStartPoint:
 					if self.direction == TOP:
 						self.mStop = self.P = max(self.A, min(self.H, self.mStartPoint))
 					else:
@@ -335,7 +332,7 @@ class RunningText(Renderer):
 		if self.mStartDelay:
 			if self.direction in (LEFT, RIGHT):
 				self.moveLabel(self.P, self.Y)
-			else: # if self.direction in (TOP,BOTTOM):
+			else:  # if self.direction in (TOP,BOTTOM):
 				self.moveLabel(self.X, self.P)
 
 		self.mCount = self.mRepeat
@@ -346,7 +343,7 @@ class RunningText(Renderer):
 		if self.A <= self.P <= self.B:
 			if self.direction in (LEFT, RIGHT):
 				self.moveLabel(self.P, self.Y)
-			else: # if self.direction in (TOP,BOTTOM)
+			else:  # if self.direction in (TOP,BOTTOM)
 				self.moveLabel(self.X, self.P)
 			timeout = self.mStepTimeout
 			if (self.mStop is not None) and (self.mStop + abs(self.mStep) > self.P >= self.mStop):

@@ -11,7 +11,7 @@ from Components.Pixmap import Pixmap
 from Components.ProgressBar import ProgressBar
 from Components.ServiceList import refreshServiceList
 from Components.ActionMap import ActionMap
-
+from gettext import ngettext
 from enigma import eFastScan, eDVBFrontendParametersSatellite, eTimer
 
 import os
@@ -89,9 +89,9 @@ class FastScanStatus(Screen):
 
 		self["actions"] = ActionMap(["OkCancelActions"],
 			{
-				"ok": self.ok,
-				"cancel": self.cancel
-			})
+			"ok": self.ok,
+			"cancel": self.cancel
+		})
 
 		self.onFirstExecBegin.append(self.doServiceScan)
 

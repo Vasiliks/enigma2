@@ -18,7 +18,7 @@ def filter(g):
 			continue
 
 		if t[1] != "\n":
-#			print t
+			# print(t)
 			yield t[1]
 
 
@@ -69,7 +69,7 @@ def do_file(f, mode):
 					except:
 						pass
 
-					raise Exception("action enum must be simple.")
+					raise Exception(_("action enum must be simple."))
 
 				counter = 0
 

@@ -16,7 +16,7 @@ from Components.SystemInfo import SystemInfo
 from ServiceReference import ServiceReference
 from Plugins.Plugin import PluginDescriptor
 from xml.etree.ElementTree import parse
-from enigma import eDVBCI_UI, eDVBCIInterfaces, eEnv, eServiceCenter
+from enigma import eDVBCI_UI, eDVBCIInterfaces, eEnv, eServiceCenter, eServiceReference
 from Tools.BoundFunction import boundFunction
 from Tools.CIHelper import cihelper
 from Tools.XMLTools import stringToXML
@@ -45,7 +45,7 @@ class CIselectMainMenu(Screen):
 				"red": self.close,
 				"ok": self.greenPressed,
 				"cancel": self.close
-			}, -1)
+		}, -1)
 
 		NUM_CI = SystemInfo["CommonInterface"]
 
@@ -85,7 +85,7 @@ class CIselectMainMenu(Screen):
 				print("[CommonInterfaceAssignment] CI_Wizzard there is no CI Slot in your receiver")
 			else:
 				print("[CommonInterfaceAssignment] CI_Wizzard selected CI Slot : %d" % slot)
-				if config.usage.setup_level.index > 1: # advanced
+				if config.usage.setup_level.index > 1:  # advanced
 					self.session.open(CIconfigMenu, slot)
 				else:
 					self.session.open(easyCIconfigMenu, slot)
@@ -128,13 +128,13 @@ class CIconfigMenu(Screen):
 
 		self["actions"] = ActionMap(["ColorActions", "SetupActions", "MenuActions"],
 			{
-				"green": self.greenPressed,
-				"red": self.redPressed,
-				"yellow": self.yellowPressed,
-				"blue": self.bluePressed,
-				"menu": self.menuPressed,
-				"cancel": self.cancel
-			}, -1)
+			"green": self.greenPressed,
+			"red": self.redPressed,
+			"yellow": self.yellowPressed,
+			"blue": self.bluePressed,
+			"menu": self.menuPressed,
+			"cancel": self.cancel
+		}, -1)
 
 		print("[CommonInterfaceAssignment] CI_Wizzard_Config Configuring CI Slots : %d  " % self.ci_slot)
 
@@ -157,7 +157,7 @@ class CIconfigMenu(Screen):
 
 		self.loadXML()
 		# if config mode !=advanced autoselect any caid
-		if config.usage.setup_level.index <= 1: # advanced
+		if config.usage.setup_level.index <= 1:  # advanced
 			self.selectedcaid = self.caidlist
 			self.finishedCAidSelection(self.selectedcaid)
 
@@ -181,7 +181,7 @@ class CIconfigMenu(Screen):
 		if answer:
 			try:
 				os.remove(self.filename)
-			except OSError:
+			except:
 				print("[CommonInterfaceAssignment] CI_Config_CI%d error remove xml..." % self.ci_slot)
 			else:
 				self.session.openWithCallback(self.restartGui, MessageBox, _("Restart GUI now?"), MessageBox.TYPE_YESNO)
@@ -215,7 +215,7 @@ class CIconfigMenu(Screen):
 				for ref in args[0]:
 					service_ref = ServiceReference(ref)
 					service_name = service_ref.getServiceName()
-					if len(service_name) and find_in_list(self.servicelist, service_name, 0) == False:
+					if len(service_name) and not find_in_list(self.servicelist, service_name, 0):
 						str_service = service_ref.ref.toString()
 						split_ref = str_service.split(":")
 						if split_ref[0] == "1" and not str_service.startswith("1:134:") and "%3a//" not in str_service:
@@ -227,7 +227,7 @@ class CIconfigMenu(Screen):
 				if ref:
 					service_ref = ServiceReference(ref)
 					service_name = service_ref.getServiceName()
-					if find_in_list(self.servicelist, service_name, 0) == False:
+					if not find_in_list(self.servicelist, service_name, 0):
 						str_service = service_ref.ref.toString()
 						split_ref = str_service.split(":")
 						if split_ref[0] == "1" and not str_service.startswith("1:134:") and "%3a//" not in str_service:
@@ -242,7 +242,7 @@ class CIconfigMenu(Screen):
 				for ref in args[0]:
 					service_ref = ServiceReference(ref)
 					service_name = service_ref.getServiceName()
-					if len(service_name) and find_in_list(self.servicelist, service_name, 0) == False:
+					if len(service_name) and not find_in_list(self.servicelist, service_name, 0):
 						split_ref = service_ref.ref.toString().split(":")
 						if split_ref[0] == "1":
 							self.servicelist.append((service_name, ConfigNothing(), 0, service_ref.ref.toString()))
@@ -251,7 +251,7 @@ class CIconfigMenu(Screen):
 			else:
 				name = args[0]
 				dvbnamespace = args[1]
-				if find_in_list(self.servicelist, name, 0) == False:
+				if not find_in_list(self.servicelist, name, 0):
 					self.servicelist.append((name, ConfigNothing(), 1, dvbnamespace))
 					self["ServiceList"].l.setList(self.servicelist)
 					self.setServiceListInfo()
@@ -299,7 +299,7 @@ class CIconfigMenu(Screen):
 			fp.write("</ci>\n")
 			fp.close()
 		except OSError:
-			print("[CommonInterfaceAssignment] CI_Config_CI%d xml not written" % self.ci_slot)
+			print(f"[CommonInterfaceAssignment] CI_Config_CI%d xml not written" % self.ci_slot)
 			os.unlink(self.filename)
 
 	def loadXML(self):
@@ -336,11 +336,11 @@ class CIconfigMenu(Screen):
 					self.read_providers.append((read_provider_name, read_provider_dvbname))
 
 				self.ci_config.append((int(read_slot), (self.read_services, self.read_providers, self.usingcaid)))
-		except OSError:
+		except:
 			print("[CommonInterfaceAssignment] CI_Config_CI%d error parsing xml..." % self.ci_slot)
 			try:
 				os.remove(self.filename)
-			except OSError:
+			except:
 				print("[CommonInterfaceAssignment] CI_Activate_Config_CI%d error remove damaged xml..." % self.ci_slot)
 
 		for item in self.read_services:
@@ -374,12 +374,12 @@ class easyCIconfigMenu(CIconfigMenu):
 		CIconfigMenu.__init__(self, session, ci_slot)
 		self["actions"] = ActionMap(["ColorActions", "SetupActions", "MenuActions"],
 			{
-				"green": self.greenPressed,
-				"red": self.redPressed,
-				"yellow": self.yellowPressed,
-				"menu": self.menuPressed,
-				"cancel": self.cancel
-			}, -1)
+			"green": self.greenPressed,
+			"red": self.redPressed,
+			"yellow": self.yellowPressed,
+			"menu": self.menuPressed,
+			"cancel": self.cancel
+		}, -1)
 
 
 class CAidSelect(Screen):
@@ -449,13 +449,13 @@ class myProviderSelection(ChannelSelectionBase):
 
 		self["actions"] = ActionMap(["OkCancelActions", "ChannelSelectBaseActions"],
 			{
-				"showFavourites": self.showFavourites,
-				"showAllServices": self.showAllServices,
-				"showProviders": self.showProviders,
-				"showSatellites": boundFunction(self.showSatellites, changeMode=True),
-				"cancel": self.cancel,
-				"ok": self.channelSelected
-			})
+			"showFavourites": self.showFavourites,
+			"showAllServices": self.showAllServices,
+			"showProviders": self.showProviders,
+			"showSatellites": boundFunction(self.showSatellites, changeMode=True),
+			"cancel": self.cancel,
+			"ok": self.channelSelected
+		})
 		self["key_red"] = StaticText(_("Close"))
 		self["key_green"] = StaticText()
 		self["key_yellow"] = StaticText()
@@ -471,7 +471,7 @@ class myProviderSelection(ChannelSelectionBase):
 	def showFavourites(self):
 		pass
 
-	def channelSelected(self): # just return selected service
+	def channelSelected(self):  # just return selected service
 		ref = self.getCurrentSelection()
 		if ref is None:
 			return
@@ -490,7 +490,7 @@ class myProviderSelection(ChannelSelectionBase):
 						elif choice[1] == "providerlist":
 							serviceHandler = eServiceCenter.getInstance()
 							servicelist = serviceHandler.list(ref)
-							if not servicelist is None:
+							if servicelist:
 								providerlist = []
 								while True:
 									service = servicelist.getNext()
@@ -526,10 +526,10 @@ class myProviderSelection(ChannelSelectionBase):
 				if justSet:
 					serviceHandler = eServiceCenter.getInstance()
 					servicelist = serviceHandler.list(ref)
-					if not servicelist is None:
+					if servicelist:
 						while True:
 							service = servicelist.getNext()
-							if not service.valid(): #check if end of list
+							if not service.valid():  # check if end of list
 								break
 							unsigned_orbpos = service.getUnsignedData(4) >> 16
 							orbpos = service.getData(4) >> 16
@@ -541,12 +541,12 @@ class myProviderSelection(ChannelSelectionBase):
 									# why we need this cast?
 									service_name = str(nimmanager.getSatDescription(orbpos))
 								except:
-									if unsigned_orbpos == 0xFFFF: #Cable
+									if unsigned_orbpos == 0xFFFF:  # Cable
 										service_name = _("Cable")
-									elif unsigned_orbpos == 0xEEEE: #Terrestrial
+									elif unsigned_orbpos == 0xEEEE:  # Terrestrial
 										service_name = _("Terrestrial")
 									else:
-										if orbpos > 1800: # west
+										if orbpos > 1800:  # west
 											orbpos = 3600 - orbpos
 											h = _("W")
 										else:
@@ -582,18 +582,18 @@ class myChannelSelection(ChannelSelectionBase):
 		ChannelSelectionBase.__init__(self, session)
 		self.setTitle(_("Select service to add..."))
 		self.onShown.append(self.__onExecCallback)
-		self.bouquet_mark_edit = OFF
+		self.bouquet_mark_edit = 0
 
 		self["actions"] = ActionMap(["OkCancelActions", "TvRadioActions", "ChannelSelectBaseActions"],
 			{
-				"showProviders": self.showProviders,
-				"showSatellites": boundFunction(self.showSatellites, changeMode=True),
-				"showAllServices": self.showAllServices,
-				"cancel": self.cancel,
-				"ok": self.channelSelected,
-				"keyRadio": self.setModeRadio,
-				"keyTV": self.setModeTv
-			})
+			"showProviders": self.showProviders,
+			"showSatellites": boundFunction(self.showSatellites, changeMode=True),
+			"showAllServices": self.showAllServices,
+			"cancel": self.cancel,
+			"ok": self.channelSelected,
+			"keyRadio": self.setModeRadio,
+			"keyTV": self.setModeTv
+		})
 
 		self["key_red"] = StaticText(_("All"))
 		self["key_green"] = StaticText(_("Close"))
@@ -628,7 +628,7 @@ class myChannelSelection(ChannelSelectionBase):
 		if answer and ref:
 			serviceHandler = eServiceCenter.getInstance()
 			servicelist = serviceHandler.list(ref)
-			if not servicelist is None:
+			if servicelist:
 				providerlist = []
 				while True:
 					service = servicelist.getNext()
@@ -648,7 +648,7 @@ class myChannelSelection(ChannelSelectionBase):
 		if changeMode:
 			self.close(None)
 
-	def channelSelected(self): # just return selected service
+	def channelSelected(self):  # just return selected service
 		ref = self.getCurrentSelection()
 		if (ref.flags & 7) == 7:
 			self.enterPath(ref)

@@ -10,16 +10,17 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
 	outfilename = sys.argv[2]
 
-l = {}
+data = {}
 
 with open(infilename) as f:
-	f.readline() # throw away header line
+	# throw away header line
+	f.readline()
 	for line in f:
 		item = line.split('\t')
 		name = (item[6],)
 		for i in range(4):
 			if item[i]:
-				l[item[i]] = name
+				data[item[i]] = name
 
 with open(outfilename, 'wb') as f:
-	pickle.dump(l, f, pickle.HIGHEST_PROTOCOL)
+	pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)

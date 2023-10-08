@@ -133,12 +133,12 @@ class AnimationSetupScreen(Screen):
 
 		self["actions"] = ActionMap(["SetupActions", "ColorActions"],
 			{
-				"cancel": self.keyclose,
-				"save": self.ok,
-				"ok": self.ok,
-				"yellow": self.config,
-				"blue": self.preview
-			}, -3)
+			"cancel": self.keyclose,
+			"save": self.ok,
+			"ok": self.ok,
+			"yellow": self.config,
+			"blue": self.preview
+		}, -3)
 
 		self["list"] = MenuList(self.animationList)
 
@@ -151,7 +151,7 @@ class AnimationSetupScreen(Screen):
 			name = x.get("name", "??")
 			if key == config.misc.window_animation_default.value:
 				name = "* %s" % (name)
-			l.append( (name, key) )
+			l.append((name, key))
 
 		self["list"].setList(l)
 
