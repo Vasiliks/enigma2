@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from Components.VariableText import VariableText
 from enigma import eLabel, iPlayableService
 from Components.Renderer.Renderer import Renderer
@@ -12,7 +11,7 @@ class ChannelNumber(Renderer, VariableText):
 	GUI_WIDGET = eLabel
 
 	def changed(self, what):
-		if what == True or what[0] == self.CHANGED_SPECIFIC and what[1] == iPlayableService.evStart:
+		if what or what[0] == self.CHANGED_SPECIFIC and what[1] == iPlayableService.evStart:
 			service = self.source.serviceref
 			num = service and service.getChannelNum() or None
 			if num:

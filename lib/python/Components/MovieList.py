@@ -11,7 +11,7 @@ from Tools.LoadPixmap import LoadPixmap
 from Tools.Directories import SCOPE_CURRENT_SKIN, resolveFilename
 from Screens.LocationBox import defaultInhibitDirs
 import NavigationInstance
-
+from gettext import ngettext
 from enigma import eListboxPythonMultiContent, eListbox, gFont, iServiceInformation, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, eServiceReference, eServiceCenter, eTimer, RT_VALIGN_CENTER
 
 AUDIO_EXTENSIONS = frozenset((".dts", ".mp3", ".wav", ".wave", ".wv", ".oga", ".ogg", ".flac", ".m4a", ".mp2", ".m2a", ".wma", ".ac3", ".mka", ".aac", ".ape", ".alac", ".amr", ".au", ".mid"))
@@ -20,7 +20,7 @@ IMAGE_EXTENSIONS = frozenset((".jpg", ".png", ".gif", ".bmp", ".jpeg", ".jpe", "
 MOVIE_EXTENSIONS = frozenset((".mpg", ".vob", ".m4v", ".mkv", ".avi", ".divx", ".dat", ".flv", ".mp4", ".mov", ".wmv", ".asf", ".3gp", ".3g2", ".mpeg", ".mpe", ".rm", ".rmvb", ".ogm", ".ogv", ".m2ts", ".mts", ".webm", ".pva", ".wtv", ".stream", ".ts"))
 KNOWN_EXTENSIONS = MOVIE_EXTENSIONS.union(IMAGE_EXTENSIONS, DVD_EXTENSIONS, AUDIO_EXTENSIONS)
 
-cutsParser = struct.Struct('>QI') # big-endian, 64-bit PTS and 32-bit type
+cutsParser = struct.Struct('>QI')  # big-endian, 64-bit PTS and 32-bit type
 
 
 class MovieListData:
@@ -78,7 +78,7 @@ def moviePlayState(cutsFileName, ref, length):
 			if len(data) < cutsParser.size:
 				break
 			cut, cutType = cutsParser.unpack(data)
-			if cutType == 3: # undocumented, but 3 appears to be the stop
+			if cutType == 3:  # undocumented, but 3 appears to be the stop
 				lastPosition = cut
 		f.close()
 		# See what we have in RAM (it might help)
@@ -136,8 +136,8 @@ def resetMoviePlayState(cutsFileName, ref=None):
 		f.close()
 	except:
 		pass
-		#import sys
-		#print("Exception in resetMoviePlayState: %s: %s" % sys.exc_info()[:2])
+		# import sys
+		# print("Exception in resetMoviePlayState: %s: %s" % sys.exc_info()[:2])
 
 
 class MovieList(GUIComponent):
@@ -246,7 +246,7 @@ class MovieList(GUIComponent):
 			self.reloadDelayTimer.start(5000, 1)
 
 	def connectSelChanged(self, fnc):
-		if not fnc in self.onSelectionChanged:
+		if fnc not in self.onSelectionChanged:
 			self.onSelectionChanged.append(fnc)
 
 	def disconnectSelChanged(self, fnc):
@@ -400,25 +400,25 @@ class MovieList(GUIComponent):
 					p = os.path.split(p[0])
 				txt = p[1]
 				if txt == ".Trash":
-					res.append(MultiContentEntryPixmapAlphaBlend(pos=(0, self.trashShift), size=(iconSize, self.iconTrash.size().height()), png=self.iconTrash))
-					res.append(MultiContentEntryText(pos=(x, 0), size=(width - x - tn - r, self.itemHeight), font=0, flags=RT_HALIGN_LEFT | valign_center, text=_("Deleted items")))
-					res.append(MultiContentEntryText(pos=(width - tn - r, 0), size=(tn, self.itemHeight), font=1, flags=RT_HALIGN_RIGHT | valign_center, text=_("Trash can")))
+					res.append(MultiContentEntryPixmapAlphaTest(pos=(0, self.trashShift), size=(iconSize, self.iconTrash.size().height()), png=self.iconTrash))
+					res.append(MultiContentEntryText(pos=(x, 0), size=(width - x - tn - r, self.itemHeight), font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER, text=_("Deleted items")))
+					res.append(MultiContentEntryText(pos=(width - tn - r, 0), size=(tn, self.itemHeight), font=1, flags=RT_HALIGN_RIGHT | RT_VALIGN_CENTER, text=_("Trash can")))
 					return res
 			if not config.movielist.show_underlines.value:
 				txt = txt.replace('_', ' ').strip()
-			res.append(MultiContentEntryPixmapAlphaBlend(pos=(0, self.dirShift), size=(iconSize, iconSize), png=self.iconFolder))
-			res.append(MultiContentEntryText(pos=(x, 0), size=(width - x - tn - r, self.itemHeight), font=0, flags=RT_HALIGN_LEFT | valign_center, text=txt))
-			res.append(MultiContentEntryText(pos=(width - tn - r, 0), size=(tn, self.itemHeight), font=1, flags=RT_HALIGN_RIGHT | valign_center, text=_("Directory")))
+			res.append(MultiContentEntryPixmapAlphaTest(pos=(0, self.dirShift), size=(iconSize, iconSize), png=self.iconFolder))
+			res.append(MultiContentEntryText(pos=(x, 0), size=(width - x - tn - r, self.itemHeight), font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER, text=txt))
+			res.append(MultiContentEntryText(pos=(width - tn - r, 0), size=(tn, self.itemHeight), font=1, flags=RT_HALIGN_RIGHT | RT_VALIGN_CENTER, text=_("Directory")))
 			return res
 		if (data == -1) or (data is None):
 			data = MovieListData()
 			cur_idx = self.l.getCurrentSelectionIndex()
-			x = self.list[cur_idx] # x = ref,info,begin,...
+			x = self.list[cur_idx]  # x = ref,info,begin,...
 			if config.usage.load_length_of_movies_in_moviellist.value:
-				data.len = x[1].getLength(x[0]) #recalc the movie length...
+				data.len = x[1].getLength(x[0])  # recalc the movie length...
 			else:
-				data.len = 0 #do not recalc movielist to speedup loading the list
-			self.list[cur_idx] = (x[0], x[1], x[2], data) #update entry in list... so next time we don't need to recalc
+				data.len = 0  # dont recalc movielist to speedup loading the list
+			self.list[cur_idx] = (x[0], x[1], x[2], data)  # update entry in list... so next time we don't need to recalc
 			if config.movielist.show_underlines.value:
 				data.txt = info.getName(serviceref)
 			else:
@@ -436,7 +436,7 @@ class MovieList(GUIComponent):
 					data.icon = self.iconMovieRec
 			elif self.playInBackground and serviceref == self.playInBackground:
 				data.icon = self.iconMoviePlay
-			elif pathName.endswith(".tmpcut.ts"): # cutting with moviecut plugin to same filename
+			elif pathName.endswith(".tmpcut.ts"):  # cutting with moviecut plugin to same filename
 				data.icon = self.iconCutting
 			else:
 				switch = config.usage.show_icons_in_movielist.value
@@ -686,7 +686,7 @@ class MovieList(GUIComponent):
 				# No tags? Auto tag!
 				this_tags = name.replace(',', ' ').replace('.', ' ').split()
 				# For auto tags, we are keeping a (tag, movies) dictionary.
-				#It will be used later to check if movies have a complete sentence in common.
+				# It will be used later to check if movies have a complete sentence in common.
 				for tag in this_tags:
 					if tag in autotags:
 						autotags[tag].append(name)
@@ -753,7 +753,7 @@ class MovieList(GUIComponent):
 		rautotags = {}
 		for tag, movies in autotags.items():
 			if (len(movies) > 1):
-				movies = tuple(movies) # a tuple can be hashed, but a list not
+				movies = tuple(movies)  # a tuple can be hashed, but a list not
 				item = rautotags.get(movies, [])
 				if not item:
 					rautotags[movies] = item
@@ -784,7 +784,7 @@ class MovieList(GUIComponent):
 				self.tags[match] = set(tags)
 			else:
 				match = ' '.join(tags)
-				if (len(match) > 2) or (match in realtags): #Omit small words, only for auto tags
+				if (len(match) > 2) or (match in realtags):  # Omit small words, only for auto tags
 					self.tags[match] = set(tags)
 		# Adding the realtags to the tag list
 		for tag in realtags:
@@ -809,7 +809,7 @@ class MovieList(GUIComponent):
 				# if path ends in '/', p is blank.
 				p = os.path.split(p[0])
 			name = p[1]
-		# print "Sorting for -%s-" % name
+		# print("[MovieList] Sorting for -%s-" % name)
 
 		return (1, name and name.lower() or "", -x[2])
 
@@ -848,7 +848,7 @@ class MovieList(GUIComponent):
 			lbl.visible = True
 		self.moveToCharTimer = eTimer()
 		self.moveToCharTimer.callback.append(self._moveToChrStr)
-		self.moveToCharTimer.start(1000, True) #time to wait for next key press to decide which letter to use...
+		self.moveToCharTimer.start(1000, True)  # time to wait for next key press to decide which letter to use...
 
 	def moveToString(self, char, lbl=None):
 		self._char = self._char + char.upper()
@@ -858,14 +858,14 @@ class MovieList(GUIComponent):
 			lbl.visible = True
 		self.moveToCharTimer = eTimer()
 		self.moveToCharTimer.callback.append(self._moveToChrStr)
-		self.moveToCharTimer.start(1000, True) #time to wait for next key press to decide which letter to use...
+		self.moveToCharTimer.start(1000, True)  # time to wait for next key press to decide which letter to use...
 
 	def _moveToChrStr(self):
 		currentIndex = self.instance.getCurrentIndex()
 		found = False
 		if currentIndex < (len(self.list) - 1):
 			itemsBelow = self.list[currentIndex + 1:]
-			#first search the items below the selection
+			# first search the items below the selection
 			for index, item in enumerate(itemsBelow):
 				ref = item[0]
 				itemName = getShortName(item[1].getName(ref).upper(), ref)
@@ -878,7 +878,7 @@ class MovieList(GUIComponent):
 					self.instance.moveSelectionTo(index + currentIndex + 1)
 					break
 		if found == False and currentIndex > 0:
-			itemsAbove = self.list[1:currentIndex] #first item (0) points parent folder - no point to include
+			itemsAbove = self.list[1:currentIndex]  # first item (0) points parent folder - no point to include
 			for index, item in enumerate(itemsAbove):
 				ref = item[0]
 				itemName = getShortName(item[1].getName(ref).upper(), ref)
@@ -897,10 +897,10 @@ class MovieList(GUIComponent):
 
 
 def getShortName(name, serviceref):
-	if serviceref.flags & eServiceReference.mustDescent: #Directory
+	if serviceref.flags & eServiceReference.mustDescent:  # Directory
 		pathName = serviceref.getPath()
 		p = os.path.split(pathName)
-		if not p[1]: #if path ends in '/', p is blank.
+		if not p[1]:  # if path ends in '/', p is blank.
 			p = os.path.split(p[0])
 		return p[1].upper()
 	else:

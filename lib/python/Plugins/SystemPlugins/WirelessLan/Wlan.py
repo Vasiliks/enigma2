@@ -200,12 +200,12 @@ class wpaSupplicant:
 		except:
 			print("[Wlan] Error parsing ", configfile)
 			wsconfig = {
-					'hiddenessid': False,
-					'ssid': "",
-					'encryption': "WPA2",
-					'wepkeytype': "ASCII",
-					'key': "",
-				}
+				'hiddenessid': False,
+				'ssid': "",
+				'encryption': "WPA2",
+				'wepkeytype': "ASCII",
+				'key': "",
+			}
 
 		for (k, v) in wsconf.items():
 			print("[Wlan] wsconf [%s] %s" % (k, v))
@@ -261,7 +261,7 @@ class wpaSupplicant:
 		fp.write('}')
 		fp.write('\n')
 		fp.close()
-		#system('cat ' + getWlanConfigName(iface))
+		# system('cat ' + getWlanConfigName(iface))
 
 	def loadConfig(self, iface):
 		if existBcmWifi(iface):
@@ -271,7 +271,7 @@ class wpaSupplicant:
 		if not os.path.exists(configfile):
 			configfile = '/etc/wpa_supplicant.conf'
 		try:
-			#parse the wpasupplicant configfile
+			# parse the wpasupplicant configfile
 			print("[Wlan] Parsing configfile: ", configfile)
 			fp = open(configfile)
 			supplicant = fp.readlines()
@@ -317,12 +317,12 @@ class wpaSupplicant:
 			config.plugins.wlan.encryption.value = encryption
 
 			wsconfig = {
-					'hiddenessid': config.plugins.wlan.hiddenessid.value,
-					'ssid': config.plugins.wlan.essid.value,
-					'encryption': config.plugins.wlan.encryption.value,
-					'wepkeytype': config.plugins.wlan.wepkeytype.value,
-					'key': config.plugins.wlan.psk.value,
-				}
+				'hiddenessid': config.plugins.wlan.hiddenessid.value,
+				'ssid': config.plugins.wlan.essid.value,
+				'encryption': config.plugins.wlan.encryption.value,
+				'wepkeytype': config.plugins.wlan.wepkeytype.value,
+				'key': config.plugins.wlan.psk.value,
+			}
 
 			for (key, item) in wsconfig.items():
 				if item == "None" or item == "":
@@ -339,13 +339,13 @@ class wpaSupplicant:
 		except:
 			print("[Wlan] Error parsing ", configfile)
 			wsconfig = {
-					'hiddenessid': False,
-					'ssid': "",
-					'encryption': "WPA2",
-					'wepkeytype': "ASCII",
-					'key': "",
-				}
-		#print("[Wlan] WS-CONFIG-->",wsconfig)
+				'hiddenessid': False,
+				'ssid': "",
+				'encryption': "WPA2",
+				'wepkeytype': "ASCII",
+				'key': "",
+			}
+		# print("[Wlan] WS-CONFIG-->",wsconfig)
 		return wsconfig
 
 

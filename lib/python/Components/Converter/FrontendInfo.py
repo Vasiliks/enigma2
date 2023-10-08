@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-from Components.Converter.Converter import Converter
-from Components.Element import cached
-from Components.config import config
-from Components.NimManager import nimmanager
 from skin import parameters
+
+from Components.config import config
+from Components.Element import cached
+from Components.NimManager import nimmanager
+from Components.Converter.Converter import Converter
 
 
 class FrontendInfo(Converter):
@@ -47,8 +47,8 @@ class FrontendInfo(Converter):
 		assert self.type not in (self.LOCK, self.SLOT_NUMBER), "the text output of FrontendInfo cannot be used for lock info"
 		percent = None
 		swapsnr = config.usage.swap_snr_on_osd.value
-		colors = parameters.get("FrontendInfoColors", (0x0000FF00, 0x00FFFF00, 0x007F7F7F)) # tuner active, busy, available colors
-		if self.type == self.BER: # as count
+		colors = parameters.get("FrontendInfoColors", (0x0000FF00, 0x00FFFF00, 0x007F7F7F))  # tuner active, busy, available colors
+		if self.type == self.BER:  # as count
 			count = self.source.ber
 			if count is not None:
 				return str(count)
@@ -61,7 +61,7 @@ class FrontendInfo(Converter):
 		elif self.type == self.SNR or self.type == self.SNRdB:
 			if self.source.snr_db is not None:
 				return _("%3.01f dB") % (self.source.snr_db / 100.0)
-			elif self.source.snr is not None: #fallback to normal SNR...
+			elif self.source.snr is not None:  # fallback to normal SNR...
 				percent = self.source.snr
 		elif self.type == self.TUNER_TYPE:
 			return self.source.frontend_type or _("Unknown")
@@ -70,11 +70,11 @@ class FrontendInfo(Converter):
 			for n in nimmanager.nim_slots:
 				if n.type and n.enabled:
 					if n.slot == self.source.slot_number:
-						color = "\c%08x" % colors[0]
+						color = r"\c%08x" % colors[0]
 					elif self.source.tuner_mask & 1 << n.slot:
-						color = "\c%08x" % colors[1]
+						color = r"\c%08x" % colors[1]
 					elif len(nimmanager.nim_slots) <= self.space_for_tuners or n.isFBCRoot() or self.show_all_non_link_tuners and not (n.isFBCLink() or n.config_mode == "loopthrough"):
-						color = "\c%08x" % colors[2]
+						color = r"\c%08x" % colors[2]
 					else:
 						continue
 					if string and len(nimmanager.nim_slots) <= self.space_for_tuners_with_spaces:
@@ -86,9 +86,9 @@ class FrontendInfo(Converter):
 			for n in nimmanager.nim_slots:
 				if n.type and n.enabled:
 					if n.slot == self.source.slot_number:
-						color = "\c%08x" % colors[0]
+						color = r"\c%08x" % colors[0]
 					elif self.source.tuner_mask & 1 << n.slot:
-						color = "\c%08x" % colors[1]
+						color = r"\c%08x" % colors[1]
 					else:
 						continue
 					if string:
@@ -132,7 +132,7 @@ class FrontendInfo(Converter):
 			return self.source.snr or 0
 		elif self.type == self.BER:
 			ber = self.source.ber or 0
-			return ber if ber < self.range else self.range
+			return self.range if ber > self.range else ber
 		elif self.type == self.TUNER_TYPE:
 			type = self.source.frontend_type
 			if type == 'DVB-S':

@@ -108,7 +108,7 @@ class CpuUsageMonitor(Poll, object):
 				callback(info)
 
 	def connectCallback(self, func):
-		if not func in self.__callbacks:
+		if func not in self.__callbacks:
 			self.__callbacks.append(func)
 		if not self.poll_enabled:
 			self.poll()

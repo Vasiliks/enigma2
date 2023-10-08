@@ -2,7 +2,7 @@
 from Screens.Screen import Screen
 from Components.config import config
 from Components.Sources.CanvasSource import CanvasSource
-from Components.ActionMap import ActionMap, NumberActionMap
+from Components.ActionMap import NumberActionMap
 from Components.Console import Console
 from Components.SystemInfo import SystemInfo
 from Tools.Directories import fileExists, resolveFilename, SCOPE_PLUGINS
@@ -417,7 +417,7 @@ class VideoFinetune(Screen):
 
 	def testpicCallback(self, key):
 		if key:
-			if key == True:
+			if key:
 				self.next()
 			else:
 				self.keyNumber(key)

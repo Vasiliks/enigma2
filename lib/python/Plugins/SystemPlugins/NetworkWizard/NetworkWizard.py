@@ -99,7 +99,7 @@ class NetworkWizard(WizardLanguage, ShowRemoteControl):
 		self.InstalledInterfaceCount = len(self.Adapterlist)
 		if self.Adapterlist is not None:
 			if self.InstalledInterfaceCount == 1 and self.selectedInterface is None:
-					self.selectedInterface = self.Adapterlist[0]
+				self.selectedInterface = self.Adapterlist[0]
 		for interface in iNetwork.getAdapterList():
 			self.originalInterfaceState[interface] = {}
 			self.originalInterfaceState[interface]["up"] = iNetwork.getAdapterAttribute(interface, 'up')
@@ -162,7 +162,7 @@ class NetworkWizard(WizardLanguage, ShowRemoteControl):
 			self.Adapterlist = iNetwork.getAdapterList()
 		if self.NextStep != 'end':
 			if len(self.Adapterlist) == 0:
-				#Reset Network to defaults if network broken
+				# Reset Network to defaults if network broken
 				iNetwork.resetNetworkConfig('lan', self.resetNetworkConfigCB)
 				self.resetRef = self.session.openWithCallback(self.resetNetworkConfigFinished, MessageBox, _("Please wait while we prepare your network interfaces..."), type=MessageBox.TYPE_INFO, enable_input=False)
 			if iface in iNetwork.getInstalledAdapters():
@@ -345,7 +345,7 @@ class NetworkWizard(WizardLanguage, ShowRemoteControl):
 	def isWlanPluginInstalled(self):
 		try:
 			from Plugins.SystemPlugins.WirelessLan.Wlan import iWlan
-		except ImportError as e:
+		except ImportError:
 			self.WlanPluginInstalled = False
 		else:
 			self.WlanPluginInstalled = True

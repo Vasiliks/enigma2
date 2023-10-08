@@ -1,35 +1,39 @@
-# -*- coding: utf-8 -*-
+from os.path import isfile, join
+
+from enigma import ePixmap, iServiceInformation
+
 from Components.Renderer.Renderer import Renderer
-from enigma import iServiceInformation
-from string import upper
-from enigma import ePixmap
-from Tools.Directories import SCOPE_GUISKIN, resolveFilename
-from Components.Element import cached
-from Components.Converter.Poll import Poll
-from os.path import exists, isfile
+from Tools.Directories import SCOPE_GUISKIN, resolveFilename, fileReadLines
+
+MODULE_NAME = __name__.split(".")[-1]
 
 
-class PicEmu2(Renderer, Poll):
+class PicEmu2(Renderer):
 	__module__ = __name__
-	if exists("/usr/lib64"):
-		searchPaths = ('/data/%s/', '/usr/share/enigma2/%s/', '/usr/lib64/enigma2/python/Plugins/Extensions/%s/', '/media/sde1/%s/', '/media/cf/%s/', '/media/sdd1/%s/', '/media/hdd/%s/', '/media/usb/%s/', '/media/ba/%s/', '/mnt/ba/%s/', '/media/sda/%s/', '/etc/%s/')
-	else:
-		searchPaths = ('/data/%s/', '/usr/share/enigma2/%s/', '/usr/lib/enigma2/python/Plugins/Extensions/%s/', '/media/sde1/%s/', '/media/cf/%s/', '/media/sdd1/%s/', '/media/hdd/%s/', '/media/usb/%s/', '/media/ba/%s/', '/mnt/ba/%s/', '/media/sda/%s/', '/etc/%s/')
+	searchPaths = ("/usr/share/enigma2/", "/media/hdd/", "/media/usb/", "/media/ba/")
+	camds = {
+		"ChID": "wicardd",
+		"chid": "oscam",
+		"Sign": "mgcamd",
+		"hops": "cccam"
+	}
+	ncam = {
+		"chid": "ncam"
+	}
 
 	def __init__(self):
-		Poll.__init__(self)
 		Renderer.__init__(self)
-		self.path = 'emu'
+		self.path = "emu"
 		self.nameCache = {}
-		self.pngname = ''
+		self.pngName = ""
 		self.picon_default = "picon_default.png"
 
 	def applySkin(self, desktop, parent):
 		attribs = []
 		for (attrib, value,) in self.skinAttributes:
-			if (attrib == 'path'):
+			if (attrib == "path"):
 				self.path = value
-			elif (attrib == 'picon_default'):
+			elif (attrib == "picon_default"):
 				self.picon_default = value
 			else:
 				attribs.append((attrib, value))
@@ -38,138 +42,58 @@ class PicEmu2(Renderer, Poll):
 
 	GUI_WIDGET = ePixmap
 
-	@cached
-	def getText(self):
-		service = self.source.service
-		info = service and service.info()
-		if not service:
-			return None
-		camd = ""
-		serlist = None
-		camdlist = None
-		nameemu = []
-		nameser = []
-		if not info:
-			return ""
-		if isfile("/etc/init.d/softcam") or isfile("/etc/init.d/cardserver"):
-			try:
-				for line in open("/etc/init.d/softcam"):
-					if "echo" in line:
-						nameemu.append(line)
-				camdlist = "%s" % nameemu[1].split('"')[1]
-			except:
-				pass
-			try:
-				for line in open("/etc/init.d/cardserver"):
-					if "echo" in line:
-						nameser.append(line)
-				serlist = "%s" % nameser[1].split('"')[1]
-			except:
-				pass
-			if serlist is not None and camdlist is not None:
-				return ("%s %s" % (serlist, camdlist))
-			elif camdlist is not None:
-				return "%s" % camdlist
-			elif serlist is not None:
-				return "%s" % serlist
-			return ""
-
-		if serlist is not None:
-			try:
-				cardserver = ""
-				for current in serlist.readlines():
-					cardserver = current
-				serlist.close()
-			except:
-				pass
-		else:
-			cardserver = " "
-
-		if camdlist is not None:
-			try:
-				emu = ""
-				for current in camdlist.readlines():
-					emu = current
-				camdlist.close()
-			except:
-				pass
-		else:
-			emu = " "
-
-		return "%s %s" % (cardserver.split('\n')[0], emu.split('\n')[0])
-
-	text = property(getText)
-
 	def changed(self, what):
-		self.poll_interval = 50
-		self.poll_enabled = True
 		if self.instance:
-			pngname = ''
-			if (what[0] != self.CHANGED_CLEAR):
-				sname = ""
+			pngName = ""
+			if (what[0] != self.CHANGED_CLEAR) and isfile("/tmp/ecm.info"):
+				sName = ""
 				service = self.source.service
 				if service:
-					info = (service and service.info())
+					info = service and service.info()
 					if info:
 						caids = info.getInfoObject(iServiceInformation.sCAIDs)
-						if isfile("/tmp/ecm.info"):
-							try:
-								value = self.getText()
-								value = value.lower()
-								if value is None:
-									print("[PicEmu2] No emu installed or FTA?")
-									sname = "fta"
-								else:
-									if isfile("/tmp/ecm.info"):
-										try:
-											content = open("/tmp/ecm.info").read()
-										except:
-											content = ""
-										contentInfo = content.split("\n")
-										for line in contentInfo:
-											if ("address" in line):
-												sname = "cccam"
-							except:
-								print("")
-
-						if caids:
-							if (len(caids) > 0):
-								for caid in caids:
-									caid = self.int2hex(caid)
-									if (len(caid) == 3):
-										caid = ("0%s" % caid)
-									caid = caid[:2]
-									caid = caid.upper()
-									if (caid != "") and (sname == ""):
-										print("[PicEmu2] Unknown emu or FTA?")
-										sname = "fta"
-
-				pngname = self.nameCache.get(sname, '')
-				if (pngname == ''):
-					pngname = self.findPicon(sname)
-					if (pngname != ''):
-						self.nameCache[sname] = pngname
-
-			if (pngname == ''):
-				pngname = self.nameCache.get('fta', '')
-				if (pngname == ''):
-					pngname = self.findPicon('fta')
-					if (pngname == ''):
-						tmp = resolveFilename(SCOPE_GUISKIN, 'picon_default.png')
+						if caids and len(caids) > 0:
+							sName = self.matchCAId(caids)
+				pngName = self.nameCache.get(sName, "")
+				if (pngName == ""):
+					pngName = self.findPicon(sName)
+					if (pngName != ""):
+						self.nameCache[sName] = pngName
+			if (pngName == ""):
+				pngName = self.nameCache.get("default", "")
+				if (pngName == ""):
+					pngName = self.findPicon("picon_default")
+					if (pngName == ""):
+						tmp = resolveFilename(SCOPE_GUISKIN, "picon_default.png")
 						if isfile(tmp):
-							pngname = tmp
-						self.nameCache['default'] = pngname
+							pngName = tmp
+						self.nameCache["default"] = pngName
+			if (self.pngName != pngName):
+				self.pngName = pngName
+				self.instance.setPixmapFromFile(self.pngName)
 
-			if (self.pngname != pngname):
-				self.pngname = pngname
-				self.instance.setPixmapFromFile(self.pngname)
-
-	def int2hex(self, int):
-		return ("%x" % int)
+	def matchCAId(self, caids):
+		from process import ProcessList
+		ncam = str(ProcessList().named("ncam")).strip("[]")
+		lines = []
+		try:
+			for line in fileReadLines("/tmp/ecm.info", lines, source=MODULE_NAME):
+				if not ncam:
+					for caid in caids:
+						sName = self.camds.get(line[0:4])
+						if sName:
+							return sName
+				else:
+					for caid in caids:
+						sName = self.ncam.get(line[0:4])
+						if sName:
+							return sName
+		except IOError as err:
+			print("[PicEmu2] %s" % err)
 
 	def findPicon(self, serviceName):
 		for path in self.searchPaths:
-			pngname = (((path % self.path) + serviceName) + '.png')
-			if isfile(pngname):
-				return pngname
-		return ''
+			pngName = join(path, self.path, "%s.png" % serviceName)
+			if isfile(pngName):
+				return pngName
+		return ""

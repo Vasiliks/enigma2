@@ -4,6 +4,7 @@ from Components.config import config
 from Components.Sources.List import List
 from Components.ActionMap import queryKeyBinding
 from Components.InputDevice import remoteControl
+from gettext import pgettext
 
 # Helplist structure:
 # [ ( actionmap, context, [(action, help), (action, help), ...] ), (actionmap, ... ), ... ]
@@ -69,7 +70,6 @@ class HelpMenuList(List):
 		else:
 			if sortCmp == self._sortCmpInd:
 				self.rcKeyIndex = dict((x[1], x[0]) for x in enumerate(rcPos.getRcKeyList()))
-		buttonsProcessed = set()
 		helpSeen = defaultdict(list)
 		sortedHelplist = sorted(helplist, key=lambda hle: hle[0].prio)
 		actionMapHelp = defaultdict(list)

@@ -12,6 +12,7 @@ from Components.Sources.StaticText import StaticText
 from Components.ProgressBar import ProgressBar
 from Components.Pixmap import Pixmap
 from Components.ServiceList import refreshServiceList
+from gettext import ngettext
 
 from enigma import eCableScan, eDVBFrontendParametersCable, eTimer
 
@@ -84,9 +85,9 @@ class CableScanStatus(Screen):
 
 		self["actions"] = ActionMap(["OkCancelActions"],
 			{
-				"ok": self.ok,
-				"cancel": self.cancel
-			})
+			"ok": self.ok,
+			"cancel": self.cancel
+		})
 
 		self.onFirstExecBegin.append(self.doServiceScan)
 
@@ -249,7 +250,7 @@ CableScanAutoStartTimer = eTimer()
 
 
 def CableScanMain(session, **kwargs):
-		session.open(CableScanScreen, nimmanager.getEnabledNimListOfType("DVB-C"))
+	session.open(CableScanScreen, nimmanager.getEnabledNimListOfType("DVB-C"))
 
 
 def restartScanAutoStartTimer(reply=False):

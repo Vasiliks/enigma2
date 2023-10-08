@@ -5,6 +5,7 @@ from Components.ConfigList import ConfigListScreen
 from Components.config import config, ConfigBoolean, ConfigNothing
 from Components.Label import Label
 from Components.Sources.StaticText import StaticText
+from gettext import pgettext
 from Tools.Directories import isPluginInstalled
 
 from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
@@ -32,12 +33,12 @@ class VideoSetup(ConfigListScreen, Screen):
 		from Components.ActionMap import ActionMap
 		self["actions"] = ActionMap(["SetupActions", "MenuActions"],
 			{
-				"cancel": self.keyCancel,
-				"save": self.apply,
-				"menu": self.closeRecursive,
-				"left": self.keyLeft,
-				"right": self.keyRight
-			}, -2)
+			"cancel": self.keyCancel,
+			"save": self.apply,
+			"menu": self.closeRecursive,
+			"left": self.keyLeft,
+			"right": self.keyRight
+		}, -2)
 
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("OK"))
@@ -278,7 +279,7 @@ def VideoWizard(*args, **kwargs):
 
 def Plugins(**kwargs):
 	list = [
-#		PluginDescriptor(where = [PluginDescriptor.WHERE_SESSIONSTART, PluginDescriptor.WHERE_AUTOSTART], fnc = autostart),
+		# PluginDescriptor(where = [PluginDescriptor.WHERE_SESSIONSTART, PluginDescriptor.WHERE_AUTOSTART], fnc = autostart),
 		PluginDescriptor(name=_("Video setup"), description=_("Advanced video setup"), where=PluginDescriptor.WHERE_MENU, needsRestart=False, fnc=startSetup)
 	]
 	if config.misc.videowizardenabled.value:
