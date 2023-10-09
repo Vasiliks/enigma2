@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <stack>
 #include <list>
+#include <vector>
 
 #include <string>
 #include <lib/base/elock.h>
@@ -136,9 +137,8 @@ struct gOpcode
 
 		struct pgradient
 		{
-			gRGB startColor;
-			gRGB endColor;
-			int orientation;
+			std::vector<gRGB> colors;
+			uint8_t orientation;
 			bool alphablend;
 			int fullSize;
 		} *gradient;
@@ -146,7 +146,7 @@ struct gOpcode
 		struct pradius
 		{
 			int radius;
-			int edges;
+			uint8_t edges;
 		} *radius;
 
 		struct pborder
@@ -205,12 +205,12 @@ struct gOpcode
 			ePoint point;
 			eSize size;
 		} *setShowItemInfo;
-		
+
 		struct psetFlush
 		{
 			bool enable;
 		} *setFlush;
-		
+
 		struct psetViewInfo
 		{
 			eSize size;
@@ -222,7 +222,7 @@ struct gOpcode
 #define MAXSIZE 2048
 
 /* gRC is the singleton which controls the fifo and dispatches commands */
-class gRC: public iObject, public sigc::trackable
+class gRC : public iObject, public sigc::trackable
 {
 	DECLARE_REF(gRC);
 	friend class gPainter;
@@ -265,7 +265,7 @@ public:
 	void unlock();
 #endif
 
-	sigc::signal<void()> notify;
+	sigc::signal0<void> notify;
 
 	void setSpinnerDC(gDC *dc) { m_spinner_dc = dc; }
 	void setSpinnerOnOff(int onoff) { m_spinneronoff = onoff; }
@@ -295,8 +295,8 @@ public:
 	void setForegroundColor(const gRGB &color);
 
 	void setBorder(const gRGB &borderColor, int width);
-	void setGradient(const gRGB &startColor, const gRGB &endColor, int orientation, bool alphablend, int fullSize = 0);
-	void setRadius(int radius, int edges);
+	void setGradient(const std::vector<gRGB> &colors, uint8_t orientation, bool alphablend, int fullSize = 0);
+	void setRadius(int radius, uint8_t edges);
 
 	void setFont(gFont *font);
 	/* flags only THESE: */
@@ -381,7 +381,7 @@ public:
 #endif
 };
 
-class gDC: public iObject
+class gDC : public iObject
 {
 	DECLARE_REF(gDC);
 
@@ -393,12 +393,13 @@ protected:
 	ePtr<gFont> m_current_font;
 	ePoint m_current_offset;
 
-	gRGB m_gradient_start_color, m_gradient_end_color;
-	int m_gradient_orientation;
+	std::vector<gRGB> m_gradient_colors;
+	uint8_t m_gradient_orientation;
 	bool m_gradient_alphablend;
 	int m_gradient_fullSize;
 
-	int m_radius, m_radius_edges;
+	int m_radius;
+	uint8_t m_radius_edges;
 
 	gRGB m_border_color;
 	int m_border_width;
