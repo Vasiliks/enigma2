@@ -129,7 +129,7 @@ class StandbyScreen(Screen):
 			self.avswitch.setInput("AUX")
 		if SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
 			output = "/proc/stb/hdmi/output"
-			if os.path.isfile(output):
+			if isfile(output):
 				with open(output, "w") as hdmi:
 					hdmi.write("off")
 
