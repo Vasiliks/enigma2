@@ -4,12 +4,13 @@ from json import loads
 from locale import format_string
 from os import listdir, popen, remove, statvfs
 from os.path import getmtime, isfile, isdir, join, basename
+from subprocess import PIPE, Popen
 from time import localtime, strftime, strptime
 from urllib.request import urlopen
 from enigma import eConsoleAppContainer, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
 from skin import parameters
 from Components.About import about, getChipSetString
-from Components.ActionMap import ActionMap, HelpableActionMap
+from Components.ActionMap import HelpableActionMap, HelpableNumberActionMap
 
 from Components.config import config
 from Components.Console import Console
@@ -23,14 +24,14 @@ from Components.Pixmap import Pixmap
 from Components.ScrollLabel import ScrollLabel
 from Components.ProgressBar import ProgressBar
 from Components.GUIComponent import GUIComponent
-from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName
+from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName, getDemodVersion
 from Screens.HelpMenu import HelpableScreen
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen, ScreenSummary
 
 from Tools.Directories import SCOPE_PLUGINS, resolveFilename, fileExists, fileHas, pathExists, fileReadLine, fileReadLines, fileWriteLine, isPluginInstalled
 from Tools.Geolocation import geolocation
-from Tools.StbHardware import getFPVersion, getProcInfoTypeTuner, getBoxProc, getHWSerial, getBoxRCType, getBoxProcType, getDemodVersion
+from Tools.StbHardware import getFPVersion, getBoxProc, getHWSerial, getBoxRCType, getBoxProcType
 from Tools.LoadPixmap import LoadPixmap
 from Tools.Conversions import scaleNumber, formatDate
 
@@ -44,9 +45,7 @@ platform = BoxInfo.getItem("platform")
 DISPLAY_BRAND = BoxInfo.getItem("displaybrand")
 DISPLAY_MODEL = BoxInfo.getItem("displaymodel")
 rcname = BoxInfo.getItem("rcname")
-procType = getBoxProcType()
-procModel = getBoxProc()
-fpVersion = getFPVersion()
+
 
 INFO_COLORS = ["N", "H", "S", "P", "V", "M", "F"]
 INFO_COLOR = {
@@ -72,9 +71,10 @@ def getBoxProcTypeName():
 		"21": _("Twin Hybrid"),
 		"22": _("Hybrid Tuner")
 	}
+	procType = getBoxProcType()
 	if procType == "unknown":
 		return _("Unknown")
-	return "%s - %s" % (procType, boxProcTypes.get(procType, _("Unknown")))
+	return "%s  -  %s" % (procType, boxProcTypes.get(procType, _("Unknown")))
 
 
 class InformationBase(Screen, HelpableScreen):
@@ -488,9 +488,16 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("P1", _("Last flash"), formatDate(about.getFlashDateString())))
 		info.append(formatLine("P1", _("Enigma2 (re)starts"), config.misc.startCounter.value))
 		info.append(formatLine("P1", _("Enigma2 debug level"), eGetEnigmaDebugLvl()))
-		mediaService = BoxInfo.getItem("mediaservice")
-		if mediaService:
-			info.append(formatLine("P1", _("Media service"), mediaService.replace("enigma2-plugin-systemplugins-", "")))
+		if isPluginInstalled("ServiceHisilicon") and not isPluginInstalled("ServiceMP3"):
+			mediaService = "ServiceHisilicon"
+		elif isPluginInstalled("ServiceMP3") and not isPluginInstalled("ServiceHisilicon"):
+			mediaService = "ServiceMP3"
+		else:
+			mediaService = _("Unknown")
+		info.append(formatLine("P1", _("Media service player"), "%s") % mediaService)
+		if isPluginInstalled("ServiceApp"):
+			extraService = "ServiceApp"
+			info.append(formatLine("P1", _("Extra service player"), "%s") % extraService)
 		info.append("")
 		info.append(formatLine("S", _("Build information")))
 		if self.extraSpacing:
@@ -516,43 +523,23 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("P1", _("GStreamer version"), about.getGStreamerVersionString().replace("GStreamer ", "")))
 		info.append(formatLine("P1", _("FFmpeg version"), about.getFFmpegVersionString()))
 		info.append("")
-		if BoxInfo.getItem("HiSilicon"):
+		info.append(formatLine("S", _("Boot information")))
+		if self.extraSpacing:
 			info.append("")
-			info.append(formatLine("H", _("HiSilicon specific information")))
-			info.append("")
-			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
-			stdout, stderr = process.communicate()
-			if process.returncode == 0:
-				missing = True
-				packageList = stdout.split("\n")
-				revision = self.findPackageRevision("grab", packageList)
-				if revision and revision != "r0":
-					info.append(formatLine("P1", _("Grab"), revision))
-					missing = False
-				revision = self.findPackageRevision("hihalt", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Halt"), revision))
-					missing = False
-				revision = self.findPackageRevision("libs", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Libs"), revision))
-					missing = False
-				revision = self.findPackageRevision("partitions", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Partitions"), revision))
-					missing = False
-				revision = self.findPackageRevision("reader", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Reader"), revision))
-					missing = False
-				revision = self.findPackageRevision("showiframe", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Showiframe"), revision))
-					missing = False
-				if missing:
-					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
-			else:
-				info.append(formatLine("P1", _("Package information currently not available!")))
+		if BoxInfo.getItem("mtdbootfs"):
+			info.append(formatLine("P1", _("MTD boot"), BoxInfo.getItem("mtdbootfs")))
+		if BoxInfo.getItem("mtdkernel"):
+			info.append(formatLine("P1", _("MTD kernel"), BoxInfo.getItem("mtdkernel")))
+		if BoxInfo.getItem("mtdrootfs"):
+			info.append(formatLine("P1", _("MTD root"), BoxInfo.getItem("mtdrootfs")))
+		if BoxInfo.getItem("kernelfile"):
+			info.append(formatLine("P1", _("Kernel file"), BoxInfo.getItem("kernelfile")))
+		if BoxInfo.getItem("rootfile"):
+			info.append(formatLine("P1", _("Root file"), BoxInfo.getItem("rootfile")))
+		if BoxInfo.getItem("mkubifs"):
+			info.append(formatLine("P1", _("MKUBIFS"), BoxInfo.getItem("mkubifs")))
+		if BoxInfo.getItem("ubinize"):
+			info.append(formatLine("P1", _("UBINIZE"), BoxInfo.getItem("ubinize")))
 		self["information"].setText("\n".join(info))
 
 	def getSummaryInformation(self):
@@ -1036,11 +1023,12 @@ class ReceiverInformation(InformationBase):
 		procModel = getBoxProc()
 		if procModel != model:
 			info.append(formatLine("P1", _("Proc model"), procModel))
-		info.append(formatLine("P1", _("Hardware type"), getBoxProcTypeName().split("-")[0])) if getBoxProcTypeName() != _("Unknown") else ""
-		hwSerial = getHWSerial() if getHWSerial() != "unknown" else None
-		cpuSerial = about.getCPUSerial() if about.getCPUSerial() != "unknown" else None
-		if hwSerial or cpuSerial:
-			info.append(formatLine("P1", _("Hardware serial"), (hwSerial if hwSerial else cpuSerial)))
+		procModelType = getBoxProcTypeName()
+		if procModelType and procModelType != "unknown":
+			info.append(formatLine("P1", _("Hardware type"), procModelType))
+		hwSerial = getHWSerial()
+		if hwSerial:
+			info.append(formatLine("P1", _("Hardware serial"), (hwSerial if hwSerial != "unknown" else about.getCPUSerial())))
 		hwRelease = fileReadLine("/proc/stb/info/release", source=MODULE_NAME)
 		if hwRelease:
 			info.append(formatLine("P1", _("Factory release"), hwRelease))
@@ -1120,6 +1108,44 @@ class ReceiverInformation(InformationBase):
 		givenId = fileReadLine("/proc/device-tree/le-dt-id", source=MODULE_NAME)
 		if givenId:
 			info.append(formatLine("P1", _("Given device id"), givenId))
+		if BoxInfo.getItem("HiSilicon"):
+			info.append("")
+			info.append(formatLine("S", _("HiSilicon specific information")))
+			if self.extraSpacing:
+				info.append("")
+			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
+			stdout, stderr = process.communicate()
+			if process.returncode == 0:
+				missing = True
+				packageList = stdout.split("\n")
+				revision = findPackageRevision("grab", packageList)
+				if revision and revision != "r0":
+					info.append(formatLine("P1", _("Grab"), revision))
+					missing = False
+				revision = findPackageRevision("hihalt", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Halt"), revision))
+					missing = False
+				revision = findPackageRevision("libs", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Libs"), revision))
+					missing = False
+				revision = findPackageRevision("partitions", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Partitions"), revision))
+					missing = False
+				revision = findPackageRevision("reader", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Reader"), revision))
+					missing = False
+				revision = findPackageRevision("showiframe", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Showiframe"), revision))
+					missing = False
+				if missing:
+					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
+			else:
+				info.append(formatLine("P1", _("Package information currently not available!")))
 		info.append("")
 		info.append(formatLine("S", _("Tuner information")))
 		if self.extraSpacing:

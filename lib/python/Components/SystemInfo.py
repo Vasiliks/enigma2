@@ -425,7 +425,7 @@ SystemInfo["NCamIsActive"] = SystemInfo["NCamInstalled"] and fileCheck("/tmp/.nc
 SystemInfo["OLDE2API"] = model == "dm800"
 SystemInfo["7segment"] = displaytype == "7segment" or "7seg" in displaytype
 SystemInfo["textlcd"] = displaytype == "textlcd" or "text" in displaytype
-SystemInfo["HiSilicon"] = pathExists("/proc/hisi") or fileExists("/usr/bin/hihalt")
+SystemInfo["HiSilicon"] = socfamily.startswith("hisi") or exists("/proc/hisi") or isfile("/usr/bin/hihalt") or exists("/usr/lib/hisilicon")
 SystemInfo["DefineSat"] = platform in ("octagonhisil", "octagonhisilnew", "gbmv200", "uclanhisil") or model in ("beyonwizv2", "viper4k")
 SystemInfo["AmlogicFamily"] = socfamily.startswith(("aml", "meson")) or fileCheck("/proc/device-tree/amlogic-dt-id") or isfile("/usr/bin/amlhalt") or exists("/sys/module/amports")
 SystemInfo["RecoveryMode"] = fileCheck("/proc/stb/fp/boot_mode") and model not in ("hd51", "h7") or platform == "dmamlogic"

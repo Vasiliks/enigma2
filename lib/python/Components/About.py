@@ -7,6 +7,7 @@ from time import localtime, strftime
 import re
 from glob import glob
 from sys import maxsize, modules, version_info
+from gettext import ngettext
 import socket, fcntl, struct
 from subprocess import PIPE, Popen
 from Components.SystemInfo import BoxInfo, SystemInfo
@@ -274,16 +275,10 @@ def getChipSetNumber():
 
 
 def getCPUBrand():
-	if BoxInfo.getItem("AmlogicFamily"):
-		return _("Amlogic")
-	elif BoxInfo.getItem("HiSilicon"):
+	if SystemInfo["HiSilicon"]:
 		return _("HiSilicon")
-	elif socfamily.startswith("smp"):
-		return _("Sigma Designs")
-	elif socfamily.startswith("bcm") or BoxInfo.getItem("brand") == "rpi":
+	else:
 		return _("Broadcom")
-	print("[About] No CPU brand?")
-	return _("Undefined")
 
 
 def getCPUArch():
