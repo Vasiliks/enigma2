@@ -38,7 +38,7 @@ def end_log(test_name):
 	results = ""
 
 	for (t, self, method, args, kwargs) in get_events():
-		results += "%s T+%f: %s::%s(%s, *%s, *%s)\n" % (time.ctime(t), t - base_time, str(self.__class__), method, self, args, kwargs)
+		results += f"{time.ctime(t)} T+{t - base_time:f}: {str(self.__class__)}::{method}({self}, *{args}, *{kwargs})\n"
 
 	expected = None
 
@@ -47,7 +47,7 @@ def end_log(test_name):
 		expected = f.read()
 		f.close()
 	except:
-		print("NO TEST RESULT FOUND, creating new")
+		print("[events] NO TEST RESULT FOUND, creating new")
 		f = open(test_name + ".new_results", "wb")
 		f.write(results)
 		f.close()
@@ -55,14 +55,14 @@ def end_log(test_name):
 	print(results)
 
 	if expected is not None:
-		print("expected:")
+		print("[events] expected:")
 		if expected != results:
 			open(test_name + ".bogus_results", "wb").write(results)
 			raise tests.TestError("test data does not match")
 		else:
-			print("test compared ok")
+			print("[events] test compared ok")
 	else:
-		print("no test data to compare with.")
+		print("[events] no test data to compare with.")
 
 
 def log(fnc, base_time=0, test_name="test", *args, **kwargs):

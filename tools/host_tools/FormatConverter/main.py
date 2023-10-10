@@ -20,8 +20,8 @@ for source in datasources:
 while True:
 	os.system("/usr/bin/clear")
 	list = []
-	for index in range(len(datasources)):
-		list.append(datasources[index].getName() + (" (%d sats)" % len(datasources[index].transponderlist.keys())))
+	for index in list(range(len(datasources))):
+		list.append(datasources[index].getName() + f" ({len(datasources[index].transponderlist.keys())} sats)")
 	index = inputChoices(list, "q", "quit")
 	if index is None:
 		break
@@ -36,6 +36,6 @@ while True:
 			break
 
 		datasources[index].getCapabilities()[action][1]()
-		#except:
-		#	print sys.exc_info()
-		#	print "sorry, could not execute that command"
+		# except:
+		# print(sys.exc_info())
+		# print("sorry, could not execute that command")
