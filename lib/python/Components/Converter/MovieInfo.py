@@ -71,7 +71,7 @@ class MovieInfo(Converter):
 			elif self.type == self.MOVIE_REC_FILESIZE:
 				if isDirectory:
 					return _("Directory")
-				filesize = info.getFileSize(service)
+				filesize = info.getInfoObject(service, iServiceInformation.sFileSize)
 				if filesize is not None:
 					if filesize >= 104857600000: #100000*1024*1024
 						return "%.0f %s" % (filesize / 1073741824.0, _("GB"))

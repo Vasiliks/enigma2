@@ -326,8 +326,8 @@ public:
 
 		sDescription,
 		sServiceref,
-		sTimeCreate, 		/* unix time or string */
-		sFileSize_deprecated,   /* Value too large for int in getInfo(), use getFileSize() instead */
+		sTimeCreate,
+		sFileSize,
 
 		sCAIDs,
 		sCAIDPIDs,
