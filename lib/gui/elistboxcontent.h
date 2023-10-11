@@ -37,7 +37,7 @@ protected:
 	int cursorRestoreLine();
 	int size();
 
-	RESULT connectItemChanged(const sigc::slot<void()> &itemChanged, ePtr<eConnection> &connection);
+	RESULT connectItemChanged(const sigc::slot0<void> &itemChanged, ePtr<eConnection> &connection);
 
 	// void setOutputDevice ? (for allocating colors, ...) .. requires some work, though
 	void setSize(const eSize &size);
@@ -115,6 +115,12 @@ public:
 	void resetClip();
 	void entryRemoved(int idx);
 	void setTemplate(SWIG_PYOBJECT(ePyObject) tmplate);
+
+protected:
+	virtual void setBuildArgs(int selected) {}
+	virtual bool getIsMarked(int selected) { return false; }
+	bool m_servicelist = false;
+	ePyObject m_pArgs;
 
 private:
 	std::map<int, ePtr<gFont>> m_fonts;
