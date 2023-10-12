@@ -93,6 +93,7 @@ jobs:
         popd
     - name: patch enigma cpp files
       run: |
+        pip3 install six flake8
         sed -i 's/mallinfo2/mallinfo/g' main/enigma.cpp
     - name: build enigma2
       env: 
