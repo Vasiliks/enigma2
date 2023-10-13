@@ -2,7 +2,7 @@
 from enigma import eTimer, eServiceCenter, eServiceReference, pNavigation, getBestPlayableServiceReference, iPlayableService, setPreferredTuner, eStreamServer, iRecordableServicePtr
 from Components.ImportChannels import ImportChannels
 from Components.ParentalControl import parentalControl
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import SystemInfo, BoxInfo
 from Components.config import config, configfile
 from Tools.BoundFunction import boundFunction
 from Tools.StbHardware import getFPWasTimerWakeup
@@ -15,6 +15,7 @@ import NavigationInstance
 from ServiceReference import ServiceReference, isPlayableForCur
 from Screens.InfoBar import InfoBar
 from Components.Sources.StreamService import StreamServiceList
+from Screens.InfoBarGenerics import whitelist
 
 # TODO: remove pNavgation, eNavigation and rewrite this stuff in python.
 
@@ -38,7 +39,6 @@ class Navigation:
 		self.currentlyPlayingServiceReference = None
 		self.currentlyPlayingServiceOrGroup = None
 		self.currentlyPlayingService = None
-		self.skipServiceReferenceReset = False
 		self.RecordTimer = RecordTimer.RecordTimer()
 		self.__wasTimerWakeup = getFPWasTimerWakeup()
 		self.__isRestartUI = config.misc.RestartUI.value
@@ -86,9 +86,8 @@ class Navigation:
 		for x in self.event:
 			x(i)
 		if i == iPlayableService.evEnd:
-			if not self.skipServiceReferenceReset:
-				self.currentlyPlayingServiceReference = None
-				self.currentlyPlayingServiceOrGroup = None
+			self.currentlyPlayingServiceReference = None
+			self.currentlyPlayingServiceOrGroup = None
 			self.currentlyPlayingService = None
 
 	def dispatchRecordEvent(self, rec_service, event):
@@ -152,11 +151,17 @@ class Navigation:
 			else:
 				playref = ref
 			if self.pnav:
-				if not SystemInfo["FCCactive"]:
-					self.pnav.stopService()
-				else:
-					self.skipServiceReferenceReset = True
+				if SystemInfo["FCCactive"] and not self.pnav.playService(playref):
+					self.currentlyPlayingServiceReference = playref
+					self.currentlyPlayingServiceOrGroup = ref
+					return 0
+				self.pnav.stopService()
 				self.currentlyPlayingServiceReference = playref
+				playrefstring = playref.toString()
+				if '%3a//' not in playrefstring and playrefstring in whitelist.streamrelay:
+					url = "http://%s:%s/" % (config.misc.softcam_streamrelay_url.getHTML(), config.misc.softcam_streamrelay_port.value)
+					playref = eServiceReference("%s%s%s:%s" % (playrefstring, url.replace(":", "%3a"), playrefstring.replace(":", "%3a"), ServiceReference(playref).getServiceName()))
+					print("[Navigation] Play service via streamrelay as it is whitelisted as such", playref.toString())
 				self.currentlyPlayingServiceOrGroup = ref
 				if startPlayingServiceOrGroup and startPlayingServiceOrGroup.flags & eServiceReference.isGroup and not ref.flags & eServiceReference.isGroup:
 					self.currentlyPlayingServiceOrGroup = startPlayingServiceOrGroup
@@ -199,7 +204,6 @@ class Navigation:
 						self.retryServicePlayTimer = eTimer()
 						self.retryServicePlayTimer.callback.append(boundFunction(self.playService, ref, checkParentalControl, forceRestart, adjust))
 						self.retryServicePlayTimer.start(500, True)
-				self.skipServiceReferenceReset = False
 				if setPriorityFrontend:
 					setPreferredTuner(int(config.usage.frontend_priority.value))
 				return 0
@@ -215,10 +219,10 @@ class Navigation:
 
 	def recordService(self, ref, simulate=False):
 		service = None
-		if not simulate:
-			print("[Navigation] recording service: %s" % (str(ref)))
 		if isinstance(ref, ServiceReference):
 			ref = ref.ref
+		if not simulate:
+			print("[Navigation] recording service: %s" % (ref and ref.toString() or "None"))
 		if ref:
 			if ref.flags & eServiceReference.isGroup:
 				ref = getBestPlayableServiceReference(ref, eServiceReference(), simulate)
