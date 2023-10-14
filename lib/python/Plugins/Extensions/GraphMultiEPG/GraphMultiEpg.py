@@ -502,7 +502,7 @@ class EPGList(GUIComponent):
 			if picon != "":
 				displayPicon = LoadPixmap(picon)
 			if displayPicon is not None:
-				res.append(MultiContentEntryPixmapAlphaTest(
+				res.append(MultiContentEntryPixmapAlphaBlend(
 					pos=(r1.x + self.serviceBorderVerWidth + self.number_width, r1.y + self.serviceBorderHorWidth),
 					size=(piconWidth, piconHeight),
 					png=displayPicon,
@@ -577,7 +577,7 @@ class EPGList(GUIComponent):
 					bgpng = self.othEvPix
 
 				if bgpng is not None:
-					res.append(MultiContentEntryPixmapAlphaTest(
+					res.append(MultiContentEntryPixmapAlphaBlend(
 						pos=(left + xpos + self.eventBorderVerWidth, top + self.eventBorderHorWidth),
 						size=(ewidth - 2 * self.eventBorderVerWidth, height - 2 * self.eventBorderHorWidth),
 						png=bgpng,
@@ -610,14 +610,14 @@ class EPGList(GUIComponent):
 					for i in range(len(rec[1])):
 						if ewidth < (i + 1) * (self.recIconSize + self.iconXPadding):
 							break
-						res.append(MultiContentEntryPixmapAlphaTest(
+						res.append(MultiContentEntryPixmapAlphaBlend(
 							pos=(left + xpos + ewidth - (i + 1) * (self.recIconSize + self.iconXPadding), top + height - (self.recIconSize + self.iconYPadding)),
 							size=(self.recIconSize, self.recIconSize),
 							png=self.clocks[rec[1][len(rec[1]) - 1 - i]]))
 
 		else:
 			if selected and self.selEvPix:
-				res.append(MultiContentEntryPixmapAlphaTest(
+				res.append(MultiContentEntryPixmapAlphaBlend(
 					pos=(r2.x + self.eventBorderVerWidth, r2.y + self.eventBorderHorWidth),
 					size=(r2.w - 2 * self.eventBorderVerWidth, r2.h - 2 * self.eventBorderHorWidth),
 					png=self.selEvPix,
@@ -911,7 +911,7 @@ class GraphMultiEPG(Screen, HelpableScreen):
 			"timerAdd": (self.timerAdd, _("Add/remove change timer for current event")),
 			"info": (self.infoKeyPressed, _("Show detailed event info")),
 			"red": (self.zapTo, _("Zap to selected channel")),
-			"blue": (self.addAutoTimer, _("Add autotimer")),
+			"blue": (self.togglePrimeNow, _("Goto primetime / now")),
 			"blue_long": (self.togglePrimeNow, _("Goto specific date/time")),
 			"yellow": (self.swapMode, _("Switch between normal mode and list mode")),
 			"menu": (self.furtherOptions, _("Further Options")),
