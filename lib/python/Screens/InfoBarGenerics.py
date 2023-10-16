@@ -2685,7 +2685,6 @@ class InfoBarPiP:
 		elif "stop" == use:
 			self.showPiP()
 
-
 from RecordTimer import parseEvent
 
 
@@ -3179,6 +3178,8 @@ class InfoBarSubserviceSelection:
 
 from Components.Sources.HbbtvApplication import HbbtvApplication
 gHbbtvApplication = HbbtvApplication()
+
+
 class InfoBarRedButton:
 	def __init__(self):
 		self["RedButtonActions"] = HelpableActionMap(self, ["InfobarRedButtonActions"], {
@@ -3199,7 +3200,8 @@ class InfoBarRedButton:
 			try:
 				x(orgId)
 			except Exception as ErrMsg:
-				print(ErrMsg)
+				print("[InfoBarGenerics] updateAIT error", ErrMsg)
+				#self.onReadyForAIT.remove(x)
 
 	def updateInfomation(self):
 		try:
@@ -3213,7 +3215,7 @@ class InfoBarRedButton:
 		info = service and service.info()
 		try:
 			for x in info.getInfoObject(iServiceInformation.sHBBTVUrl):
-				print(x)
+				print("[InfoBarGenerics] HbbtvApplication:", x)
 				if x[0] in (-1, 1):
 					self.updateAIT(x[3])
 					self["HbbtvApplication"].setApplicationName(x[1])
@@ -3766,7 +3768,7 @@ class InfoBarSummarySupport:
 class InfoBarMoviePlayerSummary(Screen):
 	skin = """
 	<screen position="0,0" size="132,64">
-		<widget source="global.CurrentTime" render="Label" position="62,46" size="64,18" font="Regular;16" horizontalAlignment="right" >
+		<widget source="global.CurrentTime" render="Label" position="62,46" size="64,18" font="Regular;16" halign="right" >
 			<convert type="ClockToText">WithSeconds</convert>
 		</widget>
 		<widget source="session.RecordState" render="FixedLabel" text=" " position="62,46" size="64,18" zPosition="1" >
