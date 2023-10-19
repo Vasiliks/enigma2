@@ -21,7 +21,6 @@ public:
 	void invalidateEntry(int index);
 	void invalidate();
 	eSize getItemSize() { return m_itemsize; }
-	int getMaxItemTextWidth();
 #ifndef SWIG
 protected:
 	void cursorHome();
@@ -61,7 +60,6 @@ protected:
 	eSize m_itemsize;
 	int m_itemheight;
 	int m_itemwidth;
-	int m_max_text_width;
 	uint8_t m_orientation;
 #endif
 };
