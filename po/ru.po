@@ -1075,6 +1075,13 @@ msgstr[1] "%d пакетов обновлено."
 msgstr[2] "%d пакетов обновлено."
 
 #, python-format
+msgid "%d plugin is not available:"
+msgid_plural "%d plugins are not available:"
+msgstr[0] "%d плагин недоступен:"
+msgstr[1] "%d плагина недоступно:"
+msgstr[2] "%d плагинов недоступно:"
+
+#, python-format
 msgid "%d sec"
 msgstr "%d секунда"
 
@@ -3498,9 +3505,6 @@ msgstr "Буферизация %d%%"
 msgid "Buffers:"
 msgstr "Буферы:"
 
-msgid "Buffers"
-msgstr "Буферы"
-
 msgid "Build Brand"
 msgstr "Построение сборки"
 
@@ -4457,7 +4461,13 @@ msgid "Clear playlist"
 msgstr "Очистить список воспроизведения"
 
 msgid "Clear the virtual memory caches"
-msgstr "Очистить кеши виртуальной памяти"
+msgstr "Очистить кэши виртуальной памяти"
+
+msgid "Clear warning"
+msgid_plural "Clear warnings"
+msgstr[0] "Очистить предупреждение"
+msgstr[1] "Очистить предупреждения"
+msgstr[2] "Очистить предупреждения"
 
 msgid "Client Info ( NCam-Version: %s )"
 msgstr "Клиент ( Версия Ncam : %s )"
@@ -6609,9 +6619,6 @@ msgstr "Информация о драйвере и ядре"
 
 msgid "Drivers version"
 msgstr "Версия драйверов"
-
-msgid "Duplex"
-msgstr "Двойной"
 
 msgid "Drama and Films"
 msgstr "Драма и Фильмы"
@@ -9219,7 +9226,13 @@ msgid "Kazakhstan"
 msgstr "Kazakhstan"
 
 msgid "Keep service"
-msgstr "Держать на сервисе"
+msgstr "Сохранить канал"
+
+msgid "Keep warning"
+msgid_plural "Keep warnings"
+msgstr[0] "Сохраняйте предупреждение"
+msgstr[1] "Сохраняйте предупреждения"
+msgstr[2] "Сохраняйте предупреждения"
 
 msgid "Keeps the movie list open whilst playing audio files."
 msgstr "Сохраняет список фильмов открытым во время воспроизведения аудиофайлов."
@@ -15067,9 +15080,6 @@ msgstr[0] "Таймер сна: осталось %d секунда."
 msgstr[1] "Таймер сна: осталось %d секунды."
 msgstr[2] "Таймер сна: осталось %d секунд."
 
-msgid "Sleeping"
-msgstr "Спящий"
-
 msgid "Slide drop"
 msgstr "Скольжение вниз"
 
@@ -15933,7 +15943,7 @@ msgid "TMBD details for event"
 msgstr "Детали TMBD для события"
 
 msgid "TRANSLATOR_INFO"
-msgstr "Foxbob - 23.03.2023"
+msgstr "Коррекция перевода Foxbob 19.10.2023"
 
 msgid "TS file is too large for ISO9660 level 1!"
 msgstr "TS файл слишком большой для ISO9660 уровня 1!"
