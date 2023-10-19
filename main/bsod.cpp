@@ -132,7 +132,6 @@ bool bsodRestart()
 {
 	return bsodrestart;
 }
-
 void bsodFatal(const char *component)
 {
 	//handle python crashes	
@@ -238,7 +237,9 @@ void bsodFatal(const char *component)
 
 		std::ifstream in(eEnv::resolve("${libdir}/enigma.info").c_str());
 		const std::list<std::string> enigmainfovalues {
-			"model="
+			"model",
+			"imageversion",
+			"imagebuild"
 		};
 
 		for(std::list<std::string>::const_iterator i = enigmainfovalues.begin(); i != enigmainfovalues.end(); ++i)
@@ -279,11 +280,10 @@ void bsodFatal(const char *component)
 	p.resetClip(eRect(ePoint(0, 0), my_dc->size()));
 	p.setBackgroundColor(gRGB(0x27408B));
 	p.setForegroundColor(gRGB(0xFFFFFF));
-	p.clear();
-
 	int hd =  my_dc->size().width() == 1920;
 	ePtr<gFont> font = new gFont("Regular", hd ? 30 : 20);
 	p.setFont(font);
+	p.clear();
 
 	eRect usable_area = eRect(hd ? 30 : 100, hd ? 30 : 70, my_dc->size().width() - (hd ? 60 : 150), hd ? 150 : 100);
 
@@ -387,7 +387,7 @@ void bsodFatal(const char *component)
 	{
 		bsodrestart = false;
 		bsodhandled = false;
-		p.setBackgroundColor(gRGB(0, 0, 0, 0xFF));
+		p.setBackgroundColor(gRGB(0,0,0,0xFF));
 		p.clear();
 		return;
 	}
@@ -414,7 +414,7 @@ void oops(const mcontext_t &context)
 #elif defined(__arm__)
 	eLog(lvlFatal, "PC: %08lx", (unsigned long)context.arm_pc);
 	eLog(lvlFatal, "Fault Address: %08lx", (unsigned long)context.fault_address);
-	eLog(lvlFatal, "Error Code: %lu", (unsigned long)context.error_code);
+	eLog(lvlFatal, "Error Code:: %lu", (unsigned long)context.error_code);
 #else
 	eLog(lvlFatal, "FIXME: no oops support!");
 #endif
@@ -452,7 +452,7 @@ void handleFatalSignal(int signum, siginfo_t *si, void *ctx)
 	ucontext_t *uc = (ucontext_t*)ctx;
 	oops(uc->uc_mcontext);
 	print_backtrace();
-	eLog(lvlFatal, "-------FATAL SIGNAL (%d)", signum);
+	eLog(lvlFatal, "-------FATAL SIGNAL");
 	bsodFatal("enigma2, signal");
 }
 

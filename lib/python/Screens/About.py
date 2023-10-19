@@ -7,7 +7,7 @@ from os.path import getmtime, isfile, isdir, join, basename
 from subprocess import PIPE, Popen
 from time import localtime, strftime, strptime
 from urllib.request import urlopen
-from enigma import eConsoleAppContainer, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
+from enigma import eConsoleAppContainer, eDVBFrontendParametersSatellite, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
 from skin import parameters
 from Components.About import about, getChipSetString
 from Components.ActionMap import HelpableActionMap, HelpableNumberActionMap
@@ -74,7 +74,7 @@ def getBoxProcTypeName():
 	procType = getBoxProcType()
 	if procType == "unknown":
 		return _("Unknown")
-	return "%s  -  %s" % (procType, boxProcTypes.get(procType, _("Unknown")))
+	return f"{procType}  -  {boxProcTypes.get(procType, _('Unknown'))}"
 
 
 class InformationBase(Screen, HelpableScreen):
@@ -102,7 +102,7 @@ class InformationBase(Screen, HelpableScreen):
 			for index in range(len(colors)):
 				INFO_COLOR[INFO_COLORS[index]] = colors[index]
 		else:
-			print("[Information] Warning: %d colors are defined in the skin when %d were expected!" % (len(colors), len(INFO_COLORS)))
+			print(f"[Information] Warning: {len(colors)} colors are defined in the skin when {len(INFO_COLORS)} were expected!")
 		self["information"].setText(_("Loading information, please wait..."))
 		self.extraSpacing = config.usage.informationExtraSpacing.value
 		self.onInformationUpdated = [self.displayInformation]
@@ -154,8 +154,8 @@ def formatLine(style, left, right=None):
 	rightIndent = "    " * int(style[3]) if styleLen > 3 and style[3].isdigit() else ""
 	if right is None:
 		colon = "" if styleLen > 0 and style[0] in ("M", "P", "V") else ":"
-		return "%s%s%s%s%s" % (leftIndent, leftStartColor, left, colon, leftEndColor)
-	return "%s%s%s:%s|%s%s%s%s" % (leftIndent, leftStartColor, left, leftEndColor, rightIndent, rightStartColor, right, rightEndColor)
+		return f"{leftIndent}{leftStartColor}{left}{colon}{leftEndColor}"
+	return f"{leftIndent}{leftStartColor}{left}:{leftEndColor}|{rightIndent}{rightStartColor}{right}{rightEndColor}"
 
 
 class CommitInformation(InformationBase):
@@ -212,7 +212,7 @@ class CommitInformation(InformationBase):
 					log = loads(fd.read())
 				info = []
 				for data in log:
-					date = datetime.strptime(data["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ").strftime("%s %s" % (config.usage.date.daylong.value, config.usage.time.long.value))
+					date = datetime.strptime(data["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ").strftime(f"{config.usage.date.daylong.value} {config.usage.time.long.value}")
 					author = data["commit"]["author"]["name"]
 					# committer = data["commit"]["committer"]["name"]
 					message = [x.rstrip() for x in data["commit"]["message"].split("\n")]
@@ -235,7 +235,7 @@ class CommitInformation(InformationBase):
 
 	def displayInformation(self):
 		name = self.commitLogs[self.commitLogIndex][0]
-		self.setTitle("%s: %s" % (self.baseTitle, name))
+		self.setTitle(f"{self.baseTitle}: {name}")
 		self["key_yellow"].setText(self.commitLogs[(self.commitLogIndex - 1) % self.commitLogMax][0])
 		self["key_blue"].setText(self.commitLogs[(self.commitLogIndex + 1) % self.commitLogMax][0])
 		if name in self.cachedCommitInfo:
@@ -364,7 +364,7 @@ class DebugInformation(InformationBase):
 					with open(path) as fd:
 						info = [x.strip() for x in fd.readlines()][-LOG_MAX_LINES:]
 				except OSError as err:
-					info = "%s,%s" % (err.errno, err.strerror)
+					info = f"{err.errno},{err.strerror}"
 			self.cachedDebugInfo[path] = info
 		else:
 			self["key_menu"].setText("")
@@ -373,7 +373,7 @@ class DebugInformation(InformationBase):
 			self["debugActions"].setEnabled(False)
 			name = "Unavailable"
 			self.debugLogs = [(name, name, name)]
-			self.cachedDebugInfo[name] = "0,%s" % _("No log files found so debug logs are unavailable!")
+			self.cachedDebugInfo[name] = f"0,{_('No log files found so debug logs are unavailable!')}"
 		for callback in self.onInformationUpdated:
 			callback()
 
@@ -414,7 +414,7 @@ class DebugInformation(InformationBase):
 	def displayInformation(self):
 		if self.debugLogs:
 			name, sequence, path = self.debugLogs[self.debugLogIndex]
-			self.setTitle(_("Debug Log Information") if sequence == "Unavailable" else "%s: '%s' (%s)" % (self.baseTitle, name, sequence))
+			self.setTitle(_("Debug Log Information") if sequence == "Unavailable" else f"{self.baseTitle}: '{name}' ({sequence})")
 			if path in self.cachedDebugInfo:
 				info = self.cachedDebugInfo[path]
 				if isinstance(info, str):
@@ -456,6 +456,7 @@ class ImageInformation(InformationBase):
 			4320: "8K",
 			8640: "16K"
 		}
+		self.imageMessage = BoxInfo.getItem("InformationImageWelcome", "")
 
 	def showCommitLogs(self):
 		self.session.openWithCallback(self.informationWindowClosed, CommitInformation)
@@ -465,27 +466,41 @@ class ImageInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
-		info.append(formatLine("P1", _("Soft MultiBoot"), _("Yes") if BoxInfo.getItem("multiboot", False) else _("No")))
+		info.append(formatLine("H", _("Image information for %s %s") % getBoxDisplayName()))
+		info.append("")
+		if self.imageMessage:
+			for line in self.imageMessage:
+				info.append(formatLine("M", line))
+			info.append("")
+		info.append(formatLine("S", _("System information")))
+		if self.extraSpacing:
+			info.append("")
+		info.append(formatLine("P1", _("Info file checksum"), _("Invalid") if BoxInfo.getItem("checksumerror", False) else _("Valid")))
+		override = BoxInfo.getItem("overrideactive", False)
+		if override:
+			info.append(formatLine("P1", _("Info file override"), _("Defined / Active")))
+		info.append(formatLine("P1", _("Distribution version"), BoxInfo.getItem("imgversion")))
+		info.append(formatLine("P1", _("Distribution language"), BoxInfo.getItem("imglanguage")))
+		info.append(formatLine("P1", _("Software MultiBoot"), _("Yes") if BoxInfo.getItem("multiboot", False) else _("No")))
 		info.append(formatLine("P1", _("Flash type"), about.getFlashType()))
 		xResolution = getDesktop(0).size().width()
 		yResolution = getDesktop(0).size().height()
-		info.append(formatLine("P1", _("Skin & Resolution"), "%s  (%s  -  %s x %s)" % (config.skin.primary_skin.value.split('/')[0], self.resolutions.get(yResolution, "Unknown"), xResolution, yResolution)))
+		info.append(formatLine("P1", _("Skin & Resolution"), f"{config.skin.primary_skin.value.split('/')[0]}  ({self.resolutions.get(yResolution, 'Unknown')}  -  {xResolution} x {yResolution})"))
 		info.append("")
 		info.append(formatLine("S", _("Enigma2 information")))
 		if self.extraSpacing:
 			info.append("")
-		enigmaVersion = str(BoxInfo.getItem("imageversion"))
+		enigmaVersion = about.getEnigmaVersionString()
 		enigmaVersion = enigmaVersion.rsplit("-", enigmaVersion.count("-") - 2)
 		if len(enigmaVersion) == 3:
-			enigmaVersion = "%s (%s-%s)" % (enigmaVersion[0], enigmaVersion[2], enigmaVersion[1].capitalize())
+			enigmaVersion = f"{enigmaVersion[0]} ({enigmaVersion[2]}-{enigmaVersion[1].capitalize()})"
 		elif len(enigmaVersion) == 1:
-			enigmaVersion = "%s" % enigmaVersion[0]
+			enigmaVersion = f"{enigmaVersion[0]}"
 		else:
-			enigmaVersion = "%s (%s)" % (enigmaVersion[0], enigmaVersion[1].capitalize())
+			enigmaVersion = f"{enigmaVersion[0]} ({enigmaVersion[1].capitalize()})"
 		info.append(formatLine("P1", _("Enigma2 version"), enigmaVersion))
-		compiledate = str(BoxInfo.getItem("compiledate"))
-		info.append(formatLine("P1", _("Last update"), formatDate("%s%s%s" % (compiledate[:4], compiledate[4:6], compiledate[6:]))))
-		info.append(formatLine("P1", _("Last flash"), formatDate(about.getFlashDateString())))
+		compileDate = str(BoxInfo.getItem("compiledate"))
+		info.append(formatLine("P1", _("Last update"), formatDate(f"{compileDate[:4]}{compileDate[4:6]}{compileDate[6:]}")))
 		info.append(formatLine("P1", _("Enigma2 (re)starts"), config.misc.startCounter.value))
 		info.append(formatLine("P1", _("Enigma2 debug level"), eGetEnigmaDebugLvl()))
 		if isPluginInstalled("ServiceHisilicon") and not isPluginInstalled("ServiceMP3"):
@@ -502,8 +517,6 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("S", _("Build information")))
 		if self.extraSpacing:
 			info.append("")
-		info.append(formatLine("P1", _("Distribution"), BoxInfo.getItem("displaydistro")))
-		info.append(formatLine("P1", _("Distribution build"), formatDate(BoxInfo.getItem("imagebuild"))))
 		info.append(formatLine("P1", _("Distribution build date"), formatDate(about.getBuildDateString())))
 		info.append(formatLine("P1", _("Distribution architecture"), BoxInfo.getItem("architecture")))
 		if BoxInfo.getItem("imagedir"):
@@ -522,25 +535,55 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("P1", _("Python version"), about.getPythonVersionString()))
 		info.append(formatLine("P1", _("GStreamer version"), about.getGStreamerVersionString().replace("GStreamer ", "")))
 		info.append(formatLine("P1", _("FFmpeg version"), about.getFFmpegVersionString()))
-		info.append("")
-		info.append(formatLine("S", _("Boot information")))
 		if self.extraSpacing:
 			info.append("")
-		if BoxInfo.getItem("mtdbootfs"):
-			info.append(formatLine("P1", _("MTD boot"), BoxInfo.getItem("mtdbootfs")))
-		if BoxInfo.getItem("mtdkernel"):
-			info.append(formatLine("P1", _("MTD kernel"), BoxInfo.getItem("mtdkernel")))
-		if BoxInfo.getItem("mtdrootfs"):
-			info.append(formatLine("P1", _("MTD root"), BoxInfo.getItem("mtdrootfs")))
-		if BoxInfo.getItem("kernelfile"):
-			info.append(formatLine("P1", _("Kernel file"), BoxInfo.getItem("kernelfile")))
-		if BoxInfo.getItem("rootfile"):
-			info.append(formatLine("P1", _("Root file"), BoxInfo.getItem("rootfile")))
-		if BoxInfo.getItem("mkubifs"):
-			info.append(formatLine("P1", _("MKUBIFS"), BoxInfo.getItem("mkubifs")))
-		if BoxInfo.getItem("ubinize"):
-			info.append(formatLine("P1", _("UBINIZE"), BoxInfo.getItem("ubinize")))
+		if BoxInfo.getItem("HiSilicon"):
+			info.append("")
+			info.append(formatLine("H", _("HiSilicon specific information")))
+			info.append("")
+			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
+			stdout, stderr = process.communicate()
+			if process.returncode == 0:
+				missing = True
+				packageList = stdout.split("\n")
+				revision = self.findPackageRevision("grab", packageList)
+				if revision and revision != "r0":
+					info.append(formatLine("P1", _("Grab"), revision))
+					missing = False
+				revision = self.findPackageRevision("hihalt", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Halt"), revision))
+					missing = False
+				revision = self.findPackageRevision("libs", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Libs"), revision))
+					missing = False
+				revision = self.findPackageRevision("partitions", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Partitions"), revision))
+					missing = False
+				revision = self.findPackageRevision("reader", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Reader"), revision))
+					missing = False
+				revision = self.findPackageRevision("showiframe", packageList)
+				if revision:
+					info.append(formatLine("P1", _("Showiframe"), revision))
+					missing = False
+				if missing:
+					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
+			else:
+				info.append(formatLine("P1", _("Package information currently not available!")))
 		self["information"].setText("\n".join(info))
+
+	def findPackageRevision(self, package, packageList):
+		revision = None
+		data = [x for x in packageList if "-%s" % package in x]
+		if data:
+			data = data[0].split("-")
+			if len(data) >= 4:
+				revision = data[3]
+		return revision
 
 	def getSummaryInformation(self):
 		return "OpenPli Information"
@@ -598,7 +641,7 @@ class GeolocationInformation(InformationBase):
 			if isp:
 				ispOrg = geolocationData.get("org", None)
 				if ispOrg:
-					info.append(formatLine("P1", _("ISP"), "%s  (%s)" % (isp, ispOrg)))
+					info.append(formatLine("P1", _("ISP"), f"{isp}  ({ispOrg})"))
 				else:
 					info.append(formatLine("P1", _("ISP"), isp))
 			mobile = geolocationData.get("mobile", None)
@@ -638,7 +681,7 @@ class MemoryInformation(InformationBase):
 			else:
 				format = "%d"
 				value = int(value)
-			return "%s %s" % (format_string(format, value, grouping=True), units) if units else format_string(format, value, grouping=True)
+			return f"{format_string(format, value, grouping=True)} {units}" if units else format_string(format, value, grouping=True)
 
 		info = []
 		info.append(formatLine("H", _("Memory information for %s %s") % getBoxDisplayName()))
@@ -669,9 +712,9 @@ class MemoryInformation(InformationBase):
 		diskSize = stat.f_blocks * stat.f_frsize
 		diskFree = stat.f_bfree * stat.f_frsize
 		diskUsed = diskSize - diskFree
-		info.append(formatLine("P1", _("Total flash"), "%s  (%s)" % (scaleNumber(diskSize), scaleNumber(diskSize, "Iec"))))
-		info.append(formatLine("P1", _("Used flash"), "%s  (%s)" % (scaleNumber(diskUsed), scaleNumber(diskUsed, "Iec"))))
-		info.append(formatLine("P1", _("Free flash"), "%s  (%s)" % (scaleNumber(diskFree), scaleNumber(diskFree, "Iec"))))
+		info.append(formatLine("P1", _("Total flash"), f"{scaleNumber(diskSize)}  ({scaleNumber(diskSize, 'Iec')})"))
+		info.append(formatLine("P1", _("Used flash"), f"{scaleNumber(diskUsed)}  ({scaleNumber(diskUsed, 'Iec')})"))
+		info.append(formatLine("P1", _("Free flash"), f"{scaleNumber(diskFree)}  ({scaleNumber(diskFree, 'Iec')})"))
 		info.append("")
 		info.append(formatLine("S", _("RAM (Details)")))
 		if self.extraSpacing:
@@ -771,7 +814,7 @@ class NetworkInformation(InformationBase):
 			if isp:
 				ispOrg = geolocationData.get("org", None)
 				if ispOrg:
-					info.append(formatLine("P1", _("ISP"), "%s  (%s)" % (isp, ispOrg)))
+					info.append(formatLine("P1", _("ISP"), f"{isp}  ({ispOrg})"))
 				else:
 					info.append(formatLine("P1", _("ISP"), isp))
 			mobile = geolocationData.get("mobile", None)
@@ -814,7 +857,7 @@ class NetworkInformation(InformationBase):
 			if isinstance(result, bytes):
 				result = result.decode("UTF-8", "ignore")
 			for line in result.split("\n"):
-				if line.startswith("%s " % extraArgs):
+				if line.startswith(f"{extraArgs} "):
 					capture = True
 					if "HWaddr " in line:
 						line = line.replace("HWaddr ", "HWaddr:")
@@ -834,7 +877,7 @@ class NetworkInformation(InformationBase):
 				if line == "":
 					break
 			data = list(filter(None, [x.strip().replace("=", ":", 1) for x in data.split("  ")]))
-			data[0] = "interface:%s" % data[0]
+			data[0] = f"interface:{data[0]}"
 			# print("[Network] DEBUG: Raw network data %s." % data)
 			for item in data:
 				if ":" not in item:
@@ -867,7 +910,7 @@ class NetworkInformation(InformationBase):
 			if isinstance(result, bytes):
 				result = result.decode("UTF-8", "ignore")
 			for line in result.split("\n"):
-				if line.startswith("%s " % extraArgs):
+				if line.startswith(f"{extraArgs} "):
 					capture = True
 					data += line
 					continue
@@ -877,8 +920,8 @@ class NetworkInformation(InformationBase):
 				if line == "":
 					break
 			data = list(filter(None, [x.strip().replace("=", ":", 1) for x in data.split("  ")]))
-			data[0] = "interface:%s" % data[0]
-			data[1] = "standard:%s" % data[1]
+			data[0] = f"interface:{data[0]}"
+			data[1] = f"standard:{data[1]}"
 			for item in data:
 				if ":" not in item:
 					continue
@@ -947,7 +990,7 @@ class NetworkInformation(InformationBase):
 					if "mac" in self.interfaceData[interface]:
 						info.append(formatLine("P1", _("MAC address"), self.interfaceData[interface]["mac"]))
 					if "speed" in self.interfaceData[interface]:
-						info.append(formatLine("P1", _("Speed"), "%s Mbps" % self.interfaceData[interface]["speed"]))
+						info.append(formatLine("P1", _("Speed"), f"{self.interfaceData[interface]['speed']} Mbps"))
 					if "duplex" in self.interfaceData[interface]:
 						info.append(formatLine("P1", _("Duplex"), self.interfaceData[interface]["duplex"]))
 					if "mtu" in self.interfaceData[interface]:
@@ -1001,7 +1044,7 @@ class ReceiverInformation(InformationBase):
 	def displayInformation(self):
 		def findPackageRevision(package, packageList):
 			revision = None
-			data = [x for x in packageList if "-%s" % package in x]
+			data = [x for x in packageList if f"-{package}" in x]
 			if data:
 				data = data[0].split("-")
 				if len(data) >= 4:
@@ -1052,7 +1095,7 @@ class ReceiverInformation(InformationBase):
 			info.append("")
 		cpu = about.getCPUInfoString()
 		info.append(formatLine("P1", _("CPU"), cpu[0]))
-		info.append(formatLine("P1", _("CPU speed/cores"), "%s %s" % (cpu[1], cpu[2])))
+		info.append(formatLine("P1", _("CPU speed/cores"), f"{cpu[1]} {cpu[2]}"))
 		if cpu[3]:
 			info.append(formatLine("P1", _("CPU temperature"), cpu[3]))
 		info.append(formatLine("P1", _("CPU brand"), about.getCPUBrand()))
@@ -1069,7 +1112,7 @@ class ReceiverInformation(InformationBase):
 		if self.extraSpacing:
 			info.append("")
 		rcIndex = int(config.inputDevices.remotesIndex.value)
-		info.append(formatLine("P1", _("RC identification"), "%s  (Index: %d)" % (remoteControl.remotes[rcIndex][REMOTE_DISPLAY_NAME], rcIndex)))
+		info.append(formatLine("P1", _("RC identification"), f"{remoteControl.remotes[rcIndex][REMOTE_DISPLAY_NAME]}  (Index: {rcIndex})"))
 		rcName = remoteControl.remotes[rcIndex][REMOTE_NAME]
 		info.append(formatLine("P1", _("RC selected name"), rcName))
 		boxName = BoxInfo.getItem("rcname")
@@ -1108,44 +1151,6 @@ class ReceiverInformation(InformationBase):
 		givenId = fileReadLine("/proc/device-tree/le-dt-id", source=MODULE_NAME)
 		if givenId:
 			info.append(formatLine("P1", _("Given device id"), givenId))
-		if BoxInfo.getItem("HiSilicon"):
-			info.append("")
-			info.append(formatLine("S", _("HiSilicon specific information")))
-			if self.extraSpacing:
-				info.append("")
-			process = Popen(("/usr/bin/opkg", "list-installed"), stdout=PIPE, stderr=PIPE, universal_newlines=True)
-			stdout, stderr = process.communicate()
-			if process.returncode == 0:
-				missing = True
-				packageList = stdout.split("\n")
-				revision = findPackageRevision("grab", packageList)
-				if revision and revision != "r0":
-					info.append(formatLine("P1", _("Grab"), revision))
-					missing = False
-				revision = findPackageRevision("hihalt", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Halt"), revision))
-					missing = False
-				revision = findPackageRevision("libs", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Libs"), revision))
-					missing = False
-				revision = findPackageRevision("partitions", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Partitions"), revision))
-					missing = False
-				revision = findPackageRevision("reader", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Reader"), revision))
-					missing = False
-				revision = findPackageRevision("showiframe", packageList)
-				if revision:
-					info.append(formatLine("P1", _("Showiframe"), revision))
-					missing = False
-				if missing:
-					info.append(formatLine("P1", _("HiSilicon specific information not found.")))
-			else:
-				info.append(formatLine("P1", _("Package information currently not available!")))
 		info.append("")
 		info.append(formatLine("S", _("Tuner information")))
 		if self.extraSpacing:
@@ -1159,14 +1164,14 @@ class ReceiverInformation(InformationBase):
 			info.append("")
 		stat = statvfs("/")
 		diskSize = stat.f_blocks * stat.f_frsize
-		info.append(formatLine("P1", _("Internal flash"), "%s  (%s)" % (scaleNumber(diskSize), scaleNumber(diskSize, "Iec"))))
+		info.append(formatLine("P1", _("Internal flash"), f"{scaleNumber(diskSize)}  ({scaleNumber(diskSize, 'Iec')})"))
 		# hddList = storageManager.HDDList()
 		hddList = harddiskmanager.HDDList()
 		if hddList:
 			for hdd in hddList:
 				hdd = hdd[1]
 				capacity = hdd.diskSize() * 1000000
-				info.append(formatLine("P1", hdd.model(), "%s  (%s)" % (scaleNumber(capacity), scaleNumber(capacity, "Iec"))))
+				info.append(formatLine("P1", hdd.model(), f"{scaleNumber(capacity)}  ({scaleNumber(capacity, 'Iec')})"))
 		else:
 			info.append(formatLine("H", _("No hard disks detected.")))
 		info.append("")
@@ -1234,9 +1239,9 @@ class StorageInformation(InformationBase):
 				diskFree = stat.f_bfree * stat.f_frsize
 				diskUsed = diskSize - diskFree
 				info.append(formatLine("P2", _("Mountpoint"), partition.mountpoint))
-				info.append(formatLine("P2", _("Capacity"), "%s  (%s)" % (scaleNumber(diskSize), scaleNumber(diskSize, "Iec"))))
-				info.append(formatLine("P2", _("Used"), "%s  (%s)" % (scaleNumber(diskUsed), scaleNumber(diskUsed, "Iec"))))
-				info.append(formatLine("P2", _("Free"), "%s  (%s)" % (scaleNumber(diskFree), scaleNumber(diskFree, "Iec"))))
+				info.append(formatLine("P2", _("Capacity"), f"{scaleNumber(diskSize)}  ({scaleNumber(diskSize, 'Iec')})"))
+				info.append(formatLine("P2", _("Used"), f"{scaleNumber(diskUsed)}  ({scaleNumber(diskUsed, 'Iec')})"))
+				info.append(formatLine("P2", _("Free"), f"{scaleNumber(diskFree)}  ({scaleNumber(diskFree, 'Iec')})"))
 				break
 		# hddList = storageManager.HDDList()
 		hddList = harddiskmanager.HDDList()
@@ -1247,7 +1252,7 @@ class StorageInformation(InformationBase):
 				info.append(formatLine("S1", hdd.getDeviceName(), hdd.bus()))
 				info.append(formatLine("P2", _("Model"), hdd.model()))
 				diskSize = hdd.diskSize() * 1000000
-				info.append(formatLine("P2", _("Capacity"), "%s  (%s)" % (scaleNumber(diskSize), scaleNumber(diskSize, "Iec"))))
+				info.append(formatLine("P2", _("Capacity"), f"{scaleNumber(diskSize)}  ({scaleNumber(diskSize, 'Iec')})"))
 				info.append(formatLine("P2", _("Sleeping"), (_("Yes") if hdd.isSleeping() else _("No"))))
 				for partition in partitions:
 					if partition.device and join("/dev", partition.device).startswith(hdd.getDeviceName()):
@@ -1257,14 +1262,14 @@ class StorageInformation(InformationBase):
 						diskFree = stat.f_bfree * stat.f_frsize
 						diskUsed = diskSize - diskFree
 						info.append(formatLine("P3", _("Mountpoint"), partition.mountpoint))
-						info.append(formatLine("P3", _("Capacity"), "%s  (%s)" % (scaleNumber(diskSize), scaleNumber(diskSize, "Iec"))))
-						info.append(formatLine("P3", _("Used"), "%s  (%s)" % (scaleNumber(diskUsed), scaleNumber(diskUsed, "Iec"))))
-						info.append(formatLine("P3", _("Free"), "%s  (%s)" % (scaleNumber(diskFree), scaleNumber(diskFree, "Iec"))))
+						info.append(formatLine("P3", _("Capacity"), f"{scaleNumber(diskSize)}  ({scaleNumber(diskSize, 'Iec')})"))
+						info.append(formatLine("P3", _("Used"), f"{scaleNumber(diskUsed)}  ({scaleNumber(diskUsed, 'Iec')})"))
+						info.append(formatLine("P3", _("Free"), f"{scaleNumber(diskFree)}  ({scaleNumber(diskFree, 'Iec')})"))
 		else:
 			info.append("")
 			info.append(formatLine("S1", _("No storage or hard disks detected.")))
 		info.append("")
-		info.append(formatLine("H", "%s %s %s" % (_("Network storage on"), DISPLAY_BRAND, DISPLAY_MODEL)))
+		info.append(formatLine("H", f"{_('Network storage on')} {DISPLAY_BRAND} {DISPLAY_MODEL}"))
 		info.append("")
 		if self.mountInfo:
 			count = 0
@@ -1275,7 +1280,7 @@ class StorageInformation(InformationBase):
 				if data[0]:
 					info.append(formatLine("P2", _("Network address"), data[0]))
 					info.append(formatLine("P2", _("Capacity"), data[1]))
-					info.append(formatLine("P2", _("Used"), "%s  (%s)" % (data[2], data[4])))
+					info.append(formatLine("P2", _("Used"), f"{data[2]}  ({data[4]})"))
 					info.append(formatLine("P2", _("Free"), data[3]))
 				else:
 					info.append(formatLine("P2", _("Not currently mounted.")))
@@ -1323,7 +1328,7 @@ class StreamingInformation(InformationBase):
 				# print("[Information] DEBUG: Client data '%s'." % str(client))
 				if count:
 					info.append("")
-				info.append(formatLine("S", "%s  -  %d" % (_("Client"), count + 1)))
+				info.append(formatLine("S", f"{_('Client')}  -  {count + 1}"))
 				info.append(formatLine("P1", _("Service reference"), client[1]))
 				info.append(formatLine("P1", _("Service name"), ServiceReference(client[1]).getServiceName() or _("Unknown service!")))
 				info.append(formatLine("P1", _("IP address"), client[0][7:] if client[0].startswith("::ffff:") else client[0]))
@@ -1415,7 +1420,7 @@ class SystemInformation(InformationBase):
 
 	def displayInformation(self):
 		name, command, path = self.systemCommands[self.systemCommandsIndex]
-		self.setTitle("%s: %s" % (self.baseTitle, name))
+		self.setTitle(f"{self.baseTitle}: {name}")
 		self["key_yellow"].setText(self.systemCommands[(self.systemCommandsIndex - 1) % self.systemCommandsMax][0])
 		self["key_blue"].setText(self.systemCommands[(self.systemCommandsIndex + 1) % self.systemCommandsMax][0])
 		info = [_("Retrieving '%s' information, please wait...") % name] if self.info is None else self.info
@@ -1468,7 +1473,7 @@ class TunerInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
-		info.append(formatLine("H", _("Detected tuners")))
+		info.append(formatLine("H", _("Tuner information for %s %s") % getBoxDisplayName()))
 		info.append("")
 		nims = nimmanager.nimList()
 		descList = []
