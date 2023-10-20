@@ -59,7 +59,6 @@ protected:
 	int m_saved_cursor;
 	ePyObject m_list;
 	eSize m_itemsize;
-	ePtr<gFont> m_font;
 	int m_itemheight;
 	int m_itemwidth;
 	int m_max_text_width;
