@@ -115,6 +115,7 @@ public:
 	void resetClip();
 	void entryRemoved(int idx);
 	void setTemplate(SWIG_PYOBJECT(ePyObject) tmplate);
+	int getMaxItemTextWidth();
 
 protected:
 	virtual void setBuildArgs(int selected) {}
