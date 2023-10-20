@@ -120,7 +120,6 @@ struct eListboxStyle
 	};
 	int m_valign, m_halign, m_border_size, m_scrollbarborder_width;
 	ePtr<gFont> m_font, m_font_zoomed, m_valuefont;
-	ePoint m_text_offset;
 	eRect m_text_padding;
 
 	int m_itemCornerRadius[4];
