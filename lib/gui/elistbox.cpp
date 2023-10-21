@@ -532,8 +532,7 @@ int eListbox::event(int event, void *data, void *data2)
 		}
 
 		int line = 0;
-		int m_max_items = m_orientation == orGrid ? m_max_columns * m_max_rows : m_orientation == orHorizontal ? m_max_columns
-																											   : m_max_rows;
+		int m_max_items = m_orientation == orGrid ? m_max_columns * m_max_rows : m_orientation == orHorizontal ? m_max_columns : m_max_rows;
 
 		for (int posx = 0, posy = 0, i = 0; (m_orientation == orVertical) ? i <= m_max_items : i < m_max_items; posx += m_itemwidth + m_spacing.x(), ++i)
 		{
