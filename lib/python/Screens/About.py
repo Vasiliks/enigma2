@@ -7,7 +7,8 @@ from os.path import getmtime, isfile, isdir, join, basename
 from subprocess import PIPE, Popen
 from time import localtime, strftime, strptime
 from urllib.request import urlopen
-from enigma import eConsoleAppContainer, eDVBFrontendParametersSatellite, eDVBResourceManager, eGetEnigmaDebugLvl, eLabel, eTimer, getDesktop, ePoint, eSize
+from enigma import eDVBFrontendParametersSatellite, eDVBResourceManager, eGetEnigmaDebugLvl, eServiceCenter, eStreamServer, eTimer, getDesktop, iPlayableService, iServiceInformation
+from ServiceReference import ServiceReference
 from skin import parameters
 from Components.About import about, getChipSetString
 from Components.ActionMap import HelpableActionMap, HelpableNumberActionMap
@@ -22,6 +23,7 @@ from Components.Network import iNetwork
 from Components.NimManager import nimmanager
 from Components.Pixmap import Pixmap
 from Components.ScrollLabel import ScrollLabel
+from Components.ServiceEventTracker import ServiceEventTracker
 from Components.ProgressBar import ProgressBar
 from Components.GUIComponent import GUIComponent
 from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName, getDemodVersion
@@ -34,6 +36,8 @@ from Tools.Geolocation import geolocation
 from Tools.StbHardware import getFPVersion, getBoxProc, getHWSerial, getBoxRCType, getBoxProcType
 from Tools.LoadPixmap import LoadPixmap
 from Tools.Conversions import scaleNumber, formatDate
+from Tools.Transponder import ConvertToHumanReadable
+
 
 MODULE_NAME = __name__.split(".")[-1]
 
@@ -165,8 +169,8 @@ class CommitInformation(InformationBase):
 		self.baseTitle = _("Commit Log")
 		self.skinName.insert(0, "CommitInformation")
 		self["key_menu"] = StaticText(_("MENU"))
-		self["key_yellow"] = StaticText(_("Previous Log"))
-		self["key_blue"] = StaticText(_("Next Log"))
+		self["key_yellow"] = StaticText()
+		self["key_blue"] = StaticText()
 		self["commitActions"] = HelpableActionMap(self, ["MenuActions", "ColorActions", "NavigationActions"], {
 			"menu": (self.showCommitMenu, _("Show selection menu for commit logs")),
 			"yellow": (self.previousCommitLog, _("Show previous commit log")),
@@ -870,6 +874,7 @@ class NetworkInformation(InformationBase):
 						pos = line.index("X packets:")
 						direction = line[pos - 1:pos].lower()
 						line = "%s%s" % (line[0:pos + 10], line[pos + 10:].replace(" ", "  %sx" % direction))
+						# line = f"{line[0:pos + 10]}{line[pos + 10:].replace(" ", f"  {direction}x")}"  # Python 3.12
 					elif " txqueuelen" in line:
 						line = line.replace(" txqueuelen:", "  txqueuelen:")
 					data += line
@@ -1075,7 +1080,7 @@ class ReceiverInformation(InformationBase):
 		hwRelease = fileReadLine("/proc/stb/info/release", source=MODULE_NAME)
 		if hwRelease:
 			info.append(formatLine("P1", _("Factory release"), hwRelease))
-		displaytype = BoxInfo.getItem("displaytype")
+		displaytype = BoxInfo.getItem("displaytype").startswith(" ")
 		if displaytype and not displaytype.startswith(" "):
 			info.append(formatLine("P1", _("Display type"), displaytype))
 		fpVersion = getFPVersion()
@@ -1186,6 +1191,379 @@ class ReceiverInformation(InformationBase):
 
 	def getSummaryInformation(self):
 		return "Receiver Information"
+
+
+class ServiceInformation(InformationBase):
+	def __init__(self, session, serviceRef=None):
+		InformationBase.__init__(self, session)
+		self.baseTitle = _("Service Information")
+		self.setTitle(self.baseTitle)
+		self.skinName.insert(0, "ServiceInformation")
+		self.serviceRef = serviceRef
+		self["key_menu"] = StaticText()
+		self["key_yellow"] = StaticText()
+		self["key_blue"] = StaticText()
+		self["serviceActions"] = HelpableActionMap(self, ["MenuActions", "ColorActions", "NavigationActions"], {
+			"yellow": (self.previousService, _("Show previous service information screen")),
+			"blue": (self.nextService, _("Show next service information screen")),
+			"left": (self.previousService, _("Show previous service information screen")),
+			"right": (self.nextService, _("Show next service information screen"))
+		}, prio=0, description=_("Service Information Actions"))
+		self.serviceCommands = [
+			(_("Service and PID information"), _("Service & PID"), self.showServiceInformation),
+			(_("Transponder/Tuning information"), _("Transponder"), self.showTransponderInformation),
+			(_("ECM information"), _("ECM"), self.showECMInformation)
+		]
+		self.serviceCommandsMax = len(self.serviceCommands)
+		self.info = None
+		if serviceRef:
+			self.serviceCommandsIndex = 1
+		else:
+			self.eventTracker = ServiceEventTracker(screen=self, eventmap={iPlayableService.evEnd: self.fetchInformationDelayed})
+			self.serviceCommandsIndex = 0
+
+	def getServiceTransponderData(self):
+		self.frontendInfo = None
+		self.serviceInfo = None
+		self.transponderInfo = None
+		self.service = None
+		playServiceRef = self.session.nav.getCurrentlyPlayingServiceReference()
+		if playServiceRef:
+			self.serviceName = ServiceReference(playServiceRef).getServiceName()
+			self.serviceReference = playServiceRef.toString()
+			self.serviceReferenceType = playServiceRef.type
+		else:
+			self.serviceName = _("N/A")
+			self.serviceReference = _("N/A")
+			self.serviceReferenceType = 0
+		if self.serviceRef:  # and not (playServiceRef and playServiceRef == self.serviceRef):
+			self.serviceName = ServiceReference(self.serviceRef).getServiceName()
+			self.transponderInfo = eServiceCenter.getInstance().info(self.serviceRef).getInfoObject(self.serviceRef, iServiceInformation.sTransponderData)  # Note that info is a iStaticServiceInformation not a iServiceInformation.
+			self["key_menu"].setText("")
+			self["serviceActions"].setEnabled(False)
+			self.serviceCommandsIndex = 1
+		else:
+			self.service = self.session.nav.getCurrentService()
+			if self.service:
+				self.serviceInfo = self.service.info()
+				self.frontendInfo = self.service.frontendInfo()
+				if self.frontendInfo and not self.frontendInfo.getAll(True):
+					self.frontendInfo = None
+					serviceRef = playServiceRef
+					self.transponderInfo = serviceRef and eServiceCenter.getInstance().info(serviceRef).getInfoObject(serviceRef, iServiceInformation.sTransponderData)
+			self["key_menu"].setText(_("MENU"))
+			self["serviceActions"].setEnabled(True)
+
+	def showServiceMenu(self):
+		def showServiceMenuCallBack(selectedIndex):
+			if isinstance(selectedIndex, int):
+				self.serviceCommandsIndex = selectedIndex
+				self.displayInformation()
+				self.informationTimer.start(25)
+
+		choices = [(serviceCommand[0], index) for index, serviceCommand in enumerate(self.serviceCommands)]
+		self.session.openWithCallback(showServiceMenuCallBack, MessageBox, text=_("Select service information to view:"), list=choices, windowTitle=self.baseTitle)
+
+	def previousService(self):
+		self.serviceCommandsIndex = (self.serviceCommandsIndex - 1) % self.serviceCommandsMax
+		self.displayInformation()
+		self.informationTimer.start(25)
+
+	def nextService(self):
+		self.serviceCommandsIndex = (self.serviceCommandsIndex + 1) % self.serviceCommandsMax
+		self.displayInformation()
+		self.informationTimer.start(25)
+
+	def fetchInformation(self):
+		self.informationTimer.stop()
+		self.getServiceTransponderData()
+		name, label, method = self.serviceCommands[self.serviceCommandsIndex]
+		self.info = method()
+		for callback in self.onInformationUpdated:
+			callback()
+
+	def fetchInformationDelayed(self):  # This allows the newly selected service to stabilize before updating the service data.
+		self.informationTimer.startLongTimer(3)
+
+	def refreshInformation(self):
+		self.getServiceTransponderData()
+		InformationBase.refreshInformation(self)
+
+	def displayInformation(self):
+		name, label, method = self.serviceCommands[self.serviceCommandsIndex]
+		self.setTitle(f"{self.baseTitle}: {label}")
+		if self["key_menu"].getText():
+			self["key_yellow"].setText(self.serviceCommands[(self.serviceCommandsIndex - 1) % self.serviceCommandsMax][1])
+			self["key_blue"].setText(self.serviceCommands[(self.serviceCommandsIndex + 1) % self.serviceCommandsMax][1])
+		else:
+			self["key_yellow"].setText("")
+			self["key_blue"].setText("")
+		info = [_("Retrieving '%s' information, please wait...") % name] if self.info is None else self.info
+		if info == [""]:
+			info = [_("There is no information to show for '%s'.") % name]
+		self["information"].setText("\n".join(info))
+		self.frontendInfo = None
+		self.serviceInfo = None
+		self.transponderInfo = None
+		self.service = None
+
+	def showServiceInformation(self):
+		def formatHex(value):
+			return f"0x{value:04X}  ({value})" if value and isinstance(value, int) else ""
+
+		def getServiceInfoValue(item):
+			if self.serviceInfo:
+				value = self.serviceInfo.getInfo(item)
+				if value == -2:
+					value = self.serviceInfo.getInfoString(item)
+				elif value == -1:
+					value = _("N/A")
+			else:
+				value = ""
+			return value
+
+		def getNamespace(value):
+			if isinstance(value, str):
+				namespace = f"{_('N/A')}  -  {_('N/A')}"
+			else:
+				namespace = f"{value & 0xFFFFFFFF:08X}"
+				if namespace.startswith("EEEE"):
+					namespace = f"{namespace}  -  DVB-T"
+				elif namespace.startswith("FFFF"):
+					namespace = f"{namespace}  -  DVB-C"
+				else:
+					position = int(namespace[:4], 16)
+					if position > 1800:
+						position = 3600 - position
+						alignment = _("W")
+					else:
+						alignment = _("E")
+					namespace = f"{namespace}  -  {float(position) / 10.0}\u00B0{alignment}"
+			return namespace
+
+		def getSubtitleList():  # IanSav: If we know the current subtitle then we should flag it as "(Current)".
+			subtitleTypes = {  # This should be in SystemInfo maybe as a BoxInfo variable.
+				0: _("Unknown"),
+				1: _("Embedded"),
+				2: _("SSA file"),
+				3: _("ASS file"),
+				4: _("SRT file"),
+				5: _("VOB file"),
+				6: _("PGS file")
+			}
+			subtitleSelected = self.service and self.service.subtitle().getCachedSubtitle()
+			if subtitleSelected:
+				subtitleSelected = subtitleSelected[:3]
+			subtitle = self.service and self.service.subtitle()
+			subList = subtitle and subtitle.getSubtitleList() or []
+			for subtitle in subList:
+				print(subtitle)
+				indent = "P1F0" if subtitle[:3] == subtitleSelected else "P1"
+				subtitleLang = subtitle[4]
+				if subtitle[0] == 0:  # DVB PID.
+					info.append(formatLine(indent, _("DVB Subtitles PID & Language"), f"{formatHex(subtitle[1])}  -  {subtitleLang}"))
+				elif subtitle[0] == 1:  # Teletext.
+					info.append(formatLine(indent, _("TXT Subtitles page & Language"), f"0x0{subtitle[3] or 8:X}{subtitle[2]:02X}  -  {subtitleLang}"))
+				elif subtitle[0] == 2:  # File.
+					subtitleDesc = subtitleTypes.get(subtitle[2], f"{_('Unknown')}: {subtitle[2]}")
+					info.append(formatLine(indent, _("Other Subtitles & Language"), f"{subtitle[1] + 1}  -  {subtitleDesc}  -  {subtitleLang}"))
+
+		info = []
+		info.append(formatLine("H", _("Service and PID information for '%s'") % self.serviceName))
+		info.append("")
+		if self.serviceInfo:
+			from Components.Converter.PliExtraInfo import codec_data  # This should be in SystemInfo maybe as a BoxInfo variable.
+			videoData = []
+			videoData.append(codec_data.get(self.serviceInfo.getInfo(iServiceInformation.sVideoType), _("N/A")))
+			width = self.serviceInfo.getInfo(iServiceInformation.sVideoWidth)
+			height = self.serviceInfo.getInfo(iServiceInformation.sVideoHeight)
+			if width > 0 and height > 0:
+				videoData.append(f"{width}x{height}")
+				videoData.append(f"{(self.serviceInfo.getInfo(iServiceInformation.sFrameRate) + 500) // 1000}{('i', 'p', '')[self.serviceInfo.getInfo(iServiceInformation.sProgressive)]}")
+				videoData.append(f"[{'4:3' if getServiceInfoValue(iServiceInformation.sAspect) in (1, 2, 5, 6, 9, 0xA, 0xD, 0xE) else '16:9'}]")  # This should be in SystemInfo maybe as a BoxInfo variable.
+			gamma = ("SDR", "HDR", "HDR10", "HLG", "")[self.serviceInfo.getInfo(iServiceInformation.sGamma)]  # This should be in SystemInfo maybe as a BoxInfo variable.
+			if gamma:
+				videoData.append(gamma)
+			videoData = "  -  ".join(videoData)
+		else:
+			videoData = _("Unknown")
+		if "%3a//" in self.serviceReference and self.serviceReferenceType not in (1, 257, 4098, 4114):  # IPTV 4097 5001, no PIDs shown.
+			info.append(formatLine("P1", _("Video Codec, Size & Format"), videoData))
+			info.append(formatLine("P1", _("Service reference"), ":".join(self.serviceReference.split(":")[:9])))
+			info.append(formatLine("P1", _("URL"), self.serviceReference.split(":")[10].replace("%3a", ":")))
+			getSubtitleList()  # IanSav: This wasn't activated to be used!
+		else:
+			if ":/" in self.serviceReference:  # mp4 videos, DVB-S-T recording.
+				info.append(formatLine("P1", _("Video Codec, Size & Format"), videoData))
+				info.append(formatLine("P1", _("Service reference"), ":".join(self.serviceReference.split(":")[:9])))
+				info.append(formatLine("P1", _("Filename"), self.serviceReference.split(":")[10]))
+			else:  # fallback, movistartv, live DVB-S-T.
+				info.append(formatLine("P1", _("Provider"), getServiceInfoValue(iServiceInformation.sProvider)))
+				info.append(formatLine("P1", _("Video Codec, Size & Format"), videoData))
+				if "%3a//" in self.serviceReference:  # fallback, movistartv.
+					info.append(formatLine("P1", _("Service reference"), ":".join(self.serviceReference.split(":")[:9])))
+					info.append(formatLine("P1", _("URL"), self.serviceReference.split(":")[10].replace("%3a", ":")))
+				else:  # Live DVB-S-T
+					info.append(formatLine("P1", _("Service reference"), self.serviceReference))
+			info.append(formatLine("P1", _("Namespace & Orbital position"), getNamespace(getServiceInfoValue(iServiceInformation.sNamespace))))
+			info.append(formatLine("P1", _("Service ID (SID)"), formatHex(getServiceInfoValue(iServiceInformation.sSID))))
+			info.append(formatLine("P1", _("Transport Stream ID (TSID)"), formatHex(getServiceInfoValue(iServiceInformation.sTSID))))
+			info.append(formatLine("P1", _("Original Network ID (ONID)"), formatHex(getServiceInfoValue(iServiceInformation.sONID))))
+			info.append(formatLine("P1", _("Video PID"), formatHex(getServiceInfoValue(iServiceInformation.sVideoPID))))
+			audio = self.service and self.service.audioTracks()
+			numberOfTracks = audio and audio.getNumberOfTracks()
+			if numberOfTracks:
+				for index in range(numberOfTracks):
+					audioPID = audio.getTrackInfo(index).getPID()
+					audioDesc = audio.getTrackInfo(index).getDescription()
+					audioLang = audio.getTrackInfo(index).getLanguage() or _("Undefined")
+					audioPIDValue = _("N/A") if getServiceInfoValue(iServiceInformation.sAudioPID) == "N/A" else formatHex(audioPID)
+					indent = "P1F0" if numberOfTracks > 1 and audio.getCurrentTrack() == index else "P1"
+					info.append(formatLine(indent, _("Audio PID%s, Codec & Language") % (f" {index + 1}" if numberOfTracks > 1 else ""), f"{audioPIDValue}  -  {audioDesc}  -  {audioLang}"))
+			else:
+				info.append(formatLine("P1", _("Audio PID"), _("N/A")))
+			info.append(formatLine("P1", _("PCR PID"), formatHex(getServiceInfoValue(iServiceInformation.sPCRPID))))
+			info.append(formatLine("P1", _("PMT PID"), formatHex(getServiceInfoValue(iServiceInformation.sPMTPID))))
+			info.append(formatLine("P1", _("TXT PID"), formatHex(getServiceInfoValue(iServiceInformation.sTXTPID))))
+			getSubtitleList()
+		return info
+
+	def showTransponderInformation(self):
+		def getValue(key, default):
+			valueLive = frontendLive.get(key, default)
+			valueConfig = frontendConfig.get(key, default)
+			return valueLive if valueLive == valueConfig else f"{valueLive}  ({valueConfig})"
+
+		def getDVBCFrequencyValue():
+			valueLive = frontendLive.get("frequency", 0) / 1000.0
+			valueConfig = frontendConfig.get("frequency", 0) / 1000.0
+			return f"{valueLive:.3f} {mhz}" if valueLive == valueConfig else f"{valueLive:.3f} {mhz}  ({valueConfig:.3f} {mhz})"
+
+		def getSymbolRateValue():
+			valueLive = frontendLive.get("symbol_rate", 0) // 1000
+			valueConfig = frontendConfig.get("symbol_rate", 0) // 1000
+			return f"{valueLive} {_('KSymb/s')}" if valueLive == valueConfig else f"{valueLive} {_('KSymb/s')}  ({valueConfig} {_('KSymb/s')})"
+
+		def getDVBSFrequencyValue():
+			valueLive = frontendLive.get("frequency", 0) // 1000
+			valueConfig = frontendConfig.get("frequency", 0) // 1000
+			return f"{valueLive} {mhz}" if valueLive == valueConfig else f"{valueLive} {mhz}  ({valueConfig} {mhz})"
+
+		def getInputStreamID():
+			valueLive = frontendLive.get("is_id", -1)
+			if valueLive == -1:
+				valueLive = na
+			valueConfig = frontendConfig.get("is_id", -1)
+			if valueConfig == -1:
+				valueConfig = na
+			return valueLive if valueLive == valueConfig else f"{valueLive}  ({valueConfig})"
+
+		def getFrequencyValue():
+			valueLive = frontendLive.get("frequency", 0) / 1000000.0
+			valueConfig = frontendConfig.get("frequency", 0) / 1000000.0
+			return f"{valueLive:.3f} {mhz}" if valueLive == valueConfig else f"{valueLive:.3f} {mhz}  ({valueConfig:.3f} {mhz})"
+
+		info = []
+		info.append(formatLine("H", _("Tuning information for '%s'") % self.serviceName))
+		info.append("")
+		if self.frontendInfo:
+			frontendLive = self.frontendInfo and self.frontendInfo.getAll(False)
+			frontendConfig = self.frontendInfo and self.frontendInfo.getAll(True)
+		else:
+			frontendLive = self.transponderInfo
+			frontendConfig = self.transponderInfo
+		if frontendLive and len(frontendLive) and frontendConfig and len(frontendConfig):
+			tunerType = frontendLive["tuner_type"]
+			frontendLive = ConvertToHumanReadable(frontendLive)
+			frontendConfig = ConvertToHumanReadable(frontendConfig)
+			na = _("N/A")
+			mhz = _("MHz")
+			if not self.transponderInfo:
+				info.append(formatLine("P1", _("NIM"), f"{chr(ord('A') + frontendLive.get('tuner_number', 0))}"))
+			info.append(formatLine("P1", _("Type"), f"{frontendLive.get('tuner_type', na)}  [{tunerType}]"))
+			if tunerType == "DVB-C":
+				info.append(formatLine("P1", _("Modulation"), getValue("modulation", na)))
+				info.append(formatLine("P1", _("Frequency"), getDVBCFrequencyValue()))
+				info.append(formatLine("P1", _("Symbol rate"), getSymbolRateValue()))
+				info.append(formatLine("P1", _("Forward Error Correction (FEC)"), getValue("fec_inner", na)))
+				info.append(formatLine("P1", _("Inversion"), getValue("inversion", na)))
+			elif tunerType == "DVB-S":
+				info.append(formatLine("P1", _("System"), getValue("system", na)))
+				info.append(formatLine("P1", _("Modulation"), getValue("modulation", na)))
+				info.append(formatLine("P1", _("Orbital position"), getValue("orbital_position", na)))
+				info.append(formatLine("P1", _("Frequency"), getDVBSFrequencyValue()))
+				info.append(formatLine("P1", _("Polarization"), getValue("polarization", na)))
+				info.append(formatLine("P1", _("Symbol rate"), getSymbolRateValue()))
+				info.append(formatLine("P1", _("Forward Error Correction (FEC)"), getValue("fec_inner", na)))
+				info.append(formatLine("P1", _("Inversion"), getValue("inversion", na)))
+				info.append(formatLine("P1", _("Pilot"), getValue("pilot", na)))
+				info.append(formatLine("P1", _("Roll-off"), getValue("rolloff", na)))
+				info.append(formatLine("P1", _("Input Stream ID"), getInputStreamID()))
+				info.append(formatLine("P1", _("PLS Mode"), getValue("pls_mode", na)))
+				info.append(formatLine("P1", _("PLS Code"), getValue("pls_code", 0)))
+				valueLive = frontendLive.get("t2mi_plp_id", -1)
+				valueConfig = frontendConfig.get("t2mi_plp_id", -1)
+				if valueLive != -1 or valueConfig != -1:
+					info.append(formatLine("P1", _("T2MI PLP ID"), f"{valueLive}" if valueLive == valueConfig else f"{valueLive}  ({valueConfig})"))
+				valueLive = None if frontendLive.get("t2mi_plp_id", -1) == -1 else frontendLive.get("t2mi_pid", eDVBFrontendParametersSatellite.T2MI_Default_Pid)
+				valueConfig = None if frontendConfig.get("t2mi_plp_id", -1) == -1 else frontendConfig.get("t2mi_pid", eDVBFrontendParametersSatellite.T2MI_Default_Pid)
+				if valueLive or valueConfig:
+					info.append(formatLine("P1", _("T2MI PID"), f"{valueLive or 'None'}" if valueLive == valueConfig else f"{valueLive or 'None'}  ({valueConfig or 'None'})"))
+			elif tunerType == "DVB-T":
+				info.append(formatLine("P1", _("Frequency"), getFrequencyValue()))
+				info.append(formatLine("P1", _("Channel"), getValue("channel", na)))
+				info.append(formatLine("P1", _("Inversion"), getValue("inversion", na)))
+				info.append(formatLine("P1", _("Bandwidth"), getValue("bandwidth", na)))
+				info.append(formatLine("P1", _("Code rate LP"), getValue("code_rate_lp", na)))
+				info.append(formatLine("P1", _("Code rate HP"), getValue("code_rate_hp", na)))
+				info.append(formatLine("P1", _("Guard Interval"), getValue("guard_interval", na)))
+				info.append(formatLine("P1", _("Constellation"), getValue("constellation", na)))
+				info.append(formatLine("P1", _("Transmission mode"), getValue("transmission_mode", na)))
+				info.append(formatLine("P1", _("Hierarchy info"), getValue("hierarchy_information", na)))
+			elif tunerType == "ATSC":
+				info.append(formatLine("P1", _("System"), getValue("system", na)))
+				info.append(formatLine("P1", _("Modulation"), getValue("modulation", na)))
+				info.append(formatLine("P1", _("Frequency"), getFrequencyValue()))
+				info.append(formatLine("P1", _("Inversion"), getValue("inversion", na)))
+		else:
+			info.append(formatLine("M0", _("Tuner data is not available!")))
+		return info
+
+	def showECMInformation(self):
+		info = []
+		info.append(formatLine("H", _("ECM information for '%s'") % self.serviceName))
+		info.append("")
+		if self.serviceInfo:
+			from Components.Converter.PliExtraInfo import caid_data  # This should be in SystemInfo maybe as a BoxInfo variable.
+			from Tools.GetEcmInfo import GetEcmInfo
+			ecmData = GetEcmInfo().getEcmData()
+			for caID in sorted(set(self.serviceInfo.getInfoObject(iServiceInformation.sCAIDPIDs)), key=lambda x: (x[0], x[1])):
+				description = _("Undefined")
+				extraInfo = ""
+				provid = ""
+				for caidEntry in caid_data:
+					if int(caidEntry[0], 16) <= caID[0] <= int(caidEntry[1], 16):
+						description = caidEntry[2]
+						break
+				if caID[2]:
+					if description == "Seca":
+						provid = ",".join([caID[2][y:y + 4] for y in range(len(caID[2]), 30)])
+					elif description == "Nagra":
+						provid = caID[2][-4:]
+					elif description == "Via":
+						provid = caID[2][-6:]
+					if provid:
+						extraInfo = f" provid={provid}"
+					else:
+						extraInfo = f" extra={caID[2]}"
+				active = f" ({_('Active')})" if caID[0] == int(ecmData[1], 16) and (caID[1] == int(ecmData[3], 16) or str(int(ecmData[2], 16)) in provid) else ""
+				info.append(formatLine("P1", f"ECMPid {caID[1]:04X} ({caID[1]})", f"{caID[0]:04X}-{description}{extraInfo}{active}"))
+			if len(info) == 2:
+				info.append(formatLine("P1", _("No ECM PIDs available"), _("Free to Air (FTA) Service")))
+		return info
+
+	def getSummaryInformation(self):
+		return "Service Information"
 
 
 class StorageInformation(InformationBase):
@@ -1351,8 +1729,8 @@ class SystemInformation(InformationBase):
 		self.baseTitle = _("System Information")
 		self.setTitle(self.baseTitle)
 		self.skinName.insert(0, "SystemInformation")
-		self["key_yellow"] = StaticText(_("Previous"))
-		self["key_blue"] = StaticText(_("Next"))
+		self["key_yellow"] = StaticText()
+		self["key_blue"] = StaticText()
 		self["systemActions"] = HelpableActionMap(self, ["MenuActions", "ColorActions", "NavigationActions"], {
 			"menu": (self.showSystemMenu, _("Show selection for system information screen")),
 			"yellow": (self.previousSystem, _("Show previous system information screen")),
@@ -1379,14 +1757,14 @@ class SystemInformation(InformationBase):
 		self.info = None
 
 	def showSystemMenu(self):
+		def showSystemMenuCallBack(selectedIndex):
+			if isinstance(selectedIndex, int):
+				self.systemCommandsIndex = selectedIndex
+				self.displayInformation()
+				self.informationTimer.start(25)
+
 		choices = [(systemCommand[0], index) for index, systemCommand in enumerate(self.systemCommands)]
 		self.session.openWithCallback(self.showSystemMenuCallBack, MessageBox, text=_("Select system information to view:"), list=choices, windowTitle=self.baseTitle)
-
-	def showSystemMenuCallBack(self, selectedIndex):
-		if isinstance(selectedIndex, int):
-			self.systemCommandsIndex = selectedIndex
-			self.displayInformation()
-			self.informationTimer.start(25)
 
 	def previousSystem(self):
 		self.systemCommandsIndex = (self.systemCommandsIndex - 1) % self.systemCommandsMax
@@ -1399,11 +1777,16 @@ class SystemInformation(InformationBase):
 		self.informationTimer.start(25)
 
 	def fetchInformation(self):
+		def fetchInformationCallback(result, retVal, extraArgs):
+			self.info = [x.rstrip() for x in result.split("\n")]
+			for callback in self.onInformationUpdated:
+				callback()
+
 		self.informationTimer.stop()
 		name, command, path = self.systemCommands[self.systemCommandsIndex]
 		self.info = None
 		if command:
-			self.console.ePopen(command, self.fetchInformationCallback)
+			self.console.ePopen(command, fetchInformationCallback)
 		elif path:
 			try:
 				with open(path) as fd:
@@ -1412,11 +1795,6 @@ class SystemInformation(InformationBase):
 				self.info = [_("Error %d: System information file '%s' can't be read!  (%s)") % (err.errno, path, err.strerror)]
 			for callback in self.onInformationUpdated:
 				callback()
-
-	def fetchInformationCallback(self, result, retVal, extraArgs):
-		self.info = [x.rstrip() for x in result.split("\n")]
-		for callback in self.onInformationUpdated:
-			callback()
 
 	def displayInformation(self):
 		name, command, path = self.systemCommands[self.systemCommandsIndex]

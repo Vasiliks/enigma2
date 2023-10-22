@@ -167,7 +167,7 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 	<!-- Menu / Information -->
 	<menu entryID="info_screen" level="0" text="Information" weight="20">
 		<id val="information"/>
-		<item level="1" text="Service" entryID="service_info_screen"><screen module="ServiceInfo" screen="ServiceInfo"/></item>
+		<item level="1" text="Service" entryID="service_info_screen"><screen module="About" screen="ServiceInformation"/></item>
 		<item level="0" text="OpenPli Information" entryID="distribution_info_screen" weight="5"><screen module="About" screen="ImageInformation" /></item>
 		<item level="0" text="Receiver Information" entryID="receiver_info_screen" weight="10"><screen module="About" screen="ReceiverInformation" /></item>
 		<item level="0" text="Tuner Information" entryID="device_screen" weight="15"><screen module="About" screen="TunerInformation"/></item>

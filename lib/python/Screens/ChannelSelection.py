@@ -30,7 +30,6 @@ from Components.SystemInfo import SystemInfo
 from Screens.InputBox import PinInput
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Screens.MessageBox import MessageBox
-from Screens.ServiceInfo import ServiceInfo
 from Screens.Hotkey import InfoBarHotkey, hotkeyActionMap, hotkey
 profile("ChannelSelection.py 4")
 from Screens.PictureInPicture import PictureInPicture
@@ -471,7 +470,8 @@ class ChannelContextMenu(Screen):
 				current = self.session.nav.getCurrentlyPlayingServiceReference()
 			else:
 				current = eServiceReference(GetWithAlternative(current.toString()))
-		self.session.open(ServiceInfo, current)
+		from Screens.About import ServiceInformation  # The import needs to be here
+		self.session.open(ServiceInformation, self.csel.getCurrentSelection())
 		self.close()
 
 	def setStartupService(self):

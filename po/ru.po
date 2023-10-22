@@ -2855,7 +2855,7 @@ msgid "Audio PID"
 msgstr "Аудио PID"
 
 #, python-format
-msgid "Audio PID%s, codec & lang"
+msgid "Audio PID%s, Codec & Language"
 msgstr "Аудио PID%s, кодек и язык"
 
 msgid "Audio channel"
@@ -5552,8 +5552,8 @@ msgstr "DVB API: "
 msgid "DVB CI Delay"
 msgstr "Задержка DVB CI"
 
-msgid "DVB Subtitles PID & lang"
-msgstr "DVB субтитры PID & язык"
+msgid "DVB Subtitles PID & Language"
+msgstr "DVB Субтитры PID и язык"
 
 msgid "DVB and Pango subtitle position"
 msgstr "Положение субтитров DVB и Pango"
@@ -8276,7 +8276,7 @@ msgstr "Гваделупа"
 msgid "Guam"
 msgstr "Гуам"
 
-msgid "Guard interval"
+msgid "Guard Interval"
 msgstr "Интервал защиты"
 
 msgid "Guatemala"
@@ -10397,8 +10397,8 @@ msgstr "Имя:"
 msgid "Nameserver settings"
 msgstr "Настройки сервера имен"
 
-msgid "Namespace & Orbital pos."
-msgstr "Орбитальная позиция."
+msgid "Namespace & Orbital position"
+msgstr "Орбитальная позиция"
 
 msgid "Namibia"
 msgstr "Namibia"
@@ -10578,8 +10578,8 @@ msgstr "Не найден (поддерживаемый) DVDROM!"
 msgid "No Connection"
 msgstr "Нет соединения"
 
-msgid "No ECMPids available (FTA Service)"
-msgstr "Нет доступных ECMPids (FTA сервис)"
+msgid "No ECM PIDs available"
+msgstr "Нет доступных ECMPid"
 
 msgid "No HDD found or HDD not initialized!"
 msgstr "HDD не найден или не не инициализирован!"
@@ -11184,8 +11184,8 @@ msgstr "Другой"
 msgid "Other Images"
 msgstr "Другие имиджи"
 
-msgid "Other Subtitles & lang"
-msgstr "Другие субтитры & язык"
+msgid "Other Subtitles & Language"
+msgstr "Другие субтитры и язык"
 
 msgid "Output"
 msgstr "Выход"
@@ -13883,8 +13883,8 @@ msgstr "Серверы"
 msgid "Service"
 msgstr "Сервис"
 
-msgid "Service & PIDs"
-msgstr "Сервис & PIDs"
+msgid "Service & PID"
+msgstr "Каналы и PID"
 
 msgid "Service ID"
 msgstr "ID сервиса"
@@ -15966,8 +15966,8 @@ msgstr "Оповещение физического адреса ТВ"
 msgid "TXT PID"
 msgstr "TXT PID"
 
-msgid "TXT Subtitles page & lang"
-msgstr "TXT страницы субтитров & язык"
+msgid "TXT Subtitles page & Language"
+msgstr "Страница и язык субтитров TXT"
 
 msgid "Table of contents for collection"
 msgstr "Содержание коллекции"
@@ -17864,8 +17864,8 @@ msgstr "Мастер настроек видео"
 msgid "Videocodec"
 msgstr "Видеокодек"
 
-msgid "Videocodec, size & format"
-msgstr "Видеокодек & формат"
+msgid "Video Codec, Size & Format"
+msgstr "Видеокодек, размер и формат"
 
 msgid "Videoformat"
 msgstr "Формат видео"

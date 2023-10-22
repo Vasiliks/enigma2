@@ -816,7 +816,7 @@ class ScanSetup(ConfigListScreen, Screen, CableTransponderSearchSupport, Terrest
 				self.list.append((_("Code rate LP"), self.scan_ter.feclow))
 				self.list.append((_("Modulation"), self.scan_ter.modulation))
 				self.list.append((_("Transmission mode"), self.scan_ter.transmission))
-				self.list.append((_("Guard interval"), self.scan_ter.guard))
+				self.list.append((_("Guard Interval"), self.scan_ter.guard))
 				self.list.append((_("Hierarchy info"), self.scan_ter.hierarchy))
 				if self.scan_ter.system.value == eDVBFrontendParametersTerrestrial.System_DVB_T2:
 					self.list.append((_('PLP ID'), self.scan_ter.plp_id))
