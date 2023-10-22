@@ -6,7 +6,7 @@ from Screens.MessageBox import MessageBox
 from Components.ServiceEventTracker import ServiceEventTracker
 from Components.ActionMap import NumberActionMap, HelpableActionMap
 from Components.ConfigList import ConfigListScreen
-from Components.config import config, ConfigSubsection, ConfigNothing, ConfigSelection, ConfigYesNo
+from Components.config import config, ConfigSubsection, ConfigNothing, ConfigSelection, ConfigYesNo, ConfigOnOff
 from Components.Label import Label
 from Components.Sources.List import List
 from Components.Sources.Boolean import Boolean
