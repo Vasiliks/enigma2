@@ -6653,6 +6653,13 @@ msgstr "E2 журнал"
 msgid "ECM Info"
 msgstr "ECM инфо"
 
+msgid "ECM information"
+msgstr "Информация ЕСМ"
+
+#, python-format
+msgid "ECM information for '%s'"
+msgstr "Информация ECM для '%s'"
+
 msgid "ECM Statistics"
 msgstr "Статистика ECM"
 
@@ -13886,6 +13893,14 @@ msgstr "Сервис"
 msgid "Service & PID"
 msgstr "Каналы и PID"
 
+msgid "Service and PID information"
+msgstr "Информация о сервисе и PID"
+
+#, python-format
+msgid "Service and PID information for '%s'"
+msgstr "Информация о сервисе и PID для '%s'"
+
+
 msgid "Service ID"
 msgstr "ID сервиса"
 
@@ -17067,6 +17082,13 @@ msgstr "Время с транспондера"
 
 msgid "Transponder Time"
 msgstr "Время с транспондера"
+
+msgid "Transponder information"
+msgstr "Информация о транспондере"
+
+#, python-format
+msgid "Transponder information for '%s'"
+msgstr "Информация о транспондере для '%s'"
 
 msgid "Transponder type"
 msgstr "Тип транспондера"
