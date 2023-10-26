@@ -11515,10 +11515,10 @@ msgstr "Играть предыдущее"
 msgid "Play recorded movies..."
 msgstr "Воспроизвести записанное видео..."
 
-msgid "Play service with streamrelay"
+msgid "Play service with Stream Relay"
 msgstr "Сервис воспроизведения с streamrelay"
 
-msgid "Play service without streamrelay"
+msgid "Play service without Stream Relay"
 msgstr "Сервис воспроизведения без streamrelay"
 
 msgid "Play title"
