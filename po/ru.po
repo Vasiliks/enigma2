@@ -11515,6 +11515,12 @@ msgstr "Играть предыдущее"
 msgid "Play recorded movies..."
 msgstr "Воспроизвести записанное видео..."
 
+msgid "Play service with Stream Relay"
+msgstr "Сервис воспроизведения с streamrelay"
+
+msgid "Play service without Stream Relay"
+msgstr "Сервис воспроизведения без streamrelay"
+
 msgid "Play title"
 msgstr "Играть название"
 
@@ -13887,6 +13893,12 @@ msgstr "Список серверов"
 msgid "Servers"
 msgstr "Серверы"
 
+msgid "Server IP address used to decrypt channels that can only be done via streamrelay."
+msgstr "IP-адрес сервера, используемый для расшифровки каналов, которую можно выполнить только через streamrelay."
+
+msgid "Server port used to decrypt channels that can only be done using streamrelay."
+msgstr "Порт сервера, используемый для расшифровки каналов, которую можно выполнить только с помощью streamrelay."
+
 msgid "Service"
 msgstr "Сервис"
 
@@ -15639,6 +15651,12 @@ msgstr "Сохраненная позиция"
 
 msgid "Stream"
 msgstr "Стрим"
+
+msgid "Streamrelay port"
+msgstr "Порт streamrelay"
+
+msgid "Streamrelay URL"
+msgstr "URL-адрес потоковой передачи"
 
 msgid "Stream request"
 msgstr "Запрос стрима"
