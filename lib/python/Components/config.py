@@ -61,7 +61,7 @@ KEY_9 = ACTIONKEY_9
 
 def getKeyNumber(key):
 	if key not in ACTIONKEY_NUMBERS:
-		raise ValueError("[Config] Error: The key '%s' is not a numeric digit!" % key)
+		raise ValueError(f"[Config] Error: The key '{key}' is not a numeric digit!")
 	return key - ACTIONKEY_0
 
 
@@ -197,13 +197,12 @@ class ConfigElement:
 		else:
 			self.notifiers_final.append(notifier)
 		# CHECKME:
-		# do we want to call the notifier
-		#  - at all when adding it? (yes, though optional)
-		#  - when the default is active? (yes)
-		#  - when no value *yet* has been set,
-		#    because no config has ever been read (currently yes)
-		#    (though that's not so easy to detect.
-		#     the entry could just be new.)
+		# Do we want to call the notifier:
+		# - At all when adding it?  (Yes, though optional - initial_call)
+		# - When the default is active?  (Yes)
+		# - When no value *yet* has been set, because no config has
+		#   ever been read though that's not so easy to detect as
+		#   the entry could just be new.  (Currently Yes)
 		if initial_call:
 			notifier(self)
 
@@ -346,10 +345,11 @@ class descriptionList(choicesList):  # XXX: we might want a better name for this
 		else:
 			self.choices[index] = value
 
+# This is the control, and base class, for selection list settings.
 #
-# ConfigSelection is a "one of.."-type.  it has the "choices", usually
+# ConfigSelection is a "one of ..."-type.  It has the "choices", usually
 # a list, which contains (id, desc)-tuples (or just only the ids, in
-# case str(id) will be used as description)
+# case str(id) will be used as description).
 #
 # The ids in "choices" may be of any type, provided that for there
 # is a one-to-one mapping between x and str(x) for every x in "choices".
@@ -745,7 +745,7 @@ class ConfigSequence(ConfigElement):
 		return self.seperator.join([str(x) for x in value])
 
 	def toDisplayString(self, value):
-		return self.seperator.join(["%%0%sd" % (str(self.blockLen[index]) if self.zeroPad else "") % value for index, value in enumerate(self._value)])
+		return self.seperator.join([f"%0{str(self.blockLen[index]) if self.zeroPad else ''}d" % value for index, value in enumerate(self._value)])
 
 	def onSelect(self, session):
 		self.hidden = False
@@ -1052,19 +1052,19 @@ class ConfigText(ConfigElement, NumericalTextInput):
 
 	def insertChar(self, ch, pos, owr):
 		if owr or self.overwrite:
-			self.text = self.text[0:pos] + ch + self.text[pos + 1:]
+			self.text = f"{self.text[0:pos]}{ch}{self.text[pos + 1:]}"
 		elif self.fixed_size:
-			self.text = self.text[0:pos] + ch + self.text[pos:-1]
+			self.text = f"{self.text[0:pos]}{ch}{self.text[pos:-1]}"
 		else:
-			self.text = self.text[0:pos] + ch + self.text[pos:]
+			self.text = f"{self.text[0:pos]}{ch}{self.text[pos:]}"
 
 	def deleteChar(self, pos):
 		if not self.fixed_size:
-			self.text = self.text[0:pos] + self.text[pos + 1:]
+			self.text = f"{self.text[0:pos]}{self.text[pos + 1:]}"
 		elif self.overwrite:
-			self.text = self.text[0:pos] + " " + self.text[pos + 1:]
+			self.text = f"{self.text[0:pos]} {self.text[pos + 1:]}"
 		else:
-			self.text = self.text[0:pos] + self.text[pos + 1:] + " "
+			self.text = f"{self.text[0:pos]}{self.text[pos + 1:]} "
 
 	def deleteAllChars(self):
 		if self.fixed_size:
@@ -1394,7 +1394,7 @@ class ConfigSlider(ConfigElement):
 				callback()
 
 	def getText(self):
-		return "%d / %d / %d" % (self.min, self.value, self.max)
+		return f"{self.min} / {self.value} / {self.max}"
 
 	def getMulti(self, selected):
 		return ("slider", self.value, self.min, self.max)
@@ -1924,9 +1924,9 @@ class Config(ConfigSubsection):
 			if isinstance(val, dict):
 				self.pickle_this(name, val, result)
 			elif isinstance(val, tuple):
-				result += [name, '=', val[0], '\n']
+				result += [f"{name}={str(val[0])}\n"]
 			else:
-				result += [name, '=', val, '\n']
+				result += [f"{name}={str(val)}\n"]
 
 	def pickle(self):
 		result = []
@@ -1977,9 +1977,9 @@ class Config(ConfigSubsection):
 			f.flush()
 			os.fsync(f.fileno())
 			f.close()
-			os.rename(filename + ".writing", filename)
-		except IOError:
-			print("Config: Couldn't write %s" % filename)
+			os.rename(f"{filename}.writing", filename)
+		except OSError as err:
+			print(f"[Config] Error {err.errno}: Couldn't write '{filename}'!  ({err.strerror})")
 
 	def loadFromFile(self, filename, base_file=True):
 		self.unpickle(open(filename, "r", encoding="UTF-8"), base_file)
@@ -1991,8 +1991,8 @@ class ConfigFile:
 	def load(self):
 		try:
 			config.loadFromFile(self.CONFIG_FILE, True)
-		except IOError as e:
-			print("unable to load config (%s), assuming defaults..." % str(e))
+		except OSError as err:
+			print(f"[Config] Error {err.errno}: Unable to load config file '{self.CONFIG_FILE}', assuming defaults.  ({err.strerror})")
 
 	def save(self):
 		# config.save()
@@ -2007,14 +2007,16 @@ class ConfigFile:
 				return str(cmap[key].value)
 		return None
 
-	def getResolvedKey(self, key):
+	def getResolvedKey(self, key, silent=False):
 		names = key.split('.')
 		if len(names) > 1:
 			if names[0] == "config":
 				ret = self.__resolveValue(names[1:], config.content.items)
 				if ret and len(ret) or ret == "":
 					return ret
-		print("getResolvedKey", key, "failed !! (Typo??)")
+		if silent:
+			return None
+		print(f"[Config] Error: getResolvedKey '{key}' failed!  (Typo?)")
 		return ""
 
 
