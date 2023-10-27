@@ -214,7 +214,7 @@ class Navigation:
 	def getCurrentlyPlayingServiceOrGroup(self):
 		return self.currentlyPlayingServiceOrGroup
 
-	def recordService(self, ref, simulate=False):
+	def recordService(self, ref, simulate=False, type=pNavigation.isUnknownRecording):
 		service = None
 		if isinstance(ref, ServiceReference):
 			ref = ref.ref
@@ -239,7 +239,7 @@ class Navigation:
 			ret = self.pnav and self.pnav.stopRecordService(service)
 		return ret
 
-	def getRecordings(self, simulate=False):
+	def getRecordings(self, simulate=False, type=pNavigation.isAnyRecording):
 		recs = self.pnav and self.pnav.getRecordings(simulate)
 		if not simulate and StreamServiceList:
 			for rec in recs[:]:
