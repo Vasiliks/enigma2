@@ -5250,6 +5250,9 @@ msgstr "Копирование"
 msgid "Copy to bouquets"
 msgstr "Копировать в пакет"
 
+msgid "Copy To Stream Relay"
+msgstr "Копировать в ретрансляцию потока"
+
 msgid "Copy directory/file to target directory"
 msgstr "Скопировать каталог/файл в целевой каталог"
 
@@ -11516,10 +11519,10 @@ msgid "Play recorded movies..."
 msgstr "Воспроизвести записанное видео..."
 
 msgid "Play service with Stream Relay"
-msgstr "Сервис воспроизведения с streamrelay"
+msgstr "Сервис воспроизведения с Stream Relay"
 
 msgid "Play service without Stream Relay"
-msgstr "Сервис воспроизведения без streamrelay"
+msgstr "Сервис воспроизведения без Stream Relay"
 
 msgid "Play title"
 msgstr "Играть название"
@@ -13893,11 +13896,11 @@ msgstr "Список серверов"
 msgid "Servers"
 msgstr "Серверы"
 
-msgid "Server IP address used to decrypt channels that can only be done via streamrelay."
-msgstr "IP-адрес сервера, используемый для расшифровки каналов, которую можно выполнить только через streamrelay."
+msgid "Server IP address used to decrypt channels that can only be done via Stream Relay."
+msgstr "IP-адрес сервера, используемый для расшифровки каналов, которую можно выполнить только через Stream Relay."
 
-msgid "Server port used to decrypt channels that can only be done using streamrelay."
-msgstr "Порт сервера, используемый для расшифровки каналов, которую можно выполнить только с помощью streamrelay."
+msgid "Server port used to decrypt channels that can only be done using Stream Relay."
+msgstr "Порт сервера, используемый для расшифровки каналов, которую можно выполнить только с помощью Stream Relay."
 
 msgid "Service"
 msgstr "Сервис"
@@ -15652,11 +15655,11 @@ msgstr "Сохраненная позиция"
 msgid "Stream"
 msgstr "Стрим"
 
-msgid "Streamrelay port"
-msgstr "Порт streamrelay"
+msgid "Stream Relay port"
+msgstr "Порт Stream Relay"
 
-msgid "Streamrelay URL"
-msgstr "URL-адрес потоковой передачи"
+msgid "Stream Relay URL"
+msgstr "URL-адрес Stream Relay"
 
 msgid "Stream request"
 msgstr "Запрос стрима"

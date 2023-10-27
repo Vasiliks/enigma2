@@ -26,7 +26,7 @@ profile("ChannelSelection.py 2.3")
 from Components.Input import Input
 profile("ChannelSelection.py 3")
 from Components.ChoiceList import ChoiceList, ChoiceEntryComponent
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo, SystemInfo
 from Screens.InputBox import PinInput
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Screens.MessageBox import MessageBox
@@ -197,10 +197,11 @@ class ChannelContextMenu(Screen):
 							append_when_current_valid(current, menu, (_("Uncover dashed flickering line for this service"), self.toggleVBI), level=1)
 						else:
 							append_when_current_valid(current, menu, (_("Cover dashed flickering line for this service"), self.toggleVBI), level=1)
-						if Screens.InfoBar.InfoBar.instance.checkStreamrelay(current):
-							append_when_current_valid(current, menu, (_("Play service without Stream Relay"), self.toggleStreamrelay), level=1)
-						else:
-							append_when_current_valid(current, menu, (_("Play service with Stream Relay"), self.toggleStreamrelay), level=1)
+						if BoxInfo.getItem("StreamRelay"):
+							if Screens.InfoBar.InfoBar.instance.checkStreamrelay(current):
+								append_when_current_valid(current, menu, (_("Play service without Stream Relay"), self.toggleStreamrelay), level=1)
+							else:
+								append_when_current_valid(current, menu, (_("Play service with Stream Relay"), self.toggleStreamrelay), level=1)
 						if eDVBDB.getInstance().getCachedPid(eServiceReference(current.toString()), 9) >> 16 not in (-1, eDVBDB.getInstance().getCachedPid(eServiceReference(current.toString()), 2)):
 							# Only show when a DVB subtitle is cached on this service
 							if eDVBDB.getInstance().getFlag(eServiceReference(current.toString())) & FLAG_CENTER_DVB_SUBS:
@@ -243,6 +244,8 @@ class ChannelContextMenu(Screen):
 					if haveBouquets:
 						if not self.inBouquet and not "PROVIDERS" in current_sel_path:
 							append_when_current_valid(current, menu, (_("Copy to bouquets"), self.copyCurrentToBouquetList), level=0)
+							if BoxInfo.getItem("StreamRelay"):
+								append_when_current_valid(current, menu, (_("Copy To Stream Relay"), self.copyCurrentToStreamRelay))
 					if ("flags == %d" % (FLAG_SERVICE_NEW_FOUND)) in current_sel_path:
 						append_when_current_valid(current, menu, (_("Remove all new found flags"), self.removeAllNewFoundFlags), level=0)
 				if self.inBouquet:
@@ -611,6 +614,10 @@ class ChannelContextMenu(Screen):
 	def hdmiInputCallback(self, marker):
 		if marker is not None:
 			self.csel.addHDMIIn(marker)
+		self.close()
+
+	def copyCurrentToStreamRelay(self):
+		self.csel.copyCurrentToStreamRelay()
 		self.close()
 
 	def showMarkerInputBox(self):
@@ -1117,6 +1124,12 @@ class ChannelSelectionEdit:
 		serviceHandler = eServiceCenter.getInstance()
 		services = serviceHandler.list(provider.ref)
 		self.addBouquet(providerName, services and services.getContent('R', True))
+
+	def copyCurrentToStreamRelay(self):
+		provider = ServiceReference(self.getCurrentSelection())
+		serviceHandler = eServiceCenter.getInstance()
+		services = serviceHandler.list(provider.ref)
+		Screens.InfoBar.InfoBar.instance.ToggleStreamrelay(services and services.getContent("R", True))
 
 	def removeAlternativeServices(self):
 		cur_service = ServiceReference(self.getCurrentSelection())
