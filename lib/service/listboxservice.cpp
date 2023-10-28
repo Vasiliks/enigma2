@@ -194,20 +194,28 @@ int eListboxServiceContent::getPrevMarkerPos()
 		return 0;
 	list::iterator i(m_cursor);
 	int index = m_cursor_number;
-	while (index) // Skip precending markers
-	{
-		--i;
-		--index;
-		if (! ((i->flags & eServiceReference::isMarker) && !(i->flags & eServiceReference::isInvisible)))
-			break;
-	}
+
+	// if the search is starting part way through a section return to the start of the current section
 	while (index)
 	{
 		--i;
 		--index;
-		if ((i->flags & eServiceReference::isMarker) && !(i->flags & eServiceReference::isInvisible))
+		if (i->flags == eServiceReference::isMarker)
 			break;
 	}
+
+	// if the search started from part way through the current section return now because this is the previous visible marker
+	if (cursorResolve(index) + 1 != cursorResolve(m_cursor_number)) return cursorResolve(index);
+
+	// search for visible marker index of previous section
+	while (index)
+	{
+		--i;
+		--index;
+		if (i->flags == eServiceReference::isMarker)
+			break;
+	}
+
 	return cursorResolve(index);
 }
 
@@ -221,7 +229,7 @@ int eListboxServiceContent::getNextMarkerPos()
 	{
 		++i;
 		++index;
-		if ((i->flags & eServiceReference::isMarker) && !(i->flags & eServiceReference::isInvisible))
+		if (i->flags == eServiceReference::isMarker)
 			break;
 	}
 	return cursorResolve(index);
@@ -896,7 +904,7 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 					if (isPlayable && PyCallable_Check(m_GetPiconNameFunc))
 					{
 						ePyObject pArgs = PyTuple_New(1);
-						PyTuple_SET_ITEM(pArgs, 0, PyUnicode_FromString(ref.toString().c_str()));
+						PyTuple_SET_ITEM(pArgs, 0, PyString_FromString(ref.toString().c_str()));
 						ePyObject pRet = PyObject_CallObject(m_GetPiconNameFunc, pArgs);
 						Py_DECREF(pArgs);
 						if (pRet)
