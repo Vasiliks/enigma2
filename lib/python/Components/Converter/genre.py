@@ -276,7 +276,7 @@ def getGenreStringLong(hn, ln, country=None):
 	main = getGenreStringMain(hn, ln, country=country)
 	sub = getGenreStringSub(hn, ln)
 	if main and main != sub:
-		return main + ": " + sub
+		return f"{main}: {sub}"
 	else:
 		return main
 # 	return _("Reserved") + " " + str(hn) + "," + str(ln)

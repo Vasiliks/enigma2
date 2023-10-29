@@ -749,7 +749,11 @@ def InitUsageConfig():
 
 	config.usage.show_picon_in_display = ConfigYesNo(default=True)
 	config.usage.hide_zap_errors = ConfigYesNo(default=False)
-	config.usage.show_cryptoinfo = ConfigYesNo(default=True)
+	config.usage.show_cryptoinfo = ConfigSelection(default=2, choices=[
+		(0, _("Off")),
+		(1, _("One line")),
+		(2, _("Two lines"))
+	])
 	config.usage.show_eit_nownext = ConfigYesNo(default=True)
 	config.usage.show_vcr_scart = ConfigYesNo(default=False)
 	config.usage.show_update_disclaimer = ConfigYesNo(default=True)

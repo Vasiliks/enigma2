@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from enigma import eAVControl, iServiceInformation, iPlayableService
 from Components.Converter.Converter import Converter
 from Components.Element import cached
@@ -65,7 +64,7 @@ gamma_data = {
 
 def addspace(text):
 	if text:
-		text += " "
+		text += "  "
 	return text
 
 
@@ -225,22 +224,22 @@ class PliExtraInfo(Poll, Converter):
 
 		for caid_entry in caid_data:
 			if int(caid_entry[0], 16) <= int(self.current_caid, 16) <= int(caid_entry[1], 16):
-				color = r"\c%08x" % colors[0]  # green
+				color = "\c0000ff00"
 			else:
-				color = r"\c%08x" % colors[2]  # grey
+				color = "\c007f7f7f"
 				try:
 					for caid in available_caids:
 						if int(caid_entry[0], 16) <= caid <= int(caid_entry[1], 16):
-							color = r"\c%08x" % colors[1]  # yellow
-				except:
+							color = "\c00ffff00"
+				except Exception:
 					pass
 
-			if color != r"\c%08x" % colors[2] or caid_entry[4]:
+			if color != "\c007f7f7f" or caid_entry[4]:
 				if res:
 					res += " "
 				res += color + caid_entry[3]
 
-		res += r"\c%08x" % colors[3]  # white (this acts like a color "reset" for following strings
+		res += "\c00ffffff"
 		return res
 
 	def createCryptoSpecial(self, info):
@@ -250,8 +249,10 @@ class PliExtraInfo(Poll, Converter):
 				if int(caid_entry[0], 16) <= int(self.current_caid, 16) <= int(caid_entry[1], 16):
 					caid_name = caid_entry[2]
 					break
-			return caid_name + ":%04x:%04x:%04x:%04x" % (int(self.current_caid, 16), int(self.current_provid, 16), info.getInfo(iServiceInformation.sSID), int(self.current_ecmpid, 16))
-		except:
+			return caid_name + ":%04x:%04x:%04x" % (int(self.current_caid, 16), int(self.current_provid, 16), info.getInfo(iServiceInformation.sSID))
+		except Exception:
+			pass
+		return ""
 			pass
 		return ""
 

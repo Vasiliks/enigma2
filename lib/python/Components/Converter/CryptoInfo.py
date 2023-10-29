@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 from Components.Converter.Converter import Converter
+from Components.Converter.Poll import Poll
 from Components.Element import cached
 from Components.config import config
 from Tools.GetEcmInfo import GetEcmInfo
-from Components.Converter.Poll import Poll
 
 
 class CryptoInfo(Poll, Converter):
@@ -12,18 +11,25 @@ class CryptoInfo(Poll, Converter):
 		Poll.__init__(self)
 
 		self.type = type
-		self.active = False
-		self.visible = config.usage.show_cryptoinfo.value
-		self.textvalue = ""
-		self.poll_interval = 1000
-		self.poll_enabled = True
+		self.active = False  # TODO what's this
+		self.visible = config.usage.show_cryptoinfo.value > 0
+		self.textvalue = ""  # TODO what's this
 		self.ecmdata = GetEcmInfo()
+
+		def ShowCryptoInfo(configElement):
+			if configElement.value > 0:
+				self.poll_interval = 1000
+				self.poll_enabled = True
+			else:
+				self.poll_enabled = False
+
+		config.usage.show_cryptoinfo.addNotifier(ShowCryptoInfo)
 
 	@cached
 	def getText(self):
-		if not config.usage.show_cryptoinfo.value:
+		if config.usage.show_cryptoinfo.value < 1:
 			self.visible = False
-			data = ''
+			data = ""
 		else:
 			self.visible = True
 			if self.type == "VerboseInfo":
