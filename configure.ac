@@ -56,6 +56,57 @@ AC_ARG_WITH(boxtype,
 AC_SUBST(BOXTYPE)
 AC_DEFINE_UNQUOTED(BOXTYPE,"$BOXTYPE",[box type])
 
+AM_CONDITIONAL(HAVE_TEMPFANCONTROL, test "$BOXTYPE" == dm8000 -o "$BOXTYPE" == dm800se -o "$BOXTYPE" == dm500hd)
+AM_CONDITIONAL(DAGS, test `echo "$BOXTYPE" | cut -b 1-4` == "dags")
+AM_CONDITIONAL(DREAMBOX, test `echo "$BOXTYPE" | cut -b 1-2` == "dm" -o `echo "$BOXTYPE" | cut -b 1-5` == "dream")
+AM_CONDITIONAL(VUPLUS, test `echo "$BOXTYPE" | cut -b 1-2` == "vu")
+AM_CONDITIONAL(XTREND, test `echo "$BOXTYPE" | cut -b 1-2` == "et")
+AM_CONDITIONAL(DAGS1, test "$BOXTYPE" == dags1)
+AM_CONDITIONAL(DAGS2, test "$BOXTYPE" == dags2)
+AM_CONDITIONAL(DAGS3, test "$BOXTYPE" == dags3)
+AM_CONDITIONAL(DAGS4, test "$BOXTYPE" == dags4)
+AM_CONDITIONAL(DAGS5, test "$BOXTYPE" == dags5)
+AM_CONDITIONAL(DM900, test "$BOXTYPE" == dm900)
+AM_CONDITIONAL(DM920, test "$BOXTYPE" == dm920)
+AM_CONDITIONAL(DM8000, test "$BOXTYPE" == dm8000)
+AM_CONDITIONAL(DM7080, test "$BOXTYPE" == dm7080)
+AM_CONDITIONAL(DM820, test "$BOXTYPE" == dm820)
+AM_CONDITIONAL(DM520, test "$BOXTYPE" == dm520)
+AM_CONDITIONAL(DM7020HD, test "$BOXTYPE" == dm7020hd)
+AM_CONDITIONAL(DM7020HDV2, test "$BOXTYPE" == dm7020hdv2)
+AM_CONDITIONAL(DM800, test "$BOXTYPE" == dm800)
+AM_CONDITIONAL(DM800SE, test "$BOXTYPE" == dm800se)
+AM_CONDITIONAL(DM800SEV2, test "$BOXTYPE" == dm800sev2)
+AM_CONDITIONAL(DM500HD, test "$BOXTYPE" == dm500hd)
+AM_CONDITIONAL(DM500HDV2, test "$BOXTYPE" == dm500hdv2)
+AM_CONDITIONAL(DREAMONE, test "$BOXTYPE" == dreamone)
+AM_CONDITIONAL(DREAMTWO, test "$BOXTYPE" == dreamtwo)
+AM_CONDITIONAL(E3HD, test "$BOXTYPE" == e3hd)
+AM_CONDITIONAL(FORMULER3, test "$BOXTYPE" == formuler3)
+AM_CONDITIONAL(VUUNO, test "$BOXTYPE" == vuuno)
+AM_CONDITIONAL(VUULTIMO, test "$BOXTYPE" == vuultimo)
+AM_CONDITIONAL(VUSOLO, test "$BOXTYPE" == vusolo)
+AM_CONDITIONAL(VUSOLOSE, test "$BOXTYPE" == vusolose)
+AM_CONDITIONAL(VUDUO, test "$BOXTYPE" == vuduo)
+AM_CONDITIONAL(VUSOLO2, test "$BOXTYPE" == vusolo2)
+AM_CONDITIONAL(VUSOLO4K, test "$BOXTYPE" == vusolo4k)
+AM_CONDITIONAL(VUUNO4K, test "$BOXTYPE" == vuuno4k)
+AM_CONDITIONAL(VUUNO4KSE, test "$BOXTYPE" == vuuno4kse)
+AM_CONDITIONAL(VUULTIMO4K, test "$BOXTYPE" == vuultimo4k)
+AM_CONDITIONAL(VUZERO4K, test "$BOXTYPE" == vuzero4k)
+AM_CONDITIONAL(VUDUO2, test "$BOXTYPE" == vuduo2)
+AM_CONDITIONAL(VUDUO4K, test "$BOXTYPE" == vuduo4k)
+AM_CONDITIONAL(VUDUO4KSE, test "$BOXTYPE" == vuduo4kse)
+AM_CONDITIONAL(VUZERO, test "$BOXTYPE" == vuzero)
+AM_CONDITIONAL(DREAMBOXDMM2, test "$PLATFORM" == "dm4kgen" -o "$PLATFORM" == "dm3gen" -o "$PLATFORM" == "dm2gen")
+AM_CONDITIONAL(HAVE_COLORLCD3, test "$BOXTYPE" == dm7080)
+AM_CONDITIONAL(HAVE_COLORLCD240, test "$BOXTYPE" == dreamtwo)
+AM_CONDITIONAL(HAVE_COLORLCD2, test "$BOXTYPE" == dm800se -o "$BOXTYPE" == dm800sev2 -o "$BOXTYPE" == dm820)
+AM_CONDITIONAL(HAVE_COLORLCD1, test "$BOXTYPE" == dm8000 -o "$BOXTYPE" == dm800 -o "$BOXTYPE" == dm7020hd -o "$BOXTYPE" == dm7020hdv2)
+AM_CONDITIONAL(HAVE_GRAUTEC8000, test "$BOXTYPE" == dm8000)
+AM_CONDITIONAL(HAVE_GRAUTEC70X0, test "$BOXTYPE" == dm7020hd -o "$BOXTYPE" == dm7020hdv2 -o "$BOXTYPE" == dm7080)
+AM_CONDITIONAL(LCD_FRAMEBUFFER_MODE, test "$BOXTYPE" == et8500 -o "$BOXTYPE" == et8500s -o "$BOXTYPE" == 8100s)
+
 AC_ARG_WITH(boxbrand,
 	AS_HELP_STRING([--with-boxbrand],[build for BOXBRAND, $withval]),
 	[BOXBRAND="$withval"],[BOXBRAND=""])
@@ -385,16 +436,6 @@ if test x"$with_fhdskin" != xno ; then
 	AC_DEFINE(HAVE_FHDSKIN, 1,[Define if box supports full hd skin])
 fi
 AM_CONDITIONAL(HAVE_FHDSKIN, test x"$withfhdskin" != xno)
-
-AM_CONDITIONAL(HAVE_TEMPFANCONTROL, test "$BOXTYPE" == dm8000 -o "$BOXTYPE" == dm800se -o "$BOXTYPE" == dm500hd)
-AM_CONDITIONAL(HAVE_COLORLCD1, test "$BOXTYPE" == "dm8000" -o "$BOXTYPE" == "dm800" -o "$BOXTYPE" == "dm7020hd" -o "$BOXTYPE" == "dm7020hdv2")
-AM_CONDITIONAL(HAVE_COLORLCD2, test "$BOXTYPE" == "dm800se" -o "$BOXTYPE" == "dm800sev2" -o "$BOXTYPE" == "dm820")
-AM_CONDITIONAL(HAVE_COLORLCD3, test "$BOXTYPE" == "dm7080")
-AM_CONDITIONAL(HAVE_GRAUTEC70X0, test "$BOXTYPE" == "dm7020hd" -o "$BOXTYPE" == "dm7020hdv2" -o "$BOXTYPE" == "dm7080")
-AM_CONDITIONAL(HAVE_GRAUTEC8000, test "$BOXTYPE" == "dm8000")
-AM_CONDITIONAL(LCD_FRAMEBUFFER_MODE, test "$BOXTYPE" == "et8500" -o "$STBPLATFORM" == "8100s")
-AM_CONDITIONAL(DM9X0, test `echo "$BOXTYPE" | cut -b 1-3` == "dm9")
-AM_CONDITIONAL(DREAMBOXDMM2, test "$PLATFORM" == "dm4kgen" -o "$PLATFORM" == "dm3gen" -o "$PLATFORM" == "dm2gen")
 
 if test "$BOXTYPE" == "mbmicro" -o "$BOXTYPE" == "e4hd" -o "$BOXTYPE" == "e4hdhybrid" -o "$BOXTYPE" == "twinboxlcd" -o "$BOXTYPE" == "singleboxlcd" -o "$BOXTYPE" == "twinboxlcdci5" -o "$BOXTYPE" == "sf208" -o "$BOXTYPE" == "sf228" -o "$BOXTYPE" == "sf238" -o "$BOXTYPE" == "odin2hybrid" -o "$BOXTYPE" == "odinplus"; then
 	AC_DEFINE(KEY_PLAY_ACTUALLY_IS_KEY_PLAYPAUSE, 1,[define when rc sends a KEY_PLAY event for its KEY_PLAYPAUSE key])
@@ -784,12 +825,14 @@ lib/python/Plugins/Extensions/MediaPlayer/Makefile
 lib/python/Plugins/Extensions/MediaPlayer/meta/Makefile
 lib/python/Plugins/Extensions/MediaScanner/Makefile
 lib/python/Plugins/Extensions/MediaScanner/meta/Makefile
+lib/python/Plugins/Extensions/MiniTV/Makefile
 lib/python/Plugins/Extensions/PicturePlayer/Makefile
 lib/python/Plugins/Extensions/PicturePlayer/meta/Makefile
 lib/python/Plugins/Extensions/PicturePlayer/data/Makefile
 lib/python/Plugins/Extensions/SocketMMI/Makefile
 lib/python/Plugins/Extensions/SocketMMI/meta/Makefile
 lib/python/Plugins/Extensions/SocketMMI/src/Makefile
+lib/python/Plugins/Extensions/QuadPip/Makefile
 lib/python/Plugins/PLi/Makefile
 lib/python/Plugins/SystemPlugins/AnimationSetup/Makefile
 lib/python/Plugins/SystemPlugins/AnimationSetup/meta/Makefile

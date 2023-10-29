@@ -3695,7 +3695,6 @@ ePtr<iStreamData> eDVBServicePlay::getStreamingData()
 
 void eDVBServicePlay::setQpipMode(bool value, bool audio)
 {
-	(void) value;
 	m_noaudio = !audio;
 
 	if(m_decoder)

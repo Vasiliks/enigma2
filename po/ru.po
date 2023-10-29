@@ -2219,6 +2219,9 @@ msgstr "Добавить файл в плейлист"
 msgid "Add files to playlist"
 msgstr "Добавить файлы в плейлист"
 
+msgid "Add New Quad Channel Entry"
+msgstr "Добавить новую запись четырех каналов"
+
 msgid "Add new tag"
 msgstr "Добавить новый тег"
 
@@ -4304,6 +4307,9 @@ msgstr "Чипсет\t\t%s"
 msgid "Chipset: BCM%s"
 msgstr "Чипсет: BCM%s"
 
+msgid "Choice where to put '%s'"
+msgstr "Выбор места размещения '%s'"
+
 msgid "Choose Tuner"
 msgstr "Выберите тюнер"
 
@@ -4964,9 +4970,6 @@ msgstr "Настройка первого языка ТВ-гида."
 
 msgid "Configure the refresh rate of the screen."
 msgstr "Настройка частоты обновления экрана."
-
-msgid "Configure the screen resolution for teletext (Not all skins support full-HD teletext)."
-msgstr "Настройте разрешение экрана для телетекста (не все скины поддерживают телетекст Full-HD)."
 
 msgid "Configure the screen resolution in PC output mode."
 msgstr "Настройка разрешения экрана в режиме выхода ПК."
@@ -6209,6 +6212,9 @@ msgstr "Отключить таймер"
 msgid "Disabled"
 msgstr "Отключён"
 
+msgid "Disable MiniTV"
+msgstr "Отключить мини-ТВ"
+
 msgid "Disabled PIP.\n"
 msgstr "Отключение PiP\n"
 
@@ -6711,28 +6717,6 @@ msgstr "Бекап кеша ТВ-гида"
 msgid "EPG filename"
 msgstr "Название файла ТВ-гида"
 
-msgid ""
-"EPG key : Switch to channel list\n"
-"Ok key : Remove selected channel\n"
-"PVR key : Input channel name\n"
-"Exit key : Finish channel edit"
-msgstr ""
-"ТВ-гид : Включить список каналов\n"
-"OK : Удалить выбранный канал\n"
-"PVR : Ввести название канала\n"
-"EXIT : Закончить редактирование канала"
-
-msgid ""
-"EPG key : Switch to quad PiP entry\n"
-"Ok key : Add to new entry\n"
-"PVR key : Input channel name\n"
-"Exit key : Finish channel edit"
-msgstr ""
-"ТВ-гид : Включить 4X PiP\n"
-"OK : Добавить новый канал\n"
-"PVR : Ввести название канала\n"
-"EXIT : Закончить редактирование канала"
-
 msgid "EPG language selection 1"
 msgstr "Выбор языка ТВ-гида 1"
 
@@ -6753,6 +6737,12 @@ msgstr "Выбор ТВ-гида"
 
 msgid "EPG:"
 msgstr "ТВ-гид:"
+
+msgid "EPG key : Switch to quad PiP entry\nOk key : Add to new entry\nPVR key : Input channel name\nExit key : Finish channel edit"
+msgstr "Клавиша EPG: переключение на запись Quad PiP\nКнопка «ОК»: добавление к новой записи\nКнопка PVR: ввод имени канала\nКнопка «Выход»: завершение редактирования канала"
+
+msgid "EPG key : Switch to channel list\nOk key : Remove selected channel\nPVR key : Input channel name\nExit key : Finish channel edit"
+msgstr "Клавиша EPG: переход к списку каналов\nКнопка «ОК»: удаление выбранного канала\nКнопка PVR: ввод названия канала\nКнопка «Выход»: завершение редактирования канала"
 
 msgid "EPGSearch"
 msgstr "Поиск по ТВ-гиду"
@@ -6810,6 +6800,9 @@ msgstr "Правка вкл"
 
 msgid "Edit mode on"
 msgstr "Правка вкл"
+
+msgid "Edit Quad Channel Entry"
+msgstr "Редактировать запись четырех каналов"
 
 msgid "Edit selection"
 msgstr "Удалить выбранное"
@@ -6904,6 +6897,9 @@ msgstr "Включить HDMI-CEC"
 msgid "Enable MHW EPG"
 msgstr "Включить MHW ТВ-гид"
 
+msgid "Enable MiniTV"
+msgstr "Включить мини-ТВ"
+
 msgid "Enable Netmed EPG"
 msgstr "Включить Netmed ТВ-гид"
 
@@ -6915,6 +6911,9 @@ msgstr "Включить OK для списка выбора каналов"
 
 msgid "Enable OpenTV EPG"
 msgstr "Включить OpenTV ТВ-гид"
+
+msgid "Enable Quad PiP"
+msgstr "Включить Quad PiP"
 
 msgid "Enable ViaSat EPG"
 msgstr "Включить ViaSat ТВ-гид"
@@ -7451,6 +7450,12 @@ msgstr "Выход из мастера настроек сети"
 
 msgid "Exit networkadapter setup menu"
 msgstr "Выход из меню настроек сетевого адаптера"
+
+msgid "Exit Quad PiP"
+msgstr "Выход из Quad PiP"
+
+msgid "Exit Quad Channel Selection"
+msgstr "Выход из режима четырехканального выбора"
 
 msgid "Exit the wizard"
 msgstr "Выйти из мастера настроек"
@@ -9005,6 +9010,9 @@ msgstr "Ввод "
 msgid "Input %d"
 msgstr "Ввод %d"
 
+msgid "Input channel name."
+msgstr "Имя входного канала."
+
 msgid "Input Stream ID"
 msgstr "Входной поток ID"
 
@@ -9923,6 +9931,8 @@ msgstr "Информация о памяти для %s %s"
 msgid "Menu"
 msgstr "Меню"
 
+msgid "  Menu key : Select quad channel"
+msgstr "  Клавиша меню: выбор четырехканального канала"
 msgid "Menusort (%s)"
 msgstr "Сортировка меню (%s)"
 
@@ -10567,6 +10577,9 @@ msgstr "Новости/Текущие события/Социальные сет
 msgid "Next day starts at"
 msgstr "Следующий день начинается в"
 
+msgid "Next quad PiP channel"
+msgstr "Следующий канал Quad PiP"
+
 msgid "Nicaragua"
 msgstr "Nicaragua"
 
@@ -10599,6 +10612,12 @@ msgstr "Нет доступных субсервисов."
 
 msgid "No age block"
 msgstr "Нет возрастного ограничения"
+
+msgid " <No Channel>"
+msgstr " <Нет канала>"
+
+msgid "No channel"
+msgstr "Нет канала"
 
 msgid "No config to start, please check /etc/openvpn/ and try again."
 msgstr "Нет конфигурации для запуска, пожалуйста, проверьте / etc / openvpn / и попробуйте снова."
@@ -12130,6 +12149,9 @@ msgstr "Превью"
 msgid "Preview menu"
 msgstr "Меню превью"
 
+msgid "Prev quad PiP channel"
+msgstr "Предыдущий канал Quad PiP"
+
 msgid "Preview selected channel"
 msgstr "Превью выбранного канала"
 
@@ -12283,6 +12305,12 @@ msgstr "Python\t\t%s"
 msgid "Qatar"
 msgstr "Qatar"
 
+msgid "Quad PiP is not available."
+msgstr "Quad PiP недоступен."
+
+msgid "Quad PiP Channel Selection"
+msgstr "Выбор канала Quad PiP"
+
 msgid "Query details from the Internet Movie Database"
 msgstr "Детали запроса из базы данных фильмов в Интернете"
 
@@ -12391,6 +12419,12 @@ msgstr "Готовы установить \"%s\" ?"
 msgid "Ready to remove \"%s\" ?"
 msgstr "Готовы к удалению \"%s\"?"
 
+msgid "Really delete this entry?"
+msgstr "Действительно удалить эту запись?"
+
+msgid "  Red key : Show/Hide channel name"
+msgstr "  Красная кнопка: показать/скрыть название канала"
+
 msgid "Really WOL now?"
 msgstr "Действительно WOL сейчас?"
 
@@ -12461,6 +12495,9 @@ msgstr "Возврат на предыдущий сервис"
 #, python-format
 msgid "Receiver information for %s %s"
 msgstr "Информация о ресивере для %s %s"
+
+msgid "Receiver does not support Quad PiP."
+msgstr "Ресивер не поддерживает Quad PiP."
 
 msgid "Reception"
 msgstr "Вид списка"
@@ -12626,6 +12663,9 @@ msgstr "Запоминать пин-код сервиса"
 
 msgid "Reminder, you have chosen to save timeshift file."
 msgstr "Напоминаем, вы выбрали сохранение файла таймшифта."
+
+msgid "Remove Quad Channel Entry"
+msgstr "Удалить запись четырех каналов"
 
 msgid "Remote control type"
 msgstr "Тип пульта Д/У"
@@ -13519,6 +13559,9 @@ msgstr "Выбор CAId"
 msgid "Select Channel"
 msgstr "Выбор канала"
 
+msgid "Select channel audio"
+msgstr "Выбрать аудиоканал"
+
 msgid "Select Fast DiSEqC if your aerial system supports this. If you are unsure select 'no'."
 msgstr "Выберите быстрый DiSEqC, если Ваша система поддерживает это."
 
@@ -13650,6 +13693,9 @@ msgstr "Выбор пути для файла лога"
 
 msgid "Select provider to add..."
 msgstr "Выбор провайдера для добавления..."
+
+msgid "Select Quad Channels"
+msgstr "Выберите четыре канала"
 
 msgid "Select remote control"
 msgstr "Использовать пульт ТВ для управления"
@@ -14541,9 +14587,6 @@ msgstr "Показать инфобар"
 msgid "Show Information"
 msgstr "Показать информацию"
 
-msgid "Show Live in MiniTV"
-msgstr "MiniTV в главном меню"
-
 msgid "Show Log"
 msgstr "Показать журнал"
 
@@ -14634,6 +14677,9 @@ msgstr "Показывать индикатор на экране при зан�
 msgid "Show channel numbers in channel selection"
 msgstr "Показать номера каналов при выборе канала"
 
+msgid "Show channel selection"
+msgstr "Показать выбор канала"
+
 msgid "Show columns"
 msgstr "Показать столбцы"
 
@@ -14711,6 +14757,9 @@ msgstr "Показать инфо"
 
 msgid "Show info line"
 msgstr "Показать инфолинию"
+
+msgid "Show/Hide focus bar"
+msgstr "Показать/скрыть панель фокусировки"
 
 msgid "Show infobar on channel change"
 msgstr "Показать инфобар при смене каналов"
@@ -14939,6 +14988,12 @@ msgstr "Шоу/Игровое шоу/Досуг, хобби"
 
 msgid "Show/hide window"
 msgstr "Показать/скрыть окно"
+
+msgid "Show Live in MiniTV"
+msgstr "Прямая трансляция на MiniTV"
+
+msgid "Show PiP in MiniTV"
+msgstr "Показывать PiP на MiniTV"
 
 msgid "Shows live tv or informations on LCD."
 msgstr "Показать live тв или информацию на дисплее LCD."
@@ -19085,6 +19140,9 @@ msgstr "Переключать каналы в PiP-окне"
 msgid "Zap focus to main screen"
 msgstr "Переключать каналы в главном окне"
 
+msgid "Zap focused channel on full screen"
+msgstr "Канал, ориентированный на Zap, в полноэкранном режиме"
+
 msgid "Zap key delay for channel number input"
 msgstr "Задержка клавиши Zap для ввода номера канала"
 
@@ -19405,6 +19463,9 @@ msgstr "новости/текущие события (общее)"
 msgid "(current)"
 msgstr "(текущий)"
 
+msgid " (current channel)"
+msgstr " (текущий канал)"
+
 msgid "daily"
 msgstr "ежедневно"
 
@@ -19491,6 +19552,9 @@ msgstr "образовательные / научные / фактические
 
 msgid "empty"
 msgstr "пустой"
+
+msgid " <empty>"
+msgstr " <пустой>"
 
 msgid "enable"
 msgstr "включить"
