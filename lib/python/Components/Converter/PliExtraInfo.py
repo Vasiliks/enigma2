@@ -253,8 +253,6 @@ class PliExtraInfo(Poll, Converter):
 		except Exception:
 			pass
 		return ""
-			pass
-		return ""
 
 	def createResolution(self, info):
 		avControl = eAVControl.getInstance()
