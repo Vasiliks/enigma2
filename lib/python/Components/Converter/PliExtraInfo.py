@@ -5,25 +5,22 @@ from Components.config import config
 from Tools.Transponder import ConvertToHumanReadable
 from Tools.GetEcmInfo import GetEcmInfo
 from Components.Converter.Poll import Poll
-from skin import parameters
 
 caid_data = (
-	("0x0100", "0x01ff", "Seca", "S", True),
-	("0x0500", "0x05ff", "Via", "V", True),
-	("0x0600", "0x06ff", "Irdeto", "I", True),
-	("0x0900", "0x09ff", "NDS", "Nd", True),
-	("0x0b00", "0x0bff", "Conax", "Co", True),
-	("0x0d00", "0x0dff", "CryptoW", "Cw", True),
-	("0x0e00", "0x0eff", "PowerVU", "P", False),
+	("0x100", "0x1ff", "Seca", "S", True),
+	("0x500", "0x5ff", "Via", "V", True),
+	("0x600", "0x6ff", "Irdeto", "I", True),
+	("0x900", "0x9ff", "NDS", "Nd", True),
+	("0xb00", "0xbff", "Conax", "Co", True),
+	("0xd00", "0xdff", "CryptoW", "Cw", True),
+	("0xe00", "0xeff", "PowerVU", "P", False),
 	("0x1000", "0x10FF", "Tandberg", "TB", False),
 	("0x1700", "0x17ff", "Beta", "B", True),
 	("0x1800", "0x18ff", "Nagra", "N", True),
 	("0x2600", "0x2600", "Biss", "Bi", False),
-	("0x2700", "0x2710", "Dre3", "D3", False),
 	("0x4ae0", "0x4ae1", "Dre", "D", False),
 	("0x4aee", "0x4aee", "BulCrypt", "B1", False),
-	("0x5581", "0x5581", "BulCrypt", "B2", False),
-	("0x5601", "0x5604", "Verimatrix", "Vm", False)
+	("0x5581", "0x5581", "BulCrypt", "B2", False)
 )
 
 # stream type to codec map
@@ -53,14 +50,6 @@ codec_data = {
 	21: "SPARK",
 }
 
-# Dynamic range ("gamma") value to text
-gamma_data = {
-	0: "SDR",
-	1: "HDR",
-	2: "HDR10",
-	3: "HLG",
-}
-
 
 def addspace(text):
 	if text:
@@ -75,93 +64,6 @@ class PliExtraInfo(Poll, Converter):
 		self.type = type
 		self.poll_interval = 1000
 		self.poll_enabled = True
-		self.info_fields = {
-			# Field combinations accessible from skin
-			"All": (
-				(  # config.usage.show_cryptoinfo.value <= 0
-					"ProviderName",
-					"TransponderInfo",
-					"TransponderName",
-					"NewLine",
-					"CryptoBar",
-					"CryptoCurrentSource",
-					"NewLine",
-					"CryptoSpecial",
-					"VideoCodec",
-					"ResolutionString",
-				), (  # config.usage.show_cryptoinfo.value > 0
-					"ProviderName",
-					"TransponderInfo",
-					"TransponderName",
-					"NewLine",
-					"CryptoBar",
-					"CryptoSpecial",
-					"NewLine",
-					"PIDInfo",
-					"VideoCodec",
-					"ResolutionString",
-				)
-			),
-			"CryptoInfo": (
-				(  # config.usage.show_cryptoinfo.value <= 0
-					"CryptoBar",
-					"CryptoCurrentSource",
-					"CryptoSpecial",
-				), (  # config.usage.show_cryptoinfo.value > 0
-					"CryptoBar",
-					"CryptoSpecial",
-				)
-			),
-			"ServiceInfo": (
-				"ProviderName",
-				"TunerSystem",
-				"TransponderFrequency",
-				"TransponderPolarization",
-				"TransponderSymbolRate",
-				"TransponderFEC",
-				"TransponderModulation",
-				"OrbitalPosition",
-				"TransponderName",
-				"VideoCodec",
-				"ResolutionString",
-			),
-			"TransponderInfo": (
-				(  # not feraw
-					"StreamURLInfo",
-				),
-				(  # feraw and "DVB-T" not in feraw.get("tuner_type", "")
-					"TunerSystem",
-					"TransponderFrequencyMHz",
-					"TransponderPolarization",
-					"TransponderSymbolRate",
-					"TransponderFEC",
-					"TransponderModulation",
-					"OrbitalPosition",
-					"TransponderInfoMisPls",
-				),
-				(  # feraw and "DVB-T" in feraw.get("tuner_type", "")
-					"TunerSystem",
-					"TerrestrialChannelNumber",
-					"TransponderFrequencyMHz",
-					"TransponderPolarization",
-					"TransponderSymbolRate",
-					"TransponderFEC",
-					"TransponderModulation",
-					"OrbitalPosition",
-				)
-			),
-			"TransponderInfo2line": (
-				"ProviderName",
-				"TunerSystem",
-				"TransponderName",
-				"NewLine",
-				"TransponderFrequencyMHz",
-				"TransponderPolarization",
-				"TransponderSymbolRate",
-				"TransponderModulationFEC",
-			),
-			"User": (),
-		}
 		self.ca_table = (
 			("CryptoCaidSecaAvailable", "S", False),
 			("CryptoCaidViaAvailable", "V", False),
@@ -173,12 +75,10 @@ class PliExtraInfo(Poll, Converter):
 			("CryptoCaidBetaAvailable", "B", False),
 			("CryptoCaidNagraAvailable", "N", False),
 			("CryptoCaidBissAvailable", "Bi", False),
-			("CryptoCaidDre3Available", "D3", False),
 			("CryptoCaidDreAvailable", "D", False),
 			("CryptoCaidBulCrypt1Available", "B1", False),
 			("CryptoCaidBulCrypt2Available", "B2", False),
-			("CryptoCaidVerimatrixAvailable", "Vm", False),
-			("CryptoCaidTandbergAvailable", "TB", False),
+			("CryptoCaidTandbergAvailable", "T", False),
 			("CryptoCaidSecaSelected", "S", True),
 			("CryptoCaidViaSelected", "V", True),
 			("CryptoCaidIrdetoSelected", "I", True),
@@ -189,20 +89,13 @@ class PliExtraInfo(Poll, Converter):
 			("CryptoCaidBetaSelected", "B", True),
 			("CryptoCaidNagraSelected", "N", True),
 			("CryptoCaidBissSelected", "Bi", True),
-			("CryptoCaidDre3Selected", "D3", True),
 			("CryptoCaidDreSelected", "D", True),
 			("CryptoCaidBulCrypt1Selected", "B1", True),
 			("CryptoCaidBulCrypt2Selected", "B2", True),
-			("CryptoCaidVerimatrixSelected", "Vm", True),
-			("CryptoCaidTandbergSelected", "TB", True),
+			("CryptoCaidTandbergSelected", "T", True)
 		)
-		self.type = self.type.split(',')
-		if self.type[0] == "User":
-			self.info_fields[self.type[0]] = tuple(self.type[1:])
-		self.type = self.type[0]
 		self.ecmdata = GetEcmInfo()
 		self.feraw = self.fedata = self.updateFEdata = None
-		self.recursionCheck = set()
 
 	def getCryptoInfo(self, info):
 		if info.getInfo(iServiceInformation.sIsCrypted) == 1:
@@ -220,7 +113,6 @@ class PliExtraInfo(Poll, Converter):
 	def createCryptoBar(self, info):
 		res = ""
 		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
-		colors = parameters.get("PliExtraInfoColors", (0x0000FF00, 0x00FFFF00, 0x007F7F7F, 0x00FFFFFF))  # "found", "not found", "available", "default" colors
 
 		for caid_entry in caid_data:
 			if int(caid_entry[0], 16) <= int(self.current_caid, 16) <= int(caid_entry[1], 16):
@@ -242,6 +134,198 @@ class PliExtraInfo(Poll, Converter):
 		res += "\c00ffffff"
 		return res
 
+	def createCryptoSeca(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x100', 16) <= int(self.current_caid, 16) <= int('0x1ff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x100', 16) <= caid <= int('0x1ff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'S'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoVia(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x500', 16) <= int(self.current_caid, 16) <= int('0x5ff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x500', 16) <= caid <= int('0x5ff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'V'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoIrdeto(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x600', 16) <= int(self.current_caid, 16) <= int('0x6ff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x600', 16) <= caid <= int('0x6ff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'I'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoNDS(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x900', 16) <= int(self.current_caid, 16) <= int('0x9ff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x900', 16) <= caid <= int('0x9ff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'NDS'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoConax(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0xb00', 16) <= int(self.current_caid, 16) <= int('0xbff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0xb00', 16) <= caid <= int('0xbff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'CO'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoCryptoW(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0xd00', 16) <= int(self.current_caid, 16) <= int('0xdff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0xd00', 16) <= caid <= int('0xdff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'CW'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoPowerVU(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0xe00', 16) <= int(self.current_caid, 16) <= int('0xeff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0xe00', 16) <= caid <= int('0xeff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'P'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoTandberg(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x1010', 16) <= int(self.current_caid, 16) <= int('0x1010', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x1010', 16) <= caid <= int('0x1010', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'T'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoBeta(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x1700', 16) <= int(self.current_caid, 16) <= int('0x17ff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x1700', 16) <= caid <= int('0x17ff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'B'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoNagra(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x1800', 16) <= int(self.current_caid, 16) <= int('0x18ff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x1800', 16) <= caid <= int('0x18ff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'N'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoBiss(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x2600', 16) <= int(self.current_caid, 16) <= int('0x26ff', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x2600', 16) <= caid <= int('0x26ff', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'BI'
+		res += "\c00ffffff"
+		return res
+
+	def createCryptoDre(self, info):
+		available_caids = info.getInfoObject(iServiceInformation.sCAIDs)
+		if int('0x4ae0', 16) <= int(self.current_caid, 16) <= int('0x4ae1', 16):
+			color = "\c004c7d3f"
+		else:
+			color = "\c009f9f9f"
+			try:
+				for caid in available_caids:
+					if int('0x4ae0', 16) <= caid <= int('0x4ae1', 16):
+						color = "\c00eeee00"
+			except Exception:
+				pass
+		res = color + 'DC'
+		res += "\c00ffffff"
+		return res
+
 	def createCryptoSpecial(self, info):
 		caid_name = "FTA"
 		try:
@@ -254,20 +338,35 @@ class PliExtraInfo(Poll, Converter):
 			pass
 		return ""
 
+	def createCryptoNameCaid(self, info):
+		caid_name = "FTA"
+		if int(self.current_caid, 16) == 0:
+			return caid_name
+		try:
+			for caid_entry in self.caid_data:
+				if int(caid_entry[0], 16) <= int(self.current_caid, 16) <= int(caid_entry[1], 16):
+					caid_name = caid_entry[2]
+					break
+			return caid_name + ":%04x" % (int(self.current_caid, 16))
+		except Exception:
+			pass
+		return ""
+
 	def createResolution(self, info):
 		avControl = eAVControl.getInstance()
 		video_rate = avControl.getFrameRate(0)
 		video_pol = "p" if avControl.getProgressive() else "i"
 		video_width = avControl.getResolutionX(0)
 		video_height = avControl.getResolutionY(0)
-		fps = str((video_rate + 500) // 1000)
-		return str(video_width) + "x" + str(video_height) + " " + fps + video_pol
-
-	def createGamma(self, info):
-		return gamma_data.get(info.getInfo(iServiceInformation.sGamma), "")
+		fps = str((video_rate + 500) / 1000)
+		gamma = ("SDR", "HDR", "HDR10", "HLG", "")[info.getInfo(iServiceInformation.sGamma)]
+		return str(video_width) + "x" + str(video_height) + video_pol + fps + addspace(gamma)
 
 	def createVideoCodec(self, info):
-		return codec_data.get(info.getInfo(iServiceInformation.sVideoType), _("N/A"))
+		return codec_data.get(info.getInfo(iServiceInformation.sVideoType), "N/A")
+
+	def createServiceRef(self, info):
+		return info.getInfoString(iServiceInformation.sServiceref)
 
 	def createPIDInfo(self, info):
 		vpid = info.getInfo(iServiceInformation.sVideoPID)
@@ -290,81 +389,47 @@ class PliExtraInfo(Poll, Converter):
 			onid = 0
 		return "%d-%d:%05d:%04d:%04d:%04d" % (onid, tsid, sidpid, vpid, apid, pcrpid)
 
-	def createInfoString(self, fieldGroup, fedata, feraw, info):
-		if fieldGroup in self.recursionCheck:
-			return _("?%s-recursive?") % fieldGroup
-		self.recursionCheck.add(fieldGroup)
+	def createTransponderInfo(self, fedata, feraw, info):
+		if not feraw:
+			refstr = info.getInfoString(iServiceInformation.sServiceref)
+			if "%3a//" in refstr.lower():
+				return refstr.split(":")[10].replace("%3a", ":").replace("%3A", ":")
+			return ""
+		elif "DVB-T" in feraw.get("tuner_type"):
+			tmp = addspace(self.createChannelNumber(fedata, feraw)) + addspace(self.createFrequency(fedata)) + addspace(self.createPolarization(fedata))
+		else:
+			tmp = addspace(self.createFrequency(fedata)) + addspace(self.createPolarization(fedata))
+		return addspace(self.createTunerSystem(fedata)) + tmp + addspace(self.createSymbolRate(fedata, feraw)) + addspace(self.createFEC(fedata, feraw)) \
+			+ addspace(self.createModulation(fedata)) + addspace(self.createOrbPos(feraw)) + addspace(self.createMisPls(fedata))
 
-		fields = self.info_fields[fieldGroup]
-		if fields and isinstance(fields[0], (tuple, list)):
-			if fieldGroup == "TransponderInfo":
-				fields = fields[feraw and int("DVB-T" in feraw.get("tuner_type", "")) + 1 or 0]
-			else:
-				fields = fields[int(config.usage.show_cryptoinfo.value) > 0]
-
-		ret = ""
-		vals = []
-		for field in fields:
-			val = None
-			if field == "CryptoCurrentSource":
-				self.getCryptoInfo(info)
-				vals.append(self.current_source)
-			elif field == "StreamURLInfo":
-				val = self.createStreamURLInfo(info)
-			elif field == "TransponderModulationFEC":
-				val = self.createModulation(fedata) + '-' + self.createFEC(fedata, feraw)
-			elif field == "TransponderName":
-				val = self.createTransponderName(feraw)
-			elif field == "ProviderName":
-				val = self.createProviderName(info)
-			elif field in ("NewLine", "NL"):
-				ret += "  ".join(vals) + "\n"
-				vals = []
-			else:
-				val = self.getTextByType(field)
-
-			if val:
-				vals.append(val)
-
-		return ret + "  ".join(vals)
-
-	def createStreamURLInfo(self, info):
-		refstr = info.getInfoString(iServiceInformation.sServiceref)
-		if "%3a//" in refstr.lower():
-			return refstr.split(":")[10].replace("%3a", ":").replace("%3A", ":")
-		return ""
-
-	def createFrequency(self, feraw):
-		frequency = feraw.get("frequency")
+	def createFrequency(self, fedata):
+		frequency = fedata.get("frequency")
 		if frequency:
-			if "DVB-T" in feraw.get("tuner_type"):
-				return "%d %s" % (int(frequency // 1000000. + 0.5), _("MHz"))
-			else:
-				return str(int(frequency // 1000 + 0.5))
+			return str(frequency)
 		return ""
 
 	def createChannelNumber(self, fedata, feraw):
-		return "DVB-T" in feraw.get("tuner_type", "") and fedata.get("channel") or ""
+		return "DVB-T" in feraw.get("tuner_type") and fedata.get("channel") or ""
 
 	def createSymbolRate(self, fedata, feraw):
-		if "DVB-T" in feraw.get("tuner_type", ""):
+		if "DVB-T" in feraw.get("tuner_type"):
 			bandwidth = fedata.get("bandwidth")
 			if bandwidth:
 				return bandwidth
 		else:
 			symbolrate = fedata.get("symbol_rate")
 			if symbolrate:
-				return str(symbolrate // 1000)
+				return str(symbolrate)
 		return ""
 
 	def createPolarization(self, fedata):
 		return fedata.get("polarization_abbreviation") or ""
 
 	def createFEC(self, fedata, feraw):
-		if "DVB-T" in feraw.get("tuner_type", ""):
+		if "DVB-T" in feraw.get("tuner_type"):
 			code_rate_lp = fedata.get("code_rate_lp")
 			code_rate_hp = fedata.get("code_rate_hp")
-			guard_interval = fedata.get("guard_interval")
+			guard_interval = fedata.get('guard_interval')
 			if code_rate_lp and code_rate_hp and guard_interval:
 				return code_rate_lp + "-" + code_rate_hp + "-" + guard_interval
 		else:
@@ -394,9 +459,9 @@ class PliExtraInfo(Poll, Converter):
 		orbpos = feraw.get("orbital_position")
 		if orbpos:
 			if orbpos > 1800:
-				return _("%.1f° W") % ((3600 - orbpos) / 10.0)
+				return str((float(3600 - orbpos)) / 10.0) + "\u00B0" + "W"
 			elif orbpos > 0:
-				return _("%.1f° E") % (orbpos / 10.0)
+				return str((float(orbpos)) / 10.0) + "\u00B0" + "E"
 		return ""
 
 	def createOrbPosOrTunerSystem(self, fedata, feraw):
@@ -404,6 +469,116 @@ class PliExtraInfo(Poll, Converter):
 		if orbpos != "":
 			return orbpos
 		return self.createTunerSystem(fedata)
+
+	def createTransponderName(self, feraw):
+		orbpos = feraw.get("orbital_position")
+		if orbpos is None:  # Not satellite
+			return ""
+		freq = feraw.get("frequency")
+		if freq and freq < 10700000:  # C-band
+			if orbpos > 1800:
+				orbpos += 1
+			else:
+				orbpos -= 1
+
+		sat_names = {
+			30: 'Rascom/Eutelsat 3E',
+			48: 'SES 5',
+			70: 'Eutelsat 7E',
+			90: 'Eutelsat 9E',
+			100: 'Eutelsat 10E',
+			130: 'Hot Bird',
+			160: 'Eutelsat 16E',
+			192: 'Astra 1KR/1L/1M/1N',
+			200: 'Arabsat 20E',
+			216: 'Eutelsat 21.5E',
+			235: 'Astra 3',
+			255: 'Eutelsat 25.5E',
+			260: 'Badr 4/5/6',
+			282: 'Astra 2E/2F/2G',
+			305: 'Arabsat 30.5E',
+			315: 'Astra 5',
+			330: 'Eutelsat 33E',
+			360: 'Eutelsat 36E',
+			380: 'Paksat',
+			390: 'Hellas Sat',
+			400: 'Express 40E',
+			420: 'Turksat',
+			450: 'Intelsat 45E',
+			480: 'Afghansat',
+			490: 'Yamal 49E',
+			530: 'Express 53E',
+			570: 'NSS 57E',
+			600: 'Intelsat 60E',
+			620: 'Intelsat 62E',
+			685: 'Intelsat 68.5E',
+			705: 'Eutelsat 70.5E',
+			720: 'Intelsat 72E',
+			750: 'ABS',
+			765: 'Apstar',
+			785: 'ThaiCom',
+			800: 'Express 80E',
+			830: 'Insat',
+			851: 'Intelsat/Horizons',
+			880: 'ST2',
+			900: 'Yamal 90E',
+			915: 'Mesat',
+			950: 'NSS/SES 95E',
+			1005: 'AsiaSat 100E',
+			1030: 'Express 103E',
+			1055: 'Asiasat 105E',
+			1082: 'NSS/SES 108E',
+			1100: 'BSat/NSAT',
+			1105: 'ChinaSat',
+			1130: 'KoreaSat',
+			1222: 'AsiaSat 122E',
+			1380: 'Telstar 18',
+			1440: 'SuperBird',
+			2310: 'Ciel',
+			2390: 'Echostar/Galaxy 121W',
+			2410: 'Echostar/DirectTV 119W',
+			2500: 'Echostar/DirectTV 110W',
+			2630: 'Galaxy 97W',
+			2690: 'NIMIQ 91W',
+			2780: 'NIMIQ 82W',
+			2830: 'Echostar/QuetzSat',
+			2880: 'AMC 72W',
+			2900: 'Star One',
+			2985: 'Echostar 61.5W',
+			2990: 'Amazonas',
+			3020: 'Intelsat 58W',
+			3045: 'Intelsat 55.5W',
+			3070: 'Intelsat 53W',
+			3100: 'Intelsat 50W',
+			3150: 'Intelsat 45W',
+			3169: 'Intelsat 43.1W',
+			3195: 'SES 40.5W',
+			3225: 'NSS/Telstar 37W',
+			3255: 'Intelsat 34.5W',
+			3285: 'Intelsat 31.5W',
+			3300: 'Hispasat',
+			3325: 'Intelsat 27.5W',
+			3355: 'Intelsat 24.5W',
+			3380: 'SES 22W',
+			3400: 'NSS 20W',
+			3420: 'Intelsat 18W',
+			3450: 'Telstar 15W',
+			3460: 'Express 14W',
+			3475: 'Eutelsat 12.5W',
+			3490: 'Express 11W',
+			3520: 'Eutelsat 8W',
+			3530: 'Nilesat/Eutelsat 7W',
+			3550: 'Eutelsat 5W',
+			3560: 'Amos',
+			3592: 'Thor/Intelsat'
+		}
+
+		if orbpos in sat_names:
+			return sat_names[orbpos]
+		elif orbpos > 1800:
+			return str((float(3600 - orbpos)) / 10.0) + "W"
+		else:
+			return str((float(orbpos)) / 10.0) + "E"
 
 	def createProviderName(self, info):
 		return info.getInfoString(iServiceInformation.sProvider)
@@ -423,10 +598,6 @@ class PliExtraInfo(Poll, Converter):
 
 	@cached
 	def getText(self):
-		self.recursionCheck.clear()
-		return self.getTextByType(self.type)
-
-	def getTextByType(self, textType):
 		service = self.source.service
 		if service is None:
 			return ""
@@ -435,25 +606,116 @@ class PliExtraInfo(Poll, Converter):
 		if not info:
 			return ""
 
-		if textType == "CryptoBar":
+		if self.type == "CryptoInfo":
 			self.getCryptoInfo(info)
-			return self.createCryptoBar(info)
+			if config.usage.show_cryptoinfo.value > 0:
+				return addspace(self.createCryptoBar(info)) + self.createCryptoSpecial(info)
+			else:
+				return addspace(self.createCryptoBar(info)) + addspace(self.current_source) + self.createCryptoSpecial(info)
 
-		if textType == "CryptoSpecial":
-			self.getCryptoInfo(info)
-			return self.createCryptoSpecial(info)
+		if self.type == "CryptoBar":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoBar(info)
+			else:
+				return ""
 
-		if textType == "Resolution":
+		if self.type == "CryptoSeca":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoSeca(info)
+			else:
+				return ""
+
+		if self.type == "CryptoVia":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoVia(info)
+			else:
+				return ""
+
+		if self.type == "CryptoIrdeto":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoIrdeto(info)
+			else:
+				return ""
+
+		if self.type == "CryptoNDS":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoNDS(info)
+			else:
+				return ""
+
+		if self.type == "CryptoConax":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoConax(info)
+			else:
+				return ""
+
+		if self.type == "CryptoCryptoW":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoCryptoW(info)
+			else:
+				return ""
+
+		if self.type == "CryptoBeta":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoBeta(info)
+			else:
+				return ""
+
+		if self.type == "CryptoNagra":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoNagra(info)
+			else:
+				return ""
+
+		if self.type == "CryptoBiss":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoBiss(info)
+			else:
+				return ""
+
+		if self.type == "CryptoDre":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoDre(info)
+			else:
+				return ""
+
+		if self.type == "CryptoTandberg":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoTandberg(info)
+			else:
+				return ""
+
+		if self.type == "CryptoSpecial":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoSpecial(info)
+			else:
+				return ""
+
+		if self.type == "CryptoNameCaid":
+			if config.usage.show_cryptoinfo.value > 0:
+				self.getCryptoInfo(info)
+				return self.createCryptoNameCaid(info)
+			else:
+				return ""
+
+		if self.type == "ResolutionString":
 			return self.createResolution(info)
 
-		if textType == "ResolutionString":
-			return addspace(self.createResolution(info)) + self.createGamma(info) if self.createGamma(info) else addspace(self.createResolution(info))
-
-		if textType == "VideoCodec":
+		if self.type == "VideoCodec":
 			return self.createVideoCodec(info)
-
-		if textType == "Gamma":
-			return self.createGamma(info)
 
 		if self.updateFEdata:
 			feinfo = service.frontendInfo()
@@ -465,59 +727,75 @@ class PliExtraInfo(Poll, Converter):
 		feraw = self.feraw
 		if not feraw:
 			feraw = info.getInfoObject(iServiceInformation.sTransponderData)
+			if not feraw:
+				return ""
 			fedata = ConvertToHumanReadable(feraw)
 		else:
 			fedata = self.fedata
+		if self.type == "All":
+			self.getCryptoInfo(info)
+			if config.usage.show_cryptoinfo.value > 0:
+				return addspace(self.createProviderName(info)) + self.createTransponderInfo(fedata, feraw, info) + addspace(self.createTransponderName(feraw)) + "\n"\
+				+ addspace(self.createCryptoBar(info)) + addspace(self.createCryptoSpecial(info)) + "\n"\
+				+ addspace(self.createPIDInfo(info)) + addspace(self.createVideoCodec(info)) + self.createResolution(info)
+			else:
+				return addspace(self.createProviderName(info)) + self.createTransponderInfo(fedata, feraw, info) + addspace(self.createTransponderName(feraw)) + "\n" \
+				+ addspace(self.createCryptoBar(info)) + self.current_source + "\n" \
+				+ addspace(self.createCryptoSpecial(info)) + addspace(self.createVideoCodec(info)) + self.createResolution(info)
 
-		if textType in self.info_fields:
-			return self.createInfoString(textType, fedata, feraw, info)
+		if self.type == "ServiceInfo":
+			return addspace(self.createProviderName(info)) + addspace(self.createTunerSystem(fedata)) + addspace(self.createFrequency(feraw)) + addspace(self.createPolarization(fedata)) \
+			+ addspace(self.createSymbolRate(fedata, feraw)) + addspace(self.createFEC(fedata, feraw)) + addspace(self.createModulation(fedata)) + addspace(self.createOrbPos(feraw)) + addspace(self.createTransponderName(feraw))\
+			+ addspace(self.createVideoCodec(info)) + self.createResolution(info)
 
-		if textType == "PIDInfo":
+		if self.type == "TransponderInfo2line":
+			return addspace(self.createProviderName(info)) + addspace(self.createTunerSystem(fedata)) + addspace(self.createTransponderName(feraw)) + '\n'\
+			+ addspace(self.createFrequency(fedata)) + addspace(self.createPolarization(fedata))\
+			+ addspace(self.createSymbolRate(fedata, feraw)) + self.createModulation(fedata) + '-' + addspace(self.createFEC(fedata, feraw))
+
+		if self.type == "PIDInfo":
 			return self.createPIDInfo(info)
 
-		if textType == "ServiceRef":
+		if self.type == "ServiceRef":
 			return self.createServiceRef(info)
 
 		if not feraw:
 			return ""
 
-		if textType == "TransponderFrequency":
+		if self.type == "TransponderInfo":
+			return self.createTransponderInfo(fedata, feraw, info)
+
+		if self.type == "TransponderFrequency":
 			return self.createFrequency(feraw)
 
-		if textType == "TransponderFrequencyMHz":
-			return self.createFrequency(fedata)
-
-		if textType == "TransponderSymbolRate":
+		if self.type == "TransponderSymbolRate":
 			return self.createSymbolRate(fedata, feraw)
 
-		if textType == "TransponderPolarization":
+		if self.type == "TransponderPolarization":
 			return self.createPolarization(fedata)
 
-		if textType == "TransponderFEC":
+		if self.type == "TransponderFEC":
 			return self.createFEC(fedata, feraw)
 
-		if textType == "TransponderModulation":
+		if self.type == "TransponderModulation":
 			return self.createModulation(fedata)
 
-		if textType == "OrbitalPosition":
+		if self.type == "OrbitalPosition":
 			return self.createOrbPos(feraw)
 
-		if textType == "TunerType":
+		if self.type == "TunerType":
 			return self.createTunerType(feraw)
 
-		if textType == "TunerSystem":
+		if self.type == "TunerSystem":
 			return self.createTunerSystem(fedata)
 
-		if textType == "OrbitalPositionOrTunerSystem":
+		if self.type == "OrbitalPositionOrTunerSystem":
 			return self.createOrbPosOrTunerSystem(fedata, feraw)
 
-		if textType == "TerrestrialChannelNumber":
+		if self.type == "TerrestrialChannelNumber":
 			return self.createChannelNumber(fedata, feraw)
 
-		if textType == "TransponderInfoMisPls":
-			return self.createMisPls(fedata)
-
-		return _("?%s?") % textType
+		return _("invalid type")
 
 	text = property(getText)
 
@@ -561,7 +839,7 @@ class PliExtraInfo(Poll, Converter):
 						for caid in available_caids:
 							if int(caid_entry[0], 16) <= caid <= int(caid_entry[1], 16):
 								return True
-					except:
+					except Exception:
 						pass
 
 		return False
