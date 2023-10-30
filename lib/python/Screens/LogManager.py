@@ -143,6 +143,7 @@ class LogManager(Screen):
 				'red': self.changelogtype,
 				'green': self.showLog,
 				'yellow': self.deletelog,
+				"blue": self.deleteAllLogs,
 				"left": self.left,
 				"right": self.right,
 				"down": self.down,
@@ -153,10 +154,12 @@ class LogManager(Screen):
 			self["key_red"] = StaticText(_("Debug Logs"))
 			self["key_green"] = StaticText(_("View"))
 			self["key_yellow"] = StaticText(_("Delete"))
+			self["key_blue"] = StaticText(_("Delete all"))
 		else:
 			self["key_red"] = StaticText("")
 			self["key_green"] = StaticText("")
 			self["key_yellow"] = StaticText("")
+			self["key_blue"] = StaticText("")
 		self.onChangedEntry = []
 		self.sentsingle = ""
 		self.selectedFiles = config.logmanager.sentfiles.value
@@ -260,26 +263,38 @@ class LogManager(Screen):
 				self.sel = None
 			self.selectedFiles = self["list"].getSelectedList()
 			if self.selectedFiles:
-				message = _("Do you want to delete all the selected files:\nchoose \"No\" to only delete the currently selected file.")
+				message = _("Do you want to delete all the selected files?\n\nchoose \"No\" to only delete the currently selected file.")
 				ybox = self.session.openWithCallback(self.doDelete1, MessageBox, message, MessageBox.TYPE_YESNO)
 				ybox.setTitle(_("Delete Confirmation"))
 			elif self.sel:
-				message = _("Are you sure you want to delete this log?\n") + str(self.sel[0])
+				message = _("You want to delete this log?\n\n") + str(self.sel[0])
 				ybox = self.session.openWithCallback(self.doDelete3, MessageBox, message, MessageBox.TYPE_YESNO)
 				ybox.setTitle(_("Delete Confirmation"))
 			else:
 				self.session.open(MessageBox, _("You have not selected any logs to delete."), MessageBox.TYPE_INFO, timeout=10)
 
+	def deleteAllLogs(self):
+		if self.logs:
+			allfiles = ",".join(self.logs).replace(",", "\n")
+			message = _("You want to delete all files?\n\n") + str(allfiles)
+			self.session.openWithCallback(self.doDeleteAllLogs, MessageBox, message, MessageBox.TYPE_YESNO)
+
+	def doDeleteAllLogs(self, answer):
+		if answer:
+			from enigma import eConsoleAppContainer
+			eConsoleAppContainer().execute("rm -f " + config.crash.debugPath.value + "*")
+			self.close()
+
 	def doDelete1(self, answer):
 		self.selectedFiles = self["list"].getSelectedList()
-		self.selectedFiles = ",".join(self.selectedFiles).replace(",", " ")
+		self.selectedFiles = ",".join(self.selectedFiles).replace(",", "\n").replace(config.crash.debugPath.value, "")
 		self.sel = self["list"].getCurrent()[0]
 		if answer is True:
-			message = _("Are you sure you want to delete all the selected logs:\n") + self.selectedFiles
+			message = _("You want to delete all the selected logs?\n\n") + self.selectedFiles
 			ybox = self.session.openWithCallback(self.doDelete2, MessageBox, message, MessageBox.TYPE_YESNO)
 			ybox.setTitle(_("Delete Confirmation"))
 		else:
-			message = _("Are you sure you want to delete this log?\n") + str(self.sel[0])
+			message = _("You want to delete this log?\n\n") + str(self.sel[0])
 			ybox = self.session.openWithCallback(self.doDelete3, MessageBox, message, MessageBox.TYPE_YESNO)
 			ybox.setTitle(_("Delete Confirmation"))
 
