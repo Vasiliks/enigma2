@@ -1,17 +1,19 @@
-# -*- coding: utf-8 -*-
-from os import stat
+from array import array
 from binascii import hexlify
-from locale import format_string
-from os.path import isfile
-from time import localtime, strftime
-import re
+from fcntl import ioctl
 from glob import glob
-from sys import maxsize, modules, version_info
+from locale import format_string
+from os import stat
+from os.path import isfile
+from re import search
+from socket import AF_INET, SOCK_DGRAM, inet_ntoa, socket
 from gettext import ngettext
-import socket, fcntl, struct
+from struct import pack, unpack
 from subprocess import PIPE, Popen
+from sys import maxsize, modules, version_info
+from time import localtime, strftime
 from Components.SystemInfo import BoxInfo, SystemInfo
-from Tools.Directories import fileExists, fileReadLine, fileReadLines
+from Tools.Directories import fileReadLine, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
 
@@ -20,27 +22,27 @@ MODEL = BoxInfo.getItem("model")
 
 
 def _ifinfo(sock, addr, ifname):
-	iface = struct.pack('256s', bytes(ifname[:15], encoding="UTF-8"))
-	info  = fcntl.ioctl(sock.fileno(), addr, iface)
+	iface = pack('256s', bytes(ifname[:15], encoding="UTF-8"))
+	info = ioctl(sock.fileno(), addr, iface)
 	if addr == 0x8927:
 		return ''.join(['%02x:' % ord(char) for char in info[18:24]])[:-1].upper()
 	else:
-		return socket.inet_ntoa(info[20:24])
+		return inet_ntoa(info[20:24])
 
 
 def getIfConfig(ifname):
-	ifreq = {'ifname': ifname}
+	ifreq = {"ifname": ifname}
 	infos = {}
-	sock  = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	# offsets defined in /usr/include/linux/sockios.h on linux 2.6
-	infos['addr']    = 0x8915 # SIOCGIFADDR
-	infos['brdaddr'] = 0x8919 # SIOCGIFBRDADDR
-	infos['hwaddr']  = 0x8927 # SIOCSIFHWADDR
-	infos['netmask'] = 0x891b # SIOCGIFNETMASK
+	sock = socket(AF_INET, SOCK_DGRAM)
+	# Offsets defined in /usr/include/linux/sockios.h on linux 2.6.
+	infos["addr"] = 0x8915  # SIOCGIFADDR
+	infos["brdaddr"] = 0x8919  # SIOCGIFBRDADDR
+	infos["hwaddr"] = 0x8927  # SIOCSIFHWADDR
+	infos["netmask"] = 0x891b  # SIOCGIFNETMASK
 	try:
 		for k, v in infos.items():
 			ifreq[k] = _ifinfo(sock, v, ifname)
-	except:
+	except Exception as ex:
 		pass
 	sock.close()
 	return ifreq
@@ -134,13 +136,10 @@ def getFFmpegVersionString():
 
 
 def getKernelVersionString():
-	kernelversion = "unknown"
-	try:
-		with open("/proc/version") as f:
-			kernelversion = f.read().split(" ", 4)[2].split("-", 2)[0]
-			return kernelversion
-	except:
-		return kernelversion
+	version = fileReadLine("/proc/version", source=MODULE_NAME)
+	if version is None:
+		return _("Unknown")
+	return version.split(" ", 4)[2].split("-", 2)[0]
 
 
 def getImageTypeString():
@@ -302,21 +301,17 @@ def getDVBAPI():
 
 
 def getDriverInstalledDate():
+	from glob import glob
 	try:
-		from glob import glob
 		try:
-			if MODEL in ("dm800", "dm8000"):
-				driver = [x.split("-")[-2:-1][0][-9:] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0]) if x.startswith("Version:")][0]
-				return "%s-%s-%s" % (driver[:4], driver[4:6], driver[6:])
-			else:
-				driver = [x.split("-")[-2:-1][0][-8:] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0]) if x.startswith("Version:")][0]
-				return "%s-%s-%s" % (driver[:4], driver[4:6], driver[6:])
+			driver = [x.split("-")[-2:-1][0][-8:] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0], "r") if x.startswith("Version:")][0]
+			return "%s-%s-%s" % (driver[:4], driver[4:6], driver[6:])
 		except:
 			try:
-				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-dvb-proxy-*.control")[0]) if x.startswith("Version:")][0]
+				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-dvb-proxy-*.control")[0], "r") if x.startswith("Version:")][0]
 				return "%s" % driver[1].replace("\n", "")
 			except:
-				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-platform-util-*.control")[0]) if x.startswith("Version:")][0]
+				driver = [x.split("Version:") for x in open(glob("/var/lib/opkg/info/*-platform-util-*.control")[0], "r") if x.startswith("Version:")][0]
 				return "%s" % driver[1].replace("\n", "")
 	except:
 		return _("unknown")
@@ -327,35 +322,25 @@ def getPythonVersionString():
 
 
 def GetIPsFromNetworkInterfaces():
-	import socket
-	import fcntl
-	import struct
-	import array
-	is_64bits = maxsize > 2**32
-	struct_size = 40 if is_64bits else 32
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	max_possible = 8 # initial value
+	structSize = 40 if maxsize > 2 ** 32 else 32
+	sock = socket(AF_INET, SOCK_DGRAM)
+	maxPossible = 8  # Initial value.
+
 	while True:
-		_bytes = max_possible * struct_size
-		names = array.array('B')
-		for i in range(0, _bytes):
+		_bytes = maxPossible * structSize
+		names = array("B")
+		for index in range(_bytes):
 			names.append(0)
-		outbytes = struct.unpack('iL', fcntl.ioctl(
-			s.fileno(),
-			0x8912,  # SIOCGIFCONF
-			struct.pack('iL', _bytes, names.buffer_info()[0])
-		))[0]
+		outbytes = unpack("iL", ioctl(sock.fileno(), 0x8912, pack("iL", _bytes, names.buffer_info()[0])))[0]  # 0x8912 = SIOCGIFCONF
 		if outbytes == _bytes:
-			max_possible *= 2
+			maxPossible *= 2
 		else:
 			break
-	namestr = names.tobytes()
 	ifaces = []
-	for i in range(0, outbytes, struct_size):
-		iface_name = bytes.decode(namestr[i:i + 16]).split('\0', 1)[0]
-		if iface_name != 'lo':
-			iface_addr = socket.inet_ntoa(namestr[i + 20:i + 24])
-			ifaces.append((iface_name, iface_addr))
+	for index in range(0, outbytes, structSize):
+		ifaceName = names.tobytes()[index:index + 16].decode().split("\0", 1)[0]
+		if ifaceName != "lo":
+			ifaces.append((ifaceName, inet_ntoa(names[index + 20:index + 24])))
 	return ifaces
 
 
