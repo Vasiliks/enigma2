@@ -521,6 +521,8 @@ class ImageInformation(InformationBase):
 		info.append(formatLine("S", _("Build information")))
 		if self.extraSpacing:
 			info.append("")
+		info.append(formatLine("P1", _("Distribution"), BoxInfo.getItem("displaydistro")))
+		info.append(formatLine("P1", _("Distribution build"), formatDate(BoxInfo.getItem("imagebuild"))))
 		info.append(formatLine("P1", _("Distribution build date"), formatDate(about.getBuildDateString())))
 		info.append(formatLine("P1", _("Distribution architecture"), BoxInfo.getItem("architecture")))
 		if BoxInfo.getItem("imagedir"):
