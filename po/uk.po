@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-19 08:16+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2022-09-27 16:12+0200\n"
 "Last-Translator: kvinto\n"
 "Language-Team: kvinto\n"
@@ -638,7 +638,7 @@ msgid "AC3 transcoding"
 msgstr "Перекодування AC3"
 
 msgid "ACQUIRING TSID/ONID"
-msgstr ""
+msgstr "ACQUIRING TSID/ONID"
 
 msgid "AGC:"
 msgstr "AGC:"
@@ -1076,6 +1076,8 @@ msgid ""
 "Attention - forced loading recovery image!\n"
 "Create an empty STARTUP_RECOVERY file at the root of your HDD/USB drive and hold the Power button for more than 12 seconds for reboot receiver!"
 msgstr ""
+"Увага - примусове завантаження відновлення іміджу!\n"
+"Створіть порожній файл STARTUP_RECOVERY в кореневому каталозі вашого HDD/USB-накопичувача та утримуйте кнопку живлення більше 12с для перезавантаження приймача!"
 
 msgid "Attention, this is repeated timer!\n"
 msgstr "Увага, цей таймер повторюється!\n"
@@ -1471,6 +1473,9 @@ msgstr "КАН%s"
 
 msgid "CI (Common Interface) Setup"
 msgstr "Налаштування CI (Common Interface)"
+
+msgid "CI Boot Delay"
+msgstr "Затримка завантаження CI"
 
 msgid "CI assignment"
 msgstr "Призначення CI"
@@ -2473,7 +2478,7 @@ msgid "DMM normal"
 msgstr "DMM нормально"
 
 msgid "DTS"
-msgstr ""
+msgstr "DTS"
 
 msgid "DTS downmix"
 msgstr "DTS мікшування"
@@ -3023,7 +3028,7 @@ msgstr[2] "Виконано - Встановлено, оновлено чи ви
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 "Завантаження успішне\n"
@@ -3621,7 +3626,7 @@ msgid "FAILED"
 msgstr "ПОМИЛКА"
 
 msgid "FBC SCR (Unicable/JESS)"
-msgstr ""
+msgstr "FBC SCR (Unicable/JESS)"
 
 msgid "FBC automatic"
 msgstr "FBC автоматичний"
@@ -9006,7 +9011,7 @@ msgstr "ТЕКСТ"
 #. TRANSLATORS: Add here whatever should be shown in the "translator" about screen, up to 6 lines (use \n for newline)
 msgid "TRANSLATOR_INFO"
 msgstr ""
-"Переклад:  kvinto - 01.07.2023\n"
+"Переклад:  kvinto - 29.10.2023\n"
 "Пошта:  badsystem@ukr.net"
 
 msgid "TS file is too large for ISO9660 level 1!"
@@ -11384,6 +11389,9 @@ msgstr "вийти з меню конфігурації мережевого а�
 msgid "experimental film/video"
 msgstr "експериментальний фільм/відео"
 
+msgid "extra high"
+msgstr "надвисокий"
+
 msgid "extra wide"
 msgstr "дуже широкий"
 
@@ -11467,6 +11475,9 @@ msgstr "висота"
 
 msgid "help..."
 msgstr "допомога..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "горизонталь"
