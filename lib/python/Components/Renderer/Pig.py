@@ -1,16 +1,18 @@
-# P(icture)i(n)g(raphics) renderer
-from Components.Renderer.Renderer import Renderer
+##
+## P(icture)i(n)g(raphics) renderer
+##
 from enigma import eVideoWidget, getDesktop
+from Components.Renderer.Renderer import Renderer
 from Screens.PictureInPicture import PipPigMode
 
 
 class Pig(Renderer):
+	GUI_WIDGET = eVideoWidget
+
 	def __init__(self):
 		Renderer.__init__(self)
 		self.Position = self.Size = None
 		self.hidePip = True
-
-	GUI_WIDGET = eVideoWidget
 
 	def postWidgetCreate(self, instance):
 		desk = getDesktop(0)
@@ -21,9 +23,8 @@ class Pig(Renderer):
 		attribs = self.skinAttributes[:]
 		for (attrib, value) in self.skinAttributes:
 			if attrib == "hidePip":
-				self.hidePip = value == "1"
+				self.hidePip = value == 1
 				attribs.remove((attrib, value))
-				break
 		self.skinAttributes = attribs
 		ret = Renderer.applySkin(self, desktop, parent)
 		if ret:
