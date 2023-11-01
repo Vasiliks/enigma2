@@ -38,7 +38,7 @@ QUIT_UPGRADE_PROGRAM = 42
 QUIT_IMAGE_RESTORE = 43
 
 def setLCDModeMinitTV(value):
-	fileWriteLine("/proc/stb/lcd/mode", str(value))
+	eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 
 
 def isInfoBarInstance():

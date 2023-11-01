@@ -12,7 +12,7 @@ from Components.MenuList import MenuList
 from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
 profile("ChannelSelection.py 1")
 from Screens.EpgSelection import EPGSelection
-from enigma import eServiceReference, eServiceReferenceDVB, eEPGCache, eServiceCenter, eRCInput, eTimer, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, loadPNG
+from enigma import eDBoxLCD, eServiceReference, eServiceReferenceDVB, eEPGCache, eServiceCenter, eRCInput, eTimer, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, loadPNG
 from Components.config import config, configfile, ConfigSubsection, ConfigText, ConfigYesNo
 from Tools.NumericalTextInput import NumericalTextInput
 profile("ChannelSelection.py 2")
@@ -36,7 +36,6 @@ from Screens.PictureInPicture import PictureInPicture
 from Screens.RdsDisplay import RassInteractive
 from ServiceReference import ServiceReference, service_types_tv_ref, service_types_radio_ref, serviceRefAppendPath, hdmiInServiceRef
 from Tools.BoundFunction import boundFunction
-from Tools.Directories import fileWriteLine
 from Tools.Notifications import RemovePopup
 from Tools.Alternatives import GetWithAlternative, CompareWithAlternatives
 from Tools.Directories import fileExists, resolveFilename, sanitizeFilename, SCOPE_PLUGINS
@@ -554,7 +553,7 @@ class ChannelContextMenu(Screen):
 				del self.session.pip
 				if SystemInfo["LCDMiniTVPiP"] and config.lcd.modepip.value >= 1:
 					print('[ChannelSelection] LCDMiniTV disable PIP')
-					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modeminitv.value))
+					eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 			self.session.pip = self.session.instantiateDialog(PictureInPicture)
 			self.session.pip.setAnimationMode(0)
 			self.session.pip.show()
@@ -564,7 +563,7 @@ class ChannelContextMenu(Screen):
 				self.session.pip.servicePath[1] = currentBouquet
 				if SystemInfo["LCDMiniTVPiP"] and config.lcd.modepip.value >= 1:
 					print('[ChannelSelection] LCDMiniTV enable PIP')
-					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modepip.value))
+					eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 					print("[ChannelSelection] Write to /proc/stb/vmpeg/1/dst_width")
 					open("/proc/stb/vmpeg/1/dst_width", "w").write("0")
 					print("[ChannelSelection] Write to /proc/stb/vmpeg/1/dst_height")
@@ -577,7 +576,7 @@ class ChannelContextMenu(Screen):
 				del self.session.pip
 				if SystemInfo["LCDMiniTV"] and int(config.lcd.modepip.value) >= 1:
 					print('[ChannelSelection] LCDMiniTV disable PIP')
-					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modeminitv.value))
+					eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 				self.session.openWithCallback(self.close, MessageBox, _("Could not open Picture in Picture"), MessageBox.TYPE_ERROR)
 		else:
 			return 0
