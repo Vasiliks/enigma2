@@ -18,7 +18,10 @@ eDVBCICcSession::eDVBCICcSession(eDVBCISlot *slot, int version):
 	uint8_t buf[32], host_id[8];
 
 	m_slot->setCCManager(this);
-	m_descrambler_fd = descrambler_init();
+	m_descrambler_fd = -1;
+	m_current_ca_demux_id = 0;
+	m_descrambler_key_iv_valid = false;
+
 	parameter_init(m_dh_p, m_dh_g, m_dh_q, m_s_key, m_key_data, m_iv);
 
 	m_ci_elements.init();
@@ -745,7 +748,13 @@ void eDVBCICcSession::check_new_key()
 	if (slot != 0 && slot != 1)
 		slot = 1;
 
-	descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), slot, dec);
+	if (m_descrambler_fd > -1)
+	{
+		descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), slot, dec);
+	}
+	memcpy(m_descrambler_key_iv, dec, 32);
+	m_descrambler_odd_even = slot;
+	m_descrambler_key_iv_valid = true;
 
 	m_ci_elements.invalidate(KP);
 	m_ci_elements.invalidate(KEY_REGISTER);
@@ -948,4 +957,22 @@ bool eDVBCICcSession::ci_element_set_hostid_from_certificate(unsigned int id, X5
 	}
 
 	return true;
+}
+
+void eDVBCICcSession::setCADemuxID(uint8_t ca_demux_id)
+{
+	if (m_descrambler_fd >= 0 && m_current_ca_demux_id != ca_demux_id)
+	{
+		descrambler_deinit(m_descrambler_fd);
+		m_descrambler_fd = -1;
+	}
+	if (m_descrambler_fd == -1)
+	{
+		m_descrambler_fd = descrambler_init(ca_demux_id);
+		if (m_descrambler_key_iv_valid)
+		{
+			descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), m_descrambler_odd_even, m_descrambler_key_iv);
+		}
+	}
+	m_current_ca_demux_id = ca_demux_id;
 }
