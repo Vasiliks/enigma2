@@ -172,7 +172,7 @@ class LCD:
 		self.dimBrightness = value
 
 	def setDimDelay(self, value):
-		self.dimDelay = int(value)
+		self.dimDelay = value
 
 	def setContrast(self, value):
 		value *= 63
@@ -551,17 +551,8 @@ def InitLcd():
 		config.lcd.bright = ConfigSlider(default=default_bright, limits=(0, max_limit))
 		config.lcd.dimbright.addNotifier(setLCDdimbright)
 		config.lcd.dimbright.apply = lambda: setLCDdimbright(config.lcd.dimbright)
-		config.lcd.dimdelay = ConfigSelection(choices=[
-			("5", "5 %s" % _("seconds")),
-			("10", "10 %s" % _("seconds")),
-			("15", "15 %s" % _("seconds")),
-			("20", "20 %s" % _("seconds")),
-			("30", "30 %s" % _("seconds")),
-			("60", "1 %s" % _("minute")),
-			("120", "2 %s" % _("minutes")),
-			("300", "5 %s" % _("minutes")),
-			("0", _("Off"))
-		], default="0")
+		delayChoices = [(x, _("%d Seconds") % x) for x in (5, 10, 15, 20, 30)] + [(x * 60, ngettext("%d Minute", "%d Minutes", x) % x) for x in (1, 2, 3, 5, 10)] + [(0, _("Off"))]
+		config.lcd.dimdelay = ConfigSelection(default=0, choices=delayChoices)
 		config.lcd.dimdelay.addNotifier(setLCDdimdelay)
 		config.lcd.standby.addNotifier(setLCDstandbybright)
 		config.lcd.standby.apply = lambda: setLCDstandbybright(config.lcd.standby)
@@ -588,7 +579,7 @@ def InitLcd():
 				try:
 					InfoBarInstance = InfoBar.instance
 					InfoBarInstance and InfoBarInstance.session.open(dummyScreen)
-				except:
+				except Exception:
 					pass
 
 			config.lcd.showTv = ConfigYesNo(default=False)
@@ -614,23 +605,16 @@ def InitLcd():
 		VFD_scroll_repeats = BoxInfo.getItem("VFD_scroll_repeats")
 		if VFD_scroll_repeats and VFDRepeats:
 			def scroll_repeats(configElement):
-				eDBoxLCD.getInstance().set_VFD_scroll_repeats(int(configElement.value))
-
-			config.usage.vfd_scroll_repeats = ConfigSelection(choices=[
-				("0", _("None")),
-				("1", _("1X")),
-				("2", _("2X")),
-				("3", _("3X")),
-				("4", _("4X")),
-				("500", _("Continuous"))
-			], default="3")
+				eDBoxLCD.getInstance().set_VFD_scroll_repeats(el.value)
+			choicelist = [(0, _("None")), (1, _("1x")), (2, _("2x")), (3, _("3x")), (4, _("4x")), (500, _("Continues"))]
+			config.usage.vfd_scroll_repeats = ConfigSelection(default=3, choices=choicelist)
 			config.usage.vfd_scroll_repeats.addNotifier(scroll_repeats, immediate_feedback=False)
 		else:
 			config.usage.vfd_scroll_repeats = ConfigNothing()
 		VFD_scroll_delay = BoxInfo.getItem("VFD_scroll_delay")
 		if VFD_scroll_delay and VFDRepeats:
 			def scroll_delay(configElement):
-				eDBoxLCD.getInstance().set_VFD_scroll_delay(int(configElement.value))
+				eDBoxLCD.getInstance().set_VFD_scroll_delay(configElement.value)
 
 			config.usage.vfd_scroll_delay = ConfigSlider(default=150, increment=10, limits=(0, 500))
 			config.usage.vfd_scroll_delay.addNotifier(scroll_delay, immediate_feedback=False)
@@ -641,32 +625,20 @@ def InitLcd():
 		VFD_initial_scroll_delay = BoxInfo.getItem("VFD_initial_scroll_delay")
 		if VFD_initial_scroll_delay and VFDRepeats:
 			def initial_scroll_delay(configElement):
-				eDBoxLCD.getInstance().set_VFD_initial_scroll_delay(int(configElement.value))
+				eDBoxLCD.getInstance().set_VFD_initial_scroll_delay(el.value)
 
-			config.usage.vfd_initial_scroll_delay = ConfigSelection(choices=[
-				("3000", "3 %s" % _("seconds")),
-				("5000", "5 %s" % _("seconds")),
-				("10000", "10 %s" % _("seconds")),
-				("20000", "20 %s" % _("seconds")),
-				("30000", "30 %s" % _("seconds")),
-				("0", _("No delay"))
-			], default="10000")
+			delayChoices = [(x * 1000, _("%d Seconds") % x) for x in (3, 5, 10, 20, 30)] + [(0, _("No delay"))]
+			config.usage.vfd_initial_scroll_delay = ConfigSelection(default=10000, choices=delayChoices)
 			config.usage.vfd_initial_scroll_delay.addNotifier(initial_scroll_delay, immediate_feedback=False)
 		else:
 			config.usage.vfd_initial_scroll_delay = ConfigNothing()
 		VFD_final_scroll_delay = BoxInfo.getItem("VFD_final_scroll_delay")
 		if VFD_final_scroll_delay and VFDRepeats:
 			def final_scroll_delay(configElement):
-				eDBoxLCD.getInstance().set_VFD_final_scroll_delay(int(configElement.value))
+				eDBoxLCD.getInstance().set_VFD_final_scroll_delay(el.value)
 
-			config.usage.vfd_final_scroll_delay = ConfigSelection(choices=[
-				("3000", "3 %s" % _("seconds")),
-				("5000", "5 %s" % _("seconds")),
-				("10000", "10 %s" % _("seconds")),
-				("20000", "20 %s" % _("seconds")),
-				("30000", "30 %s" % _("seconds")),
-				("0", _("No delay"))
-			], default="10000")
+			delayChoices = [(x * 1000, _("%d Seconds") % x) for x in (3, 5, 10, 20, 30)] + [(0, _("No delay"))]
+			config.usage.vfd_final_scroll_delay = ConfigSelection(default=10000, choices=delayChoices)
 			config.usage.vfd_final_scroll_delay.addNotifier(final_scroll_delay, immediate_feedback=False)
 		else:
 			config.usage.vfd_final_scroll_delay = ConfigNothing()
