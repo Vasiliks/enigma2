@@ -2618,7 +2618,7 @@ class InfoBarPiP:
 					if lastPiPServiceTimeout:
 						self.lastPiPServiceTimeoutTimer.startLongTimer(lastPiPServiceTimeout)
 				del self.session.pip
-				if SystemInfo["LCDMiniTV"] and int(config.lcd.modepip.value) >= 1:
+				if SystemInfo["LCDMiniTV"] and config.lcd.modepip.value >= 1:
 					print('[InfoBarGenerics] LCDMiniTV disable PIP')
 					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modeminitv.value))
 				self.session.pipshown = False
@@ -2632,10 +2632,9 @@ class InfoBarPiP:
 			if self.session.pip.playService(newservice):
 				self.session.pipshown = True
 				self.session.pip.servicePath = slist and slist.getCurrentServicePath()
-				if SystemInfo["LCDMiniTVPiP"] and int(config.lcd.modepip.value) >= 1:
+				if SystemInfo["LCDMiniTVPiP"] and config.lcd.modepip.value >= 1:
 					print('[InfoBarGenerics] LCDMiniTV enable PIP')
-					print("[InfoBarGenerics] Write to /proc/stb/lcd/mode")
-					open("/proc/stb/lcd/mode", "w").write(config.lcd.modepip.value)
+					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modepip.value))
 					print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_width")
 					open("/proc/stb/vmpeg/1/dst_width", "w").write("0")
 					print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_height")
@@ -2647,10 +2646,9 @@ class InfoBarPiP:
 				if self.session.pip.playService(newservice):
 					self.session.pipshown = True
 					self.session.pip.servicePath = slist and slist.getCurrentServicePath()
-					if SystemInfo["LCDMiniTVPiP"] and int(config.lcd.modepip.value) >= 1:
+					if SystemInfo["LCDMiniTVPiP"] and config.lcd.modepip.value >= 1:
 						print('[InfoBarGenerics] LCDMiniTV enable PIP')
-						print("[InfoBarGenerics] Write to /proc/stb/lcd/mode")
-						open("/proc/stb/lcd/mode", "w").write(config.lcd.modepip.value)
+						fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modepip.value))
 						print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_width")
 						open("/proc/stb/vmpeg/1/dst_width", "w").write("0")
 						print("[InfoBarGenerics] Write to /proc/stb/vmpeg/1/dst_height")
