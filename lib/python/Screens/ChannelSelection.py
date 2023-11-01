@@ -36,6 +36,7 @@ from Screens.PictureInPicture import PictureInPicture
 from Screens.RdsDisplay import RassInteractive
 from ServiceReference import ServiceReference, service_types_tv_ref, service_types_radio_ref, serviceRefAppendPath, hdmiInServiceRef
 from Tools.BoundFunction import boundFunction
+from Tools.Directories import fileWriteLine
 from Tools.Notifications import RemovePopup
 from Tools.Alternatives import GetWithAlternative, CompareWithAlternatives
 from Tools.Directories import fileExists, resolveFilename, sanitizeFilename, SCOPE_PLUGINS
@@ -553,8 +554,7 @@ class ChannelContextMenu(Screen):
 				del self.session.pip
 				if SystemInfo["LCDMiniTVPiP"] and int(config.lcd.modepip.value) >= 1:
 					print('[ChannelSelection] LCDMiniTV disable PIP')
-					print("[ChannelSelection] Write to /proc/stb/lcd/mode")
-					open("/proc/stb/lcd/mode", "w").write(config.lcd.modeminitv.value)
+					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modeminitv.value))
 			self.session.pip = self.session.instantiateDialog(PictureInPicture)
 			self.session.pip.setAnimationMode(0)
 			self.session.pip.show()
@@ -578,8 +578,7 @@ class ChannelContextMenu(Screen):
 				del self.session.pip
 				if SystemInfo["LCDMiniTV"] and int(config.lcd.modepip.value) >= 1:
 					print('[ChannelSelection] LCDMiniTV disable PIP')
-					print("[ChannelSelection] Write to /proc/stb/lcd/mode")
-					open("/proc/stb/lcd/mode", "w").write(config.lcd.modepip.value)
+					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modeminitv.value))
 				self.session.openWithCallback(self.close, MessageBox, _("Could not open Picture in Picture"), MessageBox.TYPE_ERROR)
 		else:
 			return 0

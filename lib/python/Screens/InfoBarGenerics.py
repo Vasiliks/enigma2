@@ -38,7 +38,7 @@ from Screens.UnhandledKey import UnhandledKey
 from ServiceReference import ServiceReference, isPlayableForCur, hdmiInServiceRef
 
 from Tools.ASCIItranslit import legacyEncode
-from Tools.Directories import fileExists, fileReadLines, fileWriteLines, fileReadLinesISO, getRecordingFilename, moveFiles
+from Tools.Directories import fileExists, fileReadLines, fileWriteLine, fileReadLinesISO, getRecordingFilename, moveFiles
 from Tools.Notifications import AddPopup, AddNotificationWithCallback, current_notifications, lock, notificationAdded, notifications, RemovePopup
 from keyids import KEYFLAGS, KEYIDS, KEYIDNAMES
 from enigma import eAVControl, eTimer, eServiceCenter, eDVBServicePMTHandler, iServiceInformation, iPlayableService, eServiceReference, eEPGCache, eActionMap, getDesktop, eDVBDB
@@ -2620,8 +2620,7 @@ class InfoBarPiP:
 				del self.session.pip
 				if SystemInfo["LCDMiniTV"] and int(config.lcd.modepip.value) >= 1:
 					print('[InfoBarGenerics] LCDMiniTV disable PIP')
-					print("[InfoBarGenerics] Write to /proc/stb/lcd/mode")
-					open("/proc/stb/lcd/mode", "w").write(config.lcd.modeminitv.value)
+					fileWriteLine("/proc/stb/lcd/mode", str(config.lcd.modeminitv.value))
 				self.session.pipshown = False
 			if hasattr(self, "ScreenSaverTimerStart"):
 				self.ScreenSaverTimerStart()
