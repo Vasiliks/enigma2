@@ -13,7 +13,7 @@ from Components.ImportChannels import ImportChannels
 from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName
 from Components.Sources.StreamService import StreamServiceList
 from Components.Task import job_manager
-from Tools.Directories import mediaFilesInUse
+from Tools.Directories import fileWriteLine, mediaFilesInUse
 from Tools.Notifications import AddNotification
 from time import time, localtime
 from GlobalActions import globalActionMap
@@ -38,11 +38,7 @@ QUIT_UPGRADE_PROGRAM = 42
 QUIT_IMAGE_RESTORE = 43
 
 def setLCDModeMinitTV(value):
-	try:
-		print("[Standby] Write to /proc/stb/lcd/mode")
-		open("/proc/stb/lcd/mode", "w").write(value)
-	except:
-		print("[Standby] Write to /proc/stb/lcd/mode failed.")
+	eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 
 
 def isInfoBarInstance():
@@ -93,7 +89,7 @@ class StandbyScreen(Screen):
 
 		if LCDMiniTV:
 			# set LCDminiTV off
-			setLCDModeMinitTV("0")
+			setLCDModeMinitTV(0)
 
 		self.paused_service = self.paused_action = False
 

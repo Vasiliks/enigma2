@@ -5,12 +5,18 @@
 #include <openssl/x509.h>
 #include <lib/dvb_ci/dvbci_session.h>
 
+#include <openssl/dh.h>
+void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key);
+int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g);
+void DH_set_flags(DH *dh, int flags);
+
 class eDVBCICcSessionImpl;
 
 class eDVBCICcSession: public eDVBCISession
 {
 	eDVBCISlot *m_slot;
 	int m_descrambler_fd;
+	uint8_t m_current_ca_demux_id;
 
 	// CI+ credentials
 	enum
@@ -235,6 +241,11 @@ class eDVBCICcSession: public eDVBCISession
 	uint8_t m_key_data[16];
 	uint8_t m_iv[16];
 
+	/* descrambler key */
+	bool m_descrambler_key_iv_valid;
+	uint8_t m_descrambler_key_iv[32];
+	uint8_t m_descrambler_odd_even;
+
 	int receivedAPDU(const unsigned char *tag, const void *data, int len);
 	int doAction();
 
@@ -280,6 +291,7 @@ public:
 	void send(const unsigned char *tag, const void *data, int len);
 	void addProgram(uint16_t program_number, std::vector<uint16_t>& pids);
 	void removeProgram(uint16_t program_number, std::vector<uint16_t>& pids);
+	void setCADemuxID(uint8_t ca_demux_id);
 };
 
 #endif
