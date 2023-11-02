@@ -20,7 +20,6 @@ eDVBCICcSession::eDVBCICcSession(eDVBCISlot *slot, int version):
 	m_slot->setCCManager(this);
 	m_descrambler_fd = -1;
 	m_current_ca_demux_id = 0;
-	m_descrambler_key_iv_valid = false;
 
 	parameter_init(m_dh_p, m_dh_g, m_dh_q, m_s_key, m_key_data, m_iv);
 
@@ -117,6 +116,9 @@ void eDVBCICcSession::send(const unsigned char *tag, const void *data, int len)
 
 void eDVBCICcSession::addProgram(uint16_t program_number, std::vector<uint16_t>& pids)
 {
+	// first open ca device and set descrambler key if it's not set yet
+	try_set_descrambler_key();
+
 	eDebugNoNewLineStart("[CI CC] SESSION(%d)/ADD PROGRAM %04x: ", session_nb, program_number);
 	for (std::vector<uint16_t>::iterator it = pids.begin(); it != pids.end(); ++it)
 		eDebugNoNewLine("%02x ", *it);
@@ -748,16 +750,30 @@ void eDVBCICcSession::check_new_key()
 	if (slot != 0 && slot != 1)
 		slot = 1;
 
-	if (m_descrambler_fd > -1)
-	{
-		descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), slot, dec);
-	}
 	memcpy(m_descrambler_key_iv, dec, 32);
 	m_descrambler_odd_even = slot;
-	m_descrambler_key_iv_valid = true;
+
+	try_set_descrambler_key();
 
 	m_ci_elements.invalidate(KP);
 	m_ci_elements.invalidate(KEY_REGISTER);
+}
+
+void eDVBCICcSession::try_set_descrambler_key()
+{
+	eDebug("[CI RCC] try_set_descrambler_key");
+	if ((m_descrambler_fd == -1 && m_slot->getCADemuxID() > -1)
+	 || (m_descrambler_fd != -1 && m_current_ca_demux_id != m_slot->getCADemuxID()))
+	{
+		descrambler_deinit(m_descrambler_fd);
+		m_descrambler_fd = descrambler_init(m_slot->getCADemuxID());
+		if (m_descrambler_fd != -1)
+		{
+			eDebug("[CI RCC] try_set_descrambler_key setting key");
+			descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), m_descrambler_odd_even, m_descrambler_key_iv);
+			m_current_ca_demux_id = m_slot->getCADemuxID();
+		}
+	}
 }
 
 void eDVBCICcSession::generate_key_seed()
@@ -957,22 +973,4 @@ bool eDVBCICcSession::ci_element_set_hostid_from_certificate(unsigned int id, X5
 	}
 
 	return true;
-}
-
-void eDVBCICcSession::setCADemuxID(uint8_t ca_demux_id)
-{
-	if (m_descrambler_fd >= 0 && m_current_ca_demux_id != ca_demux_id)
-	{
-		descrambler_deinit(m_descrambler_fd);
-		m_descrambler_fd = -1;
-	}
-	if (m_descrambler_fd == -1)
-	{
-		m_descrambler_fd = descrambler_init(ca_demux_id);
-		if (m_descrambler_key_iv_valid)
-		{
-			descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), m_descrambler_odd_even, m_descrambler_key_iv);
-		}
-	}
-	m_current_ca_demux_id = ca_demux_id;
 }

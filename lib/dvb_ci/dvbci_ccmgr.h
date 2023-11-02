@@ -242,7 +242,6 @@ class eDVBCICcSession: public eDVBCISession
 	uint8_t m_iv[16];
 
 	/* descrambler key */
-	bool m_descrambler_key_iv_valid;
 	uint8_t m_descrambler_key_iv[32];
 	uint8_t m_descrambler_odd_even;
 
@@ -284,6 +283,8 @@ class eDVBCICcSession: public eDVBCISession
 	bool ci_element_set_certificate(unsigned int id, X509 *cert);
 	bool ci_element_set_hostid_from_certificate(unsigned int id, X509 *cert);
 
+	void try_set_descrambler_key();
+
 public:
 	eDVBCICcSession(eDVBCISlot *tslot, int version);
 	~eDVBCICcSession();
@@ -291,7 +292,6 @@ public:
 	void send(const unsigned char *tag, const void *data, int len);
 	void addProgram(uint16_t program_number, std::vector<uint16_t>& pids);
 	void removeProgram(uint16_t program_number, std::vector<uint16_t>& pids);
-	void setCADemuxID(uint8_t ca_demux_id);
 };
 
 #endif

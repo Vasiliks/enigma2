@@ -67,6 +67,7 @@ class eDVBCISlot: public iObject, public sigc::trackable
 	bool user_mapped;
 	void data(int);
 	bool plugged;
+	int16_t m_ca_demux_id;
 	eMainloop *m_context;
 
 	eDVBCIApplicationManagerSession *getAppManager() { return application_manager; }
@@ -108,6 +109,7 @@ public:
 	int getSlotID();
 	int getNumOfServices();
 	int getVersion();
+	int16_t getCADemuxID() { return m_ca_demux_id; };
 };
 
 struct CIPmtHandler
