@@ -319,7 +319,7 @@ def InitLcd():
 			(100, _("fast"))
 		], default=300)
 		delayChoices = [(x, _("%d Seconds") % x) for x in (10, 20, 30, 40, 50)] + [(x * 60, ngettext("%d Minute", "%d Minutes", x) % x) for x in (1, 2, 3, 5, 10, 15)] + [(0, _("Off"))]
-		config.lcd.scrollDelay = ConfigSelection(default=10, choices=delayChoices))
+		config.lcd.scrollDelay = ConfigSelection(default=10, choices=delayChoices)
 
 		def setLCDbright(configElement):
 			ilcd.setBright(configElement.value)
