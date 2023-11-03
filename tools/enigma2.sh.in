@@ -9,6 +9,17 @@ if [ -d /home/root ]; then
 	export HOME=/home/root
 fi
 
+# workaround for corrupt ssl files
+if [ "$(grep -i config.misc.firstrun=true /etc/enigma2/settings)" != "" ]; then
+	rm -rf /etc/enigma2/cert.pem &
+	rm -rf /etc/enigma2/key.pem &
+fi
+
+#ciplushelper start delay
+if [ -e /usr/bin/ciplushelper ]; then
+    sleep 2
+fi
+
 # any debuglevel passed?
 if [ -z $ENIGMA_DEBUG_LVL ]; then
 	DEBUG_LVL=3
