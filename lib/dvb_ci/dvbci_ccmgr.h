@@ -242,6 +242,7 @@ class eDVBCICcSession: public eDVBCISession
 	uint8_t m_iv[16];
 
 	/* descrambler key */
+	bool m_descrambler_new_key;
 	uint8_t m_descrambler_key_iv[32];
 	uint8_t m_descrambler_odd_even;
 

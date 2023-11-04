@@ -20,6 +20,7 @@ eDVBCICcSession::eDVBCICcSession(eDVBCISlot *slot, int version):
 	m_slot->setCCManager(this);
 	m_descrambler_fd = -1;
 	m_current_ca_demux_id = 0;
+	m_descrambler_new_key = false;
 
 	parameter_init(m_dh_p, m_dh_g, m_dh_q, m_s_key, m_key_data, m_iv);
 
@@ -752,6 +753,7 @@ void eDVBCICcSession::check_new_key()
 
 	memcpy(m_descrambler_key_iv, dec, 32);
 	m_descrambler_odd_even = slot;
+	m_descrambler_new_key = true;
 
 	try_set_descrambler_key();
 
@@ -762,16 +764,28 @@ void eDVBCICcSession::check_new_key()
 void eDVBCICcSession::try_set_descrambler_key()
 {
 	eDebug("[CI RCC] try_set_descrambler_key");
-	if ((m_descrambler_fd == -1 && m_slot->getCADemuxID() > -1)
-	 || (m_descrambler_fd != -1 && m_current_ca_demux_id != m_slot->getCADemuxID()))
+	bool set_key = (m_current_ca_demux_id != m_slot->getCADemuxID());
+
+	if (m_descrambler_fd != -1 && m_current_ca_demux_id != m_slot->getCADemuxID())
 	{
 		descrambler_deinit(m_descrambler_fd);
 		m_descrambler_fd = descrambler_init(m_slot->getCADemuxID());
-		if (m_descrambler_fd != -1)
+		m_current_ca_demux_id = m_slot->getCADemuxID();
+	}
+
+	if (m_descrambler_fd == -1 && m_slot->getCADemuxID() > -1)
+	{
+		m_descrambler_fd = descrambler_init(m_slot->getCADemuxID());
+		m_current_ca_demux_id = m_slot->getCADemuxID();
+	}
+
+	if  (m_descrambler_fd != -1 && (set_key || m_descrambler_new_key))
+	{
+		eDebug("[CI RCC] try_set_descrambler_key setting key new ca device: %d, new_key: %d", set_key, m_descrambler_new_key);
+		descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), m_descrambler_odd_even, m_descrambler_key_iv);
+		if (m_descrambler_new_key)
 		{
-			eDebug("[CI RCC] try_set_descrambler_key setting key");
-			descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), m_descrambler_odd_even, m_descrambler_key_iv);
-			m_current_ca_demux_id = m_slot->getCADemuxID();
+			m_descrambler_new_key = false;
 		}
 	}
 }
