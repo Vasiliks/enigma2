@@ -118,7 +118,7 @@ void eDVBCICcSession::send(const unsigned char *tag, const void *data, int len)
 void eDVBCICcSession::addProgram(uint16_t program_number, std::vector<uint16_t>& pids)
 {
 	// first open ca device and set descrambler key if it's not set yet
-	try_set_descrambler_key();
+	set_descrambler_key();
 
 	eDebugNoNewLineStart("[CI CC] SESSION(%d)/ADD PROGRAM %04x: ", session_nb, program_number);
 	for (std::vector<uint16_t>::iterator it = pids.begin(); it != pids.end(); ++it)
@@ -755,15 +755,18 @@ void eDVBCICcSession::check_new_key()
 	m_descrambler_odd_even = slot;
 	m_descrambler_new_key = true;
 
-	try_set_descrambler_key();
+	set_descrambler_key();
 
 	m_ci_elements.invalidate(KP);
 	m_ci_elements.invalidate(KEY_REGISTER);
 }
 
-void eDVBCICcSession::try_set_descrambler_key()
+/* Opens /dev/caX device if it's not open yet.
+ * If ca demux has changed close current /dev/caX device and open new ca device.
+ * Sets new key or old one if /dev/caX device has changed */
+void eDVBCICcSession::set_descrambler_key()
 {
-	eDebug("[CI RCC] try_set_descrambler_key");
+	eDebug("[CI RCC] set_descrambler_key");
 	bool set_key = (m_current_ca_demux_id != m_slot->getCADemuxID());
 
 	if (m_descrambler_fd != -1 && m_current_ca_demux_id != m_slot->getCADemuxID())
@@ -781,7 +784,7 @@ void eDVBCICcSession::try_set_descrambler_key()
 
 	if  (m_descrambler_fd != -1 && (set_key || m_descrambler_new_key))
 	{
-		eDebug("[CI RCC] try_set_descrambler_key setting key new ca device: %d, new_key: %d", set_key, m_descrambler_new_key);
+		eDebug("[CI RCC] setting key: new ca device: %d, new key: %d", set_key, m_descrambler_new_key);
 		descrambler_set_key(m_descrambler_fd, m_slot->getSlotID(), m_descrambler_odd_even, m_descrambler_key_iv);
 		if (m_descrambler_new_key)
 		{

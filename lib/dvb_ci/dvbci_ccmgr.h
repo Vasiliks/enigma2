@@ -284,7 +284,7 @@ class eDVBCICcSession: public eDVBCISession
 	bool ci_element_set_certificate(unsigned int id, X509 *cert);
 	bool ci_element_set_hostid_from_certificate(unsigned int id, X509 *cert);
 
-	void try_set_descrambler_key();
+	void set_descrambler_key();
 
 public:
 	eDVBCICcSession(eDVBCISlot *tslot, int version);
