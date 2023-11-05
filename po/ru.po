@@ -2120,6 +2120,12 @@ msgstr "Активация установок MAC-адреса"
 msgid "Activate Picture in Picture"
 msgstr "Включить картинку в картинке"
 
+msgid "Activate Picture in Picture - Disable LcdLiveTV"
+msgstr "Активировать «Картинка в картинке» — отключить LcdLiveTV"
+
+msgid "Activate Picture in Picture - Enable LcdLiveTV"
+msgstr "Активировать «Картинка в картинке» — включить LcdLiveTV"
+
 msgid "Activate network settings"
 msgstr "Активация сетевых настроек"
 
@@ -7777,6 +7783,9 @@ msgstr "Настройка быстрой смены канала"
 
 msgid "Fast Channel Change setup"
 msgstr "Настройка быстрой смены канала"
+
+msgid "FCC was disabled for Quad PiP"
+msgstr "FCC отключен для Quad PiP"
 
 #, python-format
 msgid "Feels like %s"

@@ -2583,7 +2583,12 @@ class InfoBarPiP:
 		if self.session.pipshown:
 			return _("Disable Picture in Picture")
 		else:
-			return _("Activate Picture in Picture")
+			if SystemInfo["LcdLiveTV"] and not config.lcd.minitvdisplay.value:
+				return _("Activate Picture in Picture - Disable LcdLiveTV")
+			elif SystemInfo["LcdLiveTV"]:
+				return _("Activate Picture in Picture - Enable LcdLiveTV")
+			else:
+				return _("Activate Picture in Picture")
 
 	def getSwapName(self):
 		return _("Swap services")

@@ -632,6 +632,7 @@ class QuadPipScreen(Screen, FocusShowHide, HelpableScreen):
 			<widget name="ch4" position="1200,780" zPosition="1" size="480,60" font="Regular; %d" horizontalAlignment="center" verticalAlignment="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
 			<widget name="text1" position="%d,%d" zPosition="2" size="%d,%d" font="Regular; %d" horizontalAlignment="left" verticalAlignment="center" borderWidth="2"/>
 			<widget name="text2" position="%d,%d" zPosition="2" size="%d,%d" font="Regular; %d" horizontalAlignment="left" verticalAlignment="center" borderWidth="2"/>
+			<widget name="text3" conditional="text3" position="1000,550" zPosition="2" size="900,40" font="Regular; 30" foregroundColor="yellow" horizontalAlignment="left" verticalAlignment="center" borderWidth="2"/>
 			<widget name="focus" position="0,0" zPosition="-1" size="960,540" backgroundColor="#ffffffff" borderWidth="5" borderColor="#e61616" alphaTest="on" />
 		</screen>
 		"""
@@ -643,7 +644,10 @@ class QuadPipScreen(Screen, FocusShowHide, HelpableScreen):
 		FocusShowHide.__init__(self)
 		HelpableScreen.__init__(self)
 		self.setTitle(_("Quad PiP Screen"))
-
+		if config.plugins.fccsetup.activate.value:
+			config.plugins.fccsetup.activate.value = False
+			config.plugins.fccsetup.activate.save()
+			self["text3"] = Label(_("FCC was disabled for Quad PiP"))
 		self["actions"] = HelpableActionMap(self, "QuadPipSetupActions",
 			{
 				"cancel": (self.keyExit, _("Exit quad PiP")),
