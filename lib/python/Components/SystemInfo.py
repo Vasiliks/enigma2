@@ -6,6 +6,8 @@ from re import findall
 from subprocess import PIPE, Popen
 
 from enigma import Misc_Options, eAVControl, eDVBCIInterfaces, eDVBResourceManager, eGetEnigmaDebugLvl, eDBoxLCD
+
+from process import ProcessList
 from Tools.Directories import SCOPE_LIBDIR, SCOPE_SKIN, fileCheck, fileContains, fileReadLine, fileReadLines, fileExists, pathExists, resolveFilename
 from Tools.StbHardware import getBoxProc
 
@@ -177,7 +179,6 @@ def getDemodVersion():
 	return version and version.strip()
 
 
-
 def getRCFile(ext):
 	filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", "%s.%s" % (BoxInfo.getItem("rcname"), ext)))
 	if not isfile(filename):
@@ -321,6 +322,12 @@ commitLogs = [
 ]
 BoxInfo.setItem("InformationCommitLogs", commitLogs)
 
+API_STREAMRELAY = ["oscam-emu",]  # add more cams
+
+for cam in API_STREAMRELAY:
+	streamrelay = str(ProcessList().named(cam)).strip("[]")
+	BoxInfo.setItem("StreamRelay", streamrelay)  # items availables for streamrelay
+
 SystemInfo["CommonInterface"] = model in ("h9combo", "h9combose", "pulse4kmini") and 1 or eDVBCIInterfaces.getInstance().getNumOfSlots() or model == "vuzero" and 0
 SystemInfo["CommonInterfaceCIDelay"] = fileCheck("/proc/stb/tsmux/rmx_delay")
 for cislot in range(BoxInfo.getItem("CommonInterface", 0)):
@@ -418,9 +425,9 @@ SystemInfo["HasFBCtuner"] = ["Vuplus DVB-C NIM(BCM3158)", "Vuplus DVB-C NIM(BCM3
 SystemInfo["Autoresolution_proc_videomode"] = model in ("gbue4k", "gbquad4k") and "/proc/stb/video/videomode_50hz" or "/proc/stb/video/videomode"
 SystemInfo["HaveCISSL"] = fileCheck("/etc/ssl/certs/customer.pem") and fileExists("/etc/ssl/certs/device.pem")
 SystemInfo["OScamInstalled"] = isfile("/usr/bin/oscam") or isfile("/usr/bin/oscam-emu") or isfile("/usr/bin/oscam-smod")
-SystemInfo["OScamIsActive"] = SystemInfo["OScamInstalled"] and fileCheck("/tmp/.oscam/oscam.version")
+SystemInfo["OScamIsActive"] = str(ProcessList().named("oscam")).strip("[]") or str(ProcessList().named("oscam-emu")).strip("[]")
 SystemInfo["NCamInstalled"] = isfile("/usr/bin/ncam")
-SystemInfo["NCamIsActive"] = SystemInfo["NCamInstalled"] and fileCheck("/tmp/.ncam/ncam.version")
+SystemInfo["NCamIsActive"] = str(ProcessList().named("ncam")).strip("[]")
 SystemInfo["OLDE2API"] = model == "dm800"
 SystemInfo["7segment"] = displaytype == "7segment" or "7seg" in displaytype
 SystemInfo["textlcd"] = displaytype == "textlcd" or "text" in displaytype

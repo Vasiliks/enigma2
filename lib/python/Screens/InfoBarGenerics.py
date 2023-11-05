@@ -2404,7 +2404,10 @@ class InfoBarExtensions:
 		return _("OScam/Ncam Info")
 
 	def getOScamInfo(self):
-		if SystemInfo["OScamInstalled"] or SystemInfo["NCamInstalled"]:
+		import process
+		p = process.ProcessList()
+		oscam = str(p.named("oscam")).strip("[]") or str(p.named("oscam-emu")).strip("[]") or str(p.named("ncam")).strip("[]")
+		if oscam:
 			return [((boundFunction(self.getOSname), boundFunction(self.openOScamInfo), lambda: True), None)] or []
 		else:
 			return []
