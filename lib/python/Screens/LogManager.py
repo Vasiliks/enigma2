@@ -12,7 +12,7 @@ from Components.FileList import MultiFileSelectList
 from Screens.MessageBox import MessageBox
 from os import remove, walk, stat, rmdir, listdir
 from os.path import join, getsize, isdir, exists
-from time import time, ctime
+from time import time, ctime, sleep
 from enigma import eTimer, eBackgroundFileEraser, eLabel, getDesktop, gFont, fontRenderClass
 from Tools.TextBoundary import getTextBoundarySize
 
@@ -282,12 +282,17 @@ class LogManager(Screen):
 	def doDeleteAllLogs(self, answer):
 		if answer:
 			from enigma import eConsoleAppContainer
-			eConsoleAppContainer().execute("rm -f " + config.crash.debugPath.value + "*")
-			self.close()
+			eConsoleAppContainer().execute("rm -f " + config.crash.debug_path.value + "*")
+			sleep(0.3)
+			self["LogsSize"].update(config.crash.debug_path.value)
+			self["key_red"].setText("")
+			self["key_green"].setText("")
+			self["key_yellow"].setText("")
+			self["key_blue"].setText("")
 
 	def doDelete1(self, answer):
 		self.selectedFiles = self["list"].getSelectedList()
-		self.selectedFiles = ",".join(self.selectedFiles).replace(",", "\n").replace(config.crash.debugPath.value, "")
+		self.selectedFiles = ",".join(self.selectedFiles).replace(",", "\n").replace(config.crash.debug_path.value, "")
 		self.sel = self["list"].getCurrent()[0]
 		if answer is True:
 			message = _("You want to delete all the selected logs?\n\n") + self.selectedFiles
