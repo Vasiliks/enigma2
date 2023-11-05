@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
-from Screens.Screen import Screen
-from Screens.ChannelSelection import *
-from Screens.ChoiceBox import ChoiceBox
-from Screens.Standby import TryQuitMainloop
-from Screens.MessageBox import MessageBox
+from os import remove, unlink
+from os.path import exists
+from xml.etree.ElementTree import parse
+
+from enigma import eDVBCI_UI, eDVBCIInterfaces, eEnv, eServiceCenter, eServiceReference
+
+
 from Components.ActionMap import ActionMap
 from Components.Sources.List import List
 from Components.Sources.StaticText import StaticText
@@ -13,22 +14,23 @@ from Components.Label import Label
 from Components.SelectionList import SelectionList
 from Components.MenuList import MenuList
 from Components.SystemInfo import SystemInfo
-from ServiceReference import ServiceReference
 from Plugins.Plugin import PluginDescriptor
-from xml.etree.ElementTree import parse
-from enigma import eDVBCI_UI, eDVBCIInterfaces, eEnv, eServiceCenter, eServiceReference
+from Screens.ChannelSelection import *
+from Screens.ChoiceBox import ChoiceBox
+from Screens.MessageBox import MessageBox
+from Screens.Screen import Screen
+from Screens.Standby import TryQuitMainloop
+from ServiceReference import ServiceReference
 from Tools.BoundFunction import boundFunction
 from Tools.CIHelper import cihelper
 from Tools.XMLTools import stringToXML
-
-import os
 
 
 class CIselectMainMenu(Screen):
 	skin = """
 		<screen name="CIselectMainMenu" position="center,center" size="500,250" title="CI assignment" >
-			<ePixmap pixmap="buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
 			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" transparent="1" />
 			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 			<widget name="CiList" position="5,50" size="490,200" scrollbarMode="showOnDemand" />
@@ -49,7 +51,7 @@ class CIselectMainMenu(Screen):
 
 		NUM_CI = SystemInfo["CommonInterface"]
 
-		print("[CommonInterfaceAssignment] CI_Wizzard FOUND %d CI Slots " % NUM_CI)
+		print(f"[CI_Wizzard] FOUND {NUM_CI} CI Slots")
 
 		self.dlg = None
 		self.state = {}
@@ -58,19 +60,20 @@ class CIselectMainMenu(Screen):
 			for slot in range(NUM_CI):
 				state = eDVBCI_UI.getInstance().getState(slot)
 				if state != -1:
-					appname = _("Slot %d") % (slot + 1) + " - " + _("unknown error")
+					appname = _("Slot %d") % (slot + 1) + " - "
 					if state == 0:
-						appname = _("Slot %d") % (slot + 1) + " - " + _("no module found")
+						appname += _("no module found")
 					elif state == 1:
-						appname = _("Slot %d") % (slot + 1) + " - " + _("init modules")
+						appname += _("init modules")
 					elif state == 2:
-						appname = _("Slot %d") % (slot + 1) + " - " + eDVBCI_UI.getInstance().getAppName(slot)
+						appname += eDVBCI_UI.getInstance().getAppName(slot)
 					elif state == 3:
-						appname = _("Slot %d") % (slot + 1) + " - " + _("module disabled")
+						appname += _("module disabled")
+					else:
+						appname += _("unknown error")
 					self.list.append((appname, ConfigNothing(), 0, slot))
 		else:
 			self.list.append((_("no CI slots found"), ConfigNothing(), 1, -1))
-
 		menuList = ConfigList(self.list)
 		menuList.list = self.list
 		menuList.l.setList(self.list)
@@ -82,9 +85,9 @@ class CIselectMainMenu(Screen):
 			action = cur[2]
 			slot = cur[3]
 			if action == 1:
-				print("[CommonInterfaceAssignment] CI_Wizzard there is no CI Slot in your receiver")
+				print("[CI_Wizzard] there is no CI Slot in your receiver")
 			else:
-				print("[CommonInterfaceAssignment] CI_Wizzard selected CI Slot : %d" % slot)
+				print(f"[CI_Wizzard] selected CI Slot : {slot}")
 				if config.usage.setup_level.index > 1:  # advanced
 					self.session.open(CIconfigMenu, slot)
 				else:
@@ -94,17 +97,17 @@ class CIselectMainMenu(Screen):
 class CIconfigMenu(Screen):
 	skin = """
 		<screen name="CIconfigMenu" position="center,center" size="560,440" title="CI assignment" >
-			<ePixmap pixmap="buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/yellow.png" position="280,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/blue.png" position="420,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="280,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/blue.png" position="420,0" size="140,40" alphaTest="on" />
 			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" transparent="1" />
 			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 			<widget source="key_yellow" render="Label" position="280,0" zPosition="1" size="140,40" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#a08500" transparent="1" />
 			<widget source="key_blue" render="Label" position="420,0" zPosition="1" size="140,40" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#18188b" transparent="1" />
 			<widget source="CAidList_desc" render="Label" position="5,50" size="550,22" font="Regular;20"  backgroundColor="#25062748" transparent="1" />
 			<widget source="CAidList" render="Label" position="5,80" size="550,45" font="Regular;20"  backgroundColor="#25062748" transparent="1" />
-			<ePixmap pixmap="div-h.png" position="0,125" zPosition="1" size="560,2" />
+			<ePixmap pixmap="skin_default/div-h.png" position="0,125" zPosition="1" size="560,2" />
 			<widget source="ServiceList_desc" render="Label" position="5,130" size="550,22" font="Regular;20" backgroundColor="#25062748" transparent="1"  />
 			<widget name="ServiceList" position="5,160" size="550,250" zPosition="1" scrollbarMode="showOnDemand" />
 			<widget source="ServiceList_info" render="Label" position="5,160" size="550,250" zPosition="2" font="Regular;20" backgroundColor="#25062748" transparent="1"  />
@@ -115,7 +118,7 @@ class CIconfigMenu(Screen):
 		Screen.__init__(self, session)
 		self.setTitle(_("CI assignment"))
 		self.ci_slot = ci_slot
-		self.filename = eEnv.resolve("${sysconfdir}/enigma2/ci") + str(self.ci_slot) + ".xml"
+		self.filename = eEnv.resolve("${sysconfdir}/enigma2/ci") + f"{self.ci_slot}.xml"
 
 		self["key_red"] = StaticText(_("Delete"))
 		self["key_green"] = StaticText(_("Add service"))
@@ -136,7 +139,7 @@ class CIconfigMenu(Screen):
 			"cancel": self.cancel
 		}, -1)
 
-		print("[CommonInterfaceAssignment] CI_Wizzard_Config Configuring CI Slots : %d  " % self.ci_slot)
+		print(f"[CI_Wizzard_Config] Configuring CI Slots : {self.ci_slot}")
 
 		i = 0
 		self.caidlist = []
@@ -144,7 +147,7 @@ class CIconfigMenu(Screen):
 			i += 1
 			self.caidlist.append((str(hex(int(caid))), str(caid), i))
 
-		print("[CommonInterfaceAssignment] CI_Wizzard_Config_CI%d read following CAIds from CI: %s" % (self.ci_slot, self.caidlist))
+		print(f"[CI_Wizzard_Config_CI{self.ci_slot}] read following CAIds from CI: {self.caidlist}")
 
 		self.selectedcaid = []
 		self.servicelist = []
@@ -174,15 +177,15 @@ class CIconfigMenu(Screen):
 		self.session.openWithCallback(self.finishedCAidSelection, CAidSelect, self.caidlist, self.selectedcaid)
 
 	def menuPressed(self):
-		if os.path.exists(self.filename):
-			self.session.openWithCallback(self.deleteXMLfile, MessageBox, _("Delete file") + " " + self.filename + "?", MessageBox.TYPE_YESNO)
+		if exists(self.filename):
+			self.session.openWithCallback(self.deleteXMLfile, MessageBox, _("Delete file") + f" {self.filename}?", MessageBox.TYPE_YESNO)
 
 	def deleteXMLfile(self, answer):
 		if answer:
 			try:
-				os.remove(self.filename)
-			except:
-				print("[CommonInterfaceAssignment] CI_Config_CI%d error remove xml..." % self.ci_slot)
+				remove(self.filename)
+			except OSError:
+				print(f"[CI_Config_CI{self.ci_slot}] error remove xml...")
 			else:
 				self.session.openWithCallback(self.restartGui, MessageBox, _("Restart GUI now?"), MessageBox.TYPE_YESNO)
 
@@ -276,34 +279,31 @@ class CIconfigMenu(Screen):
 
 	def saveXML(self):
 		try:
-			fp = open(self.filename, 'w')
-			fp.write("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n")
-			fp.write("<ci>\n")
-			fp.write("\t<slot>\n")
-			fp.write("\t\t<id>%s</id>\n" % self.ci_slot)
-			for item in self.selectedcaid:
-				if len(self.selectedcaid):
-					fp.write("\t\t<caid id=\"%s\" />\n" % item[0])
-			for item in self.servicelist:
-				if len(self.servicelist):
+			with open(self.filename, "w") as fd:
+				fd.write("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n")
+				fd.write("<ci>\n")
+				fd.write("\t<slot>\n")
+				fd.write(f"\t\t<id>{self.ci_slot}</id>\n")
+				for item in self.selectedcaid:
+					fd.write("\t\t<caid id=\"%s\" />\n" % item[0])
+				for item in self.servicelist:
 					name = item[0].replace('<', '&lt;')
 					name = name.replace('&', '&amp;')
 					name = name.replace('>', '&gt;')
 					name = name.replace('"', '&quot;')
 					name = name.replace("'", '&apos;')
 					if item[2] == 1:
-						fp.write("\t\t<provider name=\"%s\" dvbnamespace=\"%s\" />\n" % (stringToXML(name), item[3]))
+						fd.write("\t\t<provider name=\"%s\" dvbnamespace=\"%s\" />\n" % (stringToXML(name), item[3]))
 					else:
-						fp.write("\t\t<service name=\"%s\" ref=\"%s\" />\n" % (stringToXML(name), item[3]))
-			fp.write("\t</slot>\n")
-			fp.write("</ci>\n")
-			fp.close()
+						fd.write("\t\t<service name=\"%s\" ref=\"%s\" />\n" % (stringToXML(name), item[3]))
+				fd.write("\t</slot>\n")
+				fd.write("</ci>\n")
 		except OSError:
-			print(f"[CommonInterfaceAssignment] CI_Config_CI%d xml not written" % self.ci_slot)
-			os.unlink(self.filename)
+			print(f"[CI_Config_CI{self.ci_slot}] xml not written")
+			unlink(self.filename)
 
 	def loadXML(self):
-		if not os.path.exists(self.filename):
+		if not exists(self.filename):
 			self.setServiceListInfo()
 			return
 
@@ -320,13 +320,13 @@ class CIconfigMenu(Screen):
 				read_slot = getValue(slot.findall("id"), False)
 				i = 0
 				for caid in slot.findall("caid"):
-					read_caid = caid.get("id")
+					read_caid = caid.get("id")  # .encode("UTF-8")
 					self.selectedcaid.append((str(read_caid), str(read_caid), i))
 					self.usingcaid.append(int(read_caid, 16))
 					i += 1
 
 				for service in slot.findall("service"):
-					read_service_name = service.get("name")
+					#read_service_name = service.get("name")
 					read_service_ref = service.get("ref")
 					self.read_services.append(read_service_ref)
 
@@ -334,14 +334,13 @@ class CIconfigMenu(Screen):
 					read_provider_name = provider.get("name")
 					read_provider_dvbname = provider.get("dvbnamespace")
 					self.read_providers.append((read_provider_name, read_provider_dvbname))
-
 				self.ci_config.append((int(read_slot), (self.read_services, self.read_providers, self.usingcaid)))
 		except:
-			print("[CommonInterfaceAssignment] CI_Config_CI%d error parsing xml..." % self.ci_slot)
+			print("[CI_Config_CI%d] error parsing xml..." % self.ci_slot)
 			try:
-				os.remove(self.filename)
-			except:
-				print("[CommonInterfaceAssignment] CI_Activate_Config_CI%d error remove damaged xml..." % self.ci_slot)
+				remove(self.filename)
+			except OSError:
+				print("[CI_Activate_Config_CI%d] error remove damaged xml..." % self.ci_slot)
 
 		for item in self.read_services:
 			if len(item):
@@ -359,9 +358,9 @@ class CIconfigMenu(Screen):
 class easyCIconfigMenu(CIconfigMenu):
 	skin = """
 		<screen name="easyCIconfigMenu" position="center,center" size="560,440" title="CI assignment" >
-			<ePixmap pixmap="buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/yellow.png" position="280,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="280,0" size="140,40" alphaTest="on" />
 			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;19" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" transparent="1" />
 			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;19" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 			<widget source="key_yellow" render="Label" position="280,0" zPosition="1" size="140,40" font="Regular;19" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#a08500" transparent="1" />
@@ -385,12 +384,12 @@ class easyCIconfigMenu(CIconfigMenu):
 class CAidSelect(Screen):
 	skin = """
 		<screen name="CAidSelect" position="center,center" size="450,440" title="select CAId's" >
-			<ePixmap pixmap="buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
 			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" transparent="1" />
 			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 			<widget name="list" position="5,50" size="440,330" scrollbarMode="showOnDemand" />
-			<ePixmap pixmap="div-h.png" position="0,390" zPosition="1" size="450,2" />
+			<ePixmap pixmap="skin_default/div-h.png" position="0,390" zPosition="1" size="450,2" />
 			<widget source="introduction" render="Label" position="0,400" size="450,40" zPosition="10" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#25062748" transparent="1" />
 		</screen>"""
 
@@ -431,13 +430,13 @@ class CAidSelect(Screen):
 class myProviderSelection(ChannelSelectionBase):
 	skin = """
 		<screen name="myProviderSelection" position="center,center" size="560,440" title="Select provider to add...">
-			<ePixmap pixmap="buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
 			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" transparent="1" />
 			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 			<widget source="key_yellow" render="Label" position="280,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#a08500" transparent="1" />
 			<widget source="key_blue" render="Label" position="420,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#18188b" transparent="1" />
 			<widget name="list" position="5,50" size="550,330" scrollbarMode="showOnDemand" />
-			<ePixmap pixmap="div-h.png" position="0,390" zPosition="1" size="560,2" />
+			<ePixmap pixmap="skin_default/div-h.png" position="0,390" zPosition="1" size="560,2" />
 			<widget source="introduction" render="Label" position="0,400" size="560,40" zPosition="10" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#25062748" transparent="1" />
 		</screen>"""
 
@@ -565,16 +564,16 @@ class myProviderSelection(ChannelSelectionBase):
 class myChannelSelection(ChannelSelectionBase):
 	skin = """
 		<screen name="myChannelSelection" position="center,center" size="560,440" title="Select service to add...">
-			<ePixmap pixmap="buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/yellow.png" position="280,0" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="buttons/blue.png" position="420,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="140,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="280,0" size="140,40" alphaTest="on" />
+			<ePixmap pixmap="skin_default/buttons/blue.png" position="420,0" size="140,40" alphaTest="on" />
 			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" transparent="1" />
 			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 			<widget source="key_yellow" render="Label" position="280,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#a08500" transparent="1" />
 			<widget source="key_blue" render="Label" position="420,0" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#18188b" transparent="1" />
 			<widget name="list" position="5,50" size="550,330" scrollbarMode="showOnDemand" />
-			<ePixmap pixmap="div-h.png" position="0,390" zPosition="1" size="560,2" />
+			<ePixmap pixmap="skin_default/div-h.png" position="0,390" zPosition="1" size="560,2" />
 			<widget source="introduction" render="Label" position="0,400" size="560,40" zPosition="10" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#25062748" transparent="1" />
 		</screen>"""
 
@@ -598,7 +597,7 @@ class myChannelSelection(ChannelSelectionBase):
 		self["key_red"] = StaticText(_("All"))
 		self["key_green"] = StaticText(_("Close"))
 		self["key_yellow"] = StaticText()
-		self["key_blue"] = StaticText(_("Favourites"))
+		self["key_blue"] = StaticText(_("Favorites"))
 		self["introduction"] = StaticText(_("Press OK to select a service."))
 
 	def __onExecCallback(self):
@@ -701,7 +700,7 @@ def sessionstart(reason, session):
 def autostart(reason, **kwargs):
 	global global_session
 	if reason == 0:
-		print("[CommonInterfaceAssignment] CI_Assignment activating ci configs:")
+		print("[CI_Assignment] activating ci configs:")
 		activate_all(global_session)
 	elif reason == 1:
 		global_session = None
@@ -713,7 +712,7 @@ def main(session, **kwargs):
 
 def menu(menuid, **kwargs):
 	if menuid == "cam" and isModule():
-		return [(_("Common Interface assignment"), main, "ci_assign", 11)]
+		return [(_("Common Interface Assignment"), main, "ci_assign", 11)]
 	return []
 
 
