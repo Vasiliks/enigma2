@@ -838,10 +838,6 @@ msgid "%d Hours"
 msgstr "%d часов"
 
 #, python-format
-msgid "%d KB"
-msgstr "%d Кб"
-
-#, python-format
 msgid "%d MB"
 msgstr "%d Мб"
 
@@ -1374,8 +1370,9 @@ msgstr "( Все ридеры)"
 msgid "(Access to the '%s' commit log requires an Internet connection.)"
 msgstr "(Для доступа к журналу записей %s требуется подключение к Интернету.)"
 
-msgid "(Attention! There will be a restart after %d crashes.)"
-msgstr "(Внимание! После сбоя %d произойдет перезагрузка.)"
+#, python-format
+msgid "(Attention: There will be a restart after %d crashes.)"
+msgstr "(Внимание: после сбоя %d произойдёт перезагрузка.)"
 
 msgid "(Radio)"
 msgstr "(Радио)"
@@ -1555,8 +1552,8 @@ msgstr "16:9 режим ящика"
 msgid "16:9 PanScan"
 msgstr "16:9 Панорамирование"
 
-msgid "16K"
-msgstr "16K"
+msgid "16:9 reset to normal"
+msgstr "16/9 сброс в нормальное состояние"
 
 msgid "18 V"
 msgstr "18 В"
@@ -3688,9 +3685,6 @@ msgstr "Настройка CI"
 msgid "CI Basic settings"
 msgstr "Основные настройки CI"
 
-msgid "CI Helper Settings"
-msgstr "Настройки CIHelper"
-
 msgid "CI Legacy"
 msgstr "CI"
 
@@ -3706,11 +3700,17 @@ msgstr "CI Plus 1.3"
 msgid "CI assignment"
 msgstr "Назначение CI"
 
+msgid "CI Helper Settings"
+msgstr "Настройки CIHelper"
+
 msgid "CI settings"
 msgstr "Настройки CI"
 
 msgid "CI slot: "
 msgstr "Слот CI: "
+
+msgid "CI+ Helper"
+msgstr "Помощник CI+"
 
 msgid "CIFS/Samba Setup"
 msgstr "Настройки CIFS/Samba"
@@ -4649,7 +4649,7 @@ msgid "Common Interface"
 msgstr "Интерфейс модулей"
 
 msgid "Common Interface Assignment"
-msgstr "Назначение общего интерфейса"
+msgstr "Права доступа CI модулей"
 
 msgid "Common Interface Settings"
 msgstr "Общие настройки интерфейса"
@@ -4702,6 +4702,9 @@ msgstr "Файл конфигурации '%s' был изменен с моме
 
 msgid "Configuration mode"
 msgstr "Режим конфигурации"
+
+msgid "Configuration"
+msgstr "Конфигурация"
 
 msgid "Configuration mode: %s"
 msgstr "Режим конфигурации: %s"
@@ -5408,6 +5411,9 @@ msgstr "Кюрасао"
 
 msgid "Currency: "
 msgstr "Валюта: "
+
+msgid "Currency"
+msgstr "Валюта"
 
 msgid "Current"
 msgstr "Текущий"
@@ -9159,6 +9165,9 @@ msgstr "Выбран неправильный каталог: %s"
 msgid "Invalid location"
 msgstr "Неправильное расположение"
 
+msgid "Invalid type"
+msgstr "Недействительный тип"
+
 msgid "Invalid transponder data"
 msgstr "Недействительные данные транспондера"
 
@@ -10848,8 +10857,11 @@ msgstr "Norway"
 msgid "Norwegian"
 msgstr "Норвежский"
 
-msgid "Not Classified"
+msgid "Not associated"
 msgstr "Нет ассоциаций"
+
+msgid "Not configured"
+msgstr "Нет конфигурации"
 
 msgid "Not Defined"
 msgstr "Не определено"
@@ -10859,9 +10871,6 @@ msgstr "Не инсталлировано"
 
 msgid "Not Required"
 msgstr "Не требуется"
-
-msgid "Not associated"
-msgstr "Нет ассоциаций"
 
 msgid "Not defined"
 msgstr "Не определено"
@@ -16000,6 +16009,12 @@ msgstr "Сирийская Арабская Республика"
 msgid "System"
 msgstr "Система"
 
+msgid "System Info"
+msgstr "Системная информация"
+
+msgid "System Information"
+msgstr "Системная информация"
+
 msgid "System & Modulation"
 msgstr "Система & Модуляция"
 
@@ -16387,21 +16402,17 @@ msgstr "Файл таймеров (timers.xml) поврежден и не мож
 msgid "The user interface of the receiver will now restart to select the selected skin"
 msgstr "Рестарт GUI для применения выбраного скина"
 
-msgid "The user interface of your receiver is restarting"
-msgstr "Пользовательский интерфейс вашего приемника перезапускается"
-
-msgid "The user interface of your %s is restarting"
-msgstr "Пользовательский интерфейс вашего %s перезагружается"
-
+#, python-format
 msgid ""
-"The user interface of your %s is restarting\n"
+"The user interface of your %s %s is restarting\n"
 "due to an error in StartEnigma.py"
 msgstr ""
-"Пользовательский интерфейс вашего %s перезапускается\n"
-"из-за ошибки в StartEnigma.py"
+"Интерфейс Вашего %s %s будет перезагружен\n"
+"по причине ошибки в StartEnigma.py"
 
-msgid "The user interface of your %s is restarting in debug mode"
-msgstr "Пользовательский интерфейс вашего %s перезагружается в режиме отладки"
+#, python-format
+msgid "The user interface of your %s %s is restarting"
+msgstr "Перезагрузка интерфейса Вашего %s %s"
 
 msgid ""
 "The user interface of your receiver is restarting\n"
@@ -18943,6 +18954,12 @@ msgstr "У вашего %s %s (ядро %s) нет подключения к И�
 
 msgid "Your %s %s goes to WOL"
 msgstr "Ваш %s %s переходит в WOL"
+
+msgid "You want to install the plugin \"%s\"?"
+msgstr "Вы хотите установить плагин «%s»?"
+
+msgid "You want to remove the plugin \"%s\"?"
+msgstr "Вы хотите удалить плагин «%s»?"
 
 #, python-format
 msgid "Your %s %s is not connected to the Internet, please check your network settings and try again."
