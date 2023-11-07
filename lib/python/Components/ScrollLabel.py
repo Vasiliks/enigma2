@@ -1,11 +1,11 @@
-from enigma import eLabel, eListbox, ePoint, eSize, eSlider, eWidget
+from enigma import eLabel, eListbox, ePoint, eSize, eSlider, eWidget, fontRenderClass
 
 from skin import applyAllAttributes, parseBoolean, parseHorizontalAlignment, parseGradient, parseInteger, parseRadius, parseScrollbarMode, parseScrollbarScroll, scrollLabelStyle
 from Components.GUIComponent import GUIComponent
 
 
 class ScrollLabel(GUIComponent):
-	def __init__(self, text=""):
+	def __init__(self, text="", showscrollbar=True):
 		GUIComponent.__init__(self)
 		self.msgText = text
 		self.instance = None
@@ -15,8 +15,6 @@ class ScrollLabel(GUIComponent):
 		self.split = False
 		self.splitCharacter = "|"
 		self.splitTrim = False
-		self.font = None
-		self.lineHeight = 0
 		self.pageWidth = 0
 		self.pageHeight = 0
 		self.totalTextHeight = 0
@@ -108,15 +106,19 @@ class ScrollLabel(GUIComponent):
 					else:
 						leftLabelAttributes.append((attribute, value))
 						rightLabelAttributes.append((attribute, value))
-						if attribute == "noWrap" and value in ("1", "enable", "enabled", "on", "true", "yes"):
-							noWrap = True
-						if attribute == "wrap" and value not in ("1", "enable", "enabled", "on", "true", "yes"):
-							noWrap = True
 			if self.split:
+				for attribute, value in leftLabelAttributes[:]:
+					if attribute == "noWrap":  # Remove "noWrap" attribute so it can be set later.
+						leftLabelAttributes.remove((attribute, value))
+						break
+				for attribute, value in rightLabelAttributes[:]:
+					if attribute == "noWrap":  # Remove "noWrap" attribute so it can be set later.
+						rightLabelAttributes.remove((attribute, value))
+						break
 				if not splitSeparated:
 					leftAlign = "left"  # If columns are used and not separated then left column needs to be "left" aligned to avoid overlapping text.
-				leftLabelAttributes.append(("horizontalAlignment", leftAlign))
-				rightLabelAttributes.append(("horizontalAlignment", rightAlign))
+				leftLabelAttributes.extend([("horizontalAlignment", leftAlign), ("noWrap", "1")])  # Set "noWrap" to keep lines synchronized.
+				rightLabelAttributes.extend([("horizontalAlignment", rightAlign), ("noWrap", "1")])  # Set "noWrap" to keep lines synchronized.
 			applyAllAttributes(self.instance, desktop, widgetAttributes, parent.scale)
 			applyAllAttributes(self.leftText, desktop, leftLabelAttributes, parent.scale)
 			applyAllAttributes(self.rightText, desktop, rightLabelAttributes, parent.scale)
@@ -124,11 +126,9 @@ class ScrollLabel(GUIComponent):
 			retVal = True
 		else:
 			retVal = False
-		self.font = None if noWrap else self.leftText.getFont()
-		# self.lineHeight = int(fontRenderClass.getInstance().getLineHeight(self.leftText.getFont()) or 25)  # Assume a random line height if nothing is visible.
-		self.lineHeight = eLabel.calculateTextSize(self.leftText.getFont(), "Abcdefgh", eSize(10000, 10000), True).height()
+		lineHeight = int(fontRenderClass.getInstance().getLineHeight(self.leftText.getFont()) or 25)  # Assume a random line height if nothing is visible.
 		self.pageWidth = self.leftText.size().width()
-		self.pageHeight = (self.leftText.size().height() // self.lineHeight) * self.lineHeight
+		self.pageHeight = (self.leftText.size().height() // lineHeight) * lineHeight
 		self.instance.move(self.leftText.position())
 		self.instance.resize(eSize(self.pageWidth, self.pageHeight))
 		self.sliderWidth = sliderOffset + sliderWidth
@@ -156,7 +156,7 @@ class ScrollLabel(GUIComponent):
 			self.slider.setForegroundGradient(*scrollbarGradient)
 
 		self.sliderMode = sliderMode
-		self.sliderScroll = self.lineHeight if sliderScroll else self.pageHeight
+		self.sliderScroll = lineHeight if sliderScroll else self.pageHeight
 		self.setText(self.msgText)
 		return retVal
 
@@ -172,30 +172,12 @@ class ScrollLabel(GUIComponent):
 				rightText = []
 				for line in text.split("\n"):
 					line = line.split(self.splitCharacter, 1)
-					if len(line) > 1:
-						rightData = line[1].lstrip() if self.splitTrim else line[1]
-					else:
-						rightData = ""
-					if self.font:  # We are going to be wrapping long lines.
-						leftHeight = eLabel.calculateTextSize(self.font, line[0], eSize(self.leftWidth, 10000), False).height() if line[0] else self.lineHeight
-						rightHeight = eLabel.calculateTextSize(self.font, line[1], eSize(self.rightWidth, 10000), False).height() if len(line) > 1 and line[1] else self.lineHeight
-						blankLines = "\n" * (max(leftHeight // self.lineHeight, rightHeight // self.lineHeight) - 1)
-						if blankLines and leftHeight > rightHeight:
-							leftText.append(line[0])
-							rightText.append("%s%s" % (rightData, blankLines))
-						elif blankLines and leftHeight < rightHeight:
-							leftText.append("%s%s" % (line[0], blankLines))
-							rightText.append(rightData)
-						else:
-							leftText.append(line[0])
-							rightText.append(rightData)
-					else:
-						leftText.append(line[0])
-						rightText.append(rightData)
+					leftText.append(line[0])
+					rightText.append("" if len(line) < 2 else (line[1].lstrip() if self.splitTrim else line[1]))
 				self.leftText.setText("\n".join(leftText))
 				self.rightText.setText("\n".join(rightText))
 			else:
-				self.leftText.setText(text)
+				self.leftText.setText(str(text))
 			self.totalTextHeight = self.leftText.calculateSize().height()
 			leftWidth = self.leftWidth
 			rightWidth = self.rightWidth
@@ -220,19 +202,8 @@ class ScrollLabel(GUIComponent):
 	def appendText(self, text, showBottom=True):
 		self.setText("%s%s" % (self.msgText, text), showBottom)
 
-	def updateScrollbar(self):
-		visible = min(max(1000 * self.pageHeight // self.totalTextHeight, 4), 1000)
-		start = (1000 - visible) * self.currentPosition // ((self.totalTextHeight - self.pageHeight) or 1)
-		self.slider.setStartEnd(start, start + visible)
-
 	def isSliderVisible(self):
 		return self.sliderMode in (eListbox.showAlways, eListbox.showLeftAlways) or (self.sliderMode in (eListbox.showOnDemand, eListbox.showLeftOnDemand) and self.totalTextHeight > self.pageHeight)
-
-	def isNavigationNeeded(self):
-		return self.totalTextHeight > self.pageHeight
-
-	def isAtLastPage(self):
-		return self.totalTextHeight <= self.pageHeight or self.currentPosition == self.totalTextHeight - self.pageHeight
 
 	def setPos(self, pos):
 		self.currentPosition = max(0, min(pos, self.totalTextHeight - self.pageHeight))
@@ -264,6 +235,14 @@ class ScrollLabel(GUIComponent):
 	def goBottom(self):
 		if self.totalTextHeight > self.pageHeight:
 			self.setPos(self.totalTextHeight - self.pageHeight)
+
+	def updateScrollbar(self):
+		visible = min(max(1000 * self.pageHeight // self.totalTextHeight, 4), 1000)
+		start = (1000 - visible) * self.currentPosition // ((self.totalTextHeight - self.pageHeight) or 1)
+		self.slider.setStartEnd(start, start + visible)
+
+	def isAtLastPage(self):
+		return self.totalTextHeight <= self.pageHeight or self.currentPosition == self.totalTextHeight - self.pageHeight
 
 	# Old navigation method names.
 	#
