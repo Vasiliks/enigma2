@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from Components.Element import Element
 
 
@@ -18,5 +17,5 @@ class Converter(Element):
 		if str == "":
 			str = part
 		else:
-			str = str + self.separator + part
+			str = str + " " + self.separator + " " + part #here add space around separator since skin engine strips all spaces around parameters
 		return str
