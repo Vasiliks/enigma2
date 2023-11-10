@@ -179,7 +179,7 @@ class MediaPlayer(Screen, InfoBarBase, InfoBarScreenSaver, InfoBarSeek, InfoBarA
 			"cancel": (self.exit, _("Exit mediaplayer")),
 		}, -2)
 
-		sel["MediaPlayerActions"] = HelpableActionMap(self, ["MediaPlayerActions"],
+		self["MediaPlayerActions"] = HelpableActionMap(self, ["MediaPlayerActions"],
 			{
 			"play": (self.xplayEntry, _("Play entry")),
 			"pause": (self.pauseEntry, _("Pause")),
