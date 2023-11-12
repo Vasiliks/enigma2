@@ -1289,6 +1289,7 @@ void eDVBCISlot::data(int what)
 	if(state != stateInserted) {
 		eDebug("[CI] ci inserted in slot %d", getSlotID());
 		state = stateInserted;
+		determineCIVersion();
 		/* emit */ eDVBCI_UI::getInstance()->m_messagepump.send(eDVBCIInterfaces::Message(eDVBCIInterfaces::Message::slotStateChanged, getSlotID(), 1));
 		notifier->setRequested(eSocketNotifier::Read|eSocketNotifier::Priority);
 		/* enable PRI to detect removal or errors */
@@ -1440,13 +1441,13 @@ void eDVBCISlot::determineCIVersion()
 
 	if (ioctl(fd, 1, lv1Info) < 0) {
 		eTrace("[CI] Slot %d ioctl not supported: assume CI+ version 1", getSlotID());
-		m_ci_version = versionCIPlus1;
+		//m_ci_version = versionCIPlus1;
 		return;
 	}
 
 	if (strlen(lv1Info) == 0) {
 		eTrace("[CI] Slot %d no LV1 info: assume CI+ version 1", getSlotID());
-		m_ci_version = versionCIPlus1;
+		//m_ci_version = versionCIPlus1;
 		return;
 	}
 
@@ -1469,7 +1470,7 @@ void eDVBCISlot::determineCIVersion()
 
 	if(!compatId) {
 		eTrace("[CI] Slot %d CI CAM detected", getSlotID());
-		m_ci_version = versionCI;
+		//m_ci_version = versionCI;
 		return;
 	}
 
@@ -1496,7 +1497,7 @@ void eDVBCISlot::determineCIVersion()
 		}
 	}
 
-	m_ci_version = version;
+	//m_ci_version = version;
 }
 
 int eDVBCISlot::getNumOfServices()
