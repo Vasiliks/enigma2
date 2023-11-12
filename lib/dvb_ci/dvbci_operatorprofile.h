@@ -6,7 +6,8 @@
 class eDVBCIOperatorProfileSession: public eDVBCISession
 {
 	enum {
-		stateFinal=statePrivate
+		stateStatus=statePrivate,
+		stateFinal
 	};
 
 	int receivedAPDU(const unsigned char *tag, const void *data, int len);
