@@ -79,6 +79,8 @@ class MMIDialog(Screen):
 
 		print("[CI] MMIDialog with action %s" % str(action))
 
+		self["key_menu"] = StaticText(_("MENU"))
+
 		self.mmiclosed = False
 		self.tag = None
 		self.slotid = slotid

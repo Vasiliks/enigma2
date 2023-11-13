@@ -21,6 +21,7 @@ config.misc.rcused = ConfigInteger(default=1)
 
 class HelpableScreen:
 	def __init__(self):
+		self["key_help"] = StaticText(_("HELP"))
 		self["helpActions"] = ActionMap(["HelpActions"], {
 			"displayHelp": self.showHelp
 		}, prio=0)
