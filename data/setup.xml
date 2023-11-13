@@ -308,6 +308,7 @@
 		<item level="2" text="Show picons during channel number input" description="Configure whether service picons will be shown in number zap.">config.misc.numzap_picon</item>
 		<item level="1" text="Zap mode" requires="ZapMode" description="Configure the way in which the receiver changes channels.">config.misc.zapmode</item>
 		<item level="1" text="History buttons mode" description="Configure the function of the &lt;  &gt; buttons.">config.usage.historymode</item>
+		<item level="0" text="Input scroll position" description="When the input cursor reaches this point (percentage of the width, from either side) scroll the text to the cursor.">config.usage.cursorscroll</item>
 		<item level="2" text="Enable teletext caching" description="When enabled, teletext pages will be cached, allowing faster access.">config.usage.enable_tt_caching</item>
 		<item level="1" text="Teletext font and resolution" description="Configure the display resolution and the font used for teletext.">config.usage.tuxtxt_font_and_res</item>
 		<if conditional="config.usage.tuxtxt_font_and_res.value == 'expert_mode'">
