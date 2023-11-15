@@ -257,18 +257,13 @@ class RemoteControl:
 						logRemaps.append((id, remap))
 						remapButtons[keyId] = remapId
 						keyId = remapId
-					name = button.attrib.get("name")  # The name attribute is deprecated and will be removed.
-					if name:
-						for key, names in keyDescriptions[index].items():
-							if (name,) == names and keyId != key:
-								if keyId is None:
-									keyId = key
-								else:
-									print("[InputDevice] Warning: The keyId %d derived from name '%s' does not match defined keyId of %d!" % (key, name, keyId))
-								break
+					if keyId == 0:
+						placeHolder -= 1
+						keyId = placeHolder
 					rcButtons["keyIds"].append(keyId)
 					rcButtons[keyId] = {}
-					rcButtons[keyId]["label"] = button.attrib.get("label", name)
+					rcButtons[keyId]["id"] = id
+					rcButtons[keyId]["label"] = button.attrib.get("label")
 					rcButtons[keyId]["pos"] = [int(x.strip()) for x in button.attrib.get("pos", "0").split(",")]
 					rcButtons[keyId]["title"] = button.attrib.get("title")
 					rcButtons[keyId]["shape"] = button.attrib.get("shape")
