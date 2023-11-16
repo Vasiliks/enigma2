@@ -224,7 +224,7 @@ def getHotkeyFunctions():
 	hotkey.functions.append((_("Display skin"), "Module/Screens.SkinSelector/LcdSkinSelector", "Setup"))
 	hotkey.functions.append((_("Plugin Browser"), "Module/Screens.PluginBrowser/PluginBrowser", "Setup"))
 	hotkey.functions.append((_("Sleeptimer edit"), "Module/Screens.SleepTimerEdit/SleepTimerEdit", "Setup"))
-	hotkey.functions.append((_("Channel Info"), "Module/Screens.ServiceInfo/ServiceInfo", "Setup"))
+	hotkey.functions.append((_("Channel Info"), "Module/Screens.About/ServiceInformation", "Setup"))
 	hotkey.functions.append((_("Timer"), "Module/Screens.TimerEdit/TimerEditList", "Setup"))
 	for plugin in plugins.getPluginsForMenu("system"):
 		if plugin[2]:
