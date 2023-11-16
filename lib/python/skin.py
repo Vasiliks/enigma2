@@ -543,7 +543,7 @@ def parseOrientation(value):
 # and value returned is based on the trigger.
 #
 # Usage:  *string   : The paramater is a string with the "*" is removed (Type: String).
-#         #aarrggbb : The parameter is a HEX colour string (Type: Integer).
+#         #aarrggbb : The parameter is a HEX color string (Type: Integer).
 #         0xABCD    : The parameter is a HEX integer (Type: Integer).
 #         5.3       : The parameter is a floating point number (Type: Float).
 #         red       : The parameter is a named color (Type: Integer).
@@ -563,13 +563,9 @@ def parseParameter(value):
 	elif value in colors:  # Named color.
 		return colors[value].argb()
 	elif value.find(";") != -1:  # Font.
-		(font, size) = [x.strip() for x in value.split(";", 1)]
+		(font, size) = (x.strip() for x in value.split(";", 1))
 		return [font, int(size)]
 	else:  # Integer.
-		try:
-			return int(value)
-		except ValueError:
-			return value  # Возвращаем исходное значение, если не удается преобразовать в int.
 		return int(value)
 
 
