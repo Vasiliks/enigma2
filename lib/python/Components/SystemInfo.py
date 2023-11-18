@@ -316,7 +316,7 @@ commitLogs = [
 	("Enigma2 Plugins", "https://api.github.com/repos/openpli/enigma2-plugins/commits"),
 	("Aio Grab", "https://api.github.com/repos/openpli/aio-grab/commits"),
 	("Plugin EPGImport", "https://api.github.com/repos/openpli/enigma2-plugin-extensions-epgimport/commits"),
-	("Skin PLi HD", "https://api.github.com/repos/littlesat/skin-PLiHD/commits"),
+	("Skin PLi HD", "https://api.github.com/repos/68foxboris/skin-PLiHD/commits"),
 	("OpenWebif", "https://api.github.com/repos/E2OpenPlugins/e2openplugin-OpenWebif/commits"),
 	("Hans settings", "https://gitlab.openpli.org/api/v4/projects/5/repository/commits")
 ]

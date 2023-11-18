@@ -83,7 +83,8 @@ def InitAVSwitch():
 	if SystemInfo["HasSVideo"]:
 		colorformat_choices["svideo"] = "S-Video"
 
-	config.av.colorformat = ConfigSelection(choices=colorformat_choices, default="cvbs")
+	config.av.colorformat = ConfigSelection(choices=colorformat_choices, default="rgb")
+
 	config.av.aspectratio = ConfigSelection(choices={
 		"4_3_letterbox": _("4:3 Letterbox"),
 		"4_3_panscan": _("4:3 PanScan"),
