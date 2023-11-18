@@ -55,7 +55,6 @@ protected:
 
 	virtual int getItemHeight() = 0;
 	virtual int getItemWidth() { return -1; }
-	virtual int getMaxItemTextWidth() { return 1; }
 	virtual uint8_t getOrientation() { return 1; }
 	virtual int getMaxItemTextWidth() { return 1; }
 
@@ -121,7 +120,6 @@ struct eListboxStyle
 	};
 	int m_valign, m_halign, m_border_size, m_scrollbarborder_width;
 	ePtr<gFont> m_font, m_font_zoomed, m_valuefont;
-	ePoint m_text_offset;
 	eRect m_text_padding;
 
 	int m_itemCornerRadius[4];
@@ -414,7 +412,6 @@ public:
 	int getPageSize() { return m_page_size; }
 	int getItemHeight() { return m_itemheight; }
 	int getItemWidth() { return m_itemwidth; }
-	int getMaxItemTextWidth() { return m_content->getMaxItemTextWidth(); }
 	uint8_t getOrientation() { return m_orientation; }
 	int getTopIndex() { return m_top; }
 	bool getSelectionEnable() { return m_selection_enabled; }
