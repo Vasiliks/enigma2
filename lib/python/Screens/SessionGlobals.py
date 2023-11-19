@@ -12,6 +12,7 @@ from Components.Renderer.FrontpanelLed import FrontpanelLed
 from Components.config import config
 from Components.SystemInfo import BoxInfo
 
+
 class SessionGlobals(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
@@ -91,10 +92,10 @@ class SessionGlobals(Screen):
 		if nr_leds == 1:
 			FrontpanelLed(which=0, boolean=False, patterns=[PATTERN_OFF, PATTERN_BLINK, PATTERN_OFF, PATTERN_BLINK]).connect(combine)
 		elif nr_leds == 2:
-			if BoxInfo.getItem("model") == "dm520":
+			if model == "dm520":
 				FrontpanelLed(which=0, boolean=False, patterns=[PATTERN_ON, PATTERN_BLINK, PATTERN_OFF, PATTERN_BLINK]).connect(combine)
 				FrontpanelLed(which=1, boolean=False, patterns=[PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]).connect(combine)
-			elif BoxInfo.getItem("platform") == "dm4kgen":
+			elif model in ("dm920", "dm900"):
 				FrontpanelLed(which=0, boolean=False, patterns=[NormalLed0, RecLed0, StandbyLed0, RecstdbyLed0]).connect(combine)
 				FrontpanelLed(which=1, boolean=False, patterns=[NormalLed1, RecLed1, StandbyLed1, RecstdbyLed1]).connect(combine)
 			else:

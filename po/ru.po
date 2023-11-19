@@ -18225,6 +18225,13 @@ msgid "Warning"
 msgstr "Внимание"
 
 msgid ""
+"Warning! This is the last crash before an automatic restart is performed.\n"
+"Should the crash counter be reset to prevent a restart?"
+msgstr ""
+"Внимание! Это последний сбой перед автоматическим перезапуском.\n"
+"Нужно ли сбросить счетчик сбоев,чтобы предотвратить перезапуск?"
+
+msgid ""
 "Warning!\n"
 "This is an option for advanced users.\n"
 "Really disable timer conflict detection?"

@@ -218,63 +218,63 @@ def InitUsageConfig():
 		("expert_mode", _("Expert mode"))
 	])
 	config.usage.tuxtxt_UseTTF = ConfigSelection(default="1", choices=[
-		("0", _("0")),
-		("1", _("1"))
+		("0", "0"),
+		("1", "1")
 	])
 	config.usage.tuxtxt_TTFBold = ConfigSelection(default="1", choices=[
-		("0", _("0")),
-		("1", _("1"))
+		("0", "0"),
+		("1", "1")
 	])
 	config.usage.tuxtxt_TTFScreenResX = ConfigSelection(default="720", choices=[
-		("720", _("720")),
-		("1280", _("1280")),
-		("1920", _("1920"))
+		("720", "720"),
+		("1280", "1280"),
+		("1920", "1920")
 	])
 	config.usage.tuxtxt_StartX = ConfigInteger(default=50, limits=(0, 200))
 	config.usage.tuxtxt_EndX = ConfigInteger(default=670, limits=(500, 1920))
 	config.usage.tuxtxt_StartY = ConfigInteger(default=30, limits=(0, 200))
 	config.usage.tuxtxt_EndY = ConfigInteger(default=555, limits=(400, 1080))
 	config.usage.tuxtxt_TTFShiftY = ConfigSelection(default="2", choices=[
-		("-9", _("-9")),
-		("-8", _("-8")),
-		("-7", _("-7")),
-		("-6", _("-6")),
-		("-5", _("-5")),
-		("-4", _("-4")),
-		("-3", _("-3")),
-		("-2", _("-2")),
-		("-1", _("-1")),
-		("0", _("0")),
-		("1", _("1")),
-		("2", _("2")),
-		("3", _("3")),
-		("4", _("4")),
-		("5", _("5")),
-		("6", _("6")),
-		("7", _("7")),
-		("8", _("8")),
-		("9", _("9"))
+		("-9", "-9"),
+		("-8", "-8"),
+		("-7", "-7"),
+		("-6", "-6"),
+		("-5", "-5"),
+		("-4", "-4"),
+		("-3", "-3"),
+		("-2", "-2"),
+		("-1", "-1"),
+		("0", "0"),
+		("1", "1"),
+		("2", "2"),
+		("3", "3"),
+		("4", "4"),
+		("5", "5"),
+		("6", "6"),
+		("7", "7"),
+		("8", "8"),
+		("9", "9")
 	])
 	config.usage.tuxtxt_TTFShiftX = ConfigSelection(default="0", choices=[
-		("-9", _("-9")),
-		("-8", _("-8")),
-		("-7", _("-7")),
-		("-6", _("-6")),
-		("-5", _("-5")),
-		("-4", _("-4")),
-		("-3", _("-3")),
-		("-2", _("-2")),
-		("-1", _("-1")),
-		("0", _("0")),
-		("1", _("1")),
-		("2", _("2")),
-		("3", _("3")),
-		("4", _("4")),
-		("5", _("5")),
-		("6", _("6")),
-		("7", _("7")),
-		("8", _("8")),
-		("9", _("9"))
+		("-9", "-9"),
+		("-8", "-8"),
+		("-7", "-7"),
+		("-6", "-6"),
+		("-5", "-5"),
+		("-4", "-4"),
+		("-3", "-3"),
+		("-2", "-2"),
+		("-1", "-1"),
+		("0", "0"),
+		("1", "1"),
+		("2", "2"),
+		("3", "3"),
+		("4", "4"),
+		("5", "5"),
+		("6", "6"),
+		("7", "7"),
+		("8", "8"),
+		("9", "9")
 	])
 	config.usage.tuxtxt_TTFWidthFactor16 = ConfigInteger(default=29, limits=(8, 31))
 	config.usage.tuxtxt_TTFHeightFactor16 = ConfigInteger(default=14, limits=(8, 31))
@@ -522,12 +522,12 @@ def InitUsageConfig():
 	config.usage.timeshift_start_delay = ConfigSelection(default="0", choices=choicelist)
 
 	config.usage.alternatives_priority = ConfigSelection(default="0", choices=[
-		("0", _("DVB-S/-C/-T")),
-		("1", _("DVB-S/-T/-C")),
-		("2", _("DVB-C/-S/-T")),
-		("3", _("DVB-C/-T/-S")),
-		("4", _("DVB-T/-C/-S")),
-		("5", _("DVB-T/-S/-C")),
+		("0", "DVB-S/-C/-T"),
+		("1", "DVB-S/-T/-C"),
+		("2", "DVB-C/-S/-T"),
+		("3", "DVB-C/-T/-S"),
+		("4", "DVB-T/-C/-S"),
+		("5", "DVB-T/-S/-C"),
 		("127", _("No priority"))])
 
 	def remote_fallback_changed(configElement):
@@ -1442,34 +1442,34 @@ def InitUsageConfig():
 		if SystemInfo["HasColorspaceSimple"]:
 			config.av.hdmicolorspace = ConfigSelection(default="Edid(Auto)", choices={
 				"Edid(Auto)": _("Auto"),
-				"Hdmi_Rgb": _("RGB"),
-				"444": _("YCbCr444"),
-				"422": _("YCbCr422"),
-				"420": _("YCbCr420")
+				"Hdmi_Rgb": "RGB",
+				"444": "YCbCr444",
+				"422": "YCbCr422",
+				"420": "YCbCr420"
 			})
 		else:
 			if model == "vuzero4k" or BoxInfo.getItem("platform") == "dm4kgen":
 				config.av.hdmicolorspace = ConfigSelection(default="Edid(Auto)", choices={
 					"Edid(Auto)": _("Auto"),
-					"Hdmi_Rgb": _("RGB"),
-					"Itu_R_BT_709": _("BT709"),
+					"Hdmi_Rgb": "RGB",
+					"Itu_R_BT_709": "BT709",
 					"DVI_Full_Range_RGB": _("Full Range RGB"),
-					"FCC": _("FCC 1953"),
-					"Itu_R_BT_470_2_BG": _("BT470 BG"),
-					"Smpte_170M": _("Smpte 170M"),
-					"Smpte_240M": _("Smpte 240M"),
-					"Itu_R_BT_2020_NCL": _("BT2020 NCL"),
-					"Itu_R_BT_2020_CL": _("BT2020 CL"),
-					"XvYCC_709": _("BT709 XvYCC"),
-					"XvYCC_601": _("BT601 XvYCC")
+					"FCC": "FCC 1953",
+					"Itu_R_BT_470_2_BG": "BT470 BG",
+					"Smpte_170M": "Smpte 170M",
+					"Smpte_240M": "Smpte 240M",
+					"Itu_R_BT_2020_NCL": "BT2020 NCL",
+					"Itu_R_BT_2020_CL": "BT2020 CL",
+					"XvYCC_709": "BT709 XvYCC",
+					"XvYCC_601": "BT601 XvYCC"
 				})
 			else:
 				config.av.hdmicolorspace = ConfigSelection(default="auto", choices={
 					"auto": _("Auto"),
-					"rgb": _("RGB"),
-					"420": _("420"),
-					"422": _("422"),
-					"444": _("444")
+					"rgb": "RGB",
+					"420": "420",
+					"422": "422",
+					"444": "444"
 				})
 		config.av.hdmicolorspace.addNotifier(setHaveColorspace)
 
@@ -1478,9 +1478,9 @@ def InitUsageConfig():
 			open(SystemInfo["HasColordepth"], "w").write(configElement.value)
 		config.av.hdmicolordepth = ConfigSelection(default="auto", choices={
 			"auto": _("Auto"),
-			"8bit": _("8 bit"),
-			"10bit": _("10 bit"),
-			"12bit": _("12 bit")
+			"8bit": "8 bit",
+			"10bit": "10 bit",
+			"12bit": "12 bit"
 		})
 		config.av.hdmicolordepth.addNotifier(setHaveColordepth)
 
@@ -1495,9 +1495,9 @@ def InitUsageConfig():
 			open(SystemInfo["HasColorimetry"], "w").write(configElement.value)
 		config.av.hdmicolorimetry = ConfigSelection(default="auto", choices=[
 			("auto", _("Auto")),
-			("bt2020ncl", _("BT 2020 NCL")),
-			("bt2020cl", _("BT 2020 CL")),
-			("bt709", _("BT 709"))
+			("bt2020ncl", "BT 2020 NCL"),
+			("bt2020cl", "BT 2020 CL"),
+			("bt709", "BT 709")
 		])
 		config.av.hdmicolorimetry.addNotifier(setColorimetry)
 
@@ -1506,10 +1506,10 @@ def InitUsageConfig():
 			open(SystemInfo["HasHdrType"], "w").write(configElement.value)
 		config.av.hdmihdrtype = ConfigSelection(default="auto", choices={
 			"auto": _("Auto"),
-			"none": _("SDR"),
-			"hdr10": _("HDR10"),
-			"hlg": _("HLG"),
-			"dolby": _("Dolby")
+			"none": "SDR",
+			"hdr10": "HDR10",
+			"hlg": "HLG",
+			"dolby": "Dolby"
 		})
 		config.av.hdmihdrtype.addNotifier(setHdmiHdrType)
 
@@ -1645,15 +1645,15 @@ def InitUsageConfig():
 	config.subtitles.subtitle_bad_timing_delay = ConfigSelection(default="0", choices=subtitle_delay_choicelist)
 	config.subtitles.dvb_subtitles_backtrans = ConfigSelection(default="0", choices=[
 		("0", _("No transparency")),
-		("25", _("10%")),
-		("50", _("20%")),
-		("75", _("30%")),
-		("100", _("40%")),
-		("125", _("50%")),
-		("150", _("60%")),
-		("175", _("70%")),
-		("200", _("80%")),
-		("225", _("90%")),
+		("25", "10%"),
+		("50", "20%"),
+		("75", "30%"),
+		("100", "40%"),
+		("125", "50%"),
+		("150", "60%"),
+		("175", "70%"),
+		("200", "80%"),
+		("225", "90%"),
 		("255", _("Full transparency"))
 	])
 	config.subtitles.pango_subtitle_colors = ConfigSelection(default="1", choices=[
@@ -1822,7 +1822,6 @@ def InitUsageConfig():
 
 	config.misc.useNTPminutes = ConfigSelection(default="30", choices=[("30", _("%d Minutes") % 30), ("60", _("%d Hour") % 1), ("1440", _("%d Hours") % 24)])
 
-
 def updateChoices(sel, choices):
 	if choices:
 		defval = None
@@ -1875,7 +1874,6 @@ def showrotorpositionChoicesUpdate(update=False):
 	else:
 		config.misc.showrotorposition.setChoices(choiceslist, "no")
 	SystemInfo["isRotorTuner"] = count > 0
-
 
 
 def preferredTunerChoicesUpdate(update=False):

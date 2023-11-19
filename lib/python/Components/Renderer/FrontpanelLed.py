@@ -1,7 +1,6 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 from Components.Element import Element
-
+from os.path import exists
 # this is not a GUI renderer.
 
 
@@ -20,22 +19,20 @@ class FrontpanelLed(Element):
 
 		(speed, pattern, pattern_4bit) = self.patterns[val]
 
-		try:
-			print("[FrontpanelLed] Write to /proc/stb/fp/led%d_pattern" % self.which)
-			open("/proc/stb/fp/led%d_pattern" % self.which, "w").write("%08x" % pattern)
-		except IOError:
-			print("[FrontpanelLed] Write to /proc/stb/fp/led_pattern failed.")
+		if exists("/proc/stb/fp/led%s_pattern" % str(self.which)):
+			print("[FrontpanelLed] Write to /proc/stb/fp/led%s_pattern" % str(self.which))
+			with open("/proc/stb/fp/led%s_pattern" % str(self.which), "w") as f:
+				f.write("%08x" % pattern)
 		if self.which == 0:
-			try:
-				print("[FrontpanelLed] Write to /proc/stb/fp/led_pattern")
-				open("/proc/stb/fp/led_set_pattern", "w").write("%08x" % pattern_4bit)
+			if exists("/proc/stb/fp/led_set_pattern"):
+				print("[FrontpanelLed] Write to /proc/stb/fp/led_set_pattern")
+				with open("/proc/stb/fp/led_set_pattern", "w") as f:
+					f.write("%08x" % pattern_4bit)
+			if exists("/proc/stb/fp/led_set_speed"):
 				print("[FrontpanelLed] Write to /proc/stb/fp/led_set_speed")
-				open("/proc/stb/fp/led_set_speed", "w").write("%d" % speed)
-			except IOError:
-				print("[FrontpanelLed] Write to /proc/stb/fp/led_pattern failed.")
-				print("[FrontpanelLed] Write to /proc/stb/fp/led_set_speed failed.")
-			try:
+				with open("/proc/stb/fp/led_set_speed", "w") as f:
+					f.write("%d" % speed)
+			if exists("/proc/stb/fp/led_pattern_speed"):
 				print("[FrontpanelLed] Write to /proc/stb/fp/led_pattern_speed")
-				open("/proc/stb/fp/led_pattern_speed", "w").write("%d" % speed)
-			except IOError:
-				print("[FrontpanelLed] Write to /proc/stb/fp/led_pattern_speed failed.")
+				with open("/proc/stb/fp/led_pattern_speed", "w") as f:
+					f.write("%d" % speed)
