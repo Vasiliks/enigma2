@@ -19534,7 +19534,7 @@ msgid "descramble and record ecm"
 msgstr "раскодировать и записывать ECM"
 
 msgid "detective/thriller"
-msgstr "детектив/риллер"
+msgstr "детектив/триллер"
 
 msgid "disable"
 msgstr "выключить"
