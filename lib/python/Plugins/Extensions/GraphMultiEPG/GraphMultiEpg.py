@@ -7,7 +7,7 @@ from Components.ActionMap import HelpableActionMap
 from Components.GUIComponent import GUIComponent
 from Components.EpgList import Rect
 from Components.Sources.Event import Event
-from Components.MultiContent import MultiContentEntryText, MultiContentEntryPixmapAlphaBlend, MultiContentEntryPixmap
+from Components.MultiContent import MultiContentEntryText, MultiContentEntryPixmapAlphaBlend
 from Components.TimerList import TimerList
 from Components.Renderer.Picon import getPiconName
 from Components.Sources.ServiceEvent import ServiceEvent
@@ -73,6 +73,7 @@ config.misc.graph_mepg.show_timelines = ConfigSelection(default="all", choices=[
 config.misc.graph_mepg.servicename_alignment = ConfigSelection(default=possibleAlignmentChoices[0][0], choices=possibleAlignmentChoices)
 config.misc.graph_mepg.extension_menu = ConfigYesNo(default=False)
 config.misc.graph_mepg.show_record_clocks = ConfigYesNo(default=True)
+config.misc.graph_mepg.show_disabled_timers= ConfigYesNo(default=False)
 config.misc.graph_mepg.zap_blind_bouquets = ConfigYesNo(default=False)
 
 listscreen = config.misc.graph_mepg.default_mode.value
@@ -128,6 +129,7 @@ class EPGList(GUIComponent):
 		self.selEvPix = None
 		self.recEvPix = None
 		self.curSerPix = None
+		self.disEvPix = None
 
 		self.foreColor = 0xffffff
 		self.foreColorSelected = 0xffc000
@@ -144,6 +146,8 @@ class EPGList(GUIComponent):
 		self.backColorNow = 0x505080
 		self.foreColorRec = 0xffffff
 		self.backColorRec = 0x805050
+		self.foreColorDis = 0xffffff
+		self.backColorDis = 0x777700
 		self.serviceFont = gFont("Regular", 20)
 		self.entryFontName = "Regular"
 		self.entryFontSize = 18
@@ -215,6 +219,12 @@ class EPGList(GUIComponent):
 
 		def ServiceForegroundColorRecording(value):
 			self.foreColorRec = parseColor(value).argb()
+
+		def ServiceForegroundColorDisabled(value):
+			self.foreColorDis = parseColor(value).argb()
+
+		def ServiceBackgroundColorDisabled(value):
+			self.backColorDis = parseColor(value).argb()
 
 		def ServiceBackgroundColor(value):
 			self.backColorService = parseColor(value).argb()
@@ -396,9 +406,10 @@ class EPGList(GUIComponent):
 		self.selEvPix = LoadPixmap(resolveFilename(SCOPE_CURRENT_SKIN, 'epg/SelectedEvent.png'))
 		self.recEvPix = LoadPixmap(resolveFilename(SCOPE_CURRENT_SKIN, 'epg/RecordingEvent.png'))
 		self.curSerPix = LoadPixmap(resolveFilename(SCOPE_CURRENT_SKIN, 'epg/CurrentService.png'))
+		self.disEvPix = LoadPixmap(resolveFilename(SCOPE_CURRENT_SKIN, 'epg/DisabledEvent.png'))
 
 		# if no background png's are present at all, use the solid background borders for further calculations
-		if (self.nowEvPix, self.othEvPix, self.selEvPix, self.recEvPix, self.curSerPix) == (None, None, None, None, None):
+		if (self.nowEvPix, self.othEvPix, self.selEvPix, self.recEvPix, self.curSerPix, self.disEvPix) == (None, None, None, None, None, None):
 			self.eventBorderHorWidth = self.eventBorderWidth
 			self.eventBorderVerWidth = self.eventBorderWidth
 			self.serviceBorderHorWidth = self.serviceBorderWidth
@@ -469,20 +480,20 @@ class EPGList(GUIComponent):
 
 		res = [None]
 		if bgpng is not None:    # bacground for service rect
-			res.append(MultiContentEntryPixmap(
-				pos=(r1.x + self.serviceBorderVerWidth, r1.y + self.serviceBorderHorWidth),
-				size=(r1.w - 2 * self.serviceBorderVerWidth, r1.h - 2 * self.serviceBorderHorWidth),
-				png=bgpng,
-				flags=BT_SCALE))
+			res.append(MultiContentEntryPixmapAlphaBlend(
+					pos=(r1.x + self.serviceBorderVerWidth, r1.y + self.serviceBorderHorWidth),
+					size=(r1.w - 2 * self.serviceBorderVerWidth, r1.h - 2 * self.serviceBorderHorWidth),
+					png=bgpng,
+					flags=BT_SCALE))
 		else:
 			res.append(MultiContentEntryText(
-				pos=(r1.x, r1.y),
-				size=(r1.w, r1.h),
-				font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER,
-				text="",
-				color=None, color_sel=None,
-				backcolor=serviceBackColor, backcolor_sel=serviceBackColor,
-				border_width=self.serviceBorderWidth, border_color=self.borderColorService))
+					pos=(r1.x, r1.y),
+					size=(r1.w, r1.h),
+					font=0, flags=RT_HALIGN_LEFT | RT_VALIGN_CENTER,
+					text="",
+					color=None, color_sel=None,
+					backcolor=serviceBackColor, backcolor_sel=serviceBackColor,
+					border_width=self.serviceBorderWidth, border_color=self.borderColorService))
 		displayPicon = None
 		if self.number_width:
 			res.append(MultiContentEntryText(
@@ -548,6 +559,7 @@ class EPGList(GUIComponent):
 				duration = ev[3]
 				xpos, ewidth = self.calcEntryPosAndWidthHelper(stime, duration, start, end, width)
 				rec = self.timer.isInTimer(ev[0], stime, duration, service)
+				dis = self.timer.isInTimer(ev[0], stime, duration, service, disabledTimers=True) if config.misc.graph_mepg.show_disabled_timers.value else None
 
 				# event box background
 				foreColorSelected = foreColor = self.foreColor
@@ -562,12 +574,19 @@ class EPGList(GUIComponent):
 				if selected and self.select_rect.x == xpos + left and self.selEvPix:
 					if rec is not None and rec[1][-1] in (2, 12, 17, 27):
 						foreColorSelected = self.foreColorSelectedRec
+					elif dis is not None and dis[1][-1] in (2, 12, 17, 27):
+						foreColorSelected = self.foreColorSelected
 					bgpng = self.selEvPix
 					backColorSel = None
 				elif rec is not None and rec[1][-1] in (2, 12, 17, 27):
 					bgpng = self.recEvPix
 					foreColor = self.foreColorRec
 					backColor = self.backColorRec
+				elif dis is not None and dis[1][-1] in (2, 12, 17, 27):
+					bgpng = self.disEvPix
+					foreColor = self.foreColorDis
+					backColor = self.backColorDis
+
 				elif stime <= now and now < stime + duration:
 					bgpng = self.nowEvPix
 				elif currentservice:
@@ -894,55 +913,55 @@ class GraphMultiEPG(Screen, HelpableScreen):
 			Screen.setTitle(self, bouquetname)
 
 		self["list"] = EPGList(selChangedCB=self.onSelectionChanged,
-			timer=self.session.nav.RecordTimer,
-			time_epoch=config.misc.graph_mepg.prev_time_period.value,
-			overjump_empty=config.misc.graph_mepg.overjump.value,
-			epg_bouquet=epg_bouquet)
+					timer=self.session.nav.RecordTimer,
+					time_epoch=config.misc.graph_mepg.prev_time_period.value,
+					overjump_empty=config.misc.graph_mepg.overjump.value,
+					epg_bouquet=epg_bouquet)
 
 		HelpableScreen.__init__(self)
 		self["okactions"] = HelpableActionMap(self, ["OkCancelActions"],
 			{
-			"cancel": (self.closeScreen, _("Exit EPG")),
-			"ok": (self.eventSelected, _("Zap to selected channel, or show detailed event info (depends on configuration)"))
-		}, -1)
+				"cancel": (self.closeScreen, _("Exit EPG")),
+				"ok": (self.eventSelected, _("Zap to selected channel, or show detailed event info (depends on configuration)"))
+			}, -1)
 		self["okactions"].csel = self
 		self["gmepgactions"] = HelpableActionMap(self, ["GMEPGSelectActions"],
 			{
-			"timerAdd": (self.timerAdd, _("Add/remove change timer for current event")),
-			"info": (self.infoKeyPressed, _("Show detailed event info")),
-			"red": (self.zapTo, _("Zap to selected channel")),
-			"blue": (self.togglePrimeNow, _("Goto primetime / now")),
-			"blue_long": (self.togglePrimeNow, _("Goto specific date/time")),
-			"yellow": (self.swapMode, _("Switch between normal mode and list mode")),
-			"menu": (self.furtherOptions, _("Further Options")),
-			"nextBouquet": (self.nextBouquet, self.getKeyNextBouquetHelptext),
-			"prevBouquet": (self.prevBouquet, self.getKeyPrevBouquetHelptext),
-			"nextService": (self.nextPressed, _("Goto next page of events")),
-			"prevService": (self.prevPressed, _("Goto previous page of events")),
-			"preview": (self.preview, _("Preview selected channel")),
-			"window": (self.showhideWindow, _("Show/hide window")),
-			"nextDay": (self.nextDay, _("Goto next day of events")),
-			"prevDay": (self.prevDay, _("Goto previous day of events")),
-			"moveUp": (self.moveUp, _("Goto up service")),
-			"moveDown": (self.moveDown, _("Goto down service"))
-		}, -1)
+				"timerAdd": (self.timerAdd, _("Add/remove change timer for current event")),
+				"info": (self.infoKeyPressed, _("Show detailed event info")),
+				"red": (self.zapTo, _("Zap to selected channel")),
+				"blue": (self.togglePrimeNow, _("Goto primetime / now")),
+				"blue_long": (self.enterDateTime, _("Goto specific date/time")),
+				"yellow": (self.swapMode, _("Switch between normal mode and list mode")),
+				"menu": (self.furtherOptions, _("Further Options")),
+				"nextBouquet": (self.nextBouquet, self.getKeyNextBouquetHelptext),
+				"prevBouquet": (self.prevBouquet, self.getKeyPrevBouquetHelptext),
+				"nextService": (self.nextPressed, _("Goto next page of events")),
+				"prevService": (self.prevPressed, _("Goto previous page of events")),
+				"preview": (self.preview, _("Preview selected channel")),
+				"window": (self.showhideWindow, _("Show/hide window")),
+				"nextDay": (self.nextDay, _("Goto next day of events")),
+				"prevDay": (self.prevDay, _("Goto previous day of events")),
+				"moveUp": (self.moveUp, _("Goto up service")),
+				"moveDown": (self.moveDown, _("Goto down service"))
+			}, -1)
 		self["gmepgactions"].csel = self
 
 		self["inputactions"] = HelpableActionMap(self, ["InputActions"],
 			{
-			"left": (self.leftPressed, _("Go to previous event")),
-			"right": (self.rightPressed, _("Go to next event")),
-			"1": (self.key1, _("Set time window to 1 hour")),
-			"2": (self.key2, _("Set time window to 2 hours")),
-			"3": (self.key3, _("Set time window to 3 hours")),
-			"4": (self.key4, _("Set time window to 4 hours")),
-			"5": (self.key5, _("Set time window to 5 hours")),
-			"6": (self.key6, _("Set time window to 6 hours")),
-			"7": (self.prevPage, _("Go to previous page of service")),
-			"9": (self.nextPage, _("Go to next page of service")),
-			"8": (self.toTop, _("Go to first service")),
-			"0": (self.toEnd, _("Go to last service"))
-		}, -1)
+				"left": (self.leftPressed, _("Go to previous event")),
+				"right": (self.rightPressed, _("Go to next event")),
+				"1": (self.key1, _("Set time window to 1 hour")),
+				"2": (self.key2, _("Set time window to 2 hours")),
+				"3": (self.key3, _("Set time window to 3 hours")),
+				"4": (self.key4, _("Set time window to 4 hours")),
+				"5": (self.key5, _("Set time window to 5 hours")),
+				"6": (self.key6, _("Set time window to 6 hours")),
+				"7": (self.prevPage, _("Go to previous page of service")),
+				"9": (self.nextPage, _("Go to next page of service")),
+				"8": (self.toTop, _("Go to first service")),
+				"0": (self.toEnd, _("Go to last service"))
+			}, -1)
 		self["inputactions"].csel = self
 
 		self.protectContextMenu = True
