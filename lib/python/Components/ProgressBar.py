@@ -1,26 +1,30 @@
-from enigma import eSlider
+# -*- coding: utf-8 -*-
 from Components.GUIComponent import GUIComponent
 from Components.VariableValue import VariableValue
 
+from enigma import eSlider
 
-class ProgressBar(VariableValue, GUIComponent):  # A general purpose progress bar
+# a general purpose progress bar
 
+
+class ProgressBar(VariableValue, GUIComponent):
 	def __init__(self):
 		GUIComponent.__init__(self)
 		VariableValue.__init__(self)
-		self.__range = (0, 100)
+		self.__start = 0
+		self.__end = 100
 
 	GUI_WIDGET = eSlider
 
 	def postWidgetCreate(self, instance):
-		instance.setRange(*self.__range)
+		instance.setRange(self.__start, self.__end)
 
 	def setRange(self, range):
-		self.__range = range
 		if self.instance is not None:
-			self.instance.setRange(*self.__range)
+			self.__start, self.__end = range
+			self.instance.setRange(self.__start, self.__end)
 
 	def getRange(self):
-		return self.__range
+		return (self.__start, self.__end)
 
 	range = property(getRange, setRange)
