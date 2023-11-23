@@ -26,8 +26,6 @@ class SessionGlobals(Screen):
 		self["RecordState"] = RecordState(session)
 		self["Standby"] = Boolean(fixed=False)
 
-		from Components.SystemInfo import SystemInfo
-
 		combine = Combine(func=lambda s: {(False, False): 0, (False, True): 1, (True, False): 2, (True, True): 3}[(s[0].boolean, s[1].boolean)])
 		combine.connect(self["Standby"])
 		combine.connect(self["RecordState"])
@@ -87,15 +85,15 @@ class SessionGlobals(Screen):
 		if config.usage.frontledrecstdby_color.value == "4":
 			RecstdbyLed1 = PATTERN_BLINK
 
-		nr_leds = SystemInfo.get("NumFrontpanelLEDs", 0)
+		nr_leds = BoxInfo.getItem("NumFrontpanelLEDs", 0)
 
 		if nr_leds == 1:
 			FrontpanelLed(which=0, boolean=False, patterns=[PATTERN_OFF, PATTERN_BLINK, PATTERN_OFF, PATTERN_BLINK]).connect(combine)
 		elif nr_leds == 2:
-			if model == "dm520":
+			if BoxInfo.getItem("model") == "dm520":
 				FrontpanelLed(which=0, boolean=False, patterns=[PATTERN_ON, PATTERN_BLINK, PATTERN_OFF, PATTERN_BLINK]).connect(combine)
 				FrontpanelLed(which=1, boolean=False, patterns=[PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]).connect(combine)
-			elif model in ("dm920", "dm900"):
+			elif BoxInfo.getItem("model") == ("dm920", "dm900"):
 				FrontpanelLed(which=0, boolean=False, patterns=[NormalLed0, RecLed0, StandbyLed0, RecstdbyLed0]).connect(combine)
 				FrontpanelLed(which=1, boolean=False, patterns=[NormalLed1, RecLed1, StandbyLed1, RecstdbyLed1]).connect(combine)
 			else:
