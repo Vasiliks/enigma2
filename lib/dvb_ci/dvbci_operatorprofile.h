@@ -6,7 +6,8 @@
 class eDVBCIOperatorProfileSession: public eDVBCISession
 {
 	enum {
-		stateStatus=statePrivate,
+		stateStatusRequest=statePrivate,
+		stateStatus,
 		stateFinal
 	};
 
