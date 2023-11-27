@@ -20,6 +20,12 @@ if [ -e /usr/bin/ciplushelper ]; then
 	sleep 3
 fi
 
+if [ -f "/proc/stb/fp/led_color" ]; then
+	echo "00ffffff" > /proc/stb/fp/led_color
+elif [ -f "/proc/stb/fp/led_brightness" ]; then
+	echo "000000ff" > /proc/stb/fp/led_brightness
+fi
+
 # any debuglevel passed?
 if [ -z $ENIGMA_DEBUG_LVL ]; then
 	DEBUG_LVL=3
