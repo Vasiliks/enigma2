@@ -8149,10 +8149,10 @@ msgstr "Информация о геолокации"
 msgid "Geolocation Information"
 msgstr "Информация о геолокации"
 
-msgid "Geolocation does not contain time zone information."
+msgid "Geolocation data does not contain time zone information."
 msgstr "Геолокация не содержит информации о часовом поясе."
 
-msgid "Geolocation has been used to set the time zone."
+msgid "Geolocation data has been used to set the time zone."
 msgstr "Геолокация использовалась для установки часового пояса."
 
 msgid "Geolocation information cannot be retrieved, please try again later."
@@ -8163,7 +8163,7 @@ msgid "Geolocation information for %s %s"
 msgstr "Информация о геолокации для %s %s"
 
 msgid ""
-"Geolocation is not available. There is no Internet.\n"
+"Geolocation data is not available. There is no Internet.\n"
 "Press \"OK\" to continue wizard."
 msgstr ""
 "Геолокация недоступна. Интернета нет.\n"

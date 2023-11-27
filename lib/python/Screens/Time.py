@@ -52,11 +52,11 @@ class Time(Setup):
 	def useGeolocation(self):
 		geolocationData = geolocation.getGeolocationData(fields="status,message,timezone,proxy")
 		if geolocationData.get("proxy", True):
-			self.session.open(MessageBox, 'Geolocation is not available.', MessageBox.TYPE_INFO, timeout=3)
+			self.session.open(MessageBox, 'Geolocation data is not available.', MessageBox.TYPE_INFO, timeout=3)
 			return
 		tz = geolocationData.get("timezone", None)
 		if tz is None:
-			self.session.open(MessageBox, 'Geolocation does not contain time zone information.', MessageBox.TYPE_INFO, timeout=3)
+			self.session.open(MessageBox, 'Geolocation data does not contain time zone information.', MessageBox.TYPE_INFO, timeout=3)
 		else:
 			areaItem = None
 			valItem = None
@@ -74,7 +74,7 @@ class Time(Setup):
 			if valItem is not None:
 				valItem[1].changed()
 			self["config"].invalidate(valItem)
-			self.session.open(MessageBox, 'Geolocation has been used to set the time zone.', MessageBox.TYPE_INFO, timeout=3)
+			self.session.open(MessageBox, 'Geolocation data has been used to set the time zone.', MessageBox.TYPE_INFO, timeout=3)
 
 	def yellow(self):  # Invoked from the Wizard.
 		self.useGeolocation()
@@ -238,11 +238,11 @@ class TimeWizard(ConfigListScreen, Screen, ShowRemoteControl):
 	def useGeolocation(self):
 		geolocationData = geolocation.getGeolocationData(fields="status,message,timezone,proxy")
 		if geolocationData.get("proxy", True):
-			self["text"].setText(_("Geolocation is not available. There is no Internet.\nPress \"OK\" to continue wizard."))
+			self["text"].setText(_("Geolocation data is not available. There is no Internet.\nPress \"OK\" to continue wizard."))
 			return
 		tz = geolocationData.get("timezone", None)
 		if not tz:
-			self["text"].setText(_("Geolocation does not contain time zone information."))
+			self["text"].setText(_("Geolocation data does not contain time zone information."))
 		else:
 			areaItem = None
 			valItem = None
