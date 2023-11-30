@@ -33,6 +33,7 @@ def InitUsageConfig():
 		("quad9security", _("Quad9 Security")),
 		("quad9nosecurity", _("Quad9 No Security")),
 		("cloudflare", _("Cloudflare")),
+		("nordvpn", _("NordVPN")),
 		("opendns", _("OpenDNS")),
 		("opendns-2", _("OpenDNS-2"))
 	])
