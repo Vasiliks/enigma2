@@ -19,6 +19,7 @@
 
 #include <lib/dvb/streamserver.h>
 #include <lib/dvb/encoder.h>
+#include <lib/python/python_helpers.h>
 
 eStreamClient::eStreamClient(eStreamServer *handler, int socket, const std::string remotehost)
  : parent(handler), encoderFd(-1), streamFd(socket), streamThread(NULL), m_remotehost(remotehost), m_timeout(eTimer::create(eApp))
@@ -160,8 +161,16 @@ void eStreamClient::notifier(int what)
 				set_tcp_option(streamFd, TCP_USER_TIMEOUT, 10 * 1000);
 
 				if (serviceref.substr(0, 10) == "file?file=") /* convert openwebif stream reqeust back to serviceref */
-					serviceref = std::string("1:0:1:0:0:0:0:0:0:0:") + serviceref.substr(10);
-
+					serviceref = "1:0:1:0:0:0:0:0:0:0:" + serviceref.substr(10);
+				/* Strip session ID from URL if it exists, PLi streaming can not handle it */
+				pos = serviceref.find("&sessionid=");
+				if (pos != std::string::npos) {
+					serviceref.erase(pos, std::string::npos);
+				}
+				pos = serviceref.find("?sessionid=");
+				if (pos != std::string::npos) {
+					serviceref.erase(pos, std::string::npos);
+				}
 				pos = serviceref.find('?');
 				if (pos == std::string::npos)
 				{
@@ -211,7 +220,8 @@ void eStreamClient::notifier(int what)
 						int interlaced = 0;
 						int aspectratio = 0;
 						int buffersize;
-						std::string vcodec, acodec;
+						std::string vcodec = "h264";
+						std::string acodec = "aac";
 
 						sscanf(request.substr(pos).c_str(), "&bitrate=%d", &bitrate);
 						pos = request.find("&width=");
@@ -249,14 +259,13 @@ void eStreamClient::notifier(int what)
 								acodec = acodec.substr(0, pos);
 							}
 						}
-
 						encoderFd = -1;
 
-						if(eEncoder::getInstance())
+						if (eEncoder::getInstance())
 							encoderFd = eEncoder::getInstance()->allocateEncoder(serviceref, buffersize, bitrate, width, height, framerate, !!interlaced, aspectratio,
 									vcodec, acodec);
 
-						if(encoderFd >= 0)
+						if (encoderFd >= 0)
 						{
 							m_serviceref = serviceref;
 							m_useencoder = true;
@@ -369,6 +378,89 @@ bool eStreamServer::stopStreamClient(const std::string remotehost, const std::st
 	}
 	return false;
 }
+
+PyObject *eStreamServer::getConnectedClientDetails(int index)
+{
+	ePyObject ret;
+
+	eUsePtr<iDVBChannel> stream_channel;
+	eServiceReferenceDVB dvbservice;
+
+	int idx = 0;
+	for (eSmartPtrList<eStreamClient>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if(idx == index)
+		{
+			dvbservice = it->getDVBService();
+			break;
+		}
+	}
+
+	if(dvbservice)
+	{
+		std::list<eDVBResourceManager::active_channel> list;
+		ePtr<eDVBResourceManager> res_mgr;
+		if ( !eDVBResourceManager::getInstance( res_mgr ) )
+		{
+			res_mgr->getActiveChannels(list);
+		}
+
+		if(list.size()) {
+		
+			eDVBChannelID channel;
+			dvbservice.getChannelID(channel);
+
+			for (std::list<eDVBResourceManager::active_channel>::iterator i(list.begin()); i != list.end(); ++i)
+			{
+				std::string channelid = i->m_channel_id.toString();
+				if (channelid == channel.toString().c_str())
+				{
+					stream_channel = i->m_channel;
+					break;
+				}
+			}
+					
+		}
+
+	}
+
+	ret = PyDict_New();
+
+	if(stream_channel)
+	{
+
+		ePtr<iDVBFrontend> fe;
+		if(!stream_channel->getFrontend(fe))
+		{
+
+			ePtr<iDVBFrontendData> fdata;
+			fe->getFrontendData(fdata);
+			if (fdata)
+			{
+				ePyObject fret = PyDict_New();;
+				frontendDataToDict(fret, fdata);
+				PutToDict(ret, "frontend", fret);
+			}
+
+
+			ePtr<iDVBTransponderData> tdata;
+			fe->getTransponderData(tdata, true);
+			if (tdata)
+			{
+				ePyObject tret = PyDict_New();;
+				transponderDataToDict(tret, tdata);
+				PutToDict(ret, "transponder", tret);
+			}
+
+		}
+
+	}
+
+	return ret;
+
+}
+
+
 
 PyObject *eStreamServer::getConnectedClients()
 {
