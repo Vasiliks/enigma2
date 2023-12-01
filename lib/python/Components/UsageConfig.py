@@ -185,6 +185,7 @@ def InitUsageConfig():
 	config.usage.volume_instead_of_channelselection = ConfigYesNo(default=False)
 	config.usage.channelselection_preview = ConfigYesNo(default=False)
 	config.usage.show_spinner = ConfigYesNo(default=True)
+	config.usage.enable_blinking = ConfigYesNo(default=True)
 	config.usage.plugin_sort_weight = ConfigDictionarySet()
 	config.usage.menu_sort_weight = ConfigDictionarySet(default={"mainmenu": {"submenu": {}}})
 	config.usage.menu_sort_mode = ConfigSelection(default="default", choices=[
