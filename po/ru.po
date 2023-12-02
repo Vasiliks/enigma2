@@ -15735,6 +15735,12 @@ msgstr "Порт Stream Relay"
 msgid "Stream Relay URL"
 msgstr "URL-адрес Stream Relay"
 
+msgid "Stream Relay Settings"
+msgstr "Настройки Stream Relay"
+
+msgid "Stream Relay Setup Actions"
+msgstr "Действия по настройке Stream Relay"
+
 msgid "Stream request"
 msgstr "Запрос стрима"
 

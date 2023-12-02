@@ -217,6 +217,7 @@ class InfoBarStreamRelay:
 
 	def reload(self):
 		self.streamRelay = fileReadLines(self.FILENAME, default=[], source=self.__class__.__name__)
+		self.streamRelay = [streamRelay for streamRelay in self.streamRelay if streamRelay]
 
 	def check(self, nav, service):
 		return (service or nav.getCurrentlyPlayingServiceReference()) and service.toString() in self.streamRelay
@@ -227,12 +228,8 @@ class InfoBarStreamRelay:
 	def toggle(self, nav, service):
 		if isinstance(service, list):
 			serviceList = service
-			for service in serviceList:
-				servicestring = service.toString()
-				if servicestring in self.streamRelay:
-					self.streamRelay.remove(servicestring)
-				else:
-					self.streamRelay.append(servicestring)
+			serviceList = [service.toString() for service in serviceList]
+			self.streamRelay = list(set(serviceList + self.streamRelay))
 			self.write()
 		else:
 			service = service or nav.getCurrentlyPlayingServiceReference()
@@ -245,6 +242,15 @@ class InfoBarStreamRelay:
 					if nav.getCurrentlyPlayingServiceReference() == service:  # if nav.getCurrentlyPlayingServiceReference():
 						nav.restartService()
 				self.write()
+
+	def getData(self):
+		return self.streamRelay
+
+	def setData(self, value):
+		self.streamRelay = value
+		self.write()
+
+	data = property(getData, setData)
 
 	def streamrelayChecker(self, playref):
 		playrefstring = playref.toString()
