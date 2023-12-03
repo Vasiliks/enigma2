@@ -41,7 +41,7 @@ class Pager(GUIAddon):
 		elif hasattr(self.source, "onSelChanged"):
 			if self.initPager not in self.source.onSelChanged:
 				self.source.onSelChanged.append(self.initPager)
-				
+
 		self.initPager()
 
 	GUI_WIDGET = eListbox
@@ -244,7 +244,7 @@ class Pager(GUIAddon):
 			elif attrib == "showIcons":
 				self.showIcons = value
 			elif attrib == "maxPages":
-				self.max_pages = value
+				self.max_pages = parseScale(value)
 			elif attrib == "orientation":
 				self.orientation = self.orientations.get(value, self.orientations["orHorizontal"])
 				if self.orientation == eListbox.orHorizontal:
