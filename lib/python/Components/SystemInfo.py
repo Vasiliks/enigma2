@@ -376,6 +376,7 @@ SystemInfo["LcdLiveTV"] = fileCheck("/proc/stb/fb/sd_detach") or fileCheck("/pro
 SystemInfo["LcdLiveTVMode"] = fileCheck("/proc/stb/lcd/mode")
 SystemInfo["LcdLiveDecoder"] = fileCheck("/proc/stb/lcd/live_decoder")
 SystemInfo["LCDMiniTV"] = fileExists("/proc/stb/lcd/mode")
+SystemInfo["LCDMiniTVPiP"] = SystemInfo["LCDMiniTV"] and model not in ("gb800ueplus", "gbquad4k", "gbue4k")
 SystemInfo["ConfigDisplay"] = SystemInfo["FrontpanelDisplay"]
 SystemInfo["DefaultDisplayBrightness"] = model in ("dm900", "dm920", "one", "two") and 8 or 5
 SystemInfo["FastChannelChange"] = False
