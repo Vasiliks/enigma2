@@ -1,181 +1,150 @@
 # -*- coding: utf-8 -*-
 from Components.Converter.Converter import Converter
+from enigma import iServiceInformation, iPlayableService, iPlayableServicePtr, eServiceReference
+from ServiceReference import resolveAlternate
 from Components.config import config
-from enigma import iServiceInformation, iPlayableService, iPlayableServicePtr, eServiceReference, eEPGCache, eServiceCenter
 from Components.Element import cached
-from ServiceReference import resolveAlternate, ServiceReference
-from Tools.Directories import fileExists
-from Tools.Transponder import ConvertToHumanReadable, getChannelNumber
-from Components.NimManager import nimmanager
-import Screens.InfoBar
+from Tools.Transponder import ConvertToHumanReadable
 
 
 class ServiceName(Converter):
 	NAME = 0
-	NAME_ONLY = 1
-	NAME_EVENT = 2
-	PROVIDER = 3
-	REFERENCE = 4
-	EDITREFERENCE = 5
-	TRANSPONDER = 6
+	PROVIDER = 1
+	REFERENCE = 2
+	EDITREFERENCE = 3
+	NUMBER = 4
+	FORMAT_STRING = 5
 
 	def __init__(self, type):
 		Converter.__init__(self, type)
-		self.epgQuery = eEPGCache.getInstance().lookupEventTime
-		self.mode = ""
-		if ';' in type:
-			type, self.mode = type.split(';')
-		if type == "Provider":
-			self.type = self.PROVIDER
-		elif type == "Reference":
-			self.type = self.REFERENCE
-		elif type == "EditReference":
-			self.type = self.EDITREFERENCE
-		elif type == "NameOnly":
-			self.type = self.NAME_ONLY
-		elif type == "NameAndEvent":
-			self.type = self.NAME_EVENT
-		elif type == "TransponderInfo":
-			self.type = self.TRANSPONDER
+
+		self.parts = type.split(",")
+		if len(self.parts) > 1:
+			self.type = self.FORMAT_STRING
+			self.separator = self.parts[0]
 		else:
-			self.type = self.NAME
+			if type == "Provider":
+				self.type = self.PROVIDER
+			elif type == "Reference":
+				self.type = self.REFERENCE
+			elif type == "EditReference":
+				self.type = self.EDITREFERENCE
+			elif type == "Number":
+				self.type = self.NUMBER
+			else:
+				self.type = self.NAME
 
 	@cached
 	def getText(self):
 		service = self.source.service
-		info = None
-		if isinstance(service, eServiceReference):
-			info = self.source.info
-		elif isinstance(service, iPlayableServicePtr):
+		if isinstance(service, iPlayableServicePtr):
 			info = service and service.info()
-			service = None
-
+			ref = None
+		else: # reference
+			info = service and self.source.info
+			ref = service
 		if not info:
 			return ""
-
-		if self.type == self.NAME or self.type == self.NAME_ONLY or self.type == self.NAME_EVENT:
-			name = service and info.getName(service)
-			if name is None:
-				name = info.getName()
-			name = name.replace('\xc2\x86', '').replace('\xc2\x87', '').replace('_', ' ')
-			if self.type == self.NAME_EVENT:
-				act_event = info and info.getEvent(0)
-				if not act_event and info:
-					refstr = info.getInfoString(iServiceInformation.sServiceref)
-					act_event = self.epgQuery(eServiceReference(refstr), -1, 0)
-				if act_event is None:
-					return "%s - " % name
-				else:
-					return "%s - %s" % (name, act_event.getEventName())
-			elif self.type != self.NAME_ONLY and config.usage.show_channel_numbers_in_servicelist.value and hasattr(self.source, "serviceref") and self.source.serviceref and '0:0:0:0:0:0:0:0:0' not in self.source.serviceref.toString():
-				numservice = self.source.serviceref
-				num = numservice and numservice.getChannelNum() or None
-				if num is not None:
-					return str(num) + '   ' + name
-				else:
-					return name
-			else:
-				return name
+		if self.type == self.NAME:
+			return self.getName(ref, info)
 		elif self.type == self.PROVIDER:
-			return info.getInfoString(iServiceInformation.sProvider)
+			return self.getProvider(ref, info)
 		elif self.type == self.REFERENCE or self.type == self.EDITREFERENCE and hasattr(self.source, "editmode") and self.source.editmode:
-			if not service:
-				refstr = info.getInfoString(iServiceInformation.sServiceref)
-				path = refstr and eServiceReference(refstr).getPath()
-				if path and fileExists("%s.meta" % path):
-					fd = open("%s.meta" % path)
-					refstr = fd.readline().strip()
-					fd.close()
-				return refstr
-			nref = resolveAlternate(service)
+			if not ref:
+				return info.getInfoString(iServiceInformation.sServiceref)
+			nref = resolveAlternate(ref)
 			if nref:
-				service = nref
-			return service.toString()
-		elif self.type == self.TRANSPONDER:
-			if service:
-				nref = resolveAlternate(service)
-				if nref:
-					service = nref
-					info = eServiceCenter.getInstance().info(service)
-				transponder_info = info.getInfoObject(service, iServiceInformation.sTransponderData)
-			else:
-				transponder_info = info.getInfoObject(iServiceInformation.sTransponderData)
-			if "InRootOnly" in self.mode and not self.rootBouquet():
-				return ""
-			if "NoRoot" in self.mode and self.rootBouquet():
-				return ""
-			if transponder_info:
-				self.t_info = ConvertToHumanReadable(transponder_info)
-				if self.system() is None:  # catch driver bug
-					return ""
-				if "DVB-T" in self.system():
-					return self.dvb_t()
-				elif "DVB-C" in self.system():
-					return self.dvb_c()
-				return self.dvb_s()
-			if service:
-				result = service.toString()
-			else:
-				result = info.getInfoString(iServiceInformation.sServiceref)
-			if "%3a//" in result:
-				return result.rsplit("%3a//", 1)[1].split("/")[0]
-			return ""
+				ref = nref
+			return ref.toString()
+		elif self.type == self.NUMBER:
+			numservice = self.source.serviceref
+			return self.getNumber(numservice, info)
+		elif self.type == self.FORMAT_STRING:
+			name = self.getName(ref, info)
+			numservice = hasattr(self.source, "serviceref") and self.source.serviceref
+			num = numservice and self.getNumber(numservice, info) or ""
+			orbpos, tp_data = self.getOrbitalPos(ref, info)
+			provider = self.getProvider(ref, info, tp_data)
+			tuner_system = ref and info and self.getServiceSystem(ref, info, tp_data)
+			res_str = ""
+			for x in self.parts[1:]:
+				if x == "NUMBER" and num:
+					res_str = self.appendToStringWithSeparator(res_str, num)
+				if x == "NAME" and name:
+					res_str = self.appendToStringWithSeparator(res_str, name)
+				if x == "ORBPOS" and orbpos:
+					res_str = self.appendToStringWithSeparator(res_str, orbpos)
+				if x == "PROVIDER" and provider:
+					res_str = self.appendToStringWithSeparator(res_str, provider)
+				if x == "TUNERSYSTEM" and tuner_system:
+					res_str = self.appendToStringWithSeparator(res_str, tuner_system)
+			return res_str
+
+
 
 	text = property(getText)
 
 	def changed(self, what):
-		if what[0] != self.CHANGED_SPECIFIC or what[1] in (iPlayableService.evStart,):
+		if what[0] != self.CHANGED_SPECIFIC or what[1] in (iPlayableService.evStart, iPlayableService.evNewProgramInfo):
 			Converter.changed(self, what)
 
-	def dvb_s(self):
-		return "%s %s %s %s %s %s %s" % (self.orb_pos(), self.system(), self.freq(), self.polar(), self.s_rate(), self.fec(), self.mod())
+	def getName(self, ref, info):
+		name = ref and info.getName(ref)
+		if name is None:
+			name = info.getName()
+		return name.replace('\xc2\x86', '').replace('\xc2\x87', '').replace('_', ' ')
 
-	def dvb_t(self):
-		return "%s %s %s/%s" % (self.system(), self.ch_number(), self.freq(), self.bandwidth())
+	def getNumber(self, ref, info):
+		if not ref:
+			ref = eServiceReference(info.getInfoString(iServiceInformation.sServiceref))
+		num = ref and ref.getChannelNum() or None
+		if num is None:
+			num = '---'
+		else:
+			num = str(num)
+		return num
 
-	def dvb_c(self):
-		return "%s %s %s %s %s" % (self.system(), self.freq(), self.s_rate(), self.fec(), self.mod())
+	def getProvider(self, ref, info, tp_data=None):
+		if ref:
+			return info.getInfoString(ref, iServiceInformation.sProvider)
+		return info.getInfoString(iServiceInformation.sProvider)
 
-	def system(self):
-		return self.t_info["system"]
+	def getOrbitalPos(self, ref, info):
+		orbitalpos = ""
+		if ref:
+			tp_data = info.getInfoObject(ref, iServiceInformation.sTransponderData)
+		else:
+			tp_data = info.getInfoObject(iServiceInformation.sTransponderData)
 
-	def freq(self):
-		return self.t_info["frequency"]
+		if not tp_data and not ref:
+			service = self.source.service
+			if service:
+				feraw = service.frontendInfo()
+				tp_data = feraw and feraw.getAll(config.usage.infobar_frontend_source.value == "settings")
 
-	def bandwidth(self):
-		return self.t_info["bandwidth"]
+		if tp_data is not None:
+			try:
+				position = tp_data["orbital_position"]
+				if position > 1800: # west
+					orbitalpos = "%.1f " %(float(3600 - position)/10) + _("°W")
+				else:
+					orbitalpos = "%.1f " %(float(position)/10) + _("°E")
+			except:
+				pass
+		return orbitalpos, tp_data
 
-	def s_rate(self):
-		return self.t_info["symbol_rate"]
+	def getServiceSystem(self, ref, info, feraw):
+		if ref:
+			sref = info.getInfoObject(ref, iServiceInformation.sServiceref)
+		else:
+			sref = info.getInfoObject(iServiceInformation.sServiceref)
 
-	def mod(self):
-		return self.t_info["modulation"]
+		if not sref:
+			sref = ref.toString()
 
-	def polar(self):
-		return self.t_info["polarization_abbreviation"]
+		if sref and "%3a//" in sref:
+			return "IPTV"
 
-	def orb_pos(self):
-		op = self.t_info["orbital_position"]
-		if '(' in op:
-			op = op.split('(')[1]
-			return "%s%s%s" % (op[:-2], "\u00B0", op[-2:-1])
-		op = op.split(' ')[0]
-		return "%s%s%s" % (op[:-1], "\u00B0", op[-1:])
+		fedata = ConvertToHumanReadable(feraw)
 
-	def fec(self):
-		return self.t_info["fec_inner"]
-
-	def ch_number(self):
-		for n in nimmanager.nim_slots:
-			if n.isCompatible("DVB-T"):
-				channel = getChannelNumber(self.freq(), n.slot)
-				if channel:
-					return _("CH") + "%s" % channel
-		return ""
-
-	def rootBouquet(self):
-		servicelist = Screens.InfoBar.InfoBar.instance.servicelist
-		epg_bouquet = servicelist and servicelist.getRoot()
-		if ServiceReference(epg_bouquet).getServiceName():
-			return False
-		return True
+		return fedata.get("system") or ""
