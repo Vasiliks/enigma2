@@ -35,7 +35,7 @@ from Screens.Hotkey import InfoBarHotkey, hotkeyActionMap, hotkey
 profile("ChannelSelection.py 4")
 from Screens.PictureInPicture import PictureInPicture
 from Screens.RdsDisplay import RassInteractive
-from ServiceReference import ServiceReference, service_types_tv_ref, service_types_radio_ref, serviceRefAppendPath, hdmiInServiceRef
+from ServiceReference import ServiceReference, service_types_tv_ref, service_types_radio_ref, serviceRefAppendPath, getStreamRelayRef, hdmiInServiceRef
 from Tools.BoundFunction import boundFunction
 from Tools.Notifications import RemovePopup
 from Tools.Alternatives import GetWithAlternative, CompareWithAlternatives
@@ -87,19 +87,6 @@ class BouquetSelector(Screen):
 
 	def cancelClick(self):
 		self.close(False)
-
-
-def getStreamRelayRef(sref):
-	try:
-		if "http" in sref:
-			icamport = config.misc.softcam_streamrelay_port.value
-			icamip = ".".join("%d" % d for d in config.misc.softcam_streamrelay_url.value)
-			icam = f"http%3a//{icamip}%3a{icamport}/"
-			if icam in sref:
-				return sref.split(icam)[1].split(":")[0].replace("%3a", ":"), True
-	except Exception:
-		pass
-	return sref, False
 
 
 class SilentBouquetSelector:
