@@ -16,6 +16,6 @@ install_PYTHON = \
 	SessionGlobals.py LocationBox.py WizardLanguage.py TaskView.py VirtualKeyBoard.py \
 	TextBox.py FactoryReset.py Recording.py UnhandledKey.py ServiceStopScreen.py \
 	InputDeviceSetup.py DVD.py SoftwareUpdate.py AutoDiseqc.py InstallWizard.py ScreenSaver.py \
-	Hotkey.py StreamingClientsInfo.py SoftcamSetup.py FlashImage.py SetupFallbacktuner.py \
+	Hotkey.py StreamingClientsInfo.py SoftcamSetup.py SetupFallbacktuner.py \
 	SkinSelector.py CronTimer.py OScamInfo.py LogManager.py Time.py UserInterfacePositioner.py WizardUserInterfacePositioner.py \
-	QuadPiP.py
+	QuadPiP.py FlashManager.py MultiBootManager.py

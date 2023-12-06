@@ -1313,7 +1313,6 @@ def InitUsageConfig():
 	if not os.path.exists(keytranslation):
 		keytranslation = eEnv.resolve("${datadir}/enigma2/keytranslation.xml")
 	config.usage.keytrans = ConfigText(default=keytranslation)
-	config.usage.alternative_imagefeed = ConfigText(default="", fixed_size=False)
 
 	# This is already in StartEniga.py.
 	# config.crash = ConfigSubsection()

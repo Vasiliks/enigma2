@@ -172,7 +172,7 @@ socfamily = BoxInfo.getItem("socfamily")
 mtdkernel = BoxInfo.getItem("mtdkernel")
 procModel = getBoxProc()
 
-from Tools.Multiboot import getMultibootStartupDevice, getMultibootslots  # This import needs to be here to avoid a SystemInfo load loop!
+from Tools.MultiBoot import MultiBoot
 
 
 def getBoxDisplayName():  # This function returns a tuple like ("BRANDNAME", "BOXNAME")
@@ -292,6 +292,11 @@ BoxInfo.setItem("ModuleLayout", getModuleLayout(), immutable=True)
 #
 BoxInfo.setItem("RCImage", getRCFile("png"))
 BoxInfo.setItem("RCMapping", getRCFile("xml"))
+BoxInfo.setItem("canMultiBoot", MultiBoot.getBootSlots())
+BoxInfo.setItem("HasKexecMultiboot", fileHas("/proc/cmdline", "kexec=1"))
+BoxInfo.setItem("cankexec", BoxInfo.getItem("kexecmb") and fileExists("/usr/bin/kernel_auto.bin") and fileExists("/usr/bin/STARTUP.cpio.gz") and not BoxInfo.getItem("HasKexecMultiboot"))
+BoxInfo.setItem("HasSDmmc", MultiBoot.canMultiBoot() and "sd" in MultiBoot.getBootSlots()["2"] and "mmcblk" in MTDROOTFS)
+
 BoxInfo.setItem("RemoteEnable", model in ("dm800", "azboxhd"))
 if model in ("maram9", "axodin"):
 	repeat = 400
@@ -409,11 +414,7 @@ SystemInfo["hasXcoreVFD"] = model in ("osmega", "spycat4k", "spycat4kmini", "spy
 SystemInfo["HasOfflineDecoding"] = model not in ("osmini", "osminiplus", "et7000mini", "et11000", "mbmicro", "mbtwinplus", "mbmicrov2", "et7000", "et8500")
 SystemInfo["hasKexec"] = fileContains("/proc/cmdline", "kexec=1")
 SystemInfo["canKexec"] = not SystemInfo["hasKexec"] and isfile("/usr/bin/kernel_auto.bin") and isfile("/usr/bin/STARTUP.cpio.gz") and (model in ("vuduo4k", "vuduo4kse") and ["mmcblk0p9", "mmcblk0p6"] or model in ("vusolo4k", "vuultimo4k", "vuuno4k", "vuuno4kse") and ["mmcblk0p4", "mmcblk0p1"] or model == "vuzero4k" and ["mmcblk0p7", "mmcblk0p4"])
-SystemInfo["MultibootStartupDevice"] = getMultibootStartupDevice()
 SystemInfo["canMode12"] = "%s_4.boxmode" % model in cmdline and cmdline["%s_4.boxmode" % model] in ("1", "12") and "192M"
-SystemInfo["canMultiBoot"] = getMultibootslots()
-SystemInfo["canDualBoot"] = fileCheck("/dev/block/by-name/flag")
-SystemInfo["canFlashWithOfgwrite"] = model not in ("dm")
 SystemInfo["CanProc"] = SystemInfo["HasMMC"] and not SystemInfo["Blindscan_t2_available"]
 SystemInfo["CanChangeOsdAlpha"] = access("/proc/stb/video/alpha", R_OK) and True or False
 SystemInfo["CanChangeOsdPlaneAlpha"] = access("/sys/class/graphics/fb0/osd_plane_alpha", R_OK) and True or False
