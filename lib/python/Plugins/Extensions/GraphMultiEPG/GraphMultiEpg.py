@@ -7,7 +7,7 @@ from Components.ActionMap import HelpableActionMap
 from Components.GUIComponent import GUIComponent
 from Components.EpgList import Rect
 from Components.Sources.Event import Event
-from Components.MultiContent import MultiContentEntryText, MultiContentEntryPixmapAlphaBlend
+from Components.MultiContent import MultiContentEntryText, MultiContentEntryPixmapAlphaBlend, MultiContentEntryPixmap
 from Components.TimerList import TimerList
 from Components.Renderer.Picon import getPiconName
 from Components.Sources.ServiceEvent import ServiceEvent
@@ -229,9 +229,6 @@ class EPGList(GUIComponent):
 		def ServiceForegroundColorDisabled(value):
 			self.foreColorDis = parseColor(value).argb()
 
-		def ServiceBackgroundColorDisabled(value):
-			self.backColorDis = parseColor(value).argb()
-
 		def ServiceBackgroundColor(value):
 			self.backColorService = parseColor(value).argb()
 
@@ -240,6 +237,9 @@ class EPGList(GUIComponent):
 
 		def ServiceBackgroundColorRecording(value):
 			self.backColorRec = parseColor(value).argb()
+
+		def ServiceBackgroundColorDisabled(value):
+			self.backColorDis = parseColor(value).argb()
 
 		def ServiceBorderColor(value):
 			self.borderColorService = parseColor(value).argb()
@@ -543,7 +543,7 @@ class EPGList(GUIComponent):
 						flags=BT_SCALE))
 
 		if bgpng is not None:    # bacground for service rect
-			res.append(MultiContentEntryPixmapAlphaBlend(
+			res.append(MultiContentEntryPixmap(
 					pos=(r1.x + self.serviceBorderVerWidth, r1.y + self.serviceBorderHorWidth),
 					size=(r1.w - 2 * self.serviceBorderVerWidth, r1.h - 2 * self.serviceBorderHorWidth),
 					png=bgpng,
@@ -655,9 +655,9 @@ class EPGList(GUIComponent):
 					bgpng = self.othEvPix
 
 				if bgpng is not None:
-					res.append(MultiContentEntryPixmapAlphaBlend(
-						pos=(left + xpos + self.eventBorderVerWidth, top + self.eventBorderHorWidth),
-						size=(ewidth - 2 * self.eventBorderVerWidth, height - 2 * self.eventBorderHorWidth),
+					res.append(MultiContentEntryPixmap(
+						pos=(left + xpos, top + self.eventBorderHorWidth),
+						size=(ewidth, height - self.eventBorderHorWidth),
 						png=bgpng,
 						flags=BT_SCALE))
 				else:
