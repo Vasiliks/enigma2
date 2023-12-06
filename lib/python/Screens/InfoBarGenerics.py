@@ -622,8 +622,8 @@ class InfoBarShowHide(InfoBarScreenSaver):
 			open('/etc/enigma2/whitelist_vbi', 'w').write('\n'.join(whitelist.vbi))
 			self.showHideVBI()
 
-	def checkStreamrelay(self, service=None):
-		return streamrelay.check(self.session.nav, service)
+	def checkStreamrelay(self, service):
+		return (service and service.toString() in whitelist.streamrelay)
 
 	def ToggleStreamrelay(self, service=None):
 		streamrelay.toggle(self.session.nav, service)
