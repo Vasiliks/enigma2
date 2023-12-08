@@ -17,6 +17,7 @@ from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Screens.Setup import Setup
 from Screens.Standby import QUIT_REBOOT, TryQuitMainloop
+from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLines, fileWriteLine
 from Tools.MultiBoot import MultiBoot
 
@@ -151,7 +152,7 @@ class MultiBootManager(Screen, HelpableScreen):
 		self.close(True)
 
 	def deleteImage(self):
-		self.session.openWithCallback(self.deleteImageAnswer, MessageBox, "%s\n\n%s" % (self["slotlist"].l.getCurrentSelection()[0][0], _("Are you sure you want to delete this image?")), simple=True, windowTitle=self.getTitle())
+		self.session.openWithCallback(self.deleteImageAnswer, MessageBox, "%s\n\n%s" % (self["slotlist"].l.getCurrentSelection()[0][0], _("Are you sure you want to delete this image?")), simple=True, title=self.getTitle())
 
 	def deleteImageAnswer(self, answer):
 		if answer:
@@ -407,7 +408,7 @@ class KexecSlotManager(Setup):
 				startupFileContent = "kernel=%s/linuxrootfs%d/zImage root=UUID=%s rootsubdir=%s/linuxrootfs%d%s" % (model, slot, self.kexecSlotManagerDevice, model, slot, rootWait)
 				with open("/STARTUP_%d" % slot, "w") as fd:
 					fd.write(startupFileContent)
-			self.session.openWithCallback(restartCallback, MessageBox, _("Restart necessary, restart GUI now?"), MessageBox.TYPE_YESNO, windowTitle=self.getTitle())
+			self.session.openWithCallback(restartCallback, MessageBox, _("Restart necessary, restart GUI now?"), MessageBox.TYPE_YESNO, title=self.getTitle())
 
 		if self.kexecSlotManagerDevice:
 			createSlots()
@@ -421,7 +422,7 @@ class KexecSlotManager(Setup):
 			]
 			for deviceID, deviceData in self.deviceData.items():
 				choiceList.append(("%s (%s)" % (deviceData[1], deviceData[0]), deviceID))
-			self.session.openWithCallback(self.deviceSelectionCallback, MessageBox, text=_("Please select the device or Cancel to cancel the selection."), list=choiceList, windowTitle=self.getTitle())
+			self.session.openWithCallback(self.deviceSelectionCallback, MessageBox, text=_("Please select the device or Cancel to cancel the selection."), list=choiceList, title=self.getTitle())
 
 		self.readDevices(readDevicesCallback)
 
@@ -635,7 +636,7 @@ arg=${bootargs} logo=osd0,loaded,0x7f800000 vout=1080p50hz,enable hdmimode=1080p
 				self.session.open(ConsoleScreen, title=self.getTitle(), cmdlist=cmdlist, finishedCallback=formatDeviceCallback, closeOnSuccess=True)
 
 		def formatDeviceCallback():
-			self.session.openWithCallback(restartCallback, MessageBox, _("Restart necessary, restart GUI now?"), MessageBox.TYPE_YESNO, windowTitle=self.getTitle())
+			self.session.openWithCallback(restartCallback, MessageBox, _("Restart necessary, restart GUI now?"), MessageBox.TYPE_YESNO, title=self.getTitle())
 
 		if self.GPTSlotManagerDevice:
 			createSlots()
@@ -649,7 +650,7 @@ arg=${bootargs} logo=osd0,loaded,0x7f800000 vout=1080p50hz,enable hdmimode=1080p
 			]
 			for deviceData in self.deviceData.items():
 				choiceList.append(("%s (%s)" % (deviceData[1], deviceData[0]), 1))
-			self.session.openWithCallback(self.deviceSelectionCallback, MessageBox, text=_("Please select the device or Cancel to cancel the selection."), list=choiceList, windowTitle=self.getTitle())
+			self.session.openWithCallback(self.deviceSelectionCallback, MessageBox, text=_("Please select the device or Cancel to cancel the selection."), list=choiceList, title=self.getTitle())
 
 		self.readDevices(readDevicesCallback)
 
