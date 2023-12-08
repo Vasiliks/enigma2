@@ -24,6 +24,8 @@ from Screens.Screen import Screen
 from Tools.Downloader import downloadWithProgress
 from Tools.MultiBoot import MultiBoot
 
+model = BoxInfo.getItem("model")
+
 UMOUNT = "/bin/umount"
 OFGWRITE = "/usr/bin/ofgwrite"
 
@@ -108,7 +110,7 @@ class FlashManager(Screen, HelpableScreen):
 			return result[0] if result else None
 
 		def getImages(path, files):
-			for file in [x for x in files if splitext(x)[1] == ".zip" and not basename(x).startswith(".") and (boxname in x or machinebuild in x or model in x)]:
+			for file in [x for x in files if splitext(x)[1] == ".zip" and not basename(x).startswith(".") and (model in x)]:
 				try:
 					zipData = ZipFile(file, mode="r")
 					zipFiles = zipData.namelist()
@@ -130,13 +132,9 @@ class FlashManager(Screen, HelpableScreen):
 			if self.imageFeed != "openpli":
 				self.keyDistributionCallback("openpli")  # No images can be found for the selected distribution so go back to the openpli default.
 
-		machinebuild = BoxInfo.getItem("machinebuild")
-		model = BoxInfo.getItem("model")
-		boxname = BoxInfo.getItem("BoxName")
-
 		if not self.imagesList:
 			index = findInList(self.imageFeed)
-			box = machinebuild if index else boxname
+			box = model
 			feedURL = self.feedUrls[index][FEED_JSON_URL] if index else "https://images.mynonpublic.com/openatv/json/%s" % box
 			try:
 				req = Request(feedURL, None, USER_AGENT)
@@ -153,14 +151,14 @@ class FlashManager(Screen, HelpableScreen):
 				for media in ["/media/%s" % x for x in listdir("/media")] + (["/media/net/%s" % x for x in listdir("/media/net")] if isdir("/media/net") else []):
 					# print("[FlashManager] getImagesList DEBUG: media='%s'." % media)
 					if not (BoxInfo.getItem("HasMMC") and "/mmc" in media) and isdir(media):
-						getImages(media, [join(media, x) for x in listdir(media) if splitext(x)[1] == ".zip" and (boxname in x or machinebuild in x or model in x)])
+						getImages(media, [join(media, x) for x in listdir(media) if splitext(x)[1] == ".zip" and (model in x)])
 						for folder in ["images", "downloaded_images", "imagebackups"]:
 							if folder in listdir(media):
 								subFolder = join(media, folder)
 								# print("[FlashManager] getImagesList DEBUG: subFolder='%s'." % subFolder)
 								if isdir(subFolder) and not islink(subFolder) and not ismount(subFolder):
 									# print("[FlashManager] getImagesList DEBUG: Next subFolder='%s'." % subFolder)
-									getImages(subFolder, [join(subFolder, x) for x in listdir(subFolder) if splitext(x)[1] == ".zip" and (boxname in x or machinebuild in x or model in x)])
+									getImages(subFolder, [join(subFolder, x) for x in listdir(subFolder) if splitext(x)[1] == ".zip" and (model in x)])
 									for dir in [dir for dir in [join(subFolder, dir) for dir in listdir(subFolder)] if isdir(dir) and splitext(dir)[1] == ".unzipped"]:
 										try:
 											rmtree(dir)
@@ -188,7 +186,7 @@ class FlashManager(Screen, HelpableScreen):
 				self.setIndex = 0
 			self.selectionChanged()
 		else:
-			self.session.openWithCallback(getImagesListCallback, MessageBox, _("Error: Cannot find any images!"), type=MessageBox.TYPE_ERROR, timeout=3, windowTitle=self.getTitle())
+			self.session.openWithCallback(getImagesListCallback, MessageBox, _("Error: Cannot find any images!"), type=MessageBox.TYPE_ERROR, timeout=3, title=self.getTitle())
 
 	def keyCancel(self):
 		self.close()
@@ -239,7 +237,7 @@ class FlashManager(Screen, HelpableScreen):
 		self.feedUrls = [["openATV", "https://images.mynonpublic.com/openatv/json/%s" % BoxInfo.getItem("BoxName")]]
 		distributionList = []
 		default = 0
-		machine = BoxInfo.getItem("machinebuild")
+		machine = BoxInfo.getItem("model")
 		try:
 			req = Request("https://raw.githubusercontent.com/OpenATV/FlashImage/gh-pages/%s.json" % machine, None, USER_AGENT)
 			responseList = load(urlopen(req, timeout=5))
@@ -250,7 +248,7 @@ class FlashManager(Screen, HelpableScreen):
 			distributionList.append((distribution, distribution))
 			if distribution == self.imageFeed:
 				default = index
-		self.session.openWithCallback(self.keyDistributionCallback, MessageBox, _("Please select a distribution from which you would like to flash an image:"), list=distributionList, default=default, windowTitle=_("Flash Manager - Distributions"))
+		self.session.openWithCallback(self.keyDistributionCallback, MessageBox, _("Please select a distribution from which you would like to flash an image:"), list=distributionList, default=default, title=_("Flash Manager - Distributions"))
 
 	def keyDistributionCallback(self, distribution):
 		if distribution:
@@ -276,7 +274,7 @@ class FlashManager(Screen, HelpableScreen):
 					self.imagesList = {}
 					self.getImagesList()
 				except OSError as err:
-					self.session.open(MessageBox, _("Error %d: Unable to delete downloaded image '%s'!  (%s)" % (err.errno, currentSelection, err.strerror)), MessageBox.TYPE_ERROR, timeout=3, windowTitle=self.getTitle())
+					self.session.open(MessageBox, _("Error %d: Unable to delete downloaded image '%s'!  (%s)" % (err.errno, currentSelection, err.strerror)), MessageBox.TYPE_ERROR, timeout=3, title=self.getTitle())
 
 		currentSelectionImage = self["list"].getCurrent()[0][0]
 		self.session.openWithCallback(keyDeleteImageCallback, MessageBox, _("Do you really want to delete '%s'?") % currentSelectionImage, MessageBox.TYPE_YESNO, default=False)
@@ -390,7 +388,7 @@ class FlashImage(Screen, HelpableScreen):
 				default = index
 			choices.append((slotMsg % (slotCode, slotType, imageDictionary[slotCode]["imagename"], current), (slotCode, True)))
 		choices.append((_("No, don't flash this image"), False))
-		self.session.openWithCallback(self.checkMedia, MessageBox, _("Do you want to flash the image '%s'?") % self.imageName, list=choices, default=default, windowTitle=self.getTitle())
+		self.session.openWithCallback(self.checkMedia, MessageBox, _("Do you want to flash the image '%s'?") % self.imageName, list=choices, default=default, title=self.getTitle())
 
 	def checkMedia(self, choice):
 		if choice:
@@ -427,7 +425,7 @@ class FlashImage(Screen, HelpableScreen):
 				if MultiBoot.canMultiBoot():
 					self.slotCode = choice[0]
 				if BoxInfo.getItem("distro") in self.imageName:
-					self.session.openWithCallback(self.backupQuestionCallback, MessageBox, _("Do you want to backup settings?"), default=True, timeout=10, windowTitle=self.getTitle())
+					self.session.openWithCallback(self.backupQuestionCallback, MessageBox, _("Do you want to backup settings?"), default=True, timeout=10, title=self.getTitle())
 				else:
 					self.backupQuestionCallback(None)
 				return
@@ -446,11 +444,11 @@ class FlashImage(Screen, HelpableScreen):
 					elif isDevice or "no_backup" == choice:
 						self.startBackupSettings(choice)
 					else:
-						self.session.openWithCallback(self.startBackupSettings, MessageBox, _("Warning: There is only a network drive to store the backup. This means the auto restore will not work after the flash. Alternatively, mount the network drive after the flash and perform a manufacturer reset to auto restore."), windowTitle=self.getTitle())
+						self.session.openWithCallback(self.startBackupSettings, MessageBox, _("Warning: There is only a network drive to store the backup. This means the auto restore will not work after the flash. Alternatively, mount the network drive after the flash and perform a manufacturer reset to auto restore."), title=self.getTitle())
 				except OSError as err:
-					self.session.openWithCallback(self.keyCancel, MessageBox, _("Error: Unable to create the required directories on the target device (e.g. USB stick or hard disk)! Please verify device and try again."), type=MessageBox.TYPE_ERROR, windowTitle=self.getTitle())
+					self.session.openWithCallback(self.keyCancel, MessageBox, _("Error: Unable to create the required directories on the target device (e.g. USB stick or hard disk)! Please verify device and try again."), type=MessageBox.TYPE_ERROR, title=self.getTitle())
 			else:
-				self.session.openWithCallback(self.keyCancel, MessageBox, _("Error: Could not find a suitable device! Please remove some downloaded images or attach another device (e.g. USB stick) with sufficient free space and try again."), type=MessageBox.TYPE_ERROR, windowTitle=self.getTitle())
+				self.session.openWithCallback(self.keyCancel, MessageBox, _("Error: Could not find a suitable device! Please remove some downloaded images or attach another device (e.g. USB stick) with sufficient free space and try again."), type=MessageBox.TYPE_ERROR, title=self.getTitle())
 		else:
 			self.keyCancel()
 
@@ -497,7 +495,7 @@ class FlashImage(Screen, HelpableScreen):
 					(_("Do not flash image"), "abort")
 				]
 				default = 0
-			self.session.openWithCallback(self.postFlashActionCallback, MessageBox, text, list=choices, default=default, windowTitle=self.getTitle())
+			self.session.openWithCallback(self.postFlashActionCallback, MessageBox, text, list=choices, default=default, title=self.getTitle())
 		else:
 			self.keyCancel()
 
@@ -520,7 +518,7 @@ class FlashImage(Screen, HelpableScreen):
 				nextRecordingTime = self.session.nav.RecordTimer.getNextRecordingTime()
 				if recording or (nextRecordingTime > 0 and (nextRecordingTime - time()) < 360):
 					self.choice = choice
-					self.session.openWithCallback(self.recordWarning, MessageBox, "%s\n\n%s" % (_("Recording(s) are in progress or coming up in few seconds!"), _("Flash your %s %s and reboot now?") % getBoxDisplayName()), default=False, windowTitle=self.getTitle())
+					self.session.openWithCallback(self.recordWarning, MessageBox, "%s\n\n%s" % (_("Recording(s) are in progress or coming up in few seconds!"), _("Flash your %s %s and reboot now?") % getBoxDisplayName()), default=False, title=self.getTitle())
 					return
 			restoreSettings = ("restoresettings" in choice)
 			restoreSettingsnoPlugin = (choice == "restoresettingsnoplugin")
@@ -595,7 +593,7 @@ class FlashImage(Screen, HelpableScreen):
 
 	def downloadError(self, error):
 		self.downloader.stop()
-		self.session.openWithCallback(self.keyCancel, MessageBox, "%s\n\n%s" % (_("Error downloading image '%s'!") % self.imageName, error.strerror), type=MessageBox.TYPE_ERROR, windowTitle=self.getTitle())
+		self.session.openWithCallback(self.keyCancel, MessageBox, "%s\n\n%s" % (_("Error downloading image '%s'!") % self.imageName, error.strerror), type=MessageBox.TYPE_ERROR, title=self.getTitle())
 
 	def unzip(self):
 		self["header"].setText(_("Unzipping Image"))
@@ -614,7 +612,7 @@ class FlashImage(Screen, HelpableScreen):
 			self.flashImage()
 		except Exception as err:
 			print("[FlashManager] startUnzip Error: %s!" % str(err))
-			self.session.openWithCallback(self.keyCancel, MessageBox, _("Error unzipping image '%s'!") % self.imageName, type=MessageBox.TYPE_ERROR, windowTitle=self.getTitle())
+			self.session.openWithCallback(self.keyCancel, MessageBox, _("Error unzipping image '%s'!") % self.imageName, type=MessageBox.TYPE_ERROR, title=self.getTitle())
 
 	def flashImage(self):
 		def findImageFiles(path):
@@ -662,7 +660,7 @@ class FlashImage(Screen, HelpableScreen):
 			self.containerOFGWrite.ePopen([OFGWRITE, OFGWRITE] + cmdArgs + ['%s' % imageFiles], callback=self.flashImageDone)
 			fbClass.getInstance().lock()
 		else:
-			self.session.openWithCallback(self.keyCancel, MessageBox, _("Error: Image '%s' to install is invalid!") % self.imageName, type=MessageBox.TYPE_ERROR, windowTitle=self.getTitle())
+			self.session.openWithCallback(self.keyCancel, MessageBox, _("Error: Image '%s' to install is invalid!") % self.imageName, type=MessageBox.TYPE_ERROR, title=self.getTitle())
 
 	def flashImageDone(self, data, retVal, extraArgs):
 		fbClass.getInstance().unlock()
@@ -672,4 +670,4 @@ class FlashImage(Screen, HelpableScreen):
 			self["summary_header"].setText(self["header"].getText())
 			self["info"].setText("%s\n\n%s\n%s" % (self.imageName, _("Press OK for MultiBoot selection."), _("Press EXIT to close.")))
 		else:
-			self.session.openWithCallback(self.keyCancel, MessageBox, _("Flashing image '%s' was not successful!") % self.imageName, type=MessageBox.TYPE_ERROR, windowTitle=self.getTitle())
+			self.session.openWithCallback(self.keyCancel, MessageBox, _("Flashing image '%s' was not successful!") % self.imageName, type=MessageBox.TYPE_ERROR, title=self.getTitle())
