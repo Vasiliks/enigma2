@@ -33,6 +33,7 @@ from Screens.Screen import Screen, ScreenSummary
 
 from Tools.Directories import SCOPE_PLUGINS, resolveFilename, fileExists, fileHas, pathExists, fileReadLine, fileReadLines, fileWriteLine, isPluginInstalled
 from Tools.Geolocation import geolocation
+from Tools.MultiBoot import MultiBoot
 from Tools.StbHardware import getFPVersion, getBoxProc, getHWSerial, getBoxRCType, getBoxProcType
 from Tools.LoadPixmap import LoadPixmap
 from Tools.Conversions import scaleNumber, formatDate
@@ -83,24 +84,27 @@ def getBoxProcTypeName():
 
 class InformationBase(Screen, HelpableScreen):
 	skin = """
-	<screen name="Information" position="center,center" size="950,560" resolution="1280,720">
-		<widget name="information" position="10,10" size="e-20,e-60" colPosition="475" conditional="information" divideChar="|" font="Regular;20" noWrap="1" leftColAlign="left" rightColAlign="left" split="1" transparent="1" />
-		<widget source="key_red" render="Label" position="10,e-50" size="180,40" backgroundColor="key_red" conditional="key_red" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+	<screen name="Information" title="Information" position="center,center" size="1020,600" resolution="1280,720">
+		<widget name="information" position="0,0" size="e,e-50" font="Regular;20" splitPosition="400" />
+		<widget source="key_red" render="Label" position="0,e-40" size="180,40" backgroundColor="key_red" conditional="key_red" font="Regular;20" foregroundColor="key_text" halign="center" valign="center">
 			<convert type="ConditionalShowHide" />
 		</widget>
-		<widget source="key_green" render="Label" position="200,e-50" size="180,40" backgroundColor="key_green" conditional="key_green" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+		<widget source="key_green" render="Label" position="190,e-40" size="180,40" backgroundColor="key_green" conditional="key_green" font="Regular;20" foregroundColor="key_text" halign="center" valign="center">
 			<convert type="ConditionalShowHide" />
 		</widget>
-		<widget source="key_yellow" render="Label" position="390,e-50" size="180,40" backgroundColor="key_yellow" conditional="key_yellow" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+		<widget source="key_yellow" render="Label" position="380,e-40" size="180,40" backgroundColor="key_yellow" conditional="key_yellow" font="Regular;20" foregroundColor="key_text" halign="center" valign="center">
 			<convert type="ConditionalShowHide" />
 		</widget>
-		<widget source="key_blue" render="Label" position="580,e-50" size="180,40" backgroundColor="key_blue" conditional="key_blue" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+		<widget source="key_blue" render="Label" position="570,e-40" size="180,40" backgroundColor="key_blue" conditional="key_blue" font="Regular;20" foregroundColor="key_text" halign="center" valign="center">
 			<convert type="ConditionalShowHide" />
 		</widget>
-		<widget source="key_info" render="Label" position="e-180,e-50" size="80,40" backgroundColor="key_back" conditional="key_info" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+		<widget source="key_menu" render="Label" position="e-260,e-40" size="80,40" backgroundColor="key_back" conditional="key_menu" font="Regular;20" foregroundColor="key_text" halign="center" valign="center">
 			<convert type="ConditionalShowHide" />
 		</widget>
-		<widget source="key_help" render="Label" position="e-90,e-50" size="80,40" backgroundColor="key_back" conditional="key_help" font="Regular;20" foregroundColor="key_text" horizontalAlignment="center" verticalAlignment="center">
+		<widget source="key_info" render="Label" position="e-170,e-40" size="80,40" backgroundColor="key_back" conditional="key_info" font="Regular;20" foregroundColor="key_text" halign="center" valign="center">
+			<convert type="ConditionalShowHide" />
+		</widget>
+		<widget source="key_help" render="Label" position="e-80,e-40" size="80,40" backgroundColor="key_back" conditional="key_help" font="Regular;20" foregroundColor="key_text" halign="center" valign="center">
 			<convert type="ConditionalShowHide" />
 		</widget>
 	</screen>"""
@@ -508,7 +512,22 @@ class ImageInformation(InformationBase):
 			info.append(formatLine("P1", _("Info file override"), _("Defined / Active")))
 		info.append(formatLine("P1", _("Distribution version"), BoxInfo.getItem("imgversion")))
 		info.append(formatLine("P1", _("Distribution language"), BoxInfo.getItem("imglanguage")))
+		slotCode, bootCode = MultiBoot.getCurrentSlotAndBootCodes()
+		if MultiBoot.canMultiBoot():
+			device = MultiBoot.getBootDevice()
+			if BoxInfo.getItem("HasHiSi") and "sda" in device:
+				slotCode = int(slotCode)
+				image = slotCode - 4 if slotCode > 4 else slotCode - 1
+				device = _("SDcard slot %s%s") % (image, f"  -  {device}" if device else "")
+			else:
+				device = _("eMMC slot %s%s") % (slotCode, f"  -  {device}" if device else "")
+			info.append(formatLine("P1", _("Hardware MultiBoot device"), device))
+			info.append(formatLine("P1", _("MultiBoot startup file"), MultiBoot.getStartupFile()))
+		if bootCode:
+			info.append(formatLine("P1", _("MultiBoot boot mode"), MultiBoot.getBootCodeDescription(bootCode)))
 		info.append(formatLine("P1", _("Software MultiBoot"), _("Yes") if BoxInfo.getItem("multiboot", False) else _("No")))
+		if BoxInfo.getItem("HasKexecMultiboot"):
+			info.append(formatLine("P1", _("Vu+ MultiBoot"), _("Yes")))
 		info.append(formatLine("P1", _("Flash type"), about.getFlashType()))
 		xResolution = getDesktop(0).size().width()
 		yResolution = getDesktop(0).size().height()
@@ -765,6 +784,67 @@ class MemoryInformation(InformationBase):
 
 	def getSummaryInformation(self):
 		return "Memory Information Data"
+
+class MultiBootInformation(InformationBase):
+	def __init__(self, session):
+		InformationBase.__init__(self, session)
+		self.setTitle(_("MultiBoot Information"))
+		self.skinName.insert(0, "MultiBootInformation")
+		self.slotImages = None
+
+	def fetchInformation(self):
+		def fetchInformationCallback(slotImages):
+			self.slotImages = slotImages
+			for callback in self.onInformationUpdated:
+				callback()
+
+		self.informationTimer.stop()
+		MultiBoot.getSlotImageList(fetchInformationCallback)
+
+	def refreshInformation(self):
+		self.slotImages = None
+		MultiBoot.loadMultiBoot()
+		InformationBase.refreshInformation(self)
+
+	def displayInformation(self):
+		info = []
+		info.append(formatLine("H", _("Boot slot information for %s %s") % getBoxDisplayName()))
+		info.append("")
+		if self.slotImages:
+			slotCode, bootCode = MultiBoot.getCurrentSlotAndBootCodes()
+			slotImageList = sorted(self.slotImages.keys(), key=lambda x: (not x.isnumeric(), int(x) if x.isnumeric() else x))
+			currentMsg = f"  -  {_('Current')}"
+			imageLists = {}
+			for slot in slotImageList:
+				for boot in self.slotImages[slot]["bootCodes"]:
+					if imageLists.get(boot) is None:
+						imageLists[boot] = []
+					current = currentMsg if boot == bootCode and slot == slotCode else ""
+					indent = "P0V" if boot == "" else "P1V"
+					if current:
+						indent = indent.replace("P", "F").replace("V", "F")
+					imageLists[boot].append(formatLine(indent, _("Slot '%s'") % slot, f"{self.slotImages[slot]['imagename']}{current}"))
+			count = 0
+			for bootCode in sorted(imageLists.keys()):
+				if bootCode == "":
+					continue
+				if count:
+					info.append("")
+				info.append(formatLine("S", MultiBoot.getBootCodeDescription(bootCode), None))
+				if self.extraSpacing:
+					info.append("")
+				info.extend(imageLists[bootCode])
+				count += 1
+			if count:
+				info.append("")
+			if "" in imageLists:
+				info.extend(imageLists[""])
+		else:
+			info.append(formatLine("P1", _("Retrieving boot slot information...")))
+		self["information"].setText("\n".join(info))
+
+	def getSummaryInformation(self):
+		return "MultiBoot Information Data"
 
 
 class NetworkInformation(InformationBase):
