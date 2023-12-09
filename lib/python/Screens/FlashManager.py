@@ -571,7 +571,7 @@ class FlashImage(Screen, HelpableScreen):
 				self["header"].setText(_("Downloading Image"))
 				self["info"].setText(self.imageName)
 				self["summary_header"].setText(self["header"].getText())
-				self.downloader = DownloadWithProgress(self.source.replace(" ", "%20"), self.zippedImage)
+				self.downloader = downloadWithProgress(self.source.replace(" ", "%20"), self.zippedImage)
 				self.downloader.addProgress(self.downloadProgress)
 				self.downloader.addEnd(self.downloadEnd)
 				self.downloader.addError(self.downloadError)
