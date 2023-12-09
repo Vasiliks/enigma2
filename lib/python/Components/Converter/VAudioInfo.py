@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 from enigma import iPlayableService
+
 from Components.Converter.Converter import Converter
-from Components.Element import cached
 from Components.Converter.Poll import Poll
+from Components.Element import cached
 
 # Common function to standardize the display of Audio Codecs
 # _acedits is a list of text conversions (from, to) that are done in the
@@ -56,19 +58,25 @@ class VAudioInfo(Poll, Converter, object):
 		self.poll_enabled = True
 		self.lang_strings = ("english", "englisch", "eng")
 		self.codecs = {
-			"01_dolbydigitalplus": ("digital+", "digitalplus", "ac3+", "e-ac-3", "a_eac3",),
-			"02_dolbydigital": ("ac3", "ac-3", "a_ac3", "a_ac-3", "dolbydigital",),
+			"01_dolbydigitalplus": ("digital+", "digitalplus", "ac3+",),
+			"02_dolbydigital": ("ac3", "dolbydigital",),
 			"03_mp3": ("mp3",),
 			"04_wma": ("wma",),
 			"05_flac": ("flac",),
-			"06_he-aac": ("aac-he", "mpeg4-aac", "mpeg4", "mpeg-4",),
-			"07_aac": ("aac", "a_aac",),
+			"06_he-aac": ("he-aac",),
+			"07_aac": ("aac",),
 			"08_lpcm": ("lpcm",),
 			"09_dts-hd": ("dts-hd",),
 			"10_dts": ("dts",),
 			"11_pcm": ("pcm",),
-			"12_mpeg": ("mpeg", "a_mpeg/l3", "mpeg-1",),
+			"12_mpeg": ("mpeg",),
 			"13_dolbytruehd": ("truehd",),
+			"14_aacplus": ("aac+",),
+			"15_ipcm": ("ipcm",),
+			"16_wma-pro": ("wma pro",),
+			"17_vorbis": ("vorbis",),
+			"18_opus": ("opus",),
+			"19_amr": ("amr",),
 		}
 		self.codec_info = {
 			"dolbytruehd": ("51", "20", "71"),
@@ -98,12 +106,11 @@ class VAudioInfo(Poll, Converter, object):
 			if lang in languages:
 				languages = "English"
 				break
-
-		languages = languages.replace("und ", "")
+		languages = languages.replace("und", "")
 		return languages
 
 	def getAudioCodec(self, info):
-		description_str = _("unknown")
+		description_str = _("N/A")
 		if self.getAudio():
 			languages = self.getLanguage()
 			description = StdAudioDesc(self.audio_info.getDescription()) or ""
@@ -112,11 +119,11 @@ class VAudioInfo(Poll, Converter, object):
 				return languages
 			if description.lower() in languages.lower():
 				languages = ""
-			description_str = description + " " + languages
+			description_str = description
 		return description_str
 
 	def getAudioIcon(self, info):
-		description_str = self.get_short(self.getAudioCodec(info).lower())
+		description_str = self.get_short(self.getAudioCodec(info).translate(str.maketrans('  ', ' .')).lower())
 		return description_str
 
 	def get_short(self, audioName):
@@ -142,7 +149,7 @@ class VAudioInfo(Poll, Converter, object):
 					return self.getAudioCodec(info)
 				if self.type == self.GET_AUDIO_ICON:
 					return self.getAudioIcon(info)
-		return _("Invalid type")
+		return _("invalid type")
 
 	text = property(getText)
 

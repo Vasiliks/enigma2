@@ -32,7 +32,8 @@ CODEC_NAMES = {  # Stream type to codec mapping.
 	18: "VP6",
 	19: "N/A 19",
 	20: "N/A 20",
-	21: "SPARK"
+	21: "SPARK",
+	40: "AVS2",
 }
 codec_data = CODEC_NAMES  # Legacy name currently only used in Information.py.
 
