@@ -41,11 +41,11 @@ class lamedb(datasource):
 				if ord(line[0]) == 9:
 					transponder = line.strip().split(' ')[1].split(':')
 					sat = transponder[4]
+					tsid = None
+					onid = None
 					if sat not in sats:
 						sats[sat] = []
 					sats[sat].append((transponder, tsid, onid))
-					tsid = None
-					onid = None
 				elif line.strip() != "/" and line.strip() != "end":
 					data = line.strip().split(":")
 					tsid = str(int(data[1], 16))
