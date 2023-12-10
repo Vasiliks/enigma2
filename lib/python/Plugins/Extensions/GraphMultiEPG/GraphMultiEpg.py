@@ -513,7 +513,7 @@ class EPGList(GUIComponent):
 						pos=(r1.left(), r1.height() - self.serviceBorderWidth),
 						size=(r1.width(), self.serviceBorderWidth),
 						png=self.borderBottomPix,
-						flags/home/foxbob/enigma2-OEA/lib/python/Navigation.py=BT_SCALE))
+						flags=BT_SCALE))
 				res.append(MultiContentEntryPixmapAlphaBlend(
 						pos=(left, height - self.eventBorderWidth),
 						size=(width, self.eventBorderWidth),
