@@ -98,7 +98,7 @@ def createRecordTimerEntry(timer):
 
 
 class RecordTimerEntry(timer.TimerEntry):
-######### the following static methods and members are only in use when the box is in (soft) standby
+# the following static methods and members are only in use when the box is in (soft) standby
 	wasInStandby = False
 	wasInDeepStandby = False
 	receiveRecordEvents = False
@@ -133,7 +133,7 @@ class RecordTimerEntry(timer.TimerEntry):
 			print("[RecordTimer] RecordTimer.staticGotRecordEvent(iRecordableService.evEnd)")
 			if not checkForRecordings():
 				print("[RecordTimer] No recordings busy of sceduled within 6 minutes so shutdown")
-				RecordTimerEntry.shutdown() # immediate shutdown
+				RecordTimerEntry.shutdown()  # immediate shutdown
 		elif event == iRecordableService.evStart:
 			print("[RecordTimer] RecordTimer.staticGotRecordEvent(iRecordableService.evStart)")
 
@@ -187,7 +187,7 @@ class RecordTimerEntry(timer.TimerEntry):
 		self.dirname = dirname
 		self.dirnameHadToFallback = False
 		self.autoincrease = False
-		self.autoincreasetime = 3600 * 24 # 1 day
+		self.autoincreasetime = 3600 * 24  # 1 day
 		self.tags = tags or []
 		self.descramble = descramble
 		self.record_ecm = record_ecm
@@ -247,7 +247,7 @@ class RecordTimerEntry(timer.TimerEntry):
 			elif config.recording.filename_composition.value == "long":
 				filename += " - " + name + " - " + self.description
 			else:
-				filename += " - " + name # standard
+				filename += " - " + name  # standard
 
 		if config.recording.ascii_filenames.value:
 			filename = legacyEncode(filename)
@@ -402,10 +402,10 @@ class RecordTimerEntry(timer.TimerEntry):
 				if Screens.Standby.inStandby:
 					self.log(5, "wakeup and zap to recording service")
 					RecordTimerEntry.setWasInStandby()
-					#set service to zap after standby
+					# set service to zap after standby
 					Screens.Standby.inStandby.prev_running_service = self.service_ref.ref
 					Screens.Standby.inStandby.paused_service = None
-					#wakeup standby
+					# wakeup standby
 					Screens.Standby.inStandby.Power()
 				else:
 					self.sendactivesource()
@@ -459,7 +459,7 @@ class RecordTimerEntry(timer.TimerEntry):
 					elif not config.recording.asktozap.value:
 						self.log(8, "asking user to zap away")
 						AddNotificationWithCallback(self.failureCB, MessageBox, _("A timer failed to record!\nDisable TV and try again?\n"), timeout=20, default=True)
-					else: # zap without asking
+					else:  # zap without asking
 						self.log(9, "zap without asking")
 						AddNotification(MessageBox, _("In order to record a timer, the TV was switched to the recording service!\n"), type=MessageBox.TYPE_INFO, timeout=20)
 						self.setRecordingPreferredTuner()
@@ -479,10 +479,10 @@ class RecordTimerEntry(timer.TimerEntry):
 					if RecordTimerEntry.wasInDeepStandby and self.zap_wakeup in ("always", "from_deep_standby") or self.zap_wakeup in ("always", "from_standby"):
 						self.log(11, "wakeup and zap")
 						RecordTimerEntry.setWasInStandby()
-						#set service to zap after standby
+						# set service to zap after standby
 						Screens.Standby.inStandby.prev_running_service = self.service_ref.ref
 						Screens.Standby.inStandby.paused_service = None
-						#wakeup standby
+						# wakeup standby
 						Screens.Standby.inStandby.Power()
 				else:
 					self.sendactivesource()
@@ -550,7 +550,7 @@ class RecordTimerEntry(timer.TimerEntry):
 			else:
 				if RecordTimerEntry.wasInDeepStandby:
 					RecordTimerEntry.keypress()
-					if Screens.Standby.inStandby: #In case some plugin did put the receiver already in standby
+					if Screens.Standby.inStandby:  # In case some plugin did put the receiver already in standby
 						config.misc.standbyCounter.value = 0
 					else:
 						AddNotification(Screens.Standby.Standby, StandbyCounterIncrease=False)
@@ -668,8 +668,8 @@ class RecordTimerEntry(timer.TimerEntry):
 					choice.insert(1, (_("Save timeshift and zap"), "save"))
 			else:
 				message += _("Reminder, you have chosen to save timeshift file.")
-			#if self.justplay or self.always_zap:
-			#	choice.insert(2, (_("Don't zap"), "continue"))
+			# if self.justplay or self.always_zap:
+			# choice.insert(2, (_("Don't zap"), "continue"))
 			choice.insert(2, (_("Don't zap"), "continue"))
 
 			def zapAction(choice):
@@ -851,7 +851,7 @@ def createTimer(xml):
 	record_ecm = int(xml.get("record_ecm") or "0")
 
 	name = xml.get("name")
-	#filename = xml.get("filename")
+	# filename = xml.get("filename")
 	entry = RecordTimerEntry(serviceref, begin, end, name, description, eit, disabled, justplay, afterevent, dirname=location, tags=tags, descramble=descramble, record_ecm=record_ecm, always_zap=always_zap, zap_wakeup=zap_wakeup, rename_repeat=rename_repeat, conflict_detection=conflict_detection, pipzap=pipzap)
 	entry.repeated = int(repeated)
 	flags = xml.get("flags")
@@ -971,34 +971,34 @@ class RecordTimer(timer.Timer):
 			AddPopup(_("Timer overlap in timers.xml detected!\nPlease recheck it!") + timer_text, type=MessageBox.TYPE_ERROR, timeout=0, id="TimerLoadFailed")
 
 	def saveTimer(self):
-		#root_element = xml.etree.ElementTree.Element('timers')
-		#root_element.text = "\n"
+		# root_element = xml.etree.ElementTree.Element('timers')
+		# root_element.text = "\n"
 
-		#for timer in self.timer_list + self.processed_timers:
+		# for timer in self.timer_list + self.processed_timers:
 			# some timers (instant records) don't want to be saved.
 			# skip them
-			#if timer.dontSave:
+			# if timer.dontSave:
 				#continue
-			#t = xml.etree.ElementTree.SubElement(root_element, 'timers')
-			#t.set("begin", str(int(timer.begin)))
-			#t.set("end", str(int(timer.end)))
-			#t.set("serviceref", str(timer.service_ref))
-			#t.set("repeated", str(timer.repeated))
-			#t.set("name", timer.name)
-			#t.set("description", timer.description)
-			#t.set("afterevent", str({
+			# t = xml.etree.ElementTree.SubElement(root_element, 'timers')
+			# t.set("begin", str(int(timer.begin)))
+			# t.set("end", str(int(timer.end)))
+			# t.set("serviceref", str(timer.service_ref))
+			# t.set("repeated", str(timer.repeated))
+			# t.set("name", timer.name)
+			# t.set("description", timer.description)
+			# t.set("afterevent", str({
 			#	AFTEREVENT.NONE: "nothing",
 			#	AFTEREVENT.STANDBY: "standby",
 			#	AFTEREVENT.DEEPSTANDBY: "deepstandby",
 			#	AFTEREVENT.AUTO: "auto"}))
-			#if timer.eit is not None:
+			# if timer.eit is not None:
 			#	t.set("eit", str(timer.eit))
-			#if timer.dirname is not None:
+			# if timer.dirname is not None:
 			#	t.set("location", str(timer.dirname))
-			#t.set("disabled", str(int(timer.disabled)))
-			#t.set("justplay", str(int(timer.justplay)))
-			#t.text = "\n"
-			#t.tail = "\n"
+			# t.set("disabled", str(int(timer.disabled)))
+			# t.set("justplay", str(int(timer.justplay)))
+			# t.text = "\n"
+			# t.tail = "\n"
 
 			#for time, code, msg in timer.log_entries:
 				#l = xml.etree.ElementTree.SubElement(t, 'log')

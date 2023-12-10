@@ -326,7 +326,7 @@ class CIconfigMenu(Screen):
 					i += 1
 
 				for service in slot.findall("service"):
-					#read_service_name = service.get("name")
+					# read_service_name = service.get("name")
 					read_service_ref = service.get("ref")
 					self.read_services.append(read_service_ref)
 

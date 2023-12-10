@@ -200,7 +200,7 @@ class PictureInPicture(Screen):
 					AddPopup(text="PiP...\n" + _("Connected transcoding, limit - no PiP!"), type=MessageBox.TYPE_ERROR, timeout=5, id="ZapPipError")
 				return False
 			if ref.toString().startswith("4097"):
-				#Change to service type 1 and try to play a stream as type 1
+				# Change to service type 1 and try to play a stream as type 1
 				ref = eServiceReference("1" + ref.toString()[4:])
 			if not self.isPlayableForPipService(ref):
 				if not config.usage.hide_zap_errors.value:

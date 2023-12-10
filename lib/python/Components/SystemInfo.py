@@ -5,10 +5,10 @@ from os.path import exists, isfile, join as pathjoin
 from re import findall
 from subprocess import PIPE, Popen
 
-from enigma import Misc_Options, eAVControl, eDVBCIInterfaces, eDVBResourceManager, eGetEnigmaDebugLvl, eDBoxLCD
+from enigma import Misc_Options, eAVControl, eDVBCIInterfaces, eDVBResourceManager, eGetEnigmaDebugLvl
 
 from process import ProcessList
-from Tools.Directories import SCOPE_LIBDIR, SCOPE_SKIN, fileCheck, fileContains, fileReadLine, fileReadLines, fileExists, pathExists, fileHas, resolveFilename
+from Tools.Directories import SCOPE_LIBDIR, SCOPE_SKIN, fileCheck, fileContains, fileReadLine, fileReadLines, fileExists, pathExists, resolveFilename
 from Tools.MultiBoot import MultiBoot
 from Tools.StbHardware import getBoxProc
 
@@ -249,40 +249,6 @@ def getModuleLayout():
 					return detail.split("\t")[0]
 	return None
 
-
-def getBoxName():
-	box = MACHINE
-	machinename = DISPLAYMODEL.lower()
-	if box in ('uniboxhd1', 'uniboxhd2', 'uniboxhd3'):
-		box = "ventonhdx"
-	elif box == "odinm6":
-		box = machinename
-	elif box == "inihde" and machinename == "hd-1000":
-		box = "sezam-1000hd"
-	elif box == "ventonhdx" and machinename == "hd-5000":
-		box = "sezam-5000hd"
-	elif box == "ventonhdx" and machinename == "premium twin":
-		box = "miraclebox-twin"
-	elif box == "xp1000" and machinename == "sf8 hd":
-		box = "sf8"
-	elif box.startswith('et') and box not in ('et8000', 'et8500', 'et8500s', 'et10000'):
-		box = box[0:3] + 'x00'
-	elif box == "odinm9":
-		box = "maram9"
-	elif box.startswith('sf8008m'):
-		box = "sf8008m"
-	elif box.startswith('sf8008'):
-		box = "sf8008"
-	elif box.startswith('ustym4kpro'):
-		box = "ustym4kpro"
-	elif box.startswith('twinboxlcdci'):
-		box = "twinboxlcd"
-	elif box == "sfx6018":
-		box = "sfx6008"
-	elif box == "sx888":
-		box = "sx88v2"
-	return box
-
 BoxInfo.setItem("DebugLevel", eGetEnigmaDebugLvl())
 BoxInfo.setItem("InDebugMode", eGetEnigmaDebugLvl() >= 4)
 BoxInfo.setItem("ModuleLayout", getModuleLayout(), immutable=True)
@@ -488,4 +454,3 @@ SystemInfo["FrontpanelLEDBlinkControl"] = fileExists("/proc/stb/fp/led_blink")
 SystemInfo["FrontpanelLEDBrightnessControl"] = fileExists("/proc/stb/fp/led_brightness")
 SystemInfo["FrontpanelLEDColorControl"] = fileExists("/proc/stb/fp/led_color")
 SystemInfo["FrontpanelLEDFadeControl"] = fileExists("/proc/stb/fp/led_fade")
-

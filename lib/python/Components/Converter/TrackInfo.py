@@ -71,7 +71,7 @@ class TrackInfo(Poll, Converter):
 			selectedSubtitle = None
 			enabled = False
 			import Screens.InfoBar
-			######## MoviePlayer
+			# MoviePlayer
 			movieplayer = Screens.InfoBar.MoviePlayer.instance
 			if movieplayer:
 				selectedSubtitle = movieplayer.selected_subtitle
@@ -79,7 +79,7 @@ class TrackInfo(Poll, Converter):
 			else:
 				selectedSubtitle = None
 				enabled = False
-			######## Infobar
+			# Infobar
 			if not selectedSubtitle:
 				InfoBar = Screens.InfoBar.InfoBar.instance
 				if InfoBar:
@@ -88,7 +88,7 @@ class TrackInfo(Poll, Converter):
 				else:
 					selectedSubtitle = None
 					enabled = False
-			######### for kodi & subssupport
+			# for kodi & subssupport
 			if not selectedSubtitle:
 				try:
 					from Plugins.Extensions.Kodi.plugin import KodiVideoPlayer
@@ -108,7 +108,7 @@ class TrackInfo(Poll, Converter):
 								return _("External")
 							else:
 								return selectedSubtitle
-			##############################
+
 			if selectedSubtitle and enabled:
 				subtitlelist = subtitle and subtitle.getSubtitleList()
 				for x in subtitlelist:

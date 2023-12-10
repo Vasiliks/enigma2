@@ -32,7 +32,7 @@ class Opkg(Screen):
 		self.activity = 0
 		self.activityTimer = eTimer()
 		self.activityTimer.callback.append(self.doActivityTimer)
-		#self.activityTimer.start(100, False)
+		# self.activityTimer.start(100, False)
 
 		self.opkg = OpkgComponent()
 		self.opkg.addCallback(self.opkgCallback)

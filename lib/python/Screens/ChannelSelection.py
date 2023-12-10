@@ -270,7 +270,7 @@ class ChannelContextMenu(Screen):
 					append_when_current_valid(current, menu, (_("Purge deleted user bouquets"), self.purgeDeletedBouquets), level=0)
 					append_when_current_valid(current, menu, (_("Restore deleted user bouquets"), self.restoreDeletedBouquets), level=0)
 				append_when_current_valid(current, menu, (_("Reload services/bouquets list"), self.reloadServicesBouquets), level=2)
-		if self.inBouquet: # current list is editable?
+		if self.inBouquet:  # current list is editable?
 			if csel.bouquet_mark_edit == OFF:
 				if csel.movemode:
 					append_when_current_valid(current, menu, (_("Disable move mode"), self.toggleMoveMode), level=0, key="6")
@@ -1258,7 +1258,7 @@ class ChannelSelectionEdit:
 		# self.servicePath is just a reference to servicePathTv or Radio...
 		# so we never ever do use the asignment operator in self.servicePath
 		del self.servicePath[:]  # remove all elements
-		self.servicePath += self.savedPath # add saved elements
+		self.servicePath += self.savedPath  # add saved elements
 		del self.savedPath
 		self.setRoot(self.servicePath[-1])
 		if self.current_ref:
@@ -1293,13 +1293,13 @@ class ChannelSelectionEdit:
 
 	def removeCurrentService(self, bouquet=False):
 		if self.movemode and self.entry_marked:
-			self.toggleMoveMarked() # unmark current entry
+			self.toggleMoveMarked()  # unmark current entry
 		self.editMode = True
 		ref = self.servicelist.getCurrent()
 		mutableList = self.getMutableList()
 		if ref.valid() and mutableList is not None:
 			if not mutableList.removeService(ref):
-				mutableList.flushChanges() #FIXME do not flush on each single removed service
+				mutableList.flushChanges()  # FIXME do not flush on each single removed service
 				self.servicelist.removeCurrent()
 				self.servicelist.resetRoot()
 				playingref = self.session.nav.getCurrentlyPlayingServiceOrGroup()
@@ -1309,7 +1309,7 @@ class ChannelSelectionEdit:
 	def addServiceToBouquet(self, dest, service=None):
 		mutableList = self.getMutableList(dest)
 		if not mutableList is None:
-			if service is None: #use current selected service
+			if service is None:  # use current selected service
 				service = self.servicelist.getCurrent()
 			if not mutableList.addService(service):
 				mutableList.flushChanges()
@@ -2602,7 +2602,7 @@ class ChannelSelectionRadio(ChannelSelectionBase, ChannelSelectionEdit, ChannelS
 				iPlayableService.evEnd: self.__evServiceEnd
 			})
 
-########## RDS Radiotext / Rass Support BEGIN
+# RDS Radiotext / Rass Support BEGIN
 		self.infobar = infobar  # reference to real infobar (the one and only)
 		self["RdsDecoder"] = self.info["RdsDecoder"]
 		self["RdsActions"] = HelpableActionMap(self, ["InfobarRdsActions"],
@@ -2630,7 +2630,7 @@ class ChannelSelectionRadio(ChannelSelectionBase, ChannelSelectionEdit, ChannelS
 
 	def RassInteractivePossibilityChanged(self, state):
 		self["RdsActions"].setEnabled(state)
-########## RDS Radiotext / Rass Support END
+# RDS Radiotext / Rass Support END
 
 	def __onExecBegin(self):
 		self.info.show()

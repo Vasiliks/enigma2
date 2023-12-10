@@ -498,7 +498,7 @@ class Harddisk:
 		self.timer = eTimer()
 		self.timer.callback.append(self.runIdle)
 		self.idle_running = True
-		self.setIdleTime(self.max_idle_time) # kick the idle polling loop
+		self.setIdleTime(self.max_idle_time)  # kick the idle polling loop
 
 	def runIdle(self):
 		if not self.max_idle_time:
@@ -544,7 +544,7 @@ class Partition:
 		self.mountpoint = mountpoint
 		self.description = description
 		self.force_mounted = mountpoint and force_mounted
-		self.is_hotplug = force_mounted # so far; this might change.
+		self.is_hotplug = force_mounted  # so far; this might change.
 		self.device = device
 
 	def __str__(self):
@@ -585,7 +585,7 @@ class Partition:
 			if mounts is None:
 				mounts = getProcMounts()
 			for parts in mounts:
-				if self.mountpoint.startswith(parts[1]): # use startswith so a mount not ending with '/' is also detected.
+				if self.mountpoint.startswith(parts[1]):  # use startswith so a mount not ending with '/' is also detected.
 					return True
 		return False
 
@@ -689,7 +689,7 @@ class HarddiskManager:
 		try:
 			open("/dev/" + blockdev).close()
 		except IOError as err:
-			if err.errno == 159: # no medium present
+			if err.errno == 159:  # no medium present
 				medium_found = False
 
 		return error, blacklisted, removable, is_cdrom, partitions, medium_found
@@ -731,7 +731,7 @@ class HarddiskManager:
 			description = self.getUserfriendlyDeviceName(device, physdev)
 			p = Partition(mountpoint=self.getMountpoint(device), description=description, force_mounted=True, device=device)
 			self.partitions.append(p)
-			if p.mountpoint: # Plugins won't expect unmounted devices
+			if p.mountpoint:  # Plugins won't expect unmounted devices
 				self.on_partition_list_change("add", p)
 			# see if this is a harddrive
 			l = len(device)
@@ -764,7 +764,7 @@ class HarddiskManager:
 		for x in self.partitions[:]:
 			if x.device == device:
 				self.partitions.remove(x)
-				if x.mountpoint: # Plugins won't expect unmounted devices
+				if x.mountpoint:  # Plugins won't expect unmounted devices
 					self.on_partition_list_change("remove", x)
 		l = len(device)
 		if l and not device[l - 1].isdigit():
@@ -800,7 +800,7 @@ class HarddiskManager:
 			if not devname:
 				continue
 			dev, part = self.splitDeviceName(devname)
-			if part and dev in devs: # if this is a partition and we still have the wholedisk, remove wholedisk
+			if part and dev in devs:  # if this is a partition and we still have the wholedisk, remove wholedisk
 				devs.remove(dev)
 
 		# return all devices which are not removed due to being a wholedisk when a partition exists
@@ -830,7 +830,7 @@ class HarddiskManager:
 	def addMountedPartition(self, device, desc):
 		for x in self.partitions:
 			if x.mountpoint == device:
-				#already_mounted
+				# already_mounted
 				return
 		self.partitions.append(Partition(mountpoint=device, description=desc))
 
@@ -850,7 +850,7 @@ class HarddiskManager:
 			ioctl(cd.fileno(), ioctl_flag, speed)
 			cd.close()
 		except Exception as ex:
-			print("[Harddisk] Error %s: Failed to set %s speed to %s" % (device, speed), ex)
+			print("[Harddisk] Failed to set %s speed to %s" % (device, speed), ex)
 
 
 class UnmountTask(Task.LoggingTask):
@@ -940,8 +940,8 @@ class MkfsTask(Task.LoggingTask):
 						d[1] = d[1].split('\x08', 1)[0]
 					self.setProgress(80 * int(d[0]) / int(d[1]))
 				except Exception as e:
-					print("[Harddisk] MkfsTask - [Mkfs] Error: %s" % err)
-				return # don't log the progess
+					print("[Mkfs] E:", e)
+				return  # don't log the progess
 		self.log.append(data)
 
 

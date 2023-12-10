@@ -133,8 +133,8 @@ class TempFanControl(ConfigListScreen, Screen):
 			self.list.append((_("Standby fan %d PWM") % (count + 1), fancontrol.getConfig(count).pwm_standby))
 
 		ConfigListScreen.__init__(self, self.list, session=self.session)
-		#self["config"].list = self.list
-		#self["config"].setList(self.list)
+		# self["config"].list = self.list
+		# self["config"].setList(self.list)
 		seperation = skin.parameters.get("ConfigListSeperator", 300)
 		self["config"].l.setSeperation(seperation)
 

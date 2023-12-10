@@ -106,7 +106,7 @@ class Dish(Screen):
 		self.rotor_pos = self.cur_orbpos
 		self.total_time = self.getTurnTime(prev_rotor_pos, self.rotor_pos, self.cur_polar)
 		self.turn_time = self.total_time
-		self.close_timeout = round(self.total_time * 1.25) # aded 25%
+		self.close_timeout = round(self.total_time * 1.25)  # aded 25%
 		self["posFrom"].setText(self.OrbToStr(prev_rotor_pos))
 		self["posGoto"].setText(self.OrbToStr(self.rotor_pos))
 		self["tunerName"].setText(self.getTunerName())
@@ -199,7 +199,7 @@ class Dish(Screen):
 			if nimConfig.configMode.value == "simple":
 				if "positioner" in nimConfig.diseqcMode.value:
 					nim = config.Nims[tuner]
-					if pol in (1, 3): # vertical
+					if pol in (1, 3):  # vertical
 						return nim.turningspeedV.float
 					return nim.turningspeedH.float
 			elif nimConfig.configMode.value == "advanced":
@@ -210,7 +210,7 @@ class Dish(Screen):
 						currLnb = lnbnum and nimConfig.advanced.lnb[lnbnum]
 						diseqcmode = currLnb and currLnb.diseqcMode.value or ""
 						if diseqcmode == "1_2":
-							if pol in (1, 3): # vertical
+							if pol in (1, 3):  # vertical
 								return currLnb.turningspeedV.float
 							return currLnb.turningspeedH.float
 		if pol in (1, 3):
@@ -316,9 +316,9 @@ class Dishpip(Dish, Screen):
 			self.close_timeout -= 1
 			if self.close_timeout <= 3:
 				self.__toHide()
-			#elif not self.getRotorMovingState():
-			#	self.turnTimer.stop()
-			#	self.timeoutTimer.start(10000, True)
+			# elif not self.getRotorMovingState():
+			# self.turnTimer.stop()
+			# self.timeoutTimer.start(10000, True)
 		else:
 			if not self.getRotorMovingState():
 				self.turnTimer.stop()
@@ -356,7 +356,7 @@ class Dishpip(Dish, Screen):
 		self.rotor_pos = self.cur_orbpos
 		self.total_time = self.getTurnTime(prev_rotor_pos, self.rotor_pos, self.cur_polar)
 		self.turn_time = self.total_time
-		self.close_timeout = round(self.total_time * 1.25) # aded 25%
+		self.close_timeout = round(self.total_time * 1.25)  # aded 25%
 		self["posFrom"].setText(self.OrbToStr(prev_rotor_pos))
 		self["posGoto"].setText(self.OrbToStr(self.rotor_pos))
 		self["tunerName"].setText(self.getTunerName())

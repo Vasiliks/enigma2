@@ -6,7 +6,7 @@ from Components.config import config, ConfigClock
 from Components.Pixmap import Pixmap
 from Components.Label import Label
 from Components.EpgList import EPGList, EPG_TYPE_SINGLE, EPG_TYPE_SIMILAR, EPG_TYPE_MULTI, EPG_TYPE_PARTIAL
-from Components.ActionMap import ActionMap
+from Components.ActionMap import ActionMap, HelpableActionMap
 from Components.UsageConfig import preferredTimerPath
 from Components.Sources.ServiceEvent import ServiceEvent
 from Components.Sources.StaticText import StaticText
@@ -118,10 +118,10 @@ class EPGSelection(Screen):
 				"info": self.infoKeyPressed,
 				"red": self.zapTo,
 				"menu": self.furtherOptions,
-				"nextBouquet": self.nextBouquet, # just used in multi epg yet
-				"prevBouquet": self.prevBouquet, # just used in multi epg yet
-				"nextService": self.nextService, # just used in single epg yet
-				"prevService": self.prevService, # just used in single epg yet
+				"nextBouquet": self.nextBouquet,  # just used in multi epg yet
+				"prevBouquet": self.prevBouquet,  # just used in multi epg yet
+				"nextService": self.nextService,  # just used in single epg yet
+				"prevService": self.prevService,  # just used in single epg yet
 				"preview": self.eventPreview,
 			})
 
@@ -293,7 +293,7 @@ class EPGSelection(Screen):
 		self.currentService = service
 		self.onCreate()
 
-	#just used in multipeg
+	# just used in multipeg
 	def onCreate(self):
 		li = self["list"]
 		li.recalcEntrySize()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from enigma import eRCInput, eTimer, eWindow , getDesktop
+from enigma import eRCInput, eTimer, eWindow, getDesktop
 
 from skin import GUI_SKIN_ID, applyAllAttributes
 from Components.config import config

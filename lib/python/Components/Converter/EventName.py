@@ -4,7 +4,6 @@ from Components.Converter.genre import getGenreStringSub
 from Components.config import config
 from Components.UsageConfig import dropEPGNewLines, replaceEPGSeparator
 from time import localtime, mktime, strftime
-from time import time, localtime
 from gettext import pgettext
 
 

@@ -427,7 +427,7 @@ class JobManager:
 		return list
 
 # some examples:
-#class PartitionExistsPostcondition:
+# class PartitionExistsPostcondition:
 #	def __init__(self, device):
 #		self.device = device
 #
@@ -550,7 +550,7 @@ class FailedPostcondition(Condition):
 	def check(self, task):
 		return (self.exception is None) or (self.exception == 0)
 
-#class HDDInitJob(Job):
+# class HDDInitJob(Job):
 #	def __init__(self, device):
 #		Job.__init__(self, _("Initialize Harddisk"))
 #		self.device = device

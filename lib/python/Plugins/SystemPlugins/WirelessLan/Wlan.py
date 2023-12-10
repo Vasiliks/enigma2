@@ -78,7 +78,7 @@ class Wlan:
 				if existBcmWifi(self.iface):
 					enigma.eConsoleAppContainer().execute("wl up")
 
-		ifobj = Wireless(self.iface) # a Wireless NIC Object
+		ifobj = Wireless(self.iface)  # a Wireless NIC Object
 
 		try:
 			scanresults = ifobj.scan()
@@ -130,7 +130,7 @@ class Wlan:
 					'essid': str.strip(self.asciify(result.essid)),
 					'iface': self.iface,
 					'maxrate': ifobj._formatBitrate(result.rate[-1][-1]),
-					'noise': '',#result.quality.nlevel-0x100,
+					'noise': '',  # result.quality.nlevel-0x100,
 					'quality': str(quality),
 					'signal': str(signal),
 					'custom': extra,
@@ -171,9 +171,9 @@ class wpaSupplicant:
 	def loadBcmWifiConfig(self, iface):
 		wsconf = {}
 		wsconf["ssid"] = ""
-		wsconf["hiddenessid"] = False # not used
+		wsconf["hiddenessid"] = False  # not used
 		wsconf["encryption"] = "WPA2"
-		wsconf["wepkeytype"] = "ASCII" # not used
+		wsconf["wepkeytype"] = "ASCII"  # not used
 		wsconf["key"] = ""
 
 		configfile = getWlConfName(iface)

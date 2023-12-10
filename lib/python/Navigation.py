@@ -64,7 +64,7 @@ class Navigation:
 				if not Screens.Standby.inTryQuitMainloop:
 					self.standbytimer = eTimer()
 					self.standbytimer.callback.append(self.gotostandby)
-					self.standbytimer.start(15000, True) # Time increse 15 second for standby.
+					self.standbytimer.start(15000, True)  # Time increse 15 second for standby.
 		if self.__prevWakeupTime:
 			config.misc.prev_wakeup_time.value = 0
 			config.misc.prev_wakeup_time.save()
@@ -213,7 +213,7 @@ class Navigation:
 					self.currentlyPlayingServiceReference = None
 					self.currentlyPlayingServiceOrGroup = None
 					if oldref and ("://" in oldref.getPath() or streamrelay.checkService(oldref)):
-						print("[Navigation] Streaming was active -> try again") # use timer to give the streamserver the time to deallocate the tuner
+						print("[Navigation] Streaming was active -> try again")  # use timer to give the streamserver the time to deallocate the tuner
 						self.retryServicePlayTimer = eTimer()
 						self.retryServicePlayTimer.callback.append(boundFunction(self.playService, ref, checkParentalControl, forceRestart, adjust))
 						self.retryServicePlayTimer.start(500, True)

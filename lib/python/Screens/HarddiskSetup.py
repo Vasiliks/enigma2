@@ -51,7 +51,7 @@ class HarddiskSelection(Screen):
 	def __init__(self, session):
 		Screen.__init__(self, session)
 		self.setTitle(_("Format Disk Settings"))
-		self.skinName = "HarddiskSelection" # For derived classes
+		self.skinName = "HarddiskSelection"  # For derived classes
 		if harddiskmanager.HDDCount() == 0:
 			tlist = []
 			tlist.append((_("no storage devices found"), 0))

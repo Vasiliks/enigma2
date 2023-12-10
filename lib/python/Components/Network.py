@@ -80,11 +80,11 @@ class Network:
 			data['up'] = int(open('/sys/class/net/%s/flags' % iface).read().strip(), 16) & 1 == 1
 			self.configuredInterfaces.append(iface)
 			nit = ni.ifaddresses(iface)
-			data['ip'] = self.convertIP(nit[ni.AF_INET][0]['addr']) # ipv4
+			data['ip'] = self.convertIP(nit[ni.AF_INET][0]['addr'])  # ipv4
 			data['netmask'] = self.convertIP(nit[ni.AF_INET][0]['netmask'])
 			data['bcast'] = self.convertIP(nit[ni.AF_INET][0]['broadcast'])
-			data['mac'] = nit[ni.AF_LINK][0]['addr'] # mac
-			data['gateway'] = self.convertIP(ni.gateways()['default'][ni.AF_INET][0]) # default gw
+			data['mac'] = nit[ni.AF_LINK][0]['addr']  # mac
+			data['gateway'] = self.convertIP(ni.gateways()['default'][ni.AF_INET][0])  # default gw
 			disable_ipv6 = "/proc/sys/net/ipv6/conf/all/disable_ipv6"
 			enable_ipv6 = "/etc/enigma2/ipv6"
 			if not isfile(enable_ipv6) and isfile(disable_ipv6):
@@ -270,7 +270,7 @@ class Network:
 		else:
 			if iface not in self.lan_interfaces:
 				if iface == "eth1":
-					name = _("VLAN connection")
+					name = _("WLAN connection")
 				else:
 					name = _("LAN connection")
 				if len(self.lan_interfaces) and not iface == "eth1":

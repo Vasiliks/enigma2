@@ -292,8 +292,8 @@ class InfoBarUnhandledKey:
 		self.checkUnusedTimer = eTimer()
 		self.checkUnusedTimer.callback.append(self.checkUnused)
 		self.onLayoutFinish.append(self.unhandledKeyDialog.hide)
-		eActionMap.getInstance().bindAction('', -maxsize - 1, self.actionA) #highest prio
-		eActionMap.getInstance().bindAction('', maxsize, self.actionB) #lowest prio
+		eActionMap.getInstance().bindAction('', -maxsize - 1, self.actionA)  # highest prio
+		eActionMap.getInstance().bindAction('', maxsize, self.actionB)  # lowest prio
 		self.flags = (1 << 1)
 		self.uflags = 0
 		self.sibIgnoreKeys = (
@@ -323,7 +323,7 @@ class InfoBarUnhandledKey:
 	def closeSIB(self, key):
 		return True if key >= 12 and key not in self.sibIgnoreKeys else False  # (114, 115, 174, 352, 103, 108, 402, 403, 407, 412)
 
-	#this function is only called when no other action has handled this key
+	# this function is only called when no other action has handled this key
 	def actionB(self, key, flag):
 		if flag != 4:
 			self.uflags |= (1 << flag)
@@ -3261,7 +3261,7 @@ class InfoBarRedButton:
 				x(orgId)
 			except Exception as ErrMsg:
 				print("[InfoBarGenerics] updateAIT error", ErrMsg)
-				#self.onReadyForAIT.remove(x)
+				# self.onReadyForAIT.remove(x)
 
 	def updateInfomation(self):
 		try:
@@ -3629,7 +3629,7 @@ class InfoBarCueSheetSupport:
 				return  # Should not happen?
 			length = seekable.getLength()
 			if length[0]:
-				length = (-1, 0)   #  Set length 0 if error in getLength()
+				length = (-1, 0)  # Set length 0 if error in getLength()
 			print("[InfoBarGenerics] seekable.getLength() returns:", length)
 			if (last > 900000) and (not length[1] or last < length[1] - 900000):
 				self.resume_point = last

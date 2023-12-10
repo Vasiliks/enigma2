@@ -91,12 +91,12 @@ InitFallbackFiles()
 profile("config.misc")
 config.misc.radiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "radio.mvi"))
 config.misc.blackradiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "black.mvi"))
-config.misc.startCounter = ConfigInteger(default=0) # number of e2 starts...
-config.misc.standbyCounter = NoSave(ConfigInteger(default=0)) # number of standby
-config.misc.DeepStandby = NoSave(ConfigYesNo(default=False)) # detect deepstandby
-config.misc.RestartUI = ConfigYesNo(default=False) # detect user interface restart
+config.misc.startCounter = ConfigInteger(default=0)  # number of e2 starts...
+config.misc.standbyCounter = NoSave(ConfigInteger(default=0))  # number of standby
+config.misc.DeepStandby = NoSave(ConfigYesNo(default=False))  # detect deepstandby
+config.misc.RestartUI = ConfigYesNo(default=False)  # detect user interface restart
 config.misc.prev_wakeup_time = ConfigInteger(default=0)
-#config.misc.prev_wakeup_time_type is only valid when wakeup_time is not 0
+# config.misc.prev_wakeup_time_type is only valid when wakeup_time is not 0
 config.misc.prev_wakeup_time_type = ConfigInteger(default=0)
 # 0 = RecordTimer, 1 = ZapTimer, 2 = Plugins, 3 = WakeupTimer
 config.misc.epgcache_filename = ConfigText(default="/media/hdd/epg.dat", fixed_size=False)
@@ -106,16 +106,16 @@ config.misc.SyncTimeUsing = ConfigSelection(default="0", choices=[
 ])
 config.misc.NTPserver = ConfigText(default="pool.ntp.org", fixed_size=False)
 
-#demo code for use of standby enter leave callbacks
-#def leaveStandby():
-#	print("!!!!!!!!!!!!!!!!!leave standby")
+# demo code for use of standby enter leave callbacks
+# def leaveStandby():
+# print("!!!!!!!!!!!!!!!!!leave standby")
 
-#def standbyCountChanged(configElement):
-#	print("!!!!!!!!!!!!!!!!!enter standby num", configElement.value)
-#	from Screens.Standby import inStandby
-#	inStandby.onClose.append(leaveStandby)
+# def standbyCountChanged(configElement):
+# print("!!!!!!!!!!!!!!!!!enter standby num", configElement.value)
+# from Screens.Standby import inStandby
+# inStandby.onClose.append(leaveStandby)
 
-#config.misc.standbyCounter.addNotifier(standbyCountChanged, initial_call = False)
+config.misc.standbyCounter.addNotifier(standbyCountChanged, initial_call=False)
 ####################################################
 
 profile("Twisted")
@@ -587,7 +587,7 @@ def runScreenTest():
 	from time import time, strftime, localtime
 	from Tools.StbHardware import setFPWakeuptime, setRTCtime
 	from Screens.SleepTimerEdit import isNextWakeupTime
-	#get currentTime
+	# get currentTime
 	nowTime = time()
 	wakeupList = sorted([
 		x for x in ((session.nav.RecordTimer.getNextRecordingTime(), 0),
@@ -600,7 +600,7 @@ def runScreenTest():
 	if wakeupList:
 		from time import strftime
 		startTime = wakeupList[0]
-		if (startTime[0] - nowTime) < 270: # no time to switch box back on
+		if (startTime[0] - nowTime) < 270:  # no time to switch box back on
 			wptime = nowTime + 30  # so switch back on in 30 seconds
 		else:
 			wptime = startTime[0] - 240
@@ -711,10 +711,10 @@ profile("UserInterface")
 import Screens.UserInterfacePositioner
 Screens.UserInterfacePositioner.InitOsd()
 
-#from enigma import dump_malloc_stats
-#t = eTimer()
-#t.callback.append(dump_malloc_stats)
-#t.start(1000)
+# from enigma import dump_malloc_stats
+# t = eTimer()
+# t.callback.append(dump_malloc_stats)
+# t.start(1000)
 
 # first, setup a screen
 try:

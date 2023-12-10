@@ -215,7 +215,7 @@ class Satfinder(ScanSetup):
 				self.list.append(self.preDefTransponderEntry)
 		elif self.DVB_type.value == "DVB-C":
 			self.typeOfTuningEntry = (_('Tune'), self.tuning_type)
-			if config.Nims[self.feid].cable.scan_type.value != "provider" or len(nimmanager.getTranspondersCable(int(self.satfinder_scan_nims.value))) < 1: # only show 'predefined transponder' if in provider mode and transponders exist
+			if config.Nims[self.feid].cable.scan_type.value != "provider" or len(nimmanager.getTranspondersCable(int(self.satfinder_scan_nims.value))) < 1:  # only show 'predefined transponder' if in provider mode and transponders exist
 				self.tuning_type.value = "single_transponder"
 			else:
 				self.list.append(self.typeOfTuningEntry)

@@ -1845,8 +1845,8 @@ def readSkin(screen, skin, names, desktop):
 
 			usedComponents.add(wclassname)
 
-			screen[wclassname] = addonClass() #init the addon
-			screen[wclassname].connectRelatedElement(wconnection, screen) #connect it to related ellement
+			screen[wclassname] = addonClass()  # init the addon
+			screen[wclassname].connectRelatedElement(wconnection, screen)  # connect it to related ellement
 			attributes = screen[wclassname].skinAttributes = []
 			collectAttributes(attributes, widget, context, skinPath, ignore=("addon",))
 

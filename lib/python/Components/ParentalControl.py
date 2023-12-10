@@ -89,7 +89,7 @@ class ParentalControl:
 			if [x for x in path[1:].split("/") if x.startswith(".") and not x == ".Trash"]:
 				age = 18
 		elif int(config.ParentalControl.age.value):
-			try: # Age control based on getExtendedDescription also valid for EIT.
+			try:  # Age control based on getExtendedDescription also valid for EIT.
 				event = info and info.getEvent(ref)
 				rating = event.getExtendedDescription().strip()
 				agecontrol = "%s" % int(config.ParentalControl.age.value)

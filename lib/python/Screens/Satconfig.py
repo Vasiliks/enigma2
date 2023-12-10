@@ -82,8 +82,8 @@ class NimSetup(ConfigListScreen, ServiceStopScreen, Screen):
 
 	def adaptConfigModeChoices(self):
 		if self.nim.isCompatible("DVB-S") and not self.nim.isFBCLink():
-			#redefine configMode choices with only the possible/required options.
-			#We have to pre-define them here as here all tuner configs are known
+			# redefine configMode choices with only the possible/required options.
+			# We have to pre-define them here as here all tuner configs are known
 			config_mode_choices = {"simple": _("Simple"), "advanced": _("Advanced")}
 			if not self.nim.multi_type:
 				config_mode_choices["nothing"] = _("Disabled")
@@ -132,7 +132,7 @@ class NimSetup(ConfigListScreen, ServiceStopScreen, Screen):
 				self.configMode = (self.indent % _("Configuration mode"), self.nimConfig.configMode, _("Select 'FBC SCR' if this tuner will connect to a SCR (Unicable/JESS) device. For all other setups select 'FBC automatic'.") if self.nim.isFBCLink() else _("Configure this tuner using simple or advanced options, or loop it through to another tuner, or copy a configuration from another tuner, or disable it."))
 				self.list.append(self.configMode)
 				warning_text = _(" Warning: the selected tuner should not use SCR Unicable type for LNBs because each tuner need a own SCR number.")
-				if self.nimConfig.configMode.value == "simple":			#simple setup
+				if self.nimConfig.configMode.value == "simple":  # simple setup
 					self.diseqcModeEntry = (self.indent % pgettext("Satellite configuration mode", "Mode"), self.nimConfig.diseqcMode, _("Select how the satellite dish is set up. i.e. fixed dish, single LNB, DiSEqC switch, positioner, etc."))
 					self.list.append(self.diseqcModeEntry)
 					if self.nimConfig.diseqcMode.value in ("single", "toneburst_a_b", "diseqc_a_b", "diseqc_a_b_c_d"):
@@ -189,7 +189,7 @@ class NimSetup(ConfigListScreen, ServiceStopScreen, Screen):
 						cur_orb_pos = self.nimConfig.advanced.sats.orbital_position
 						if cur_orb_pos is not None:
 							if cur_orb_pos not in self.nimConfig.advanced.sat.keys():
-								cur_orb_pos = next(iter(self.nimConfig.advanced.sat)) # get first key
+								cur_orb_pos = next(iter(self.nimConfig.advanced.sat))  # get first key
 							self.fillListWithAdvancedSatEntrys(self.nimConfig.advanced.sat[cur_orb_pos])
 					self.have_advanced = True
 				if self.nimConfig.configMode.value != "nothing" and config.usage.setup_level.index >= 2:

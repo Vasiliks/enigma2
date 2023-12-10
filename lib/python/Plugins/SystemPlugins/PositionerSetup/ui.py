@@ -982,7 +982,7 @@ class PositionerSetup(Screen):
 				rotorCmd |= 0xE000
 			else:					# west
 				rotorCmd |= 0xD000
-		else: # Southern Hemisphere
+		else:  # Southern Hemisphere
 			if satHourAngle <= 180:  # the east
 				rotorCmd = azimuth2Rotorcode(satHourAngle) | 0xD000
 			else:  # west

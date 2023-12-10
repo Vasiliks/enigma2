@@ -555,7 +555,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 		if config or self.focus == FOCUS_CONFIG:
 			index = self["config"].getCurrentIndex()
 			if self.settings.menupage.value == PAGE_AUDIO:
-				if self.subtitlelist and index == 0: # Subtitle selection screen
+				if self.subtitlelist and index == 0:  # Subtitle selection screen
 					self.keyAudioSubtitle()
 					self.__updatedInfo()
 				elif self["config"].getCurrent()[2]:

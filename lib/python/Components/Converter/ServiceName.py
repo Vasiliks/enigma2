@@ -80,8 +80,6 @@ class ServiceName(Converter):
 					res_str = self.appendToStringWithSeparator(res_str, tuner_system)
 			return res_str
 
-
-
 	text = property(getText)
 
 	def changed(self, what):
@@ -119,7 +117,7 @@ class ServiceName(Converter):
 		if tp_data is not None:
 			try:
 				position = tp_data["orbital_position"]
-				if position > 1800: # west
+				if position > 1800:  # west
 					orbitalpos = "%.1f " %(float(3600 - position)/10) + _("°W")
 				else:
 					orbitalpos = "%.1f " %(float(position)/10) + _("°E")

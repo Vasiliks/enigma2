@@ -236,7 +236,7 @@ class TimerSanityCheck:
 					if ref and ref.flags & eServiceReference.isGroup:  # service group ?
 						serviceList = serviceHandler.list(ref)  # get all alternative services
 						if serviceList:
-							for ref in serviceList.getContent("R"): # iterate over all group service references
+							for ref in serviceList.getContent("R"):  # iterate over all group service references
 								type = getServiceType(ref)
 								if not type in tunerType:  # just add single time
 									tunerType.append(type)

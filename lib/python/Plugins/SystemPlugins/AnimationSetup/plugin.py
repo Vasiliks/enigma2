@@ -14,12 +14,12 @@ g_animation_paused = False
 g_orig_show = None
 g_orig_doClose = None
 
-config.misc.window_animation_default = ConfigNumber(default = 0)
-config.misc.window_animation_speed = ConfigSelectionNumber(1, 30, 1, default = 20)
-config.misc.listbox_animation_default = ConfigSelection(default = "0", choices = [("0", _("Disable")), ("1", _("Enable")), ("2", _("Same behavior as current animation"))])
+config.misc.window_animation_default = ConfigNumber(default=0)
+config.misc.window_animation_speed = ConfigSelectionNumber(1, 30, 1, default=20)
+config.misc.listbox_animation_default = ConfigSelection(default="0", choices=[("0", _("Disable")), ("1", _("Enable")), ("2", _("Same behavior as current animation"))])
 
 class AnimationSetupConfig(ConfigListScreen, Screen):
-	skin=   """
+	skin = """
 		<screen position="center,center" size="600,140" title="Animation Settings">
 			<widget name="config" position="0,0" size="600,100" scrollbarMode="showOnDemand" />
 

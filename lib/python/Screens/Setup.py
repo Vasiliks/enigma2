@@ -85,7 +85,7 @@ class Setup(ConfigListScreen, Screen):
 
 		self.seperation = int(self.setup.get('separation', '0'))
 
-		#check for list.entries > 0 else self.close
+		# check for list.entries > 0 else self.close
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("OK"))
 		self["description"] = Label("")
@@ -149,11 +149,11 @@ class Setup(ConfigListScreen, Screen):
 					continue
 
 				item_text = _(x.get("text", "??"))
-				item_description = _(x.get("description", " ")) # don't change
+				item_description = _(x.get("description", " "))  # don't change
 				b = eval(x.text or "")
 				if b == "":
 					continue
-				#add to configlist
+				# add to configlist
 				item = b
 				# the first b is the item itself, ignored by the configList.
 				# the second one is converted to string.
