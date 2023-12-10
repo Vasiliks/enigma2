@@ -150,7 +150,7 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 			<item entryID="software_update" level="0" text="Software Update" weight="25"><screen module="SoftwareUpdate" screen="UpdatePlugin" /></item>
 			<item entryID="keyboard_setup" text="Keyboard"><setup id="keyboard" /></item>
 			<item entryID="rfmod_setup" level="1" text="RF Modulator Output Setup" requires="RfModulator"><setup id="RFModulator" /></item>
-			<item entryID="flash_image" level="0" text="Flash Image"><screen module="FlashImage" screen="SelectImage" /></item>
+			<item entryID="flash_online" level="0" text="Flash Online" description="Download and flash images on your device." weight="13"><screen module="FlashManager" screen="FlashManager" /></item>
 			<item entryID="factory_reset" level="0" text="Factory Reset"><screen module="FactoryReset" screen="FactoryReset" /></item>
 		</menu>
 	</menu>
@@ -176,6 +176,7 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 		<item level="0" text="Memory" entryID="memory_info_screen" weight="30"><screen module="About" screen="MemoryInformation" /></item>
 		<item level="0" text="Network" entryID="network_info_screen" weight="35"><screen module="About" screen="NetworkInformation" /></item>
 		<item level="0" text="Geolocation" entryID="geolocation_info_screen" weight="45"><screen module="About" screen="GeolocationInformation" /></item>
+		<item level="1" text="MultiBoot" entryID="multiboot_info_screen" weight="40" requires="canMultiBoot"><screen module="About" screen="MultiBootInformation" /></item>
 		<item level="2" text="Streaming clients info" entryID="streaming_clients_info_screen"><screen module="StreamingClientsInfo"/></item>
 	</menu>
 
@@ -198,7 +199,8 @@ self.session.scart.VCRSbChanged(3)
 		<item text="Restart enigma" entryID="restart_enigma"><screen module="Standby" screen="TryQuitMainloop">3</screen></item>
 		<!--item text="Restart enigma in standard mode" requires="InDebugMode" entryID="restart_enigma"><screen module="Standby" screen="TryQuitMainloop">3</screen></item>
 		<item text="Restart enigma in debug mode" requires="!InDebugMode" entryID="restart_enigma_debug"><screen module="Standby" screen="TryQuitMainloop">6</screen></item-->
-		<item text="Multiboot image selector" entryID="multiboot" requires="canMultiBoot"><screen module="FlashImage" screen="MultibootSelection">1</screen></item>
+		<item text="MultiBoot Manager" entryID="multiboot" level="0" weight="6" requires="canMultiBoot"><screen module="MultiBootManager" screen="MultiBootManager" /></item>
+		<item text="Enable Kexec MultiBoot" entryID="kexec_multiboot" level="2" weight="6" requires="cankexec"><screen module="MultiBootManager" screen="KexecInit">1</screen></item>
 		<item text="Deep standby" requires="DeepstandbySupport" entryID="deep_standby"><screen module="Standby" screen="TryQuitMainloop">1</screen></item>
 		<item text="Shutdown" requires="!DeepstandbySupport" entryID="deep_standby"><screen module="Standby" screen="TryQuitMainloop">1</screen></item>
 	</menu>

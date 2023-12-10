@@ -33,6 +33,7 @@ from Screens.Screen import Screen, ScreenSummary
 
 from Tools.Directories import SCOPE_PLUGINS, resolveFilename, fileExists, fileHas, pathExists, fileReadLine, fileReadLines, fileWriteLine, isPluginInstalled
 from Tools.Geolocation import geolocation
+from Tools.MultiBoot import MultiBoot
 from Tools.StbHardware import getFPVersion, getBoxProc, getHWSerial, getBoxRCType, getBoxProcType
 from Tools.LoadPixmap import LoadPixmap
 from Tools.Conversions import scaleNumber, formatDate
@@ -208,7 +209,7 @@ class CommitInformation(InformationBase):
 
 	def showCommitMenu(self):
 		choices = [(commitLog[0], index) for index, commitLog in enumerate(self.commitLogs)]
-		self.session.openWithCallback(self.showCommitMenuCallBack, MessageBox, text=_("Select a repository commit log to view:"), list=choices, windowTitle=self.baseTitle)
+		self.session.openWithCallback(self.showCommitMenuCallBack, MessageBox, text=_("Select a repository commit log to view:"), list=choices, title=self.baseTitle)
 
 	def showCommitMenuCallBack(self, selectedIndex):
 		if isinstance(selectedIndex, int):
@@ -309,7 +310,7 @@ class DebugInformation(InformationBase):
 
 	def showLogMenu(self):
 		choices = [(_("Log file: '%s'  (%s)") % (debugLog[0], debugLog[1]), index) for index, debugLog in enumerate(self.debugLogs)]
-		self.session.openWithCallback(self.showLogMenuCallBack, MessageBox, text=_("Select a debug log file to view:"), list=choices, default=self.debugLogIndex, windowTitle=self.baseTitle)
+		self.session.openWithCallback(self.showLogMenuCallBack, MessageBox, text=_("Select a debug log file to view:"), list=choices, default=self.debugLogIndex, title=self.baseTitle)
 
 	def showLogMenuCallBack(self, selectedIndex):
 		if isinstance(selectedIndex, int):
@@ -335,10 +336,10 @@ class DebugInformation(InformationBase):
 			try:
 				remove(path)
 				del self.cachedDebugInfo[path]
-				self.session.open(MessageBox, _("Log file '%s' deleted.") % name, type=MessageBox.TYPE_INFO, timeout=5, close_on_any_key=True, windowTitle=self.baseTitle)
+				self.session.open(MessageBox, _("Log file '%s' deleted.") % name, type=MessageBox.TYPE_INFO, timeout=5, close_on_any_key=True, title=self.baseTitle)
 				self.debugLogs = []
 			except OSError as err:
-				self.session.open(MessageBox, _("Error %d: Log file '%s' not deleted!  (%s)") % (err.errno, name, err.strerror), type=MessageBox.TYPE_ERROR, timeout=5, windowTitle=self.baseTitle)
+				self.session.open(MessageBox, _("Error %d: Log file '%s' not deleted!  (%s)") % (err.errno, name, err.strerror), type=MessageBox.TYPE_ERROR, timeout=5, title=self.baseTitle)
 			self.informationTimer.start(25)
 
 	def deleteAllLogs(self):
@@ -357,7 +358,7 @@ class DebugInformation(InformationBase):
 					type = MessageBox.TYPE_ERROR
 					close = False
 					log.append(((_("Error %d: Log file '%s' not deleted!  (%s)") % (err.errno, name, err.strerror)), None))
-			self.session.open(MessageBox, _("Results of the delete all logs:"), type=type, list=log, timeout=5, close_on_any_key=close, windowTitle=self.baseTitle)
+			self.session.open(MessageBox, _("Results of the delete all logs:"), type=type, list=log, timeout=5, close_on_any_key=close, title=self.baseTitle)
 			self.debugLogs = []
 			self.cachedDebugInfo = {}
 			self.informationTimer.start(25)
@@ -508,7 +509,22 @@ class ImageInformation(InformationBase):
 			info.append(formatLine("P1", _("Info file override"), _("Defined / Active")))
 		info.append(formatLine("P1", _("Distribution version"), BoxInfo.getItem("imgversion")))
 		info.append(formatLine("P1", _("Distribution language"), BoxInfo.getItem("imglanguage")))
+		slotCode, bootCode = MultiBoot.getCurrentSlotAndBootCodes()
+		if MultiBoot.canMultiBoot():
+			device = MultiBoot.getBootDevice()
+			if BoxInfo.getItem("HasHiSi") and "sda" in device:
+				slotCode = int(slotCode)
+				image = slotCode - 4 if slotCode > 4 else slotCode - 1
+				device = _("SDcard slot %s%s") % (image, f"  -  {device}" if device else "")
+			else:
+				device = _("eMMC slot %s%s") % (slotCode, f"  -  {device}" if device else "")
+			info.append(formatLine("P1", _("Hardware MultiBoot device"), device))
+			info.append(formatLine("P1", _("MultiBoot startup file"), MultiBoot.getStartupFile()))
+		if bootCode:
+			info.append(formatLine("P1", _("MultiBoot boot mode"), MultiBoot.getBootCodeDescription(bootCode)))
 		info.append(formatLine("P1", _("Software MultiBoot"), _("Yes") if BoxInfo.getItem("multiboot", False) else _("No")))
+		if BoxInfo.getItem("HasKexecMultiboot"):
+			info.append(formatLine("P1", _("Vu+ MultiBoot"), _("Yes")))
 		info.append(formatLine("P1", _("Flash type"), about.getFlashType()))
 		xResolution = getDesktop(0).size().width()
 		yResolution = getDesktop(0).size().height()
@@ -765,6 +781,68 @@ class MemoryInformation(InformationBase):
 
 	def getSummaryInformation(self):
 		return "Memory Information Data"
+
+
+class MultiBootInformation(InformationBase):
+	def __init__(self, session):
+		InformationBase.__init__(self, session)
+		self.setTitle(_("MultiBoot Information"))
+		self.skinName.insert(0, "MultiBootInformation")
+		self.slotImages = None
+
+	def fetchInformation(self):
+		def fetchInformationCallback(slotImages):
+			self.slotImages = slotImages
+			for callback in self.onInformationUpdated:
+				callback()
+
+		self.informationTimer.stop()
+		MultiBoot.getSlotImageList(fetchInformationCallback)
+
+	def refreshInformation(self):
+		self.slotImages = None
+		MultiBoot.loadMultiBoot()
+		InformationBase.refreshInformation(self)
+
+	def displayInformation(self):
+		info = []
+		info.append(formatLine("H", _("Boot slot information for %s %s") % getBoxDisplayName()))
+		info.append("")
+		if self.slotImages:
+			slotCode, bootCode = MultiBoot.getCurrentSlotAndBootCodes()
+			slotImageList = sorted(self.slotImages.keys(), key=lambda x: (not x.isnumeric(), int(x) if x.isnumeric() else x))
+			currentMsg = f"  -  {_('Current')}"
+			imageLists = {}
+			for slot in slotImageList:
+				for boot in self.slotImages[slot]["bootCodes"]:
+					if imageLists.get(boot) is None:
+						imageLists[boot] = []
+					current = currentMsg if boot == bootCode and slot == slotCode else ""
+					indent = "P0V" if boot == "" else "P1V"
+					if current:
+						indent = indent.replace("P", "F").replace("V", "F")
+					imageLists[boot].append(formatLine(indent, _("Slot '%s'") % slot, f"{self.slotImages[slot]['imagename']}{current}"))
+			count = 0
+			for bootCode in sorted(imageLists.keys()):
+				if bootCode == "":
+					continue
+				if count:
+					info.append("")
+				info.append(formatLine("S", MultiBoot.getBootCodeDescription(bootCode), None))
+				if self.extraSpacing:
+					info.append("")
+				info.extend(imageLists[bootCode])
+				count += 1
+			if count:
+				info.append("")
+			if "" in imageLists:
+				info.extend(imageLists[""])
+		else:
+			info.append(formatLine("P1", _("Retrieving boot slot information...")))
+		self["information"].setText("\n".join(info))
+
+	def getSummaryInformation(self):
+		return "MultiBoot Information Data"
 
 
 class NetworkInformation(InformationBase):
@@ -1229,6 +1307,7 @@ class ServiceInformation(InformationBase):
 		self["key_yellow"] = StaticText()
 		self["key_blue"] = StaticText()
 		self["serviceActions"] = HelpableActionMap(self, ["MenuActions", "ColorActions", "NavigationActions"], {
+			"menu": (self.showServiceMenu, _("Show selection for service information screen")),
 			"yellow": (self.previousService, _("Show previous service information screen")),
 			"blue": (self.nextService, _("Show next service information screen")),
 			"left": (self.previousService, _("Show previous service information screen")),
@@ -1287,7 +1366,7 @@ class ServiceInformation(InformationBase):
 				self.informationTimer.start(25)
 
 		choices = [(serviceCommand[0], index) for index, serviceCommand in enumerate(self.serviceCommands)]
-		self.session.openWithCallback(showServiceMenuCallBack, MessageBox, text=_("Select service information to view:"), list=choices, windowTitle=self.baseTitle)
+		self.session.openWithCallback(showServiceMenuCallBack, MessageBox, text=_("Select service information to view:"), list=choices, title=self.baseTitle)
 
 	def previousService(self):
 		self.serviceCommandsIndex = (self.serviceCommandsIndex - 1) % self.serviceCommandsMax
@@ -1792,7 +1871,7 @@ class SystemInformation(InformationBase):
 				self.informationTimer.start(25)
 
 		choices = [(systemCommand[0], index) for index, systemCommand in enumerate(self.systemCommands)]
-		self.session.openWithCallback(self.showSystemMenuCallBack, MessageBox, text=_("Select system information to view:"), list=choices, windowTitle=self.baseTitle)
+		self.session.openWithCallback(self.showSystemMenuCallBack, MessageBox, text=_("Select system information to view:"), list=choices, title=self.baseTitle)
 
 	def previousSystem(self):
 		self.systemCommandsIndex = (self.systemCommandsIndex - 1) % self.systemCommandsMax

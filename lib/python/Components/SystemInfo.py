@@ -8,7 +8,8 @@ from subprocess import PIPE, Popen
 from enigma import Misc_Options, eAVControl, eDVBCIInterfaces, eDVBResourceManager, eGetEnigmaDebugLvl, eDBoxLCD
 
 from process import ProcessList
-from Tools.Directories import SCOPE_LIBDIR, SCOPE_SKIN, fileCheck, fileContains, fileReadLine, fileReadLines, fileExists, pathExists, resolveFilename
+from Tools.Directories import SCOPE_LIBDIR, SCOPE_SKIN, fileCheck, fileContains, fileReadLine, fileReadLines, fileExists, pathExists, fileHas, resolveFilename
+from Tools.MultiBoot import MultiBoot
 from Tools.StbHardware import getBoxProc
 
 MODULE_NAME = __name__.split(".")[-1]
@@ -171,8 +172,6 @@ architecture = BoxInfo.getItem("architecture")
 socfamily = BoxInfo.getItem("socfamily")
 mtdkernel = BoxInfo.getItem("mtdkernel")
 procModel = getBoxProc()
-
-from Tools.Multiboot import getMultibootStartupDevice, getMultibootslots  # This import needs to be here to avoid a SystemInfo load loop!
 
 
 def getBoxDisplayName():  # This function returns a tuple like ("BRANDNAME", "BOXNAME")
@@ -407,13 +406,13 @@ SystemInfo["HasComposite"] = BoxInfo.getItem("rca")
 SystemInfo["AmlogicFamily"] = model.startswith(("aml", "meson")) or fileCheck("/proc/device-tree/amlogic-dt-id") or fileExists("/usr/bin/amlhalt") or fileExists("/sys/module/amports")
 SystemInfo["hasXcoreVFD"] = model in ("osmega", "spycat4k", "spycat4kmini", "spycat4kcombo") and fileCheck("/sys/module/brcmstb_%s/parameters/pt6302_cgram" % model)
 SystemInfo["HasOfflineDecoding"] = model not in ("osmini", "osminiplus", "et7000mini", "et11000", "mbmicro", "mbtwinplus", "mbmicrov2", "et7000", "et8500")
-SystemInfo["hasKexec"] = fileContains("/proc/cmdline", "kexec=1")
-SystemInfo["canKexec"] = not SystemInfo["hasKexec"] and isfile("/usr/bin/kernel_auto.bin") and isfile("/usr/bin/STARTUP.cpio.gz") and (model in ("vuduo4k", "vuduo4kse") and ["mmcblk0p9", "mmcblk0p6"] or model in ("vusolo4k", "vuultimo4k", "vuuno4k", "vuuno4kse") and ["mmcblk0p4", "mmcblk0p1"] or model == "vuzero4k" and ["mmcblk0p7", "mmcblk0p4"])
-SystemInfo["MultibootStartupDevice"] = getMultibootStartupDevice()
+SystemInfo["HasKexecMultiboot"] = fileContains("/proc/cmdline", "kexec=1")
+SystemInfo["cankexec"] = not SystemInfo["HasKexecMultiboot"] and isfile("/usr/bin/kernel_auto.bin") and isfile("/usr/bin/STARTUP.cpio.gz") and (model in ("vuduo4k", "vuduo4kse") and ["mmcblk0p9", "mmcblk0p6"] or model in ("vusolo4k", "vuultimo4k", "vuuno4k", "vuuno4kse") and ["mmcblk0p4", "mmcblk0p1"] or model == "vuzero4k" and ["mmcblk0p7", "mmcblk0p4"])
 SystemInfo["canMode12"] = "%s_4.boxmode" % model in cmdline and cmdline["%s_4.boxmode" % model] in ("1", "12") and "192M"
-SystemInfo["canMultiBoot"] = getMultibootslots()
+SystemInfo["canMultiBoot"] = MultiBoot.getBootSlots()
 SystemInfo["canDualBoot"] = fileCheck("/dev/block/by-name/flag")
 SystemInfo["canFlashWithOfgwrite"] = model not in ("dm")
+SystemInfo["HasGPT"] = model in ("dreamone", "dreamtwo") and pathExists("/dev/mmcblk0p7")
 SystemInfo["CanProc"] = SystemInfo["HasMMC"] and not SystemInfo["Blindscan_t2_available"]
 SystemInfo["CanChangeOsdAlpha"] = access("/proc/stb/video/alpha", R_OK) and True or False
 SystemInfo["CanChangeOsdPlaneAlpha"] = access("/sys/class/graphics/fb0/osd_plane_alpha", R_OK) and True or False

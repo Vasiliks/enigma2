@@ -362,14 +362,14 @@ class MoviePlayer(InfoBarBase, InfoBarShowHide, InfoBarMenu, InfoBarSeek, InfoBa
 			else:
 				if answer == "playlist":
 					self.leavePlayerConfirmed([True, "movielist"])
-				elif answer == "loop" and lenght > 0:
+				elif answer == "loop" and length > 0:
 					self.leavePlayerConfirmed([True, "loop"])
 				else:
 					self.leavePlayerConfirmed([True, "quit"])
 		elif answer in ("repeatcurrent"):
 			if config.usage.next_movie_msg.value:
-				(item, lenght) = self.getPlaylistServiceInfo(self.cur_service)
-				self.displayPlayedName(self.cur_service, item, lenght)
+				(item, length) = self.getPlaylistServiceInfo(self.cur_service)
+				self.displayPlayedName(self.cur_service, item, length)
 			self.session.nav.stopService()
 			self.session.nav.playService(self.cur_service)
 
