@@ -150,7 +150,7 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 			<item entryID="software_update" level="0" text="Software Update" weight="25"><screen module="SoftwareUpdate" screen="UpdatePlugin" /></item>
 			<item entryID="keyboard_setup" text="Keyboard"><setup id="keyboard" /></item>
 			<item entryID="rfmod_setup" level="1" text="RF Modulator Output Setup" requires="RfModulator"><setup id="RFModulator" /></item>
-			<item entryID="flash_online" level="0" text="Flash image Online" description="Download and flash images on your device." weight="13"><screen module="FlashManager" screen="FlashManager" /></item>
+			<item entryID="flash_online" level="0" text="Flash Online" description="Download and flash images on your device." weight="13"><screen module="FlashManager" screen="FlashManager" /></item>
 			<item entryID="factory_reset" level="0" text="Factory Reset"><screen module="FactoryReset" screen="FactoryReset" /></item>
 		</menu>
 	</menu>

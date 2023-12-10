@@ -65,7 +65,7 @@ class FlashManager(Screen, HelpableScreen):
 		Screen.__init__(self, session)
 		HelpableScreen.__init__(self)
 		self.skinName = ["FlashManager", "FlashOnline"]
-		self.imageFeed = "openpli"
+		self.imageFeed = "openPli"
 		self.setTitle(_("Flash Manager - %s Images") % self.imageFeed)
 		self.imagesList = {}
 		self.expanded = []
@@ -129,8 +129,8 @@ class FlashManager(Screen, HelpableScreen):
 					print("[FlashManager] getImagesList Error: Unable to extract file list from Zip file '%s'!" % file)
 
 		def getImagesListCallback(retVal=None):  # The retVal argument absorbs the unwanted return value from MessageBox.
-			if self.imageFeed != "openpli":
-				self.keyDistributionCallback("openpli")  # No images can be found for the selected distribution so go back to the openpli default.
+			if self.imageFeed != "openPli":
+				self.keyDistributionCallback("openPli")  # No images can be found for the selected distribution so go back to the openpli default.
 
 		if not self.imagesList:
 			index = findInList(self.imageFeed)
