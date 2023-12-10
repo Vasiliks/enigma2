@@ -70,7 +70,7 @@ class TitleProperties(Screen, ConfigListScreen):
 			self.list.append(("DVD " + _("Track"), self.properties.position))
 			self.list.append(("DVD " + _("Title"), self.properties.menutitle))
 			self.list.append(("DVD " + _("Description"), self.properties.menusubtitle))
-			if config.usage.setup_level.index >= 2: # expert+
+			if config.usage.setup_level.index >= 2:  # expert+
 				for audiotrack in self.properties.audiotracks:
 					DVB_aud = audiotrack.DVB_lang.getValue() or audiotrack.pid.getValue()
 					self.list.append((_("Burn audio track (%s)") % DVB_aud, audiotrack.active))
@@ -132,9 +132,9 @@ class TitleProperties(Screen, ConfigListScreen):
 			self.project.titles.insert(new_pos - 1, swaptitle)
 
 	def ok(self):
-		#key = self.keydict[self["config"].getCurrent()[1]]
-		#if key in self.project.filekeys:
-			#self.session.openWithCallback(self.FileBrowserClosed, FileBrowser, key, self.settings)
+		# key = self.keydict[self["config"].getCurrent()[1]]
+		# if key in self.project.filekeys:
+			# self.session.openWithCallback(self.FileBrowserClosed, FileBrowser, key, self.settings)
 		pass
 
 	def cancel(self):

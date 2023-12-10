@@ -16,7 +16,7 @@ import sys
 # Twisted imports
 from twisted.python import log, failure
 from twisted.internet import main, posixbase, error
-#from twisted.internet.pollreactor import PollReactor, poller
+# from twisted.internet.pollreactor import PollReactor, poller
 
 from enigma import getApplication
 
@@ -149,7 +149,7 @@ class PollReactor(posixbase.PosixReactorBase):
 		"""Poll the poller for new events."""
 
 		if timeout is not None:
-			timeout = int(timeout * 1000) # convert seconds to milliseconds
+			timeout = int(timeout * 1000)  # convert seconds to milliseconds
 
 		try:
 			l = poller.poll(timeout)

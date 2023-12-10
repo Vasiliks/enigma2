@@ -8,7 +8,7 @@ from Screens.MessageBox import MessageBox
 
 
 class Console(Screen):
-	#TODO move this to skin.xml
+	# TODO move this to skin.xml
 	skin = """
 		<screen position="100,100" size="550,400" title="Command execution..." >
 			<widget name="text" position="0,0" size="550,400" font="Console;14" />
@@ -49,7 +49,7 @@ class Console(Screen):
 		self.finished = False
 		self.container.appClosed.append(self.runFinished)
 		self.container.dataAvail.append(self.dataAvail)
-		self.onLayoutFinish.append(self.startRun) # dont start before gui is finished
+		self.onLayoutFinish.append(self.startRun)  # dont start before gui is finished
 
 	def updateTitle(self):
 		self.setTitle(self.newtitle)
@@ -58,8 +58,8 @@ class Console(Screen):
 		if self.showStartStopText:
 			self["text"].setText(_("Execution progress:") + "\n\n")
 		print("[Console] executing in run", self.run, " the command:", self.cmdlist[self.run])
-		if self.container.execute(self.cmdlist[self.run]): #start of container application failed...
-			self.runFinished(-1) # so we must call runFinished manual
+		if self.container.execute(self.cmdlist[self.run]):  # start of container application failed...
+			self.runFinished(-1)  # so we must call runFinished manual
 
 	def runFinished(self, retval):
 		if retval:
@@ -67,8 +67,8 @@ class Console(Screen):
 			self.show()
 		self.run += 1
 		if self.run != len(self.cmdlist):
-			if self.container.execute(self.cmdlist[self.run]): #start of container application failed...
-				self.runFinished(-1) # so we must call runFinished manual
+			if self.container.execute(self.cmdlist[self.run]):  # start of container application failed...
+				self.runFinished(-1)  # so we must call runFinished manual
 		else:
 			self.show()
 			self.finished = True

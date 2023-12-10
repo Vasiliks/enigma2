@@ -127,9 +127,9 @@ class CaidInfo2(Poll, Converter, object):
 			self.type = self.CRD
 		elif type == "CrdTxt":
 			self.type = self.CRDTXT
-		elif  type == "IsFta":
+		elif type == "IsFta":
 			self.type = self.IS_FTA
-		elif  type == "IsCrypted":
+		elif type == "IsCrypted":
 			self.type = self.IS_CRYPTED
 		elif type == "Short":
 			self.type = self.SHORT
@@ -318,7 +318,7 @@ class CaidInfo2(Poll, Converter, object):
 					else:
 						if source != "cache" and source == "net" and source.find("emu") == -1:
 							return True
-						# return  (source != None and source == "net") or (source != None and source != "sci") or (source != None and source != "emu") or (reader != None and reader != "emu") or (source != None and source != "card") 
+						# return (source != None and source == "net") or (source != None and source != "sci") or (source != None and source != "emu") or (reader != None and reader != "emu") or (source != None and source != "card") 
 
 				else:
 					return False

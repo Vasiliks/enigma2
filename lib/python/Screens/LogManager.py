@@ -128,7 +128,7 @@ class LogManagerPoller:
 						eBackgroundFileEraser.getInstance().erase(fn)
 						bytesToRemove -= st_size
 						size -= st_size
-		self.TrashTimer.startLongTimer(43200) #twice a day
+		self.TrashTimer.startLongTimer(43200)  # twice a day
 
 
 class LogManager(Screen):

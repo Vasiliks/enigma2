@@ -208,7 +208,7 @@ class EPGList(GUIComponent):
 		def EventBorderHorWidth(value):  # for png backgrounds only
 			self.eventBorderHorWidth = int(value)
 
-		def EventBorderVerWidth(value): # for png backgrounds only
+		def EventBorderVerWidth(value):  # for png backgrounds only
 			self.eventBorderVerWidth = int(value)
 
 		def EventNamePadding(value):
@@ -496,7 +496,7 @@ class EPGList(GUIComponent):
 			currentservice = False
 
 		res = [None]
-		if self.graphics_mode: # render borders if GMEPG is in graphics mode
+		if self.graphics_mode:  # render borders if GMEPG is in graphics mode
 			if self.borderTopPix is not None:
 				res.append(MultiContentEntryPixmapAlphaBlend(
 						pos=(r1.left(), r1.top()),
@@ -513,7 +513,7 @@ class EPGList(GUIComponent):
 						pos=(r1.left(), r1.height() - self.serviceBorderWidth),
 						size=(r1.width(), self.serviceBorderWidth),
 						png=self.borderBottomPix,
-						flags=BT_SCALE))
+						flags/home/foxbob/enigma2-OEA/lib/python/Navigation.py=BT_SCALE))
 				res.append(MultiContentEntryPixmapAlphaBlend(
 						pos=(left, height - self.eventBorderWidth),
 						size=(width, self.eventBorderWidth),

@@ -22,7 +22,7 @@ from skin import parameters, getSkinFactor
 from Tools.Directories import SCOPE_CURRENT_SKIN, resolveFilename, fileExists
 from Tools.LoadPixmap import LoadPixmap
 
-###global
+# global
 sf = getSkinFactor()
 sizeH = 700
 HDSKIN = False
@@ -36,7 +36,7 @@ elif screenwidth and screenwidth > 1920:
 elif screenwidth and screenwidth > 1024:
 	sizeH = screenwidth - 100
 	HDSKIN = True
-###global
+# global
 
 
 class OscamInfo:

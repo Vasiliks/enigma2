@@ -426,7 +426,7 @@ class ServiceList(GUIComponent):
 			ref = eServiceReference()
 		return marked
 
-#just for movemode.. only one marked entry..
+# just for movemode.. only one marked entry..
 	def setCurrentMarked(self, state):
 		self.l.setCurrentMarked(state)
 
@@ -458,7 +458,7 @@ class ServiceList(GUIComponent):
 		numberHeight = self.ItemHeight // 2 if twoLines and config.usage.servicelist_servicenumber_valign.value == "1" else self.ItemHeight
 		self.l.setElementPosition(self.l.celServiceNumber, eRect(self.listMarginLeft, 0, channelNumberWidth, numberHeight))
 
-		#progress view modes for two lines
+		# progress view modes for two lines
 		#  0 - single, centered
 		# 10 - single, upper line
 		#  1 - dual, bar upper line, value lower line

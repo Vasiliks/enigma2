@@ -192,19 +192,19 @@ class DVDPlayer(Screen, InfoBarBase, InfoBarNotifications, InfoBarSeek, InfoBarP
 
 		self["DVDPlayerDirectionActions"] = ActionMap(["DirectionActions"],
 			{
-				#MENU KEY DOWN ACTIONS
+				# MENU KEY DOWN ACTIONS
 				"left": self.keyLeft,
 				"right": self.keyRight,
 				"up": self.keyUp,
 				"down": self.keyDown,
 
-				#MENU KEY REPEATED ACTIONS
+				# MENU KEY REPEATED ACTIONS
 				"leftRepeated": self.doNothing,
 				"rightRepeated": self.doNothing,
 				"upRepeated": self.doNothing,
 				"downRepeated": self.doNothing,
 
-				#MENU KEY UP ACTIONS
+				# MENU KEY UP ACTIONS
 				"leftUp": self.doNothing,
 				"rightUp": self.doNothing,
 				"upUp": self.doNothing,
@@ -219,7 +219,7 @@ class DVDPlayer(Screen, InfoBarBase, InfoBarNotifications, InfoBarSeek, InfoBarP
 
 		self["DVDPlayerPlaybackActions"] = HelpableActionMap(self, ["DVDPlayerActions"],
 			{
-				#PLAYER ACTIONS
+				# PLAYER ACTIONS
 				"dvdMenu": (self.enterDVDMenu, _("show DVD main menu")),
 				"toggleInfo": (self.toggleInfo, _("toggle time, chapter, audio, subtitle info")),
 				"nextChapter": (self.nextChapter, _("forward to the next chapter")),
@@ -337,7 +337,7 @@ class DVDPlayer(Screen, InfoBarBase, InfoBarNotifications, InfoBarSeek, InfoBarP
 		if subs:
 			subs.disableSubtitles(self.session.current_dialog.instance)
 
-	def serviceStarted(self): #override InfoBarShowHide function
+	def serviceStarted(self):  # override InfoBarShowHide function
 		self.dvdScreen and self.dvdScreen.show()
 
 	def doEofInternal(self, playing):
@@ -579,7 +579,7 @@ class DVDPlayer(Screen, InfoBarBase, InfoBarNotifications, InfoBarSeek, InfoBarP
 				ifofilename = val
 				if not ifofilename.upper().endswith("/VIDEO_TS"):
 					ifofilename += "/VIDEO_TS"
-				files = [("/VIDEO_TS.IFO", 0x100), ("/VTS_01_0.IFO", 0x100), ("/VTS_01_0.IFO", 0x200)] # ( filename, offset )
+				files = [("/VIDEO_TS.IFO", 0x100), ("/VTS_01_0.IFO", 0x100), ("/VTS_01_0.IFO", 0x200)]  # ( filename, offset )
 				for name in files:
 					(status, isNTSC, isLowResolution) = self.readVideoAtributes(ifofilename, name)
 					if status:
@@ -654,7 +654,7 @@ class DVDPlayer(Screen, InfoBarBase, InfoBarNotifications, InfoBarSeek, InfoBarP
 		except:
 			pass
 
-	def playLastCB(self, answer): # overwrite infobar cuesheet function
+	def playLastCB(self, answer):  # overwrite infobar cuesheet function
 		print("[DVD] playLastCB", answer, self.resume_point)
 		if self.service:
 			if answer:
@@ -673,7 +673,7 @@ class DVDPlayer(Screen, InfoBarBase, InfoBarNotifications, InfoBarSeek, InfoBarP
 	def createSummary(self):
 		return DVDSummary
 
-#override some InfoBarSeek functions
+# override some InfoBarSeek functions
 	def doEof(self):
 		self.setSeekState(self.SEEK_STATE_PLAY)
 

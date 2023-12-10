@@ -39,14 +39,14 @@ class GUIComponent:
 		if self.skinAttributes is None:
 			return False
 
-		#//workaround for values from attributes the not be set
+		# //workaround for values from attributes the not be set
 		#
-		#The order of some attributes is crucial if they are applied. Also, an attribute may be responsible that another does not take effect and occurs at different skins.
-		#It was noticed at 'scrollbarSliderBorderWidth' and 'scrollbarSliderForegroundColor'.
+		# The order of some attributes is crucial if they are applied. Also, an attribute may be responsible that another does not take effect and occurs at different skins.
+		# It was noticed at 'scrollbarSliderBorderWidth' and 'scrollbarSliderForegroundColor'.
 		#
 		if config.skin.primary_skin.value.split('/')[0] not in ('DMConcinnity-HD'):
 			self.skinAttributes.sort()
-		#//
+		# //
 		skin.applyAllAttributes(self.instance, desktop, self.skinAttributes, parent.scale)
 		return True
 

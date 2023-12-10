@@ -20,7 +20,7 @@ import time
 
 from events import eventfnc
 
-##################### ENIGMA BASE
+# ENIGMA BASE
 
 
 class eTimer:
@@ -86,7 +86,7 @@ def run(duration=1000):
 		runIteration()
 
 
-##################### ENIGMA GUI
+# ENIGMA GUI
 
 eSize = None
 ePoint = None
@@ -287,7 +287,7 @@ for (x, (y, z)) in Tools.Directories.defaultPaths.items():
 Tools.Directories.defaultPaths[Tools.Directories.SCOPE_SKIN] = ("../data/", Tools.Directories.PATH_DONTCREATE)
 Tools.Directories.defaultPaths[Tools.Directories.SCOPE_CONFIG] = ("/etc/enigma2/", Tools.Directories.PATH_DONTCREATE)
 
-##################### ENIGMA CONFIG
+# ENIGMA CONFIG
 
 print("[enigma] import config")
 import Components.config
@@ -299,7 +299,7 @@ my_config = [
 
 Components.config.config.unpickle(my_config)
 
-##################### ENIGMA ACTIONS
+# ENIGMA ACTIONS
 
 
 class eActionMap:
@@ -307,7 +307,7 @@ class eActionMap:
 		pass
 
 
-##################### ENIGMA STARTUP:
+# ENIGMA STARTUP:
 
 def init_nav():
 	print("[enigma] init nav")

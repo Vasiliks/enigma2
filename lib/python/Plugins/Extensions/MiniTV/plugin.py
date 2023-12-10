@@ -3,15 +3,15 @@ from Components.PluginComponent import plugins
 from Screens.Screen import Screen
 from Components.ConfigList import ConfigListScreen
 from Components.config import config, ConfigSubsection, ConfigSelection, ConfigInteger
-from Components.ActionMap import ActionMap,NumberActionMap
+from Components.ActionMap import ActionMap, NumberActionMap
 from Components.Sources.StaticText import StaticText
 
 
 config.plugins.minitv = ConfigSubsection()
-config.plugins.minitv.enable = ConfigSelection(default="disable", choices=[ ("enable", "enable"), ("disable", "disable")])
+config.plugins.minitv.enable = ConfigSelection(default="disable", choices=[("enable", "enable"), ("disable", "disable")])
 
-class MiniTVSetup(Screen,ConfigListScreen):
-	skin = 	"""
+class MiniTVSetup(Screen, ConfigListScreen):
+	skin = """
 		<screen position="center,center" size="400,270" title="MiniTV Setup" >
 			<ePixmap pixmap="skin_default/buttons/red.png" position="30,10" size="140,40" alphaTest="on" />
 			<ePixmap pixmap="skin_default/buttons/green.png" position="230,10" size="140,40" alphaTest="on" />
@@ -41,7 +41,7 @@ class MiniTVSetup(Screen,ConfigListScreen):
 	def createSetup(self):
 		self.minitvModeEntry = (_("MiniTV Mode"), config.plugins.minitv.enable)
 		self.list = []
-		self.list.append( self.minitvModeEntry )
+		self.list.append(self.minitvModeEntry)
 		self["config"].list = self.list
 		self["config"].l.setList(self.list)	
 

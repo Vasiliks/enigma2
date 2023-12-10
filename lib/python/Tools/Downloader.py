@@ -2,7 +2,7 @@
 from twisted.web import client
 from twisted.internet import reactor, defer
 from urllib.parse import urlparse
-#from Components.SystemInfo import BoxInfo
+# from Components.SystemInfo import BoxInfo
 
 
 class HTTPProgressDownloader(client.HTTPDownloader):

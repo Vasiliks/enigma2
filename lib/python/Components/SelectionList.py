@@ -17,8 +17,8 @@ def SelectionEntryComponent(description, value, index, selected):
 	]
 	global icons
 	icon = icons[0] if selected else icons[1]
-# 	Do we really we need SelectionListLockOff
-#	ix, iy, iw, ih = parameters.get("SelectionListLock" if selected else "SelectionListLockOff", (0, 2, 25, 24))
+# Do we really we need SelectionListLockOff
+# ix, iy, iw, ih = parameters.get("SelectionListLock" if selected else "SelectionListLockOff", (0, 2, 25, 24))
 	ix, iy, iw, ih = parameters.get("SelectionListLock", (0, 2, 25, 24))
 	res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHABLEND, ix, iy, iw, ih, icon, None, None, BT_SCALE | BT_KEEP_ASPECT_RATIO))
 	return res

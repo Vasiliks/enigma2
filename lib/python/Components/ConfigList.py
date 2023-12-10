@@ -12,7 +12,7 @@ from skin import parameters
 class ConfigList(GUIComponent):
 	def __init__(self, list, session=None):
 		GUIComponent.__init__(self)
-		self.l = eListboxPythonConfigContent()
+		self.l = eListboxPythonConfigContent()  # noqa: E741
 		seperation = parameters.get("ConfigListSeperator", 200)
 		self.l.setSeperation(seperation)
 		height, space = parameters.get("ConfigListSlider", (17, 0))
@@ -101,7 +101,7 @@ class ConfigList(GUIComponent):
 		instance.selectionChanged.get().remove(self.selectionChanged)
 		instance.setContent(None)
 
-	def setList(self, l):
+	def setList(self, l):  # noqa: E741
 		self.timer.stop()
 		self.__list = l
 		self.l.setList(self.__list)

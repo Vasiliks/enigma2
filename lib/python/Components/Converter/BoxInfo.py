@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#<widget source="session.CurrentService" render="Label" position="1356,284" size="488,34" zPosition="2" font="Regular;30" horizontalAlignment="center" foregroundColor="red" backgroundColor="transpBlack" transparent="1">
-#	<convert type="BoxInfo">Boxtype</convert>
-#</widget>
+# <widget source="session.CurrentService" render="Label" position="1356,284" size="488,34" zPosition="2" font="Regular;30" horizontalAlignment="center" foregroundColor="red" backgroundColor="transpBlack" transparent="1">
+# 	<convert type="BoxInfo">Boxtype</convert>
+# </widget>
 
 from Components.Converter.Poll import Poll
 from Components.Converter.Converter import Converter
@@ -31,7 +31,7 @@ import os
 
 class BoxInfo(Poll, Converter, object):
 	Boxtype = 0
-	CpuInfo = 1	
+	CpuInfo = 1
 	HddTemp = 2
 	TempInfo = 3
 	FanInfo = 4
@@ -61,7 +61,7 @@ class BoxInfo(Poll, Converter, object):
 		'TimeInfo': self.TimeInfo,
 		'TimeInfo2': self.TimeInfo2,
 		'TimeInfo3': self.TimeInfo3,
-		'TimeInfo4': self.TimeInfo4}[type]		
+		'TimeInfo4': self.TimeInfo4}[type]
 
 	def imageinfo(self):
 		imageinfo = ''
@@ -75,7 +75,7 @@ class BoxInfo(Poll, Converter, object):
 			imageinfo = '/var/opkg/status'
 		return imageinfo
 
-	@cached	
+	@cached
 	def getText(self):
 		if self.type == self.Boxtype:
 			box = software = ''
@@ -135,7 +135,7 @@ class BoxInfo(Poll, Converter, object):
 							f = open('/sys/firmware/devicetree/base/cpus/cpu@0/clock-frequency', 'rb')
 							clockfrequency = f.read()
 							f.close()
-							cpu_speed = "%s" % str(int(binascii.hexlify(clockfrequency), 16)/1000000)
+							cpu_speed = "%s" % str(int(binascii.hexlify(clockfrequency), 16) / 1000000)
 						except:
 							cpu_speed = '-'
 				if cpu_info == '': 
@@ -246,7 +246,7 @@ class BoxInfo(Poll, Converter, object):
 			except:
 				return ''
 
-		elif self.type == self.SkinInfo:			
+		elif self.type == self.SkinInfo:
 			if fileExists('/etc/enigma2/settings'):
 				try:
 					for line in open('/etc/enigma2/settings'):
