@@ -106,17 +106,40 @@ config.misc.SyncTimeUsing = ConfigSelection(default="0", choices=[
 ])
 config.misc.NTPserver = ConfigText(default="pool.ntp.org", fixed_size=False)
 
-# demo code for use of standby enter leave callbacks
+def dump(dir, p=""):
+	had = dict()
+	if isinstance(dir, dict):
+		for (entry, val) in dir.items():
+			dump(val, p + "(dict)/" + entry)
+	if hasattr(dir, "__dict__"):
+		for name, value in dir.__dict__.items():
+			if str(value) not in had:
+				had[str(value)] = 1
+				dump(value, p + "/" + str(name))
+			else:
+				print("[StartEnigma] Dump: %s/%s:%s(cycle)" % (p, str(name), str(dir.__class__)))
+	else:
+		print("[StartEnigma] Dump: %s:%s" % (p, str(dir)))  # + ":" + str(dir.__class__)
+
+# Demo code for use of standby enter leave callbacks.
+#
 # def leaveStandby():
-# print("!!!!!!!!!!!!!!!!!leave standby")
-
+# 	print("[StartEnigma] Leaving standby.")
+#
+#
 # def standbyCountChanged(configElement):
-# print("!!!!!!!!!!!!!!!!!enter standby num", configElement.value)
-# from Screens.Standby import inStandby
-# inStandby.onClose.append(leaveStandby)
+# 	print("[StartEnigma] Enter standby number %s." % configElement.value)
+# 	from Screens.Standby import inStandby
+# 	inStandby.onClose.append(leaveStandby)
+#
+#
+# config.misc.standbyCounter.addNotifier(standbyCountChanged, initial_call=False)
 
-config.misc.standbyCounter.addNotifier(standbyCountChanged, initial_call=False)
-####################################################
+#################################
+#                               #
+#  Code execution starts here!  #
+#                               #
+#################################
 
 profile("Twisted")
 print("[StartEnigma] Initializing Twisted.")
@@ -188,25 +211,6 @@ from Plugins.Plugin import PluginDescriptor
 
 profile("misc")
 had = dict()
-
-
-def dump(dir, p=""):
-	if isinstance(dir, dict):
-		for (entry, val) in dir.items():
-			dump(val, p + "(dict)/" + entry)
-	if hasattr(dir, "__dict__"):
-		for name, value in dir.__dict__.items():
-			if str(value) not in had:
-				had[str(value)] = 1
-				dump(value, p + "/" + str(name))
-			else:
-				print(p + "/" + str(name) + ":" + str(dir.__class__) + "(cycle)")
-	else:
-		print(p + ":" + str(dir))
-
-# + ":" + str(dir.__class__)
-
-# display
 
 
 profile("LOAD:ScreenGlobals")
