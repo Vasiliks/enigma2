@@ -6016,6 +6016,12 @@ msgstr "Удалить имидж"
 msgid "Delete Image"
 msgstr "Удалить имидж"
 
+msgid "Delete only highlighted file"
+msgstr "Удалить только выделенный файл"
+
+msgid "Delete or Wipe the highlighted slot"
+msgstr "Удалить или стереть выделенный слот"
+
 msgid "Delete logfile"
 msgstr "Удалить файл журнала"
 
@@ -8516,7 +8522,10 @@ msgid "Harddisk"
 msgstr "Жесткий диск"
 
 msgid "Harddisk Setup"
-msgstr "Настройки жестокого диска"
+msgstr "Настройки жёсткого диска"
+
+msgid "Hardware MultiBoot device"
+msgstr "Устройство MultiBoot"
 
 msgid "Hardware information"
 msgstr "Информация об оборудовании"
@@ -8932,6 +8941,10 @@ msgstr "Версия имиджа: "
 msgid "Imagerevision: "
 msgstr "Ревизия имиджа: "
 
+#, python-format
+msgid "Image information for %s %s"
+msgstr "Информация о имидже для %s %s"
+
 msgid "Immediately restart selected devices."
 msgstr "Немедленно перезапустите выбранные устройства."
 
@@ -9020,6 +9033,9 @@ msgstr "Индонезия"
 
 msgid "Inetd recovery"
 msgstr "Загрузить меню Recovery"
+
+msgid "Info file checksum"
+msgstr "Контрольная сумма"
 
 msgid "Info"
 msgstr "Информация"
@@ -13878,6 +13894,9 @@ msgstr "Использовать пульт ТВ для управления"
 msgid "Select satellites"
 msgstr "Выбор спутников"
 
+msgid "Select service information to view:"
+msgstr "Выберите информацию о канале для просмотра:"
+
 msgid "Select service to add..."
 msgstr "Выбор сервиса для добавления..."
 
@@ -15377,7 +15396,36 @@ msgstr "Слот %s / FBC вход %s"
 
 #, python-format
 msgid "Slot %s / FBC virtual %s"
-msgstr "Слот %s / FBC виртуальный %s"
+msgstr "Слот %s / виртуальный FBC %s"
+
+#, python-format
+msgid "Slot %s: %s"
+msgstr "Слот %s: %s"
+
+#, python-format
+msgid "Slot %s: %s (Current image)"
+msgstr "Слот %s: %s (текущий имидж)"
+
+#, python-format
+msgid "Slot %s: %s as USB Recovery"
+msgstr "Слот %s: %s как USB-восстановление"
+
+#, python-format
+msgid "Slot '%s' %s"
+msgstr ""
+
+#, python-format
+msgid "Slot '%s' %s: %s%s"
+msgstr "Слот '%s' %s: %s%s"
+
+msgid "Slot Manager"
+msgstr "Менеджер слотов"
+
+msgid "Slot Manager Actions"
+msgstr "Действия диспетчера слотов"
+
+msgid "Slot R: Root Slot Full Backup (Current image)"
+msgstr "Слот R: полное резервное копирование корневого слота (текущий образ)"
 
 msgid "Slovak"
 msgstr "Словакский"
@@ -15432,6 +15480,9 @@ msgstr "ПО"
 
 msgid "Software information"
 msgstr "Информация о программном обеспечении"
+
+msgid "Software MultiBoot"
+msgstr "Мультизагрузка ПО"
 
 msgid "Software management"
 msgstr "Менеджер управления ПО"
@@ -17430,6 +17481,10 @@ msgstr "Информация о тюнере"
 
 msgid "Tuner information"
 msgstr "Информация о тюнере"
+
+#, python-format
+msgid "Tuner information for %s %s"
+msgstr "Информация о тюнере для %s %s"
 
 msgid "Tuner configuration"
 msgstr "Конфигурация тюнера"

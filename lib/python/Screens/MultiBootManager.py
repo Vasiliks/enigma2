@@ -17,7 +17,6 @@ from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Screens.Setup import Setup
 from Screens.Standby import QUIT_REBOOT, TryQuitMainloop
-from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLines, fileWriteLine
 from Tools.MultiBoot import MultiBoot
 
