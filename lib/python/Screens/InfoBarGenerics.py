@@ -2846,7 +2846,7 @@ class InfoBarInstantRecord:
 			if event:
 				end = info["end"]
 			elif limitEvent == "event":
-				message = _("No event info found, recording indefinitely.")
+				message = _("No event info found, recording default is infinite.")
 		if limitEvent in ("", "indefinitely"):
 			message = _("Recording time has been set.")
 			if event:
@@ -2881,10 +2881,10 @@ class InfoBarInstantRecord:
 					self.session.nav.RecordTimer.record(recording)
 					self.recording.append(recording)
 					added_timer = True
-					message += _("Record time limited due to conflicting timer %s") % name_date
+					message += _("Record time limited due to conflicting timer: %s") % f"\n{name_date}"
 					duration_message = "\n" + _("Default duration: %d mins") % ((recording.end - recording.begin) // 60) + "\n"
 				else:
-					message = _("Could not record due to conflicting timer %s") % name
+					message = _("Could not record due to conflicting timer: %s") % f"\n{name}"
 					if count > 2:
 						message += "\n" + _("total conflict (%d)") % (count - 1)
 			else:
