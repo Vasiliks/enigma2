@@ -5,7 +5,7 @@ import RecordTimer
 import Components.ParentalControl
 from Screens.Screen import Screen
 from Screens.MessageBox import MessageBox
-from Components.ActionMap import ActionMap
+from Components.ActionMap import HelpableActionMap
 from Components.config import config
 from Components.AVSwitch import AVSwitch
 from Components.Console import Console
@@ -66,7 +66,7 @@ class StandbyScreen(Screen):
 		if isfile("/usr/script/standby_enter.sh"):
 			Console().ePopen("/usr/script/standby_enter.sh")
 
-		self["actions"] = ActionMap(["StandbyActions"],
+		self["actions"] = HelpableActionMap(["StandbyActions"],
 		{
 			"power": self.Power,
 			"discrete_on": self.Power
