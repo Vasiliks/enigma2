@@ -629,15 +629,8 @@ class InfoBarShowHide(InfoBarScreenSaver):
 	def checkStreamrelay(self, service):
 		return (service and service.toString() in whitelist.streamrelay)
 
-	def ToggleStreamrelay(self, service):
-		servicestring = service.toString()
-		if servicestring in whitelist.streamrelay:
-			whitelist.streamrelay.remove(servicestring)
-		else:
-			whitelist.streamrelay.append(servicestring)
-		if self.session.nav.getCurrentlyPlayingServiceReference() == service:
-			self.session.nav.restartService()
-		open('/etc/enigma2/whitelist_streamrelay', 'w').write('\n'.join(whitelist.streamrelay))
+	def ToggleStreamrelay(self, service=None):
+		streamrelay.toggle(self.session.nav, service)
 
 
 class BufferIndicator(Screen):
