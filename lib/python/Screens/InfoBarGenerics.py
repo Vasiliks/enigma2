@@ -2743,13 +2743,12 @@ from RecordTimer import parseEvent
 
 
 class InfoBarInstantRecord:
-	"""Instant Record - handles the instantRecord action in order to
-	start/stop instant records"""
+	"""Instant Record - Handles the instantRecord action in order to start/stop instant recordings."""
 
 	def __init__(self):
 		self["InstantRecordActions"] = HelpableActionMap(self, ["InfobarInstantRecord"], {
-			"instantRecord": (self.instantRecord, _("Instant recording")),
-		}, prio=0, description=_("Recording Actions"))
+			"instantRecord": (self.instantRecord, _("Start an instant recording")),
+		}, prio=0, description=_("Instant Recording Actions"))
 		self.SelectedInstantServiceRef = None
 		if isStandardInfoBar(self):
 			self.recording = []
@@ -2800,7 +2799,7 @@ class InfoBarInstantRecord:
 	def getProgramInfoAndEvent(self, info, name):
 		info["serviceref"] = hasattr(self, "SelectedInstantServiceRef") and self.SelectedInstantServiceRef or self.session.nav.getCurrentlyPlayingServiceOrGroup()
 
-		# try to get event info
+		# Try to get event information.
 		event = None
 		try:
 			epg = eEPGCache.getInstance()
@@ -2812,14 +2811,12 @@ class InfoBarInstantRecord:
 				else:
 					service = self.session.nav.getCurrentService()
 					event = service and service.info().getEvent(0)
-		except:
+		except Exception:
 			pass
-
 		info["event"] = event
 		info["name"] = name
 		info["description"] = ""
 		info["eventid"] = None
-
 		if event is not None:
 			curEvent = parseEvent(event)
 			info["name"] = curEvent[2]
@@ -2829,24 +2826,22 @@ class InfoBarInstantRecord:
 
 	def startInstantRecording(self, limitEvent=""):
 		begin = int(time())
-		end = begin + 3600		# dummy
+		end = begin + 3600		# Dummy.
 		name = _("Instant record")
 		info = {}
 		message = duration_message = ""
 		timeout = 5
 		added_timer = False
-
 		self.getProgramInfoAndEvent(info, name)
 		serviceref = info["serviceref"]
 		event = info["event"]
-
 		if limitEvent in ("event", "manualendtime", "manualduration"):
 			if limitEvent in ("manualendtime", "manualduration") or (hasattr(self, "SelectedInstantServiceRef") and self.SelectedInstantServiceRef):
 				message = _("Recording time has been set.")
 			if event:
 				end = info["end"]
 			elif limitEvent == "event":
-				message = _("No event info found, recording default is infinite.")
+				message = _("No event information found, recording default is 24 hours.")
 		if limitEvent in ("", "indefinitely"):
 			message = _("Recording time has been set.")
 			if event:
@@ -2854,7 +2849,6 @@ class InfoBarInstantRecord:
 
 		if isinstance(serviceref, eServiceReference):
 			serviceref = ServiceReference(serviceref)
-
 		recording = RecordTimerEntry(serviceref, begin, end, info["name"], info["description"], info["eventid"], dirname=preferredInstantRecordPath())
 		recording.dontSave = True
 
@@ -2862,21 +2856,20 @@ class InfoBarInstantRecord:
 			recording.autoincrease = True
 			recording.setAutoincreaseEnd()
 			duration_message = "\n" + _("Default duration: %d mins") % ((recording.end - recording.begin) // 60) + "\n"
-
 		simulTimerList = self.session.nav.RecordTimer.record(recording)
 
-		if simulTimerList is None:  # no conflict
+		if simulTimerList is None:  # No conflict.
 			recording.autoincrease = False
 			self.recording.append(recording)
 			added_timer = True
 		else:
 			count = len(simulTimerList)
-			if count > 1:  # with other recording
+			if count > 1:  # With other recording.
 				timeout = 10
 				name = "'%s'" % simulTimerList[1].name
-				name_date = ' '.join((name, strftime('%F %T', localtime(simulTimerList[1].begin))))
-				print("[InfoBarInstantRecord] conflicts with", name_date, count)
-				recording.autoincrease = True  # start with max available length, then increment
+				name_date = " ".join((name, strftime("%F %T", localtime(simulTimerList[1].begin))))
+				# print(f"[InfoBarGenerics] InstantTimer conflicts with {name_date}!")
+				recording.autoincrease = True  # Start with max available length, then increment.
 				if recording.setAutoincreaseEnd():
 					self.session.nav.RecordTimer.record(recording)
 					self.recording.append(recording)
@@ -2901,7 +2894,7 @@ class InfoBarInstantRecord:
 		self.startInstantRecording(limitEvent="event")
 
 	def isInstantRecordRunning(self):
-		print("[InfoBarInstantRecord] self.recording:", self.recording)
+		# print("[InfoBarGenerics] self.recording: {self.recording}")
 		if self.recording:
 			for x in self.recording:
 				if x.isRunning():
@@ -2909,8 +2902,8 @@ class InfoBarInstantRecord:
 		return False
 
 	def recordQuestionCallback(self, answer):
-		print("[InfoBarInstantRecord] pre:\n", self.recording)
-
+		# print("[InfoBarGenerics] recordQuestionCallback")
+		# print("[InfoBarGenerics] pre: {self.recording}")
 		if answer is None or answer[1] == "no":
 			return
 		list = []
@@ -3036,26 +3029,26 @@ class InfoBarInstantRecord:
 		if not findSafeRecordPath(pirr) and not findSafeRecordPath(defaultMoviePath()):
 			if not pirr:
 				pirr = ""
-			self.session.open(MessageBox, _("Missing ") + "\n" + pirr + "\n" + _("No HDD found or HDD not initialized!"), MessageBox.TYPE_ERROR)
+			self.session.open(MessageBox, "%s\n\n%s" % (_("Path '%s' missing!") % pirr, _("No HDD found or HDD not initialized!")), MessageBox.TYPE_ERROR)
 			return
 
 		if isStandardInfoBar(self):
 			info = {}
 			self.getProgramInfoAndEvent(info, "")
-			event_entry = ((_("Add recording (stop after current event)"), "event"),)
-			common = ((_("Add recording (indefinitely)"), "indefinitely"),
-					(_("Add recording (enter recording duration)"), "manualduration"),
-					(_("Add recording (enter recording endtime)"), "manualendtime"),)
+			event_entry = ((_("Add recording (Stop after current event)"), "event"),)
+			common = ((_("Add recording (Indefinitely - 24 hours)"), "indefinitely"),
+					(_("Add recording (Enter recording duration)"), "manualduration"),
+					(_("Add recording (Enter recording end time)"), "manualendtime"),)
 			if info["event"]:
 				common = event_entry + common
 		else:
 			common = ()
 		if self.isInstantRecordRunning():
-			title = _("A recording is currently running.\nWhat do you want to do?")
+			title = f'{_("A recording is currently running.")}\n{_("What do you want to do?")}'
 			list = common + \
-				((_("Change recording (duration)"), "changeduration"),
-				(_("Change recording (add time)"), "addrecordingtime"),
-				(_("Change recording (endtime)"), "changeendtime"),)
+				((_("Change recording (Duration)"), "changeduration"),
+				(_("Change recording (Add time)"), "addrecordingtime"),
+				(_("Change recording (End time)"), "changeendtime"),)
 			list += ((_("Stop recording"), "stop"),)
 			if config.usage.movielist_trashcan.value:
 				list += ((_("Stop and delete recording"), "stopdelete"),)
@@ -3067,10 +3060,10 @@ class InfoBarInstantRecord:
 				list += ((_("Stop timer recording"), "timer"),)
 			list += ((_("Do nothing"), "no"),)
 		else:
-			title = _("Start recording?")
+			title = _("Start instant recording?")
 			list = common
 			if self.isTimerRecordRunning():
-				list += ((_("Stop timer recording"), "timer"),)
+				list += ((_("Stop timer recording"), "timer"))
 			if isStandardInfoBar(self):
 				list += ((_("Do not record"), "no"),)
 		if isStandardInfoBar(self) and self.timeshiftEnabled():

@@ -2231,17 +2231,17 @@ msgstr "Добавить маркер"
 msgid "Add provider"
 msgstr "Добавить провайдера"
 
-msgid "Add recording (enter recording duration)"
-msgstr "Добавить запись (введите длительность записи)"
+msgid "Add recording (Enter recording duration)"
+msgstr "Добавить запись (Введите длительность записи)"
 
-msgid "Add recording (enter recording endtime)"
-msgstr "Добавить запись (введите время окончания)"
+msgid "Add recording (Enter recording end time)"
+msgstr "Добавить запись (Введите время окончания)"
 
-msgid "Add recording (indefinitely)"
-msgstr "Добавить запись (окончание неопределено)"
+msgid "Add recording (Indefinitely - 24 hours))"
+msgstr "Добавить запись (Окончание неопределено)"
 
-msgid "Add recording (stop after current event)"
-msgstr "Добавить запись (стоп после текущего события)"
+msgid "Add recording (Stop after current event)"
+msgstr "Добавить запись (Стоп после текущего события)"
 
 msgid "Add service"
 msgstr "Добавить сервис"
@@ -4084,14 +4084,14 @@ msgstr "Сменить пин-код"
 msgid "Change bouquets in quickzap"
 msgstr "Сменить букеты при быстром переключении"
 
-msgid "Change recording (add time)"
-msgstr "Изменить запись (добавить время)"
+msgid "Change recording (Add time)"
+msgstr "Изменить запись (Добавить время)"
 
-msgid "Change recording (duration)"
-msgstr "Изменить запись (продолжительность)"
+msgid "Change recording (Duration)"
+msgstr "Изменить запись (Длительность)"
 
-msgid "Change recording (endtime)"
-msgstr "Изменить запись (окончание)"
+msgid "Change recording (End time)"
+msgstr "Изменить запись (Время окончания)"
 
 msgid "Change repeat and delay settings?"
 msgstr "Изменить настройки задержки и повтора?"
@@ -10840,7 +10840,7 @@ msgstr "Файл epg.dat не найден на сервере"
 msgid "No epg.dat file found on the fallback receiver"
 msgstr "На резервном приемнике не найден файл epg.dat"
 
-msgid "No event info found, recording default is infinite."
+msgid "No event information found, recording default is 24 hours."
 msgstr "Нет программы в канале, запись будет без времени окончания."
 
 msgid "No fast winding possible yet... but you can use the number buttons to skip forward/backward!"
@@ -15099,6 +15099,9 @@ msgstr "Показать второй инфобар"
 msgid "Show select audio track"
 msgstr "Показать выбранную звуковую дорожку"
 
+msgid "Show Service Information"
+msgstr "Показать информацию о сервисе"
+
 msgid "Show service list"
 msgstr "Показать список сервисов"
 
@@ -15436,7 +15439,7 @@ msgstr "Слот %s: %s как USB-восстановление"
 
 #, python-format
 msgid "Slot '%s' %s"
-msgstr ""
+msgstr "Слот '%s' %s"
 
 #, python-format
 msgid "Slot '%s' %s: %s%s"
