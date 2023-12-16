@@ -52,11 +52,11 @@ config.misc.virtualkeyBoardstyle = ConfigSelection(default="new", choices=[
 	("new", _("New style")),
 	("e2", _("Enigma2 default"))])
 
-profile("SetupDevices")
+profile("InitSetupDevices")
 import Components.SetupDevices
 Components.SetupDevices.InitSetupDevices()
 
-profile("SimpleSummary")
+profile("InfoBar")
 from Screens import InfoBar
 from Screens.SimpleSummary import SimpleSummary
 
@@ -65,7 +65,11 @@ def setEPGCachePath(configElement):
 		configElement.value = join(configElement.value, "epg.dat")
 	enigma.eEPGCache.getInstance().setCacheFile(configElement.value)
 
-profile("Bouquets")
+profile("ScreenSummary")
+# from Screens.SimpleSummary import SimpleSummary
+from Screens.Screen import ScreenSummary
+
+profile("LoadBouquets")
 config.misc.load_unlinked_userbouquets = ConfigYesNo(default=True)
 
 def setLoadUnlinkedUserbouquets(configElement):
@@ -78,17 +82,17 @@ profile("ParentalControl")
 import Components.ParentalControl
 Components.ParentalControl.InitParentalControl()
 
-profile("LOAD:Navigation")
+profile("Navigation")
 from Navigation import Navigation
 
-profile("LOAD:skin")
+profile("ReadSkin")
 from skin import readSkin
 
-profile("LOAD:Tools")
+profile("InitFallbackFiles")
 from Tools.Directories import InitFallbackFiles, resolveFilename, SCOPE_PLUGINS, SCOPE_CURRENT_SKIN
 InitFallbackFiles()
 
-profile("config.misc")
+profile("ConfigMisc")
 config.misc.radiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "radio.mvi"))
 config.misc.blackradiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "black.mvi"))
 config.misc.startCounter = ConfigInteger(default=0)  # number of e2 starts...
@@ -198,12 +202,11 @@ try:  # Configure the twisted logging.
 except ImportError:
 	print("[StartEnigma] Error: Twisted not available!")
 
-profile("LOAD:Plugin")
-
+profile("AutoRunPlugins")
 # initialize autorun plugins and plugin menu entries
 from Components.PluginComponent import plugins
 
-profile("LOAD:Wizard")
+profile("StartWizard")
 from Screens.Wizard import wizardManager
 from Screens.StartWizard import *
 from Tools.BoundFunction import boundFunction
@@ -212,13 +215,10 @@ from Plugins.Plugin import PluginDescriptor
 profile("misc")
 had = dict()
 
-
-profile("LOAD:ScreenGlobals")
+profile("ScreenGlobals")
 from Screens.Globals import Globals
 from Screens.SessionGlobals import SessionGlobals
 from Screens.Screen import Screen
-
-profile("Screen")
 Screen.globalScreen = Globals()
 
 # Session.open:
@@ -323,7 +323,7 @@ class Session:
 	def instantiateSummaryDialog(self, screen, **kwargs):
 		if self.summaryDesktop is not None:
 			self.pushSummary()
-			summary = screen.createSummary() or SimpleSummary
+			summary = screen.createSummary() or ScreenSummary
 			arguments = (screen,)
 			self.summary = self.doInstantiateDialog(summary, arguments, kwargs, self.summaryDesktop)
 			self.summary.show()
@@ -415,21 +415,21 @@ class Session:
 			self.summary.show()
 
 
-profile("Standby,PowerKey")
+profile("Standby")
 import Screens.Standby
 from Screens.Menu import MainMenu, mdom
 from GlobalActions import globalActionMap
 
 
 class PowerKey:
-	""" PowerKey stuff - handles the powerkey press and powerkey release actions"""
+	"""PowerKey code - Handles the powerkey press and powerkey release actions."""
 
 	def __init__(self, session):
 		self.session = session
 		globalActionMap.actions["power_down"] = lambda *args: None
 		globalActionMap.actions["power_up"] = self.powerup
 		globalActionMap.actions["power_long"] = self.powerlong
-		globalActionMap.actions["deepstandby"] = self.shutdown  # Front panel long power button press.
+		globalActionMap.actions["deepstandby"] = self.shutdown  # Frontpanel long power button press.
 		globalActionMap.actions["discrete_off"] = self.standby
 
 	def shutdown(self):
@@ -495,7 +495,7 @@ class AutoScartControl:
 			config.av.vcrswitch.addNotifier(self.recheckVCRSb)
 			enigma.eAVControl.getInstance().vcr_sb_notifier.get().append(self.VCRSbChanged)
 
-	def recheckVCRSb(self, configElement):
+	def recheckVCRSb(self, configelement):
 		self.VCRSbChanged(self.current_vcr_sb)
 
 	def VCRSbChanged(self, value):
@@ -507,54 +507,45 @@ class AutoScartControl:
 			else:
 				self.scartDialog.switchToTV()
 
-
-profile("Load:CI")
+profile("CIHandler")
 from Screens.Ci import CiHandler
 
-profile("Load:VolumeControl")
+profile("VolumeControl")
 from Components.VolumeControl import VolumeControl
 
-
-profile("Load:Processing")
+profile("Processing")
 from Screens.Processing import Processing
 
-profile("Load:StackTracePrinter")
+profile("StackTracePrinter")
 from Components.StackTrace import StackTracePrinter
 StackTracePrinterInst = StackTracePrinter()
 
 def runScreenTest():
 	config.misc.startCounter.value += 1
 	config.misc.startCounter.save()
-
 	profile("readPluginList")
 	enigma.pauseInit()
 	plugins.readPluginList(resolveFilename(SCOPE_PLUGINS))
 	enigma.resumeInit()
-
-	profile("Init:Session")
+	profile("Session")
 	nav = Navigation()
 	session = Session(desktop=enigma.getDesktop(0), summaryDesktop=enigma.getDesktop(1), navigation=nav)
-
 	CiHandler.setSession(session)
 	powerOffTimer.setSession(session)
-
 	screensToRun = [p.fnc for p in plugins.getPlugins(PluginDescriptor.WHERE_WIZARD)]
-
-	profile("wizards")
+	profile("Wizards")
 	screensToRun += wizardManager.getWizards()
-
 	screensToRun.append((100, InfoBar.InfoBar))
 	screensToRun.sort(key=lambda x: x[0])  # works in both Pythons but let's not use sort method here first we must see if we have work network in the wizard.
 	enigma.ePythonConfigQuery.setQueryFunc(configfile.getResolvedKey)
 
 	def runNextScreen(session, screensToRun, *result):
 		if result:
+			print("[StartEnigma] Exiting via quitMainloop #3.")
 			enigma.quitMainloop(*result)
 			return
-
 		screen = screensToRun[0][1]
 		args = screensToRun[0][2:]
-
 		if screensToRun:
 			session.openWithCallback(boundFunction(runNextScreen, session, screensToRun[1:]), screen, *args)
 		else:
@@ -563,23 +554,20 @@ def runScreenTest():
 	config.misc.epgcache_filename.addNotifier(setEPGCachePath)
 
 	runNextScreen(session, screensToRun)
-
-	profile("Init:VolumeControl")
+	profile("VolumeControl")
 	vol = VolumeControl(session)
-	profile("InitProcessing")
+	profile("Processing")
 	processing = Processing(session)
-	profile("Init:PowerKey")
+	profile("PowerKey")
 	power = PowerKey(session)
-
-	if BoxInfo.getItem("vfdsymbol"):
-		profile("VFDSYMBOLS")
-		import Components.VfdSymbols
-		Components.VfdSymbols.SymbolsCheck(session)
-
+	if BoxInfo.getItem("VFDSymbols"):
+		profile("VFDSymbolsCheck")
+		from Components.VfdSymbols import SymbolsCheck
+		SymbolsCheck(session)
 	# we need session.scart to access it from within menu.xml
 	session.scart = AutoScartControl(session) if enigma.eAVControl.getInstance().hasScartSwitch() else None
 
-	profile("Init:Trashcan")
+	profile("Trashcan")
 	import Tools.Trashcan
 	Tools.Trashcan.init(session)
 
@@ -587,7 +575,7 @@ def runScreenTest():
 	profile_final()
 	runReactor()
 
-	profile("wakeup")
+	profile("Wakeup")
 	from time import time, strftime, localtime
 	from Tools.StbHardware import setFPWakeuptime, setRTCtime
 	from Screens.SleepTimerEdit import isNextWakeupTime
@@ -618,118 +606,108 @@ def runScreenTest():
 	else:
 		config.misc.prev_wakeup_time.value = 0
 	config.misc.prev_wakeup_time.save()
-
-	profile("stopService")
+	profile("StopService")
 	session.nav.stopService()
-	profile("nav shutdown")
+	profile("NavigationShutdown")
 	session.nav.shutdown()
-
-	profile("configfile.save")
+	profile("SaveConfig")
 	configfile.save()
-	from Screens import InfoBarGenerics
-	InfoBarGenerics.saveResumePoints()
-
+	from Screens.InfoBarGenerics import saveResumePoints
+	saveResumePoints()
 	return 0
 
-
-profile("Skin")
+profile("InitSkins")
 from skin import InitSkins
 InitSkins()
 
-profile("InputDevice")
-import Components.InputDevice
-Components.InputDevice.InitInputDevices()
+profile("InitInputDevices")
+from Components.InputDevice import InitInputDevices
+InitInputDevices()
 import Components.InputHotplug
 
-profile("Hotplug")
-import Components.InputHotplug
+profile("InitAVSwitch")
+from Components.AVSwitch import InitAVSwitch
+InitAVSwitch()
 
-profile("AVSwitch")
-import Components.AVSwitch
-Components.AVSwitch.InitAVSwitch()
+profile("InitHDMIRecord")
+from Components.HdmiRecord import InitHdmiRecord
+InitHdmiRecord()
 
-profile("HdmiRecord")
-import Components.HdmiRecord
-Components.HdmiRecord.InitHdmiRecord()
+profile("InitRecordingConfig")
+from Components.RecordingConfig import InitRecordingConfig
+InitRecordingConfig()
 
-profile("RecordingConfig")
-import Components.RecordingConfig
-Components.RecordingConfig.InitRecordingConfig()
+profile("InitUsageConfig")
+from Components.UsageConfig import InitUsageConfig
+InitUsageConfig()
 
-profile("UsageConfig")
-import Components.UsageConfig
-Components.UsageConfig.InitUsageConfig()
+profile("InitTimeZones")
+from Components.Timezones import InitTimeZones
+InitTimeZones()
 
-profile("Init:DebugLogCheck")
-import Screens.LogManager
-Screens.LogManager.AutoLogManager()
+profile("AutoLogManager")
+from Screens.LogManager import AutoLogManager
+AutoLogManager()
 
-profile("Timezones")
-import Components.Timezones
-Components.Timezones.InitTimeZones()
-
-profile("keymapparser")
+profile("Keymapparser")
 import keymapparser
 keymapparser.readKeymap(config.usage.keymap.value)
 keymapparser.readKeymap(config.usage.keytrans.value)
 
-profile("Init:NTPSync")
+profile("NTPSyncPoller")
 from Components.NetworkTime import ntpSyncPoller
 ntpSyncPoller.startTimer()
 
-profile("Network")
-import Components.Network
-Components.Network.waitForNetwork()
+profile("InitNetwork")
+from Components.Network import InitNetwork
+InitNetwork()
 
-profile("LCD")
-import Components.Lcd
-Components.Lcd.InitLcd()
-Components.Lcd.IconCheck()
+profile("InitLCD")
+from Components.Lcd import IconCheck, InitLcd
+InitLcd()
+IconCheck()
 
 enigma.eAVControl.getInstance().disableHDMIIn()
-
-profile("RFMod")
-import Components.RFmod
-Components.RFmod.InitRFmod()
-
-profile("Init:CI")
-import Screens.Ci
-Screens.Ci.InitCiConfig()
-
-profile("Init:LogManager")
-import Screens.LogManager
-Screens.LogManager.AutoLogManager()
 
 profile("RcModel")
 import Components.RcModel
 
-profile("Init:PowerOffTimer")
+profile("PowerOffTimer")
 from Components.PowerOffTimer import powerOffTimer
 
-profile("EpgCacheSched")
-import Components.EpgLoadSave
-Components.EpgLoadSave.EpgCacheSaveCheck()
-Components.EpgLoadSave.EpgCacheLoadCheck()
+profile("InitOSD")
+from Screens.UserInterfacePositioner import InitOsd
+InitOsd()
 
-profile("UserInterface")
-import Screens.UserInterfacePositioner
-Screens.UserInterfacePositioner.InitOsd()
+profile("EPGCacheCheck")
+from Components.EpgLoadSave import EpgCacheLoadCheck, EpgCacheSaveCheck
+EpgCacheSaveCheck()
+EpgCacheLoadCheck()
+
+profile("InitRFmod")
+from Components.RFmod import InitRFmod
+InitRFmod()
+
+profile("InitCiConfig")
+from Screens.Ci import InitCiConfig
+InitCiConfig()
 
 # from enigma import dump_malloc_stats
 # t = eTimer()
 # t.callback.append(dump_malloc_stats)
 # t.start(1000)
 
-# first, setup a screen
+# Lets get going and load a screen.
+#
 try:
-	runScreenTest()
-
-	plugins.shutdown()
-
-	Components.ParentalControl.parentalControl.save()
-except:
-	print('[StartEnigma] EXCEPTION IN PYTHON STARTUP CODE:')
-	print('-' * 60)
-	print_exc(file=stdout)
-	enigma.quitMainloop(5)
-	print('-' * 60)
+	runScreenTest()  # Start running the first screen.
+	plugins.shutdown()  # Shutdown all plugins.
+	from Components.ParentalControl import parentalControl
+	parentalControl.save()  # Save parental control settings.
+except Exception:
+	print("Error: Exception in Python StartEnigma startup code:")
+	print("=" * 60)
+	print_exc(file=sys.stdout)
+	print("[StartEnigma] Exiting via quitMainloop #4.")
+	enigma.quitMainloop(5)  # QUIT_ERROR_RESTART
+	print("-" * 60)
