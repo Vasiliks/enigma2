@@ -26,7 +26,7 @@ def ChoiceEntryComponent(key=None, text=None):
 						color=None, color_sel=None,
 						backcolor=bk_color, backcolor_sel=bk_color))
 		else:
-			res.append((eListboxPythonMultiContent.TYPE_TEXT, x, y, w, h, 0, RT_HALIGN_LEFT | verticalAlignment, "\u2014" * 200))
+			res = [None, (eListboxPythonMultiContent.TYPE_TEXT, x, y, w, h, 0, RT_HALIGN_LEFT | verticalAlignment, "\u2014" * 200)]
 	else:
 		if key:
 			x, y, w, h = parameters.get("ChoicelistName", (45, 0, 1235, 25))
