@@ -1842,6 +1842,7 @@ class SystemInformation(InformationBase):
 		self.baseTitle = _("System Information")
 		self.setTitle(self.baseTitle)
 		self.skinName.insert(0, "SystemInformation")
+		self["key_menu"] = StaticText(_("MENU"))
 		self["key_yellow"] = StaticText()
 		self["key_blue"] = StaticText()
 		self["systemActions"] = HelpableActionMap(self, ["MenuActions", "ColorActions", "NavigationActions"], {

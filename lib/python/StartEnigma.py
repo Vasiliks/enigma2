@@ -2,224 +2,19 @@ from os.path import isdir, islink, join
 import sys  # This is needed for the twisted redirection access to stderr and stdout.
 from time import time
 
-import enigma
-import eBaseImpl
-import eConsoleImpl
-from Tools.Profile import profile, profile_final
+from Tools.Profile import profile, profile_final  # This facilitates the start up progress counter.
 profile("PYTHON_START")
 import Tools.RedirectOutput
+
+import enigma  # Establish enigma2 connections to processing methods.
+import eBaseImpl
+import eConsoleImpl
 enigma.eTimer = eBaseImpl.eTimer
 enigma.eSocketNotifier = eBaseImpl.eSocketNotifier
 enigma.eConsoleAppContainer = eConsoleImpl.eConsoleAppContainer
 
-from Components.config import config, configfile, ConfigText, ConfigYesNo, ConfigInteger, ConfigSelection, ConfigSubsection, NoSave
-from Components.SystemInfo import BoxInfo, SystemInfo
-from traceback import print_exc
-from sys import stdout
+MODULE_NAME = "StartEnigma"  # This is done here as "__name__.split(".")[-1]" returns "__main__" for this module.
 
-model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
-platform = BoxInfo.getItem("platform")
-socfamily = BoxInfo.getItem("socfamily")
-
-# These entries should be moved back to UsageConfig.py when it is safe to bring UsageConfig init to this location in StartEnigma.py.
-#
-config.crash = ConfigSubsection()
-config.crash.debugSkin = ConfigYesNo(default=False)
-config.crash.debugScreens = ConfigYesNo(default=False)
-config.crash.debugKeyboards = ConfigYesNo(default=False)
-config.crash.debugRemoteControls = ConfigYesNo(default=False)
-config.crash.debugDVBScan = ConfigYesNo(default=False)
-
-# config.plugins needs to be defined before InputDevice < HelpMenu < MessageBox < InfoBar
-config.plugins = ConfigSubsection()
-config.plugins.remotecontroltype = ConfigSubsection()
-config.plugins.remotecontroltype.rctype = ConfigInteger(default=0)
-
-
-# New Plugin Style
-config.misc.plugin_style = ConfigSelection(default="normallstyle", choices=[
-	("normallstyle", _("Normall Style")),
-	("newstyle1", _("New Style 1")),
-	("newstyle2", _("New Style 2")),
-	("newstyle3", _("New Style 3")),
-	("newstyle4", _("New Style 4")),
-	("newstyle5", _("New Style 5")),
-	("newstyle6", _("New Style 6"))])
-
-# New VirtualkeyBoard Style
-config.misc.virtualkeyBoardstyle = ConfigSelection(default="new", choices=[
-	("new", _("New style")),
-	("e2", _("Enigma2 default"))])
-
-profile("InitSetupDevices")
-import Components.SetupDevices
-Components.SetupDevices.InitSetupDevices()
-
-profile("InfoBar")
-from Screens import InfoBar
-from Screens.SimpleSummary import SimpleSummary
-
-def setEPGCachePath(configElement):
-	if isdir(configElement.value) or islink(configElement.value):
-		configElement.value = join(configElement.value, "epg.dat")
-	enigma.eEPGCache.getInstance().setCacheFile(configElement.value)
-
-profile("ScreenSummary")
-# from Screens.SimpleSummary import SimpleSummary
-from Screens.Screen import ScreenSummary
-
-profile("LoadBouquets")
-config.misc.load_unlinked_userbouquets = ConfigYesNo(default=True)
-
-def setLoadUnlinkedUserbouquets(configElement):
-	enigma.eDVBDB.getInstance().setLoadUnlinkedUserbouquets(configElement.value)
-
-config.misc.load_unlinked_userbouquets.addNotifier(setLoadUnlinkedUserbouquets)
-enigma.eDVBDB.getInstance().reloadBouquets()
-
-profile("ParentalControl")
-import Components.ParentalControl
-Components.ParentalControl.InitParentalControl()
-
-profile("Navigation")
-from Navigation import Navigation
-
-profile("ReadSkin")
-from skin import readSkin
-
-profile("InitFallbackFiles")
-from Tools.Directories import InitFallbackFiles, resolveFilename, SCOPE_PLUGINS, SCOPE_CURRENT_SKIN
-InitFallbackFiles()
-
-profile("ConfigMisc")
-config.misc.radiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "radio.mvi"))
-config.misc.blackradiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "black.mvi"))
-config.misc.startCounter = ConfigInteger(default=0)  # number of e2 starts...
-config.misc.standbyCounter = NoSave(ConfigInteger(default=0))  # number of standby
-config.misc.DeepStandby = NoSave(ConfigYesNo(default=False))  # detect deepstandby
-config.misc.RestartUI = ConfigYesNo(default=False)  # detect user interface restart
-config.misc.prev_wakeup_time = ConfigInteger(default=0)
-# config.misc.prev_wakeup_time_type is only valid when wakeup_time is not 0
-config.misc.prev_wakeup_time_type = ConfigInteger(default=0)
-# 0 = RecordTimer, 1 = ZapTimer, 2 = Plugins, 3 = WakeupTimer
-config.misc.epgcache_filename = ConfigText(default="/media/hdd/epg.dat", fixed_size=False)
-config.misc.SyncTimeUsing = ConfigSelection(default="0", choices=[
-	("0", _("Transponder Time")),
-	("1", _("NTP"))
-])
-config.misc.NTPserver = ConfigText(default="pool.ntp.org", fixed_size=False)
-
-def dump(dir, p=""):
-	had = dict()
-	if isinstance(dir, dict):
-		for (entry, val) in dir.items():
-			dump(val, p + "(dict)/" + entry)
-	if hasattr(dir, "__dict__"):
-		for name, value in dir.__dict__.items():
-			if str(value) not in had:
-				had[str(value)] = 1
-				dump(value, p + "/" + str(name))
-			else:
-				print("[StartEnigma] Dump: %s/%s:%s(cycle)" % (p, str(name), str(dir.__class__)))
-	else:
-		print("[StartEnigma] Dump: %s:%s" % (p, str(dir)))  # + ":" + str(dir.__class__)
-
-# Demo code for use of standby enter leave callbacks.
-#
-# def leaveStandby():
-# 	print("[StartEnigma] Leaving standby.")
-#
-#
-# def standbyCountChanged(configElement):
-# 	print("[StartEnigma] Enter standby number %s." % configElement.value)
-# 	from Screens.Standby import inStandby
-# 	inStandby.onClose.append(leaveStandby)
-#
-#
-# config.misc.standbyCounter.addNotifier(standbyCountChanged, initial_call=False)
-
-#################################
-#                               #
-#  Code execution starts here!  #
-#                               #
-#################################
-
-profile("Twisted")
-print("[StartEnigma] Initializing Twisted.")
-try:  # Configure the twisted processor.
-	from twisted.python.runtime import platform
-	platform.supportsThreads = lambda: True
-	from e2reactor import install
-	install()
-	from twisted.internet import reactor
-
-	def runReactor():
-		reactor.run(installSignalHandlers=False)
-
-except ImportError:
-	print("[StartEnigma] Error: Twisted not available!")
-
-	def runReactor():
-		enigma.runMainloop()
-
-try:  # Configure the twisted logging.
-	from twisted.python import log, util
-
-	def quietEmit(self, eventDict):
-		text = log.textFromEventDict(eventDict)
-		if text is None:
-			return
-		if "/api/statusinfo" in text:  # Do not log OpenWebif status info.
-			return
-		# Log with time stamp.
-		#
-		# timeStr = self.formatTime(eventDict["time"])
-		# fmtDict = {
-		# 	"ts": timeStr,
-		# 	"system": eventDict["system"],
-		# 	"text": text.replace("\n", "\n\t")
-		# }
-		# msgStr = log._safeFormat("%(ts)s [%(system)s] %(text)s\n", fmtDict)
-		#
-		# Log without time stamp.
-		#
-		fmtDict = {
-			"text": text.replace("\n", "\n\t")
-		}
-		msgStr = log._safeFormat("%(text)s\n", fmtDict)
-		util.untilConcludes(self.write, msgStr)
-		util.untilConcludes(self.flush)
-
-	logger = log.FileLogObserver(sys.stdout)
-	log.FileLogObserver.emit = quietEmit
-	stdoutBackup = sys.stdout  # Backup stdout and stderr redirections.
-	stderrBackup = sys.stderr
-	log.startLoggingWithObserver(logger.emit)
-	sys.stdout = stdoutBackup  # Restore stdout and stderr redirections because of twisted redirections.
-	sys.stderr = stderrBackup
-
-except ImportError:
-	print("[StartEnigma] Error: Twisted not available!")
-
-profile("AutoRunPlugins")
-# initialize autorun plugins and plugin menu entries
-from Components.PluginComponent import plugins
-
-profile("StartWizard")
-from Screens.Wizard import wizardManager
-from Screens.StartWizard import *
-from Tools.BoundFunction import boundFunction
-from Plugins.Plugin import PluginDescriptor
-
-profile("misc")
-had = dict()
-
-profile("ScreenGlobals")
-from Screens.Globals import Globals
-from Screens.SessionGlobals import SessionGlobals
-from Screens.Screen import Screen
-Screen.globalScreen = Globals()
 
 # Session.open:
 # * Push current active dialog ("current_dialog") onto stack.
@@ -415,12 +210,6 @@ class Session:
 			self.summary.show()
 
 
-profile("Standby")
-import Screens.Standby
-from Screens.Menu import MainMenu, mdom
-from GlobalActions import globalActionMap
-
-
 class PowerKey:
 	"""PowerKey code - Handles the powerkey press and powerkey release actions."""
 
@@ -476,12 +265,6 @@ class PowerKey:
 			return 0
 
 
-if enigma.eAVControl.getInstance().hasScartSwitch():
-	profile("Scart")
-	print("[StartEnigma] Initialising Scart module")
-	from Screens.Scart import Scart
-
-
 class AutoScartControl:
 	def __init__(self, session):
 		self.hasScart = BoxInfo.getItem("scart")
@@ -499,26 +282,15 @@ class AutoScartControl:
 		self.VCRSbChanged(self.current_vcr_sb)
 
 	def VCRSbChanged(self, value):
-		# print("vcr sb changed to", value)
-		self.current_vcr_sb = value
-		if config.av.vcrswitch.value or value > 2:
-			if value:
-				self.scartDialog.showMessageBox()
-			else:
-				self.scartDialog.switchToTV()
+		if self.hasScart:
+			# print("[StartEnigma] VCR SB changed to '%s'." % value)
+			self.current_vcr_sb = value
+			if config.av.vcrswitch.value or value > 2:
+				if value:
+					self.scartDialog.showMessageBox()
+				else:
+					self.scartDialog.switchToTV()
 
-profile("CIHandler")
-from Screens.Ci import CiHandler
-
-profile("VolumeControl")
-from Components.VolumeControl import VolumeControl
-
-profile("Processing")
-from Screens.Processing import Processing
-
-profile("StackTracePrinter")
-from Components.StackTrace import StackTracePrinter
-StackTracePrinterInst = StackTracePrinter()
 
 def runScreenTest():
 	config.misc.startCounter.value += 1
@@ -550,9 +322,6 @@ def runScreenTest():
 			session.openWithCallback(boundFunction(runNextScreen, session, screensToRun[1:]), screen, *args)
 		else:
 			session.open(screen, *args)
-
-	config.misc.epgcache_filename.addNotifier(setEPGCachePath)
-
 	runNextScreen(session, screensToRun)
 	profile("VolumeControl")
 	vol = VolumeControl(session)
@@ -566,7 +335,6 @@ def runScreenTest():
 		SymbolsCheck(session)
 	# we need session.scart to access it from within menu.xml
 	session.scart = AutoScartControl(session) if enigma.eAVControl.getInstance().hasScartSwitch() else None
-
 	profile("Trashcan")
 	import Tools.Trashcan
 	Tools.Trashcan.init(session)
@@ -574,10 +342,7 @@ def runScreenTest():
 	profile("RunReactor")
 	profile_final()
 	runReactor()
-
 	profile("Wakeup")
-	from time import time, strftime, localtime
-	from Tools.StbHardware import setFPWakeuptime, setRTCtime
 	from Screens.SleepTimerEdit import isNextWakeupTime
 	# get currentTime
 	nowTime = time()
@@ -615,6 +380,243 @@ def runScreenTest():
 	from Screens.InfoBarGenerics import saveResumePoints
 	saveResumePoints()
 	return 0
+
+
+def setLoadUnlinkedUserbouquets(configElement):
+	enigma.eDVBDB.getInstance().setLoadUnlinkedUserbouquets(configElement.value)
+
+
+def dump(dir, p=""):
+	had = dict()
+	if isinstance(dir, dict):
+		for (entry, val) in dir.items():
+			dump(val, p + "(dict)/" + entry)
+	if hasattr(dir, "__dict__"):
+		for name, value in dir.__dict__.items():
+			if str(value) not in had:
+				had[str(value)] = 1
+				dump(value, p + "/" + str(name))
+			else:
+				print("[StartEnigma] Dump: %s/%s:%s(cycle)" % (p, str(name), str(dir.__class__)))
+	else:
+		print("[StartEnigma] Dump: %s:%s" % (p, str(dir)))  # + ":" + str(dir.__class__)
+
+
+# Demo code for use of standby enter leave callbacks.
+#
+# def leaveStandby():
+# 	print("[StartEnigma] Leaving standby.")
+#
+#
+# def standbyCountChanged(configElement):
+# 	print("[StartEnigma] Enter standby number %s." % configElement.value)
+# 	from Screens.Standby import inStandby
+# 	inStandby.onClose.append(leaveStandby)
+#
+#
+# config.misc.standbyCounter.addNotifier(standbyCountChanged, initial_call=False)
+
+#################################
+#                               #
+#  Code execution starts here!  #
+#                               #
+#################################
+
+profile("Twisted")
+print("[StartEnigma] Initializing Twisted.")
+try:  # Configure the twisted processor.
+	from twisted.python.runtime import platform
+	platform.supportsThreads = lambda: True
+	from e2reactor import install
+	install()
+	from twisted.internet import reactor
+
+	def runReactor():
+		reactor.run(installSignalHandlers=False)
+
+except ImportError:
+	print("[StartEnigma] Error: Twisted not available!")
+
+	def runReactor():
+		enigma.runMainloop()
+
+try:  # Configure the twisted logging.
+	from twisted.python import log, util
+
+	def quietEmit(self, eventDict):
+		text = log.textFromEventDict(eventDict)
+		if text is None:
+			return
+		if "/api/statusinfo" in text:  # Do not log OpenWebif status info.
+			return
+		# Log with time stamp.
+		#
+		# timeStr = self.formatTime(eventDict["time"])
+		# fmtDict = {
+		# 	"ts": timeStr,
+		# 	"system": eventDict["system"],
+		# 	"text": text.replace("\n", "\n\t")
+		# }
+		# msgStr = log._safeFormat("%(ts)s [%(system)s] %(text)s\n", fmtDict)
+		#
+		# Log without time stamp.
+		#
+		fmtDict = {
+			"text": text.replace("\n", "\n\t")
+		}
+		msgStr = log._safeFormat("%(text)s\n", fmtDict)
+		util.untilConcludes(self.write, msgStr)
+		util.untilConcludes(self.flush)
+
+	logger = log.FileLogObserver(sys.stdout)
+	log.FileLogObserver.emit = quietEmit
+	stdoutBackup = sys.stdout  # Backup stdout and stderr redirections.
+	stderrBackup = sys.stderr
+	log.startLoggingWithObserver(logger.emit)
+	sys.stdout = stdoutBackup  # Restore stdout and stderr redirections because of twisted redirections.
+	sys.stderr = stderrBackup
+
+except ImportError:
+	print("[StartEnigma] Error: Twisted not available!")
+
+
+from Components.SystemInfo import BoxInfo, SystemInfo
+from traceback import print_exc
+from Components.config import config, configfile, ConfigText, ConfigYesNo, ConfigInteger, ConfigSelection, ConfigSubsection, NoSave
+
+model = BoxInfo.getItem("model")
+brand = BoxInfo.getItem("brand")
+platform = BoxInfo.getItem("platform")
+socfamily = BoxInfo.getItem("socfamily")
+
+
+# These entries should be moved back to UsageConfig.py when it is safe to bring UsageConfig init to this location in StartEnigma.py.
+#
+config.crash = ConfigSubsection()
+config.crash.debugMultiBoot = ConfigYesNo(default=False)
+config.crash.debugKeyboards = ConfigYesNo(default=False)
+config.crash.debugRemoteControls = ConfigYesNo(default=False)
+config.crash.debugScreens = ConfigYesNo(default=False)
+config.crash.debugSkin = ConfigYesNo(default=False)
+config.crash.debugDVBScan = ConfigYesNo(default=False)
+
+
+# config.plugins needs to be defined before InputDevice < HelpMenu < MessageBox < InfoBar
+config.plugins = ConfigSubsection()
+config.plugins.remotecontroltype = ConfigSubsection()
+config.plugins.remotecontroltype.rctype = ConfigInteger(default=0)
+
+
+# New Plugin Style
+config.misc.plugin_style = ConfigSelection(default="normallstyle", choices=[
+	("normallstyle", _("Normall Style")),
+	("newstyle1", _("New Style 1")),
+	("newstyle2", _("New Style 2")),
+	("newstyle3", _("New Style 3")),
+	("newstyle4", _("New Style 4")),
+	("newstyle5", _("New Style 5")),
+	("newstyle6", _("New Style 6"))])
+
+
+# New VirtualkeyBoard Style
+config.misc.virtualkeyBoardstyle = ConfigSelection(default="new", choices=[
+	("new", _("New style")),
+	("e2", _("Enigma2 default"))])
+
+profile("InitSetupDevices")
+import Components.SetupDevices
+Components.SetupDevices.InitSetupDevices()
+
+profile("InfoBar")
+from Screens import InfoBar
+
+def setEPGCachePath(configElement):
+	if isdir(configElement.value) or islink(configElement.value):
+		configElement.value = join(configElement.value, "epg.dat")
+	enigma.eEPGCache.getInstance().setCacheFile(configElement.value)
+
+profile("ScreenSummary")
+# from Screens.SimpleSummary import SimpleSummary
+from Screens.Screen import ScreenSummary
+
+profile("LoadBouquets")
+config.misc.load_unlinked_userbouquets = ConfigYesNo(default=True)
+config.misc.load_unlinked_userbouquets.addNotifier(setLoadUnlinkedUserbouquets)
+enigma.eDVBDB.getInstance().reloadBouquets()
+
+profile("ParentalControl")
+import Components.ParentalControl
+Components.ParentalControl.InitParentalControl()
+
+profile("Navigation")
+from Navigation import Navigation
+
+profile("ReadSkin")
+from skin import readSkin
+
+profile("InitFallbackFiles")
+from Tools.Directories import InitFallbackFiles, resolveFilename, SCOPE_PLUGINS, SCOPE_CURRENT_SKIN
+InitFallbackFiles()
+
+profile("ConfigMisc")
+config.misc.radiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "radio.mvi"))
+config.misc.blackradiopic = ConfigText(default=resolveFilename(SCOPE_CURRENT_SKIN, "black.mvi"))
+config.misc.startCounter = ConfigInteger(default=0)  # number of e2 starts...
+config.misc.standbyCounter = NoSave(ConfigInteger(default=0))  # number of standby
+config.misc.DeepStandby = NoSave(ConfigYesNo(default=False))  # detect deepstandby
+config.misc.RestartUI = ConfigYesNo(default=False)  # detect user interface restart
+config.misc.prev_wakeup_time = ConfigInteger(default=0)
+# config.misc.prev_wakeup_time_type is only valid when wakeup_time is not 0
+config.misc.prev_wakeup_time_type = ConfigInteger(default=0)
+# 0 = RecordTimer, 1 = ZapTimer, 2 = Plugins, 3 = WakeupTimer
+config.misc.epgcache_filename = ConfigText(default="/media/hdd/epg.dat", fixed_size=False)
+config.misc.SyncTimeUsing = ConfigSelection(default="0", choices=[
+	("0", _("Transponder Time")),
+	("1", _("NTP"))
+])
+config.misc.NTPserver = ConfigText(default="pool.ntp.org", fixed_size=False)
+
+profile("AutoRunPlugins")
+# Initialize autorun plugins and plugin menu entries.
+from Components.PluginComponent import plugins
+
+profile("StartWizard")
+from Screens.Wizard import wizardManager
+from Screens.StartWizard import *
+from Tools.BoundFunction import boundFunction
+from Plugins.Plugin import PluginDescriptor
+
+profile("ScreenGlobals")
+from Screens.Globals import Globals
+from Screens.SessionGlobals import SessionGlobals
+from Screens.Screen import Screen
+Screen.globalScreen = Globals()
+
+profile("Standby")
+import Screens.Standby
+from Screens.Menu import MainMenu, mdom
+
+profile("GlobalActionMap")
+from GlobalActions import globalActionMap
+
+profile("Scart")
+from Screens.Scart import Scart
+
+profile("CIHandler")
+from Screens.Ci import CiHandler
+
+profile("VolumeControl")
+from Components.VolumeControl import VolumeControl
+
+profile("Processing")
+from Screens.Processing import Processing
+
+profile("StackTracePrinter")
+from Components.StackTrace import StackTracePrinter
+StackTracePrinterInst = StackTracePrinter()
+
+from time import localtime, strftime
+from Tools.StbHardware import setFPWakeuptime, setRTCtime
 
 profile("InitSkins")
 from skin import InitSkins
