@@ -29,10 +29,10 @@ public:
 	}
 
 	gFont(const std::string &family, float pointSize):
-		family(family), pointSize((int)pointSize)
-	{
-	}
-
+ 		family(family), pointSize((int)pointSize)
+ 	{
+ 	}
+	
 	virtual ~gFont()
 	{
 	}

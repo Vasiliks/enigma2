@@ -71,6 +71,7 @@ public:
 
 	void setLCDMode(int mode) const;
 
+
 #ifndef SWIG
 	eLCD();
 	virtual ~eLCD();

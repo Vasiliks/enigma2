@@ -13,7 +13,7 @@
 #define FBIO_WAITFORVSYNC _IOW('F', 0x20, uint32_t)
 #endif
 
-#ifndef FBIO_BLIT
+#elif !defined(FBIO_BLIT)
 #define FBIO_SET_MANUAL_BLIT _IOW('F', 0x21, __u8)
 #define FBIO_BLIT 0x22
 #endif
@@ -46,7 +46,6 @@ fbClass::fbClass(const char *fb)
 		goto nolfb;
 	}
 
-
 	if (ioctl(fbFd, FBIOGET_VSCREENINFO, &screeninfo)<0)
 	{
 		eDebug("[fb] FBIOGET_VSCREENINFO: %m");
@@ -60,7 +59,7 @@ fbClass::fbClass(const char *fb)
 		goto nolfb;
 	}
 
-	available=fix.smem_len;
+	available = fix.smem_len;
 	m_phys_mem = fix.smem_start;
 	eDebug("[fb] %s: %dk video mem", fb, available/1024);
 	lfb=(unsigned char*)mmap(0, available, PROT_WRITE|PROT_READ, MAP_SHARED, fbFd, 0);
@@ -236,6 +235,7 @@ int fbClass::lock()
 	}
 	else
 		locked = 1;
+
 	return fbFd;
 }
 
@@ -252,10 +252,10 @@ void fbClass::unlock()
 
 void fbClass::enableManualBlit()
 {
-	unsigned char tmp = 1;
 	if (fbFd < 0) return;
+	unsigned char tmp = 1;
 	if (ioctl(fbFd,FBIO_SET_MANUAL_BLIT, &tmp)<0)
-		eDebug("[fb] enable FBIO_SET_MANUAL_BLIT: %m");
+		eDebug("[fb] FBIO_SET_MANUAL_BLIT %m");
 	else
 		m_manual_blit = 1;
 }
@@ -265,7 +265,7 @@ void fbClass::disableManualBlit()
 	unsigned char tmp = 0;
 	if (fbFd < 0) return;
 	if (ioctl(fbFd,FBIO_SET_MANUAL_BLIT, &tmp)<0)
-		eDebug("[fb] disable FBIO_SET_MANUAL_BLIT: %m");
+		eDebug("[fb] FBIO_SET_MANUAL_BLIT %m");
 	else
 		m_manual_blit = 0;
 }

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from os.path import isfile
 
 from enigma import ePixmap, eTimer
@@ -20,9 +19,6 @@ class Pixmap(GUIComponent):
 	def getSize(self):
 		size = self.instance.size()
 		return size.width(), size.height()
-
-	def setPixmap(self, pixmap):
-		self.instance.setPixmap(pixmap)
 
 	def applySkin(self, desktop, screen):
 		if self.skinAttributes is not None:

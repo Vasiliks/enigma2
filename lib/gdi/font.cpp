@@ -198,11 +198,8 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 	eTrace("[Font] Loading fonts.");
 	fflush(stdout);
 	font=0;
-#if HAVE_ARCH_ARM
-	int maxbytes=8*1024*1024;
-#else
+
 	int maxbytes=4*1024*1024;
-#endif
 	eDebug("[Font] Intializing font cache, using max. %dMB.", maxbytes/1024/1024);
 	fflush(stdout);
 	{
@@ -964,7 +961,7 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 	gRGB currentforeground = foreground;
 	const gRGB background = (m_blend && surface->bpp == 32) ? gRGB(currentforeground.r, currentforeground.g, currentforeground.b, 200) : cbackground;
 
-	int opcode = -1;
+	register int opcode = -1;
 
 	__u32 lookup32_normal[16];
 	__u32 lookup32_invert[16];
@@ -1071,9 +1068,6 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 			}
 			else
 			{
-#if HAVE_HISIAPI
-				if (surface->bpp != 0)
-#endif
 				eWarning("[eTextPara] Can't render to %dbpp!", surface->bpp);
 				return;
 			}
@@ -1130,7 +1124,7 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 			int rx = rxbase, ry = rybase;
 			__u8 *d = dbase;
 			__u8 *s = sbase;
-			int sx = sxbase;
+			register int sx = sxbase;
 			int sy = sybase;
 			if ((sy+ry) >= clip.rects[c].bottom())
 				sy = clip.rects[c].bottom()-ry;
@@ -1159,15 +1153,15 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 				{
 				case 0: 		// 4bit lookup to 8bit
 					{
-						int extra_buffer_stride = buffer_stride - sx;
-						__u8 *td=d;
+						register int extra_buffer_stride = buffer_stride - sx;
+						register __u8 *td=d;
 						for (int ay = 0; ay < sy; ay++)
 						{
-							int ax;
+							register int ax;
 
 							for (ax=0; ax<sx; ax++)
 							{
-								int b=(*s++)>>4;
+								register int b=(*s++)>>4;
 								if(b)
 									*td=lookup8[b];
 								++td;
@@ -1179,14 +1173,14 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 					break;
 				case 1:	// 8bit direct
 					{
-						int extra_buffer_stride = buffer_stride - sx;
-						__u8 *td=d;
+						register int extra_buffer_stride = buffer_stride - sx;
+						register __u8 *td=d;
 						for (int ay = 0; ay < sy; ay++)
 						{
-							int ax;
+							register int ax;
 							for (ax=0; ax<sx; ax++)
 							{
-								int b=*s++;
+								register int b=*s++;
 								*td++^=b;
 							}
 							s += extra_source_stride;
@@ -1197,13 +1191,13 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 				case 2: // 16bit
 					{
 						int extra_buffer_stride = (buffer_stride >> 1) - sx;
-						__u16 *td = (__u16*)d;
+						register __u16 *td = (__u16*)d;
 						for (int ay = 0; ay != sy; ay++)
 						{
-								int ax;
+								register int ax;
 								for (ax = 0; ax != sx; ax++)
 								{
-									int b = (*s++) >> 4;
+									register int b = (*s++) >> 4;
 									if (b)
 										*td = lookup16[b];
 									++td;
@@ -1215,14 +1209,14 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 					break;
 				case 3: // 32bit
 					{
-						int extra_buffer_stride = (buffer_stride >> 2) - sx;
-						__u32 *td=(__u32*)d;
+						register int extra_buffer_stride = (buffer_stride >> 2) - sx;
+						register __u32 *td=(__u32*)d;
 						for (int ay = 0; ay < sy; ay++)
 						{
-							int ax;
+							register int ax;
 							for (ax=0; ax<sx; ax++)
 							{
-								int b=(*s++)>>4;
+								register int b=(*s++)>>4;
 								if(b)
 									*td=lookup32[b];
 								++td;
@@ -1234,14 +1228,14 @@ void eTextPara::blit(gDC &dc, const ePoint &offset, const gRGB &cbackground, con
 					break;
 				case 4: // 32-bit blend
 					{
-						int extra_buffer_stride = (buffer_stride >> 2) - sx;
-						__u32 *td = (__u32 *)d;
+						register int extra_buffer_stride = (buffer_stride >> 2) - sx;
+						register __u32 *td = (__u32 *)d;
 						for (int ay = 0; ay < sy; ay++)
 						{
-							int ax;
+							register int ax;
 							for (ax = 0; ax < sx; ax++)
 							{
-								int b = (*s++) >> 4;
+								register int b = (*s++) >> 4;
 								if (b)
 								{
 									unsigned char frame_a = (*td) >> 24 & 0xFF;
