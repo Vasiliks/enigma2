@@ -29,12 +29,12 @@ int bcm_accel_init(void)
 	fb_fd = open("/dev/fb0", O_RDWR);
 	if (fb_fd < 0)
 	{
-		eDebug("[ebcm] /dev/fb0 %m");
+		eDebug("[bcm] /dev/fb0 %m");
 		return 1;
 	}
 	if (exec_list())
 	{
-		eDebug("[ebcm] interface not available - %m");
+		eDebug("[bcm] interface not available - %m");
 		close(fb_fd);
 		fb_fd = -1;
 		return 1;
@@ -101,7 +101,7 @@ int bcm_accel_sync()
 	{
 		if (ptr)
 		{
-			eDebug("[ebcm] bcm_accel_sync: ptr %d", ptr);
+			eDebug("[bcm] bcm_accel_sync: ptr %d", ptr);
 			retval = exec_list();
 		}
 		accumulateoperations = false;
@@ -120,7 +120,7 @@ void bcm_accel_blit(
 	{
 		if (((sizeof(displaylist) / sizeof(displaylist[0]) - ptr) / 2) < 40)
 		{
-			eDebug("[ebcm] bcm_accel_blit: not enough space to accumulate");
+			eDebug("[bcm] bcm_accel_blit: not enough space to accumulate");
 			bcm_accel_sync();
 			bcm_accel_accumulate();
 		}

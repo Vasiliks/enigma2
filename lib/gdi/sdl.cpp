@@ -129,6 +129,7 @@ void gSDLDC::evFlip()
 	// Render OSD
 	SDL_UpdateTexture(m_osd_tex, NULL, m_osd->pixels, m_osd->pitch);
 	SDL_RenderCopy(m_render, m_osd_tex, NULL, NULL);
+
 	SDL_RenderPresent(m_render);
 }
 
