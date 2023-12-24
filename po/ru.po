@@ -5340,11 +5340,11 @@ msgid "Could not open the file %s!"
 msgstr "Не удалось открыть файл %s!"
 
 #, python-format
-msgid "Could not record due to conflicting timer: %s"
-msgstr "Запись невозможна из-за конфликтного таймера: %s"
+msgid "Could not record due to conflicting timer:%s"
+msgstr "Запись невозможна из-за конфликтного таймера:%s"
 
-msgid "Could not record due to invalid service: %s"
-msgstr "Запись невозможна - недействительный сервис: %s"
+msgid "Could not record due to invalid service:%s"
+msgstr "Запись невозможна - недействительный сервис:%s"
 
 #, python-format
 msgid "Could not save configuration file %s!"
@@ -8731,7 +8731,7 @@ msgstr "Часы Минуты Секунды"
 msgid "How many minutes do you want add to the recording?"
 msgstr "Сколько минут Вы хотите добавить к записи?"
 
-msgid "How many minutes do you want to record?"
+msgid "For how many minutes do you want to record?"
 msgstr "Сколько минут Вы хотите записать?"
 
 msgid ""
@@ -12729,8 +12729,8 @@ msgstr "Записать сейчас"
 msgid "Record started! Stopпинg timeshift now ..."
 msgstr "Начата запись! Остановка таймшифта."
 
-msgid "Record time limited due to conflicting timer: %s"
-msgstr "Время записи ограничено из-за конфликтного таймера: %s"
+msgid "Record time limited due to conflicting timer:%s"
+msgstr "Время записи ограничено из-за конфликтного таймера:%s"
 
 msgid "Recorded files..."
 msgstr "Записанные файлы..."
