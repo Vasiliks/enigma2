@@ -2942,6 +2942,9 @@ msgstr "Автор: "
 msgid "Authoring mode"
 msgstr "Режиме разработки"
 
+msgid "Automatically update Log-Fullscreen View"
+msgstr "Автоматически обновлять журнал в полноэкранном режиме"
+
 msgid "Auto Detect"
 msgstr "Автоматически определять"
 
@@ -8608,6 +8611,9 @@ msgstr "Скрыть заблокированные сервисы"
 msgid "Hide player"
 msgstr "Скрыть проигрыватель"
 
+msgid "Hide softcam servername"
+msgstr "Скрыть имя сервера softcam"
+
 msgid "Hide sub-menu"
 msgstr ""
 
@@ -11179,6 +11185,15 @@ msgstr "Информация ECM OScam"
 msgid "OScam Info"
 msgstr "Информация OScam"
 
+msgid "OScam Information"
+msgstr "Информация OScam"
+
+msgid "OScamInfo Overview"
+msgstr "Обзор OScamInfo"
+
+msgid "OScamOverview Log"
+msgstr "Журнал обзора OScam"
+
 msgid "OScam Info - Configuration"
 msgstr "Информация о OScam - Конфигурация"
 
@@ -13716,6 +13731,9 @@ msgstr "Выберите 'A' или 'B', если Ваша система тре
 
 msgid "Select 'FBC SCR' if this tuner will connect to a SCR (Unicable/JESS) device. For all other setups select 'FBC automatic'."
 msgstr "Выберите 'FBC SCR' ,если Ваш тюнер испрользует устройство SCR (Unicable/JESS).В остальных случаях используйте 'FBC автоматически'."
+
+msgid "Select 'Yes' to hide the server name and IP address of the server."
+msgstr "Выберите «Да», чтобы скрыть имя и IP-адрес сервера."
 
 msgid "Select 'Yes' when you want to configure this tuner for ATSC"
 msgstr "Выберите 'Да', если вы хотите настроить этот тюнер для ATSC"

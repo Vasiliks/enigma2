@@ -2505,8 +2505,8 @@ class InfoBarExtensions:
 			answer[1][1]()
 
 	def openOScamInfo(self):
-		from Screens.OScamInfo import OscamInfoMenu
-		self.session.open(OscamInfoMenu)
+		from Screens.OScamInfo import OScamOverview
+		self.session.open(OScamOverview)
 
 	def openLogManager(self):
 		from Screens.LogManager import LogManager
