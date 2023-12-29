@@ -19,8 +19,7 @@ void eRCDeviceInputDev::handleCode(long rccode)
 
 	if (ev->type != EV_KEY)
 		return;
-
-	eTrace("[eInputDeviceInit] %x %x (%u) %x", ev->value, ev->code, ev->code, ev->type);
+	eDebug("[eRCDeviceInputDev] %x %x %x", ev->value, ev->code, ev->type);
 
 	int km = iskeyboard ? input->getKeyboardMode() : eRCInput::kmNone;
 
@@ -109,6 +108,31 @@ void eRCDeviceInputDev::handleCode(long rccode)
 				ev->code = KEY_PLAYPAUSE;
 			}
 		}
+#endif
+
+	if (ev->code == KEY_TV2) {
+		ev->code = KEY_TV;
+	}
+
+#if KEY_F6_TO_KEY_VIDEO
+
+	if (ev->code == KEY_F6) {
+		ev->code = KEY_VIDEO;
+	}
+#endif
+
+#if KEY_EDIT_TO_KEY_TIME
+
+	if (ev->code == KEY_EDIT) {
+		ev->code = KEY_TIME;
+	}
+#endif
+
+#if KEY_HOME_TO_KEY_UNKNOWN
+
+	if (ev->code == KEY_HOME) {
+		ev->code = KEY_UNKNOWN;
+	}
 #endif
 
 #if TIVIARRC
@@ -551,7 +575,6 @@ void eRCDeviceInputDev::handleCode(long rccode)
 #endif
 
 	}
-	eTrace("[eRCDeviceInputDev] emit: %u", ev->value);
 	switch (ev->value)
 	{
 		case 0:

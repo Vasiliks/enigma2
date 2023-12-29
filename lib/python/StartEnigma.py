@@ -654,7 +654,6 @@ AutoLogManager()
 profile("Keymapparser")
 import keymapparser
 keymapparser.readKeymap(config.usage.keymap.value)
-keymapparser.readKeymap(config.usage.keytrans.value)
 
 profile("NTPSyncPoller")
 from Components.NetworkTime import ntpSyncPoller
