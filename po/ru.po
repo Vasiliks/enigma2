@@ -2522,8 +2522,8 @@ msgstr "Позволяет использовать пульт от ТВ для 
 msgid "Allows you to show/hide 'Logs Manager' in extensions (blue button)."
 msgstr "Позволяет показать/скрыть «Диспетчер журналов» в расширениях (синяя кнопка)."
 
-msgid "Allows you to show/hide OScam in extensions (BLUE button)."
-msgstr "Позволяет показать/скрыть OScam в дополнениях (СИНЯЯ кнопка)."
+msgid "Allows you to show/hide OSCam in extensions (BLUE button)."
+msgstr "Позволяет показать/скрыть OSCam в дополнениях (СИНЯЯ кнопка)."
 
 msgid "Almost there... "
 msgstr "Почти готово... "
@@ -4501,8 +4501,8 @@ msgstr[2] "Очистить предупреждения"
 msgid "Client Info ( NCam-Version: %s )"
 msgstr "Клиент ( Версия Ncam : %s )"
 
-msgid "Client Info ( OScam-Version: %s )"
-msgstr "Клиент ( Версия Oscam : %s )"
+msgid "Client Info ( OSCam-Version: %s )"
+msgstr "Клиент ( Версия OSCam : %s )"
 
 msgid "Client Mode"
 msgstr "Пользовательский режим"
@@ -11182,11 +11182,11 @@ msgstr "Информация о конфигурации OScam"
 msgid "OScam ECM info"
 msgstr "Информация ECM OScam"
 
-msgid "OScam Info"
-msgstr "Информация OScam"
+msgid "OSCam Info"
+msgstr "Информация OSCam"
 
-msgid "OScam Information"
-msgstr "Информация OScam"
+msgid "OSCam Information"
+msgstr "Информация OSCam"
 
 msgid "OScamInfo Overview"
 msgstr "Обзор OScamInfo"
@@ -11194,20 +11194,23 @@ msgstr "Обзор OScamInfo"
 msgid "OScamOverview Log"
 msgstr "Журнал обзора OScam"
 
-msgid "OScam Info - Configuration"
-msgstr "Информация о OScam - Конфигурация"
+msgid "OSCamInfo Log"
+msgstr "Журнал OSCamInfo"
 
-msgid "OScam Info - Main Menu"
-msgstr "OScam Info - Главное меню"
+msgid "OSCam Info - Configuration"
+msgstr "Информация о OSCam - Конфигурация"
 
-msgid "OScam Info Main Menu"
-msgstr "OScam Info  Главное меню"
+msgid "OSCam Info - Main Menu"
+msgstr "OSCam Info - Главное меню"
 
-msgid "OScam Log ( OScam-Version: %s )"
-msgstr "Журнал OScam (версия OScam:% s)"
+msgid "OSCam Info Main Menu"
+msgstr "OSCam Info  Главное меню"
 
-msgid "OScam webif disabled"
-msgstr "OScam webif отключен"
+msgid "OSCam Log ( OSCam-Version: %s )"
+msgstr "Журнал OSCam (версия OSCam:% s)"
+
+msgid "OSCam webif disabled"
+msgstr "OSCam webif отключен"
 
 msgid "OVR"
 msgstr "OVR"

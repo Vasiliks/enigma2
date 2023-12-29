@@ -7,7 +7,7 @@ from Components.config import config, ConfigNothing, ConfigAction, ConfigSelecti
 from Components.ScrollLabel import ScrollLabel
 from Screens.Setup import Setup
 from Screens.InfoBarGenerics import streamrelay
-from Screens.OScamInfo import OScamOverview
+from Screens.OScamInfo import OSCamInfo
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from Tools.GetEcmInfo import GetEcmInfo
 from Components.Sources.StaticText import StaticText
@@ -102,7 +102,7 @@ class SoftcamSetup(Screen, ConfigListScreen):
 			from Plugins.Extensions.OscamStatus.plugin import OscamStatus
 			self.session.open(OscamStatus)
 		elif "oscam" or "ncam" in self.softcams.value.lower() and os.path.isfile('/usr/lib/enigma2/python/Screens/OScamInfo.pyc'):
-			self.session.open(OScamOverview)
+			self.session.open(OSCamInfo)
 		elif "cccam" in self.softcams.value.lower() and os.path.isfile(resolveFilename(SCOPE_PLUGINS, 'Extensions/CCcamInfo/plugin.pyc')):
 			from Plugins.Extensions.CCcamInfo.plugin import CCcamInfoMain
 			self.session.open(CCcamInfoMain)

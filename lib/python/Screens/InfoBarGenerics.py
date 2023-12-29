@@ -2424,7 +2424,7 @@ class InfoBarExtensions:
 		self.addExtension(extension=self.getLogManager, type=InfoBarExtensions.EXTENSION_LIST)
 
 	def getOSname(self):
-		return _("OScam/Ncam Info")
+		return _("OSCam Info")
 
 	def getOScamInfo(self):
 		import process
@@ -2505,8 +2505,8 @@ class InfoBarExtensions:
 			answer[1][1]()
 
 	def openOScamInfo(self):
-		from Screens.OScamInfo import OScamOverview
-		self.session.open(OScamOverview)
+		from Screens.OScamInfo import OSCamInfo
+		self.session.open(OSCamInfo)
 
 	def openLogManager(self):
 		from Screens.LogManager import LogManager
