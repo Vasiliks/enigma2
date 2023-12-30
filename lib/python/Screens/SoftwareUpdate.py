@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from calendar import timegm
 from datetime import datetime
 from json import load
@@ -21,12 +20,11 @@ from Components.Opkg import OpkgComponent
 from Components.Language import language
 from Components.Sources.StaticText import StaticText
 from Components.Slider import Slider
-from Components.SystemInfo import BoxInfo
+from Components.SystemInfo import BoxInfo, getBoxDisplayName
 from Tools.BoundFunction import boundFunction
 from Tools.Directories import fileExists
 
 model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
 
 class UpdatePlugin(Screen, ProtectedScreen):
 	def __init__(self, session, *args):
@@ -80,14 +78,15 @@ class UpdatePlugin(Screen, ProtectedScreen):
 		message = None
 		abort = False
 		picon = MessageBox.TYPE_ERROR
-		url = "https://openpli.org/trafficlight"
+		url = BoxInfo.getItem("feedsurl")
 
 		# try to fetch the trafficlight json from the website
 		try:
-			status = dict(load(urlopen(url, timeout=5)))
+			status = dict(load(urlopen("%s.php" % url, timeout=5)))
 			print("[SoftwareUpdate] status is: ", status)
 		except Exception as er:
-			print('[UpdatePlugin] Error in get status', er)
+			pass
+			# print('[SoftwareUpdate] Error in get status', er)
 
 		# process the status fetched
 		if status is not None:
@@ -97,7 +96,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 				version = open("/etc/issue").readlines()[-2].split()[1]
 
 				# do we have an entry for this version
-				if (version in status or 'all' in status) and (machine in status[version]['machines'] or 'all' in status[version]['machines']):
+				if (version in status or 'all' in status) and ('machine' in status[version]['machines'] or 'all' in status[version]['machines']):
 					if 'abort' in status[version]:
 						abort = status[version]['abort']
 					if 'from' in status[version]:
@@ -135,7 +134,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 			if abort:
 				self.session.openWithCallback(self.close, MessageBox, message, type=MessageBox.TYPE_MESSAGE, picon=picon)
 			else:
-				message += "\n\n" + _("Do you want to update your receiver?")
+				message += "\n\n" + _("Do you want to update your %s %s?") % getBoxDisplayName()
 				self.session.openWithCallback(self.startActualUpdate, MessageBox, message, picon=picon)
 
 		# no message, continue with the update
@@ -148,9 +147,9 @@ class UpdatePlugin(Screen, ProtectedScreen):
 				print('[UpdatePlugin] Trying to fetch time from %s' % url)
 				return strftime("%Y-%m-%d %H:%M:%S", gmtime(int(parsedate_to_datetime(urlopen("%s/Packages.gz" % url, timeout=1).headers['last-modified']).timestamp()) - altzone))
 			except Exception as er:
-				print('[UpdatePlugin] Error in get timestamp', er)
+				# print('[SoftwareUpdate] Error in get timestamp', er)
 				return ""
-		return max([gettime(open("/etc/opkg/%s" % file, "r").readlines()[0].split()[2]) for file in listdir("/etc/opkg") if not file.startswith("3rd-party") and file not in ("arch.conf", "opkg.conf", "picons-feed.conf")])
+		return sorted([gettime(open("/etc/opkg/%s" % file, "r").readlines()[0].split()[2]) for file in listdir("/etc/opkg") if not file.startswith("3rd-party") and file not in ("arch.conf", "opkg.conf", "picons-feed.conf")], reverse=True)[0]
 
 	def startActualUpdate(self, answer):
 		if answer:
@@ -214,17 +213,16 @@ class UpdatePlugin(Screen, ProtectedScreen):
 					self.update_step = 100 / self.total_packages
 					latestImageTimestamp = self.getLatestImageTimestamp()
 					if latestImageTimestamp:
-						message = _("Do you want to update your receiver to %s?") % latestImageTimestamp + "\n"
-						message += _("Your %s %s?") % (brand, model) + "\n"
+						message = _("Do you want to update to %s?") % latestImageTimestamp + "\n"
+						message += _("Your %s %s?") % getBoxDisplayName() + "\n"
 					else:
-						message = _("Do you want to update your receiver?") + "\n"
+						message = _("Do you want to update your %s %s?") % getBoxDisplayName() + "\n"
 					message += "(" + (ngettext("%s updated package available", "%s updated packages available", self.total_packages) % self.total_packages) + ")"
 					if self.total_packages > 150:
-						choices = [(_("Update and reboot"), "cold")]
+						choices = [(_("Update and ask to reboot"), "hot")]
 						message += " " + _("Reflash recommended!")
 					else:
-						choices = [(_("Update and reboot (recommended)"), "cold"),
-						(_("Update and ask to reboot"), "hot")]
+						choices = [(_("Update and ask to reboot (recommended)"), "hot")]
 					choices.append((_("Update channel list only"), "channels"))
 					choices.append((_("Show packages to be updated"), "showlist"))
 				else:
@@ -255,7 +253,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 			else:
 				self.activityTimer.stop()
 				self.activityslider.value = 0
-				error = _("Your receiver might be unusable now. Please consult the manual for further assistance before rebooting your receiver %s %s.") % (brand, model)
+				error = _("Your receiver might be unusable now. Please consult the manual for further assistance before rebooting your %s %s.") % getBoxDisplayName()
 				if self.packages == 0:
 					error = _("No updates available. Please try again later.")
 				if self.updating:
@@ -271,7 +269,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 		self.activityTimer.stop()
 		self.activityslider.value = 0
 		self.package.text = txt
-		self.status.text = _("Press OK on your remote control to continue.")
+		self.status.text = _("Press OK to continue.")
 
 	def startActualUpgrade(self, answer):
 		if not answer or not answer[1]:
@@ -301,7 +299,7 @@ class UpdatePlugin(Screen, ProtectedScreen):
 	def exit(self):
 		if not self.opkg.isRunning():
 			if self.packages != 0 and self.error == 0 and self.channellist_only == 0:
-				self.session.openWithCallback(self.exitAnswer, MessageBox, _("Update completed. Do you want to reboot your receiver %s %s?") % (brand, model))
+				self.session.openWithCallback(self.exitAnswer, MessageBox, _("Update completed. Do you want to reboot your %s %s?") % getBoxDisplayName())
 			else:
 				self.close()
 		else:
