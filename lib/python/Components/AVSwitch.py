@@ -2,7 +2,7 @@ from Components.config import config, ConfigSlider, ConfigSelection, ConfigYesNo
 from enigma import eAVControl, eDVBVolumecontrol, getDesktop
 from Components.SystemInfo import BoxInfo, SystemInfo
 from os.path import exists
-from Tools.Directories import fileWriteLine
+from Tools.Directories import fileWriteLine, isfile
 
 model = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
