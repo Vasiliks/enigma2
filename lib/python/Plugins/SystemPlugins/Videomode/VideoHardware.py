@@ -2,7 +2,7 @@ import os
 from enigma import eAVControl, eDVBVolumecontrol
 from Components.config import config, ConfigSelection, ConfigSubDict, ConfigYesNo, ConfigSubsection, ConfigInteger
 from Components.SystemInfo import BoxInfo, SystemInfo
-from Components.About import about
+from Components.About import about, getChipSetNumber, getChipSetString
 from Tools.CList import CList
 from Tools.Directories import fileReadLine, fileWriteLine
 
@@ -155,14 +155,18 @@ class VideoHardware:
 
 	if BoxInfo.getItem("AmlogicFamily"):
 		modes["HDMI"] = ["720p", "1080p", "smpte", "2160p30", "2160p", "1080i", "576p", "576i", "480p", "480i"]
-	elif (about.getChipSetString() in ("7366", "7376", "5272s", "7444", "7445", "7445s")):
+	elif getChipSetNumber() in ("7366", "7376", "5272s", "7444", "7445", "7445s", "72604"):
 		modes["HDMI"] = ["720p", "1080p", "2160p", "1080i", "576p", "576i", "480p", "480i"]
-	elif (about.getChipSetString() in ("7252", "7251", "7251S", "7252S", "7251s", "7252s", "72604", "7278", "7444s", "3798mv200", "3798mv200h", "3798cv200", "hi3798mv200", "hi3798mv200h", "hi3798cv200", "hi3798mv300", "3798mv300")):
+		widescreen_modes = {"720p", "1080p", "1080i", "2160p"}
+	elif getChipSetNumber() in ("7252", "7251", "7251S", "7252S", "7251s", "7252s", "7278", "7444s", "3798mv200", "3798mv200h", "3798cv200", "hi3798mv200", "hi3798mv200h", "hi3798cv200", "hi3798mv300", "3798mv300"):
 		modes["HDMI"] = ["720p", "1080p", "2160p", "2160p30", "1080i", "576p", "576i", "480p", "480i"]
-	elif (about.getChipSetString() in ("7241", "7358", "7362", "73625", "7346", "7356", "73565", "7424", "7425", "7435", "7552", "7581", "7584", "75845", "7585", "pnx8493", "7162", "7111", "3716mv410", "hi3716mv410", "hi3716mv430", "3716mv430")):
+		widescreen_modes = {"720p", "1080p", "1080i", "2160p", "2160p30"}
+	elif getChipSetNumber() in ("7241", "7358", "7362", "73625", "7346", "7356", "73565", "7424", "7425", "7435", "7552", "7581", "7584", "75845", "7585", "pnx8493", "7162", "7111", "3716mv410", "hi3716mv410", "hi3716mv430", "3716mv430"):
 		modes["HDMI"] = ["720p", "1080p", "1080i", "576p", "576i", "480p", "480i"]
+		widescreen_modes = {"720p", "1080p", "1080i"}
 	else:
 		modes["HDMI"] = ["720p", "1080i", "576p", "576i", "480p", "480i"]
+		widescreen_modes = {"720p", "1080i"}
 
 	modes["YPbPr"] = modes["HDMI"]
 	if BoxInfo.getItem("scartyuv", False):
