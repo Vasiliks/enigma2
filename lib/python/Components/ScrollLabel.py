@@ -61,7 +61,7 @@ class ScrollLabel(GUIComponent):
 			rightLabelAttributes = [("transparent", "1")]
 			sliderAttributes = [("transparent", "1")]
 			leftAlign = "left"
-			rightAlign = "left"
+			rightAlign = "right"
 			for attribute, value in self.skinAttributes:
 				if attribute in sliderProperties:
 					sliderAttributes.append((attribute, value))
