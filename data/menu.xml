@@ -27,7 +27,7 @@
 			<item entryID="av_setup" level="0" text="Audio/Video Setup" weight="5"><setup id="AudioVideo" /></item>
 			<item entryID="autolanguage_setup" level="0" text="Automatic Language and Subtitles Setup" weight="10"><setup id="AutoLanguage" /></item>
 			<item key="hdmicec" level="0" text="HDMI-CEC Settings" weight="55" requires="HDMICEC"><screen module="HDMICEC" screen="HDMICECSetup" /></item>
-			<item key="osdsetup" level="1" text="OSD Position Settings" weight="50" requires="CanChangeOsdPosition"><screen module="UserInterfacePositioner" screen="UserInterfacePositioner2" /></item>
+			<item key="osdsetup" level="1" text="OSD Position Settings" weight="50" requires="OsdMenu"><screen module="UserInterfacePositioner" screen="UserInterfacePositioner2" /></item>
 		</menu>
 
 		<!-- Menu / Setup / Tuners and Scanning -->

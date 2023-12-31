@@ -2,7 +2,6 @@
 from Screens.ChannelSelection import ChannelSelection, BouquetSelector, SilentBouquetSelector
 
 from Components.ActionMap import ActionMap, HelpableActionMap, HelpableNumberActionMap, NumberActionMap
-from Components.AVSwitch import AVSwitch
 from Components.Harddisk import harddiskmanager
 from Components.Input import Input
 from Components.Label import Label
@@ -53,6 +52,9 @@ import datetime
 from re import match
 
 from RecordTimer import RecordTimerEntry, RecordTimer, findSafeRecordPath
+
+from Components.AVSwitch import AVSwitch
+iAVSwitch = AVSwitch()
 
 # hack alert!
 from Screens.Menu import MainMenu, mdom
