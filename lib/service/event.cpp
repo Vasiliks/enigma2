@@ -317,7 +317,7 @@ RESULT eServiceEvent::getGenreData(ePtr<eGenreData> &dest) const
 	return -1;
 }
 
-PyObject *eServiceEvent::getGenreDataList() const
+PyObject *eServiceEvent::getGenreData() const
 {
 	ePyObject ret = PyList_New(m_genres.size());
 	int cnt=0;
@@ -345,7 +345,7 @@ RESULT eServiceEvent::getParentalData(ePtr<eParentalData> &dest) const
 	return -1;
 }
 
-PyObject *eServiceEvent::getParentalDataList() const
+PyObject *eServiceEvent::getParentalData() const
 {
 	ePyObject ret = PyList_New(m_ratings.size());
 	int cnt = 0;
@@ -375,7 +375,7 @@ RESULT eServiceEvent::getComponentData(ePtr<eComponentData> &dest, int tagnum) c
 	return -1;
 }
 
-PyObject *eServiceEvent::getComponentDataList() const
+PyObject *eServiceEvent::getComponentData() const
 {
 	ePyObject ret = PyList_New(m_component_data.size());
 	int cnt = 0;

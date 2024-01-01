@@ -6,8 +6,12 @@
 #include <lib/gdi/drawing.h>
 #include <byteswap.h>
 
+#ifdef __GLIBC__
 #ifndef BYTE_ORDER
 #error "no BYTE_ORDER defined!"
+#endif
+#else
+#define BYTE_ORDER __BYTE_ORDER
 #endif
 
 /* surface acceleration threshold: do not attempt to accelerate surfaces smaller than the threshold (measured in bytes) */
@@ -638,7 +642,7 @@ void gPixmap::drawRectangle(const gRegion &region, const eRect &area, const gRGB
 							x--;
 						}
 					}
-				} // if blitAlphaBlend
+				}// if blitAlphaBlend
 			}	  // if center
 
 			if (top && !topRect.empty())
@@ -724,7 +728,7 @@ void gPixmap::drawRectangle(const gRegion &region, const eRect &area, const gRGB
 						uint32_t *gradientBuf2 = gradientBuf + mRect.left() - area.left();
 						std::memcpy(dst, gradientBuf2, linesize);
 					}
-				} // if blitAlphaBlend
+				}// if blitAlphaBlend
 			}	  // if center
 
 			if (top && !topRect.empty())

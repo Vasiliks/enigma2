@@ -60,6 +60,7 @@ fbClass::fbClass(const char *fb)
 		goto nolfb;
 	}
 
+
 	if (ioctl(fbFd, FBIOGET_VSCREENINFO, &screeninfo)<0)
 	{
 		eDebug("[fb] FBIOGET_VSCREENINFO: %m");
@@ -174,7 +175,7 @@ nolfb:
 		::close(fbFd);
 		fbFd = -1;
 	}
-	eDebug("[fb] framebuffer not available");
+	eDebug("[fb] framebuffer %s not available", fb);
 	return;
 }
 
@@ -194,7 +195,6 @@ int fbClass::showConsole(int state)
 
 int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 {
-	if (fbFd < 0) return -1;
 #ifdef CONFIG_ION
 	/* unmap old framebuffer with old size */
 	if (lfb)
@@ -245,7 +245,7 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 
 		if (ioctl(fbFd, FBIOPUT_VSCREENINFO, &screeninfo)<0)
 		{
-			eDebug("[fb] FBIOPUT_VSCREENINFO %m");
+			eDebug("[fb] FBIOPUT_VSCREENINFO: %m");
 			return -1;
 		}
 		eDebug("[fb] double buffering not available.");
@@ -257,7 +257,6 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 #endif
 
 	m_number_of_pages = screeninfo.yres_virtual / nyRes;
-	eDebug("[fb] %d page(s) available!", m_number_of_pages);
 
 	ioctl(fbFd, FBIOGET_VSCREENINFO, &screeninfo);
 
@@ -274,17 +273,15 @@ int fbClass::SetMode(int nxRes, int nyRes, int nbpp)
 	fb_fix_screeninfo fix;
 	if (ioctl(fbFd, FBIOGET_FSCREENINFO, &fix)<0)
 	{
-		eDebug("[fb] FBIOGET_FSCREENINFO %m");
+		eDebug("[fb] FBIOGET_FSCREENINFO: %m");
 	}
 	stride=fix.line_length;
-
 #ifdef CONFIG_ION
-	m_phys_mem = fix.smem_start;
-	available = fix.smem_len;
+    	m_phys_mem = fix.smem_start;
+    	available = fix.smem_len;
 	/* map new framebuffer */
 	lfb=(unsigned char*)mmap(0, stride * screeninfo.yres_virtual, PROT_WRITE|PROT_READ, MAP_SHARED, fbFd, 0);
 #endif
-
 	memset(lfb, 0, stride*yRes);
 	blit();
 	return 0;
@@ -299,7 +296,6 @@ void fbClass::getMode(int &xres, int &yres, int &bpp)
 
 int fbClass::setOffset(int off)
 {
-	if (fbFd < 0) return -1;
 	screeninfo.xoffset = 0;
 	screeninfo.yoffset = off;
 	return ioctl(fbFd, FBIOPAN_DISPLAY, &screeninfo);
@@ -308,14 +304,12 @@ int fbClass::setOffset(int off)
 int fbClass::waitVSync()
 {
 	int c = 0;
-	if (fbFd < 0) return -1;
 	return ioctl(fbFd, FBIO_WAITFORVSYNC, &c);
 }
 
 void fbClass::blit()
 {
-	if (fbFd < 0) return;
-#if !defined(CONFIG_ION)
+#ifndef CONFIG_ION
 	if (m_manual_blit == 1) {
 		if (ioctl(fbFd, FBIO_BLIT) < 0)
 			eDebug("[fb] FBIO_BLIT %m");
@@ -345,7 +339,6 @@ fbClass::~fbClass()
 
 int fbClass::PutCMAP()
 {
-	if (fbFd < 0) return -1;
 	return ioctl(fbFd, FBIOPUTCMAP, &cmap);
 }
 
@@ -360,7 +353,6 @@ int fbClass::lock()
 	}
 	else
 		locked = 1;
-
 	return fbFd;
 }
 
@@ -377,7 +369,6 @@ void fbClass::unlock()
 
 void fbClass::enableManualBlit()
 {
-	if (fbFd < 0) return;
 #ifndef CONFIG_ION
 	unsigned char tmp = 1;
 	if (ioctl(fbFd,FBIO_SET_MANUAL_BLIT, &tmp)<0)
@@ -391,12 +382,9 @@ void fbClass::disableManualBlit()
 {
 #ifndef CONFIG_ION
 	unsigned char tmp = 0;
-	if (fbFd < 0) return;
 	if (ioctl(fbFd,FBIO_SET_MANUAL_BLIT, &tmp)<0)
 		eDebug("[fb] FBIO_SET_MANUAL_BLIT %m");
 	else
 		m_manual_blit = 0;
 #endif
 }
-
-
