@@ -618,7 +618,7 @@ void gPixmap::drawRectangle(const gRegion &region, const eRect &area, const gRGB
 							dst->g += (((green - dst->g) * alpha) >> 8);
 							dst->r += (((red - dst->r) * alpha) >> 8);
 							dst->a += (((0xFF - dst->a) * alpha) >> 8);
-							
+
 							++dst;
 							--width;
 						}
@@ -708,7 +708,7 @@ void gPixmap::drawRectangle(const gRegion &region, const eRect &area, const gRGB
 							dst->g += (((src->g - dst->g) * src->a) >> 8);
 							dst->r += (((src->r - dst->r) * src->a) >> 8);
 							dst->a += (((0xFF - dst->a) * src->a) >> 8);
-							
+
 							++dst;
 							++src;
 							--width;
@@ -2481,7 +2481,7 @@ void gPixmap::line(const gRegion &clip, ePoint start, ePoint dst, unsigned int c
 				lasthit = a = 0;
 			else
 				goto fail;
-		} 
+		}
 		else if (!clip.rects[a].contains(x, y))
 		{
 			do

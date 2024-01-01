@@ -1,6 +1,6 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-	
+
 	$Id: color.h 2013/10/12 mohousch Exp $
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
@@ -99,11 +99,11 @@ inline uint32_t make16color(__u32 rgb)
         return 0xFF000000 | rgb;
 }
 
-// for lua until 
+// for lua until
 inline uint32_t make16Color(unsigned int rgb)
 {
 	uint32_t col = 0xFF000000 | rgb;
-	
+
         return col;
 }
 
@@ -112,11 +112,11 @@ inline uint32_t convertSetupColor2Color(unsigned char r, unsigned char g, unsign
 	int color = convertSetupColor2RGB(r, g, b);
 	int tAlpha = (alpha ? (convertSetupAlpha2Alpha(alpha)) : 0);
 
-	if(!alpha) 
+	if(!alpha)
 		tAlpha = 0xFF;
 
 	uint32_t col = ((tAlpha << 24) & 0xFF000000) | color;
-	
+
 	return col;
 }
 

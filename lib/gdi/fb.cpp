@@ -48,7 +48,7 @@ fbClass::fbClass(const char *fb)
 	cmap.green=green;
 	cmap.blue=blue;
 	cmap.transp=trans;
-	
+
 #ifdef CONFIG_ION
 	int ion;
 #endif

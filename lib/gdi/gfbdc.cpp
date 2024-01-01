@@ -247,7 +247,7 @@ void gFBDC::exec(const gOpcode *o)
 		delete o->parm.setShowItemInfo;
 		break;
 	}
-	case gOpcode::setFlush:	
+	case gOpcode::setFlush:
 	{
 		gles_set_flush(o->parm.setFlush->enable);
 		delete o->parm.setFlush;
@@ -314,9 +314,9 @@ void gFBDC::setResolution(int xres, int yres, int bpp)
 	surface.bypp = bpp / 8;
 	surface.stride = fb->Stride();
 	surface.data = fb->lfb;
-	
-	for (int y=0; y<yres; y++)    // make whole screen transparent 
-		memset(fb->lfb+ y * xres * 4, 0x00, xres * 4);	
+
+	for (int y=0; y<yres; y++)    // make whole screen transparent
+		memset(fb->lfb+ y * xres * 4, 0x00, xres * 4);
 
 	surface.data_phys = fb->getPhysAddr();
 

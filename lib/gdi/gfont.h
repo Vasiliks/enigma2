@@ -32,7 +32,7 @@ public:
  		family(family), pointSize((int)pointSize)
  	{
  	}
-	
+
 	virtual ~gFont()
 	{
 	}
