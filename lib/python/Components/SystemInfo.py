@@ -183,7 +183,7 @@ cmdline = {k: v.strip('"') for k, v in findall(r'(\S+)=(".*?"|\S+)', cmdline)}
 
 def getDemodVersion():
 	version = None
-	if exists("/proc/stb/info/nim_firmware_version"):
+	if fileExists("/proc/stb/info/nim_firmware_version"):
 		version = fileReadLine("/proc/stb/info/nim_firmware_version")
 	return version and version.strip()
 
@@ -197,26 +197,26 @@ def getRCFile(ext):
 
 def getNumVideoDecoders():
 	numVideoDecoders = 0
-	while exists("/dev/dvb/adapter0/video%d" % numVideoDecoders):
+	while fileExists("/dev/dvb/adapter0/video%d" % numVideoDecoders):
 		numVideoDecoders += 1
 	return numVideoDecoders
 
 
 def countFrontpanelLEDs():
-	numLeds = exists("/proc/stb/fp/led_set_pattern") and 1 or 0
-	while exists("/proc/stb/fp/led%d_pattern" % numLeds):
+	numLeds = fileExists("/proc/stb/fp/led_set_pattern") and 1 or 0
+	while fileExists("/proc/stb/fp/led%d_pattern" % numLeds):
 		numLeds += 1
 	return numLeds
 
 
 def hassoftcaminstalled():
-	softcams = exists("/etc/init.d/softcam") or exists("/etc/init.d/cardserver")
+	softcams = fileExists("/etc/init.d/softcam") or exists("/etc/init.d/cardserver")
 	return softcams
 
 
 def getBootdevice():
 	dev = ("root" in cmdline and cmdline["root"].startswith("/dev/")) and cmdline["root"][5:]
-	while dev and not exists("/sys/block/%s" % dev):
+	while dev and not fileExists("/sys/block/%s" % dev):
 		dev = dev[:-1]
 	return dev
 
@@ -375,7 +375,6 @@ SystemInfo["cankexec"] = not SystemInfo["HasKexecMultiboot"] and isfile("/usr/bi
 SystemInfo["canMode12"] = "%s_4.boxmode" % model in cmdline and cmdline["%s_4.boxmode" % model] in ("1", "12") and "192M"
 SystemInfo["canMultiBoot"] = MultiBoot.getBootSlots()
 SystemInfo["canDualBoot"] = fileCheck("/dev/block/by-name/flag")
-SystemInfo["canFlashWithOfgwrite"] = model not in ("dm")
 SystemInfo["HasGPT"] = model in ("dreamone", "dreamtwo") and pathExists("/dev/mmcblk0p7")
 SystemInfo["CanProc"] = SystemInfo["HasMMC"] and not SystemInfo["Blindscan_t2_available"]
 SystemInfo["CanChangeOsdAlpha"] = access("/proc/stb/video/alpha", R_OK) and True or False
