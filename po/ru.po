@@ -20300,6 +20300,9 @@ msgstr "установить список каналов"
 msgid "no delay"
 msgstr "без задержки"
 
+msgid "<no log found>"
+msgstr "<журнал не найден>"
+
 msgid "no module found"
 msgstr "не найден модуль"
 
