@@ -274,10 +274,16 @@ def getChipSetNumber():
 
 
 def getCPUBrand():
-	if SystemInfo["HiSilicon"]:
+	if BoxInfo.getItem("AmlogicFamily"):
+		return _("Amlogic")
+	elif BoxInfo.getItem("HiSilicon"):
 		return _("HiSilicon")
-	else:
+	elif socfamily.startswith("smp"):
+		return _("Sigma Designs")
+	elif socfamily.startswith("bcm") or BoxInfo.getItem("brand") == "rpi":
 		return _("Broadcom")
+	print("[About] No CPU brand?")
+	return _("Undefined")
 
 
 def getCPUArch():
