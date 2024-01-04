@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from Screens.HelpMenu import Rc
+from Screens.HelpMenu import ShowRemoteControl
 from Screens.Screen import Screen
 from Screens.WizardLanguage import WizardLanguage
 from Components.Pixmap import Pixmap
@@ -8,11 +8,11 @@ from Tools.Directories import resolveFilename, SCOPE_SKINS
 from Components.Console import Console
 
 
-class UserInterfacePositionerWizard(WizardLanguage, Rc):
+class UserInterfacePositionerWizard(WizardLanguage, ShowRemoteControl):
 	def __init__(self, session, interface=None):
 		self.xmlfile = resolveFilename(SCOPE_SKINS, "userinterfacepositionerwizard.xml")
 		WizardLanguage.__init__(self, session, showSteps=False, showStepSlider=False)
-		Rc.__init__(self)
+		ShowRemoteControl.__init__(self)
 		self.skinName = "StartWizard"
 		self.session = session
 		Screen.setTitle(self, _("Welcome..."))

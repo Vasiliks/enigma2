@@ -1,14 +1,14 @@
 import os
 from enigma import eAVControl, eDVBVolumecontrol
 from Components.config import config, ConfigSelection, ConfigSubDict, ConfigYesNo, ConfigSubsection, ConfigInteger
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo
 from Components.About import about, getChipSetNumber, getChipSetString
 from Tools.CList import CList
 from Tools.Directories import fileReadLine, fileWriteLine
 
 MODULE_NAME = __name__.split(".")[-1]
-model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
+MODEL = BoxInfo.getItem("model")
+BRAND = BoxInfo.getItem("brand")
 
 config.av.edid_override = ConfigYesNo(default=False)
 
@@ -179,7 +179,7 @@ class VideoHardware:
 	if "Scart" in modes and not BoxInfo.getItem("scart", False) and not BoxInfo.getItem("rca", False) and not BoxInfo.getItem("avjack", False):
 		del modes["Scart"]
 
-	if model == "hd2400":
+	if MODEL == "hd2400":
 		mode = fileReadLine("/proc/stb/info/board_revision", default="", source=MODULE_NAME)
 		if mode >= "2":
 			del modes["YPbPr"]
@@ -453,7 +453,7 @@ class VideoHardware:
 		if BoxInfo.getItem("have24hz"):
 			fileWriteLine("/proc/stb/video/videomode_24hz", mode24, source=MODULE_NAME)
 
-		if brand == "gigablue":
+		if BRAND == "gigablue":
 			# use 50Hz mode (if available) for booting
 			fileWriteLine("/etc/videomode", mode50, source=MODULE_NAME)
 

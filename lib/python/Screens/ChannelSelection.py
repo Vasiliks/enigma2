@@ -26,7 +26,7 @@ profile("ChannelSelection.py 2.3")
 from Components.Input import Input
 profile("ChannelSelection.py 3")
 from Components.ChoiceList import ChoiceList, ChoiceEntryComponent
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo
 from Components.Sources.StaticText import StaticText
 from Screens.InputBox import PinInput
 from Screens.VirtualKeyBoard import VirtualKeyBoard
@@ -188,7 +188,7 @@ class ChannelContextMenu(Screen):
 								append_when_current_valid(current, menu, (_("Remove from parental protection"), boundFunction(self.removeParentalProtection, current)), level=0)
 						if self.parentalControl.blacklist and config.ParentalControl.hideBlacklist.value and not self.parentalControl.sessionPinCached and config.ParentalControl.storeservicepin.value != "never":
 							append_when_current_valid(current, menu, (_("Unhide parental control services"), self.unhideParentalServices), level=0, key="1")
-					if SystemInfo["3DMode"] and fileExists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/OSD3DSetup/plugin.pyc")):
+					if BoxInfo.getItem("3DMode") and fileExists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/OSD3DSetup/plugin.pyc")):
 						if eDVBDB.getInstance().getFlag(eServiceReference(current.toString())) & FLAG_IS_DEDICATED_3D:
 							append_when_current_valid(current, menu, (_("Unmark service as dedicated 3D service"), self.removeDedicated3DFlag), level=2)
 						else:
@@ -225,7 +225,7 @@ class ChannelContextMenu(Screen):
 						if not self.inBouquet:
 							append_when_current_valid(current, menu, (_("Add service to favourites"), self.addServiceToBouquetSelected), level=0, key="5")
 							self.addFunction = self.addServiceToBouquetSelected
-					if SystemInfo["PIPAvailable"]:
+					if BoxInfo.getItem("PIPAvailable"):
 						self.PiPAvailable = True
 						if self.csel.dopipzap:
 							append_when_current_valid(current, menu, (_("Play in main window"), self.playMain), level=0, key="red")
@@ -282,7 +282,7 @@ class ChannelContextMenu(Screen):
 				if not csel.entry_marked and not inBouquetRootList and current_root and not (current_root.flags & eServiceReference.isGroup):
 					if current.type != -1:
 						menu.append(ChoiceEntryComponent("dummy", (_("Add marker"), self.showMarkerInputBox)))
-					if SystemInfo["HasHDMIin"]:
+					if BoxInfo.getItem("HasHDMIin"):
 						append_when_current_valid(current, menu, (_("Add HDMI IN to bouquet"), self.showHDMIInInputBox))
 					if not csel.movemode:
 						if haveBouquets:
@@ -550,7 +550,7 @@ class ChannelContextMenu(Screen):
 		if ref and root or (self.PiPAvailable and not self.csel.dopipzap and newservice and newservice.valid() and Components.ParentalControl.parentalControl.isServicePlayable(newservice, boundFunction(self.showServiceInPiP, root=currentBouquet), self.session)):
 			if hasattr(self.session, 'pipshown') and self.session.pipshown and hasattr(self.session, 'pip'):
 				del self.session.pip
-				if SystemInfo["LCDMiniTVPiP"] and config.lcd.modepip.value >= 1:
+				if BoxInfo.getItem("LCDMiniTVPiP") and config.lcd.modepip.value >= 1:
 					print('[ChannelSelection] LCDMiniTV disable PIP')
 					eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 			self.session.pip = self.session.instantiateDialog(PictureInPicture)
@@ -560,7 +560,7 @@ class ChannelContextMenu(Screen):
 				self.session.pipshown = True
 				self.session.pip.servicePath = self.csel.getCurrentServicePath()
 				self.session.pip.servicePath[1] = currentBouquet
-				if SystemInfo["LCDMiniTVPiP"] and config.lcd.modepip.value >= 1:
+				if BoxInfo.getItem("LCDMiniTVPiP") and config.lcd.modepip.value >= 1:
 					print('[ChannelSelection] LCDMiniTV enable PIP')
 					eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 					print("[ChannelSelection] Write to /proc/stb/vmpeg/1/dst_width")
@@ -573,7 +573,7 @@ class ChannelContextMenu(Screen):
 			else:
 				self.session.pipshown = False
 				del self.session.pip
-				if SystemInfo["LCDMiniTV"] and int(config.lcd.modepip.value) >= 1:
+				if BoxInfo.getItem("LCDMiniTV") and int(config.lcd.modepip.value) >= 1:
 					print('[ChannelSelection] LCDMiniTV disable PIP')
 					eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
 				self.session.openWithCallback(self.close, MessageBox, _("Could not open Picture in Picture"), MessageBox.TYPE_ERROR)

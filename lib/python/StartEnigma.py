@@ -480,14 +480,27 @@ except ImportError:
 	print("[StartEnigma] Error: Twisted not available!")
 
 
-from Components.SystemInfo import BoxInfo, SystemInfo
+profile("BoxInfo")
+from Components.SystemInfo import BoxInfo
+
+BRAND = BoxInfo.getItem("brand")
+BOX_TYPE = BoxInfo.getItem("machinebuild")
+MODEL = BoxInfo.getItem("model")
+DISPLAYBRAND = BoxInfo.getItem("displaybrand")
+
+print("[StartEnigma] Receiver name = %s %s" % (DISPLAYBRAND, BoxInfo.getItem("displaymodel")))
+print("[StartEnigma] Build Brand = %s" % BRAND)
+print("[StartEnigma] Build Model = %s" % MODEL)
+print("[StartEnigma] Platform = %s" % BoxInfo.getItem("platform"))
+print("[StartEnigma] SoC family = %s" % BoxInfo.getItem("socfamily"))
+
+if BoxInfo.getItem("architecture") in ("aarch64"):
+	# import usb.core
+	from usb.backend.libusb1 import get_backend
+	get_backend(find_library=lambda x: "/lib64/libusb-1.0.so.0")
+
 from traceback import print_exc
 from Components.config import config, configfile, ConfigText, ConfigYesNo, ConfigInteger, ConfigSelection, ConfigSubsection, NoSave
-
-model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
-platform = BoxInfo.getItem("platform")
-socfamily = BoxInfo.getItem("socfamily")
 
 
 # These entries should be moved back to UsageConfig.py when it is safe to bring UsageConfig init to this location in StartEnigma.py.

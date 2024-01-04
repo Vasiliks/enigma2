@@ -24,7 +24,7 @@ from Components.SystemInfo import BoxInfo, getBoxDisplayName
 from Tools.BoundFunction import boundFunction
 from Tools.Directories import fileExists
 
-model = BoxInfo.getItem("model")
+MODEL = BoxInfo.getItem("model")
 
 class UpdatePlugin(Screen, ProtectedScreen):
 	def __init__(self, session, *args):

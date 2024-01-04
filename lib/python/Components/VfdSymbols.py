@@ -6,10 +6,10 @@ import NavigationInstance
 from Tools.Directories import fileExists
 from Components.ParentalControl import parentalControl
 from Components.ServiceEventTracker import ServiceEventTracker
-from Components.SystemInfo import SystemInfo, BoxInfo
+from Components.SystemInfo import BoxInfo
 from time import sleep
 
-model = BoxInfo.getItem("model")
+MODEL = BoxInfo.getItem("model")
 brand = BoxInfo.getItem("brand")
 platform = BoxInfo.getItem("platform")
 
@@ -18,7 +18,7 @@ POLLTIME = 5  # seconds
 
 def SymbolsCheck(session, **kwargs):
 	global symbolspoller, POLLTIME
-	if SystemInfo["FirstCheckModel"] or SystemInfo["SecondCheckModel"] or SystemInfo["DefineSat"]:
+	if BoxInfo.getItem("FirstCheckModel") or BoxInfo.getItem("SecondCheckModel") or BoxInfo.getItem("DefineSat"):
 		POLLTIME = 1
 	symbolspoller = SymbolsCheckPoller(session)
 	symbolspoller.start()
@@ -59,7 +59,7 @@ class SymbolsCheckPoller:
 
 	def __evUpdatedInfo(self):
 		self.service = self.session.nav.getCurrentService()
-		if platform == "u41":
+		if MODEL == "u41":
 			self.Resolution()
 			self.Audio()
 			self.Crypted()
@@ -74,18 +74,18 @@ class SymbolsCheckPoller:
 		del self.service
 
 	def Recording(self):
-		if SystemInfo["FrontpanelLEDBrightnessControl"]:
+		if BoxInfo.getItem("FrontpanelLEDBrightnessControl"):
 			BRIGHTNESS_DEFAULT = 0xff
 			if config.lcd.ledbrightnesscontrol.value > 0xff or config.lcd.ledbrightnesscontrol.value < 0:
 				print("[VfdSymbols] LED brightness has to be between 0x0 and 0xff! Using default value (%x)" % (BRIGHTNESS_DEFAULT))
 				config.lcd.ledbrightnesscontrol.value = BRIGHTNESS_DEFAULT
-			open(SystemInfo["FrontpanelLEDBrightnessControl"], "w").write(config.lcd.ledbrightnesscontrol.value)
-		elif SystemInfo["FrontpanelLEDColorControl"]:
+			open(BoxInfo.getItem("FrontpanelLEDBrightnessControl"), "w").write(config.lcd.ledbrightnesscontrol.value)
+		elif BoxInfo.getItem("FrontpanelLEDColorControl"):
 			COLOR_DEFAULT = 0xffffff
 			if config.lcd.ledcolorcontrolcolor.value > 0xffffff or config.lcd.ledcolorcontrolcolor.value < 0:
 				print("[VfdSymbols] LED color has to be between 0x0 and 0xffffff (r, g b)! Using default value (%x)" % (COLOR_DEFAULT))
 				config.lcd.ledcolorcontrolcolor.value = COLOR_DEFAULT
-			open(SystemInfo["FrontpanelLEDColorControl"], "w").write(config.lcd.ledcolorcontrolcolor.value)
+			open(BoxInfo.getItem("FrontpanelLEDColorControl"), "w").write(config.lcd.ledcolorcontrolcolor.value)
 		elif fileExists("/proc/stb/lcd/symbol_circle"):
 			recordings = len(NavigationInstance.instance.getRecordings())
 			print("[VfdSymbols] Write to /proc/stb/lcd/symbol_pvr2")
@@ -106,7 +106,7 @@ class SymbolsCheckPoller:
 					self.led = "0"
 			elif self.led == "1":
 				open("/proc/stb/lcd/powerled", "w").write("0")
-		elif model in ("mbmicrov2", "mbmicro", "e4hd", "e4hdhybrid") and fileExists("/proc/stb/lcd/powerled"):
+		elif MODEL in ("mbmicrov2", "mbmicro", "e4hd", "e4hdhybrid") and fileExists("/proc/stb/lcd/powerled"):
 			recordings = len(NavigationInstance.instance.getRecordings())
 			self.blink = not self.blink
 			print("[VfdSymbols] Write to /proc/stb/lcd/powerled")
@@ -119,7 +119,7 @@ class SymbolsCheckPoller:
 					self.led = "0"
 			elif self.led == "1":
 				open("/proc/stb/lcd/powerled", "w").write("1")
-		elif model == "dm7020hd" and fileExists("/proc/stb/fp/led_set"):
+		elif MODEL == "dm7020hd" and fileExists("/proc/stb/fp/led_set"):
 			recordings = len(NavigationInstance.instance.getRecordings())
 			self.blink = not self.blink
 			print("[VfdSymbols] Write to /proc/stb/fp/led_set")
@@ -132,7 +132,7 @@ class SymbolsCheckPoller:
 					self.led = "0"
 			else:
 				open("/proc/stb/fp/led_set", "w").write("0xffffffff")
-		elif platform in ("dags7362", "dags73625") or model in ("tmtwin4k", "revo4k", "force3uhd") and fileExists("/proc/stb/lcd/symbol_rec"):
+		elif MODEL in ("tmtwin4k", "revo4k", "force3uhd") and fileExists("/proc/stb/lcd/symbol_rec"):
 			recordings = len(NavigationInstance.instance.getRecordings())
 			self.blink = not self.blink
 			print("[VfdSymbols] Write to /proc/stb/lcd/symbol_rec")
@@ -145,7 +145,7 @@ class SymbolsCheckPoller:
 					self.led = "0"
 			elif self.led == "1":
 				open("/proc/stb/lcd/symbol_rec", "w").write("0")
-		elif SystemInfo["HiSilicon"] and fileExists("/proc/stb/fp/ledpowercolor"):
+		elif BoxInfo.getItem("HiSilicon") and fileExists("/proc/stb/fp/ledpowercolor"):
 			import Screens.Standby
 			recordings = len(NavigationInstance.instance.getRecordings(False))
 			if recordings > 0 and not Screens.Standby.inStandby:
@@ -191,18 +191,18 @@ class SymbolsCheckPoller:
 					open("/proc/stb/fp/ledpowercolor", "w").write(config.usage.frontledstdby_color.value)
 				else:
 					open("/proc/stb/fp/ledpowercolor", "w").write(config.lcd.ledpowercolor.value)
-		elif SystemInfo["FrontpanelLEDFadeControl"]:
+		elif BoxInfo.getItem("FrontpanelLEDFadeControl"):
 			FADE_DEFAULT = 0x7
 			if config.lcd.ledfadecontrolcolor.value > 0xff or config.lcd.ledfadecontrolcolor.value < 0:
 				print("[VfdSymbols] LED fade has to be between 0x0 and 0xff! Using default value (%x)" % (FADE_DEFAULT))
 				config.lcd.ledfadecontrolcolor.value = FADE_DEFAULT
-			open(SystemInfo["FrontpanelLEDFadeControl"], "w").write(config.lcd.ledfadecontrolcolor.value)
-		elif SystemInfo["FrontpanelLEDBlinkControl"]:
+			open(BoxInfo.getItem("FrontpanelLEDFadeControl"), "w").write(config.lcd.ledfadecontrolcolor.value)
+		elif BoxInfo.getItem("FrontpanelLEDBlinkControl"):
 			BLINK_DEFAULT = 0x0710ff
 			if config.lcd.ledblinkcontrolcolor.value > 0xffffff or config.lcd.ledblinkcontrolcolor.value < 0:
 				print("[VfdSymbols] LED blink has to be between 0x0 and 0xffffff (on, total, repeats)! Using default value (%x)" % (BLINK_DEFAULT))
 				config.lcd.ledblinkcontrolcolor.value = BLINK_DEFAULT
-			open(SystemInfo["FrontpanelLEDBlinkControl"], "w").write(config.lcd.ledblinkcontrolcolor.value)
+			open(BoxInfo.getItem("FrontpanelLEDBlinkControl"), "w").write(config.lcd.ledblinkcontrolcolor.value)
 		else:
 			if not fileExists("/proc/stb/lcd/symbol_recording") or not fileExists("/proc/stb/lcd/symbol_record_1") or not fileExists("/proc/stb/lcd/symbol_record_2"):
 				return
@@ -271,7 +271,7 @@ class SymbolsCheckPoller:
 			return
 
 		print("[VfdSymbols] Write to /proc/stb/lcd/symbol_play")
-		if SystemInfo["SeekStatePlay"]:
+		if BoxInfo.getItem("SeekStatePlay"):
 			open("/proc/stb/lcd/symbol_play", "w").write("1")
 		else:
 			open("/proc/stb/lcd/symbol_play", "w").write("0")
@@ -281,7 +281,7 @@ class SymbolsCheckPoller:
 			return
 
 		print("[VfdSymbols] Write to /proc/stb/lcd/symbol_pause")
-		if SystemInfo["StatePlayPause"]:
+		if BoxInfo.getItem("StatePlayPause"):
 			open("/proc/stb/lcd/symbol_pause", "w").write("1")
 		else:
 			open("/proc/stb/lcd/symbol_pause", "w").write("0")
@@ -291,7 +291,7 @@ class SymbolsCheckPoller:
 			return
 
 		print("[VfdSymbols] Write to /proc/stb/lcd/symbol_power")
-		if SystemInfo["StandbyState"]:
+		if BoxInfo.getItem("StandbyState"):
 			open("/proc/stb/lcd/symbol_power", "w").write("0")
 		else:
 			open("/proc/stb/lcd/symbol_power", "w").write("1")

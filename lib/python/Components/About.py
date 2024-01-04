@@ -12,7 +12,7 @@ from struct import pack, unpack
 from subprocess import PIPE, Popen
 from sys import maxsize, modules, version_info
 from time import localtime, strftime
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLine, fileReadLines
 
 MODULE_NAME = __name__.split(".")[-1]
@@ -59,16 +59,11 @@ def getIfTransferredData(ifname):
 
 
 def getVersionString():
-	return getImageVersionString()
+	return str(BoxInfo.getItem("imageversion"))
 
 
 def getImageVersionString():
-	if isfile("/var/lib/opkg/status"):
-		status = stat("/var/lib/opkg/status")
-		tm = localtime(status.st_mtime)
-		if tm.tm_year >= 2018:
-			return strftime("%Y-%m-%d %H:%M:%S", tm)
-	return _("Unavailable")
+	return str(BoxInfo.getItem("imageversion"))
 
 
 def getFlashDateString():
@@ -90,25 +85,14 @@ def getBuildDateString():
 
 
 def getUpdateDateString():
-	if isfile("/proc/enigma/compiledate"):
-		build = fileReadLine("/proc/enigma/compiledate", source=MODULE_NAME)
-	elif isfile("/proc/enigma/compiledate"):
-		build = fileReadLine("/proc/enigma/compiledate", source=MODULE_NAME)
-	else:
-		build = None
-	if build is not None:
-		build = build.strip()
-		if build.isdigit():
-			return "%s-%s-%s" % (build[:4], build[4:6], build[6:])
+	build = BoxInfo.getItem("compiledate")
+	if build and build.isdigit():
+		return "%s-%s-%s" % (build[:4], build[4:6], build[6:])
 	return _("Unknown")
 
 
 def getEnigmaVersionString():
-	import enigma
-	enigma_version = enigma.getEnigmaVersionString()
-	if '-(no branch)' in enigma_version:
-		enigma_version = enigma_version[:-12]
-	return enigma_version
+	return str(BoxInfo.getItem("imageversion"))
 
 
 def getGStreamerVersionString():
