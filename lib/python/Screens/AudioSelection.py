@@ -277,7 +277,7 @@ class AudioSelection(ConfigListScreen, Screen, HelpableScreen):
 					("wide", _("Wide")),
 					("extrawide", _("Extra wide"))
 				]
-				if BoxInfo.getItem("CanProc":
+				if BoxInfo.getItem("CanProc"):
 					with open("/proc/stb/audio/3d_surround_speaker_position_choices") as speaker:
 						speaker.read().split('\n', 1)[0]
 				self.settings.speaker_3d = ConfigSelection(choices=choice_list, default=config.av.speaker_3d.value)
