@@ -6,13 +6,14 @@ from twisted.internet import threads
 from enigma import eActionMap, eDBoxLCD, eTimer
 
 from Components.config import ConfigNothing, ConfigSelection, ConfigSlider, ConfigSubsection, ConfigOnOff, ConfigYesNo, config
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo
 from Screens.InfoBar import InfoBar
 from Screens.Screen import Screen
 import Screens.Standby
 from Tools.Directories import fileReadLine, fileWriteLine
 
-model = BoxInfo.getItem("model")
+MODEL = BoxInfo.getItem("model")
+DISPLAYTYPE = BoxInfo.getItem("displaytype")
 
 
 class dummyScreen(Screen):
@@ -177,8 +178,8 @@ class LCD:
 			print("[Lcd] setLCDMode='%s'." % value)
 			fileWriteLine("/proc/stb/lcd/show_symbols", value)
 		if config.lcd.mode.value == "0":
-			SystemInfo["SeekStatePlay"] = False
-			SystemInfo["StatePlayPause"] = False
+			BoxInfo.setItem("SeekStatePlay", False)
+			BoxInfo.setItem("StatePlayPause", False)
 			if exists("/proc/stb/lcd/symbol_hdd"):
 				fileWriteLine("/proc/stb/lcd/symbol_hdd", "0")
 			if exists("/proc/stb/lcd/symbol_hddprogress"):
@@ -234,7 +235,7 @@ class LCD:
 
 def leaveStandby():
 	config.lcd.bright.apply()
-	if model == "vuultimo":
+	if MODEL == "vuultimo":
 		config.lcd.ledbrightness.apply()
 		config.lcd.ledbrightnessdeepstandby.apply()
 
@@ -248,13 +249,13 @@ def standbyCounterChanged(configElement):
 
 def InitLcd():
 	detected = eDBoxLCD.getInstance().detected()
-	SystemInfo["Display"] = detected
+	BoxInfo.setItem("Display", detected)
 	config.lcd = ConfigSubsection()
 	if exists("/proc/stb/lcd/mode"):
 		can_lcdmodechecking = fileReadLine("/proc/stb/lcd/mode")
 	else:
 		can_lcdmodechecking = False
-	SystemInfo["LCDMiniTV"] = can_lcdmodechecking
+	BoxInfo.setItem("LCDMiniTV", can_lcdmodechecking)
 	if detected:
 		ilcd = LCD()
 		if can_lcdmodechecking:
@@ -393,15 +394,15 @@ def InitLcd():
 		], default="0")
 		config.usage.vfd_xcorevfd.addNotifier(setXcoreVFD)
 
-		choices = [("0", _("off")), ("1", _("blue"))] if model == "dual" else [("0", _("Off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))]
+		choices = [("0", _("off")), ("1", _("blue"))] if MODEL == "dual" else [("0", _("Off")), ("1", _("blue")), ("2", _("red")), ("3", _("violet"))]
 
 		config.usage.lcd_ledpowercolor = ConfigSelection(default="1", choices=choices)
 		if exists("/proc/stb/fp/ledpowercolor"):
 			config.usage.lcd_ledpowercolor.addNotifier(setLedPowerColor)
-		config.usage.lcd_ledstandbycolor = ConfigSelection(default="1" if model == "dual" else "3", choices=choices)
+		config.usage.lcd_ledstandbycolor = ConfigSelection(default="1" if MODEL == "dual" else "3", choices=choices)
 		if exists("/proc/stb/fp/ledstandbycolor"):
 			config.usage.lcd_ledstandbycolor.addNotifier(setLedStandbyColor)
-		config.usage.lcd_ledsuspendcolor = ConfigSelection(default="1" if model == "dual" else "2", choices=choices)
+		config.usage.lcd_ledsuspendcolor = ConfigSelection(default="1" if MODEL == "dual" else "2", choices=choices)
 		if exists("/proc/stb/fp/ledsuspendledcolor"):
 			config.usage.lcd_ledsuspendcolor.addNotifier(setLedSuspendColor)
 
@@ -417,7 +418,7 @@ def InitLcd():
 		if exists("/proc/stb/fp/power4x7suspend"):
 			config.usage.lcd_power4x7suspend.addNotifier(setPower4x7Suspend)
 
-		if model in ('dm900', 'dm920'):
+		if MODEL in ('dm900', 'dm920'):
 			standby_default = 4
 		else:
 			standby_default = 1
@@ -428,7 +429,7 @@ def InitLcd():
 			config.lcd.contrast = ConfigNothing()
 		config.lcd.standby = ConfigSlider(default=standby_default, limits=(0, 10))
 		config.lcd.dimbright = ConfigSlider(default=standby_default, limits=(0, 10))
-		config.lcd.bright = ConfigSlider(default=SystemInfo["DefaultDisplayBrightness"], limits=(0, 10))
+		config.lcd.bright = ConfigSlider(default=BoxInfo.getItem("DefaultDisplayBrightness"), limits=(0, 10))
 		config.lcd.dimbright.addNotifier(setLCDdimbright)
 		config.lcd.dimbright.apply = lambda: setLCDdimbright(config.lcd.dimbright)
 		config.lcd.dimdelay = ConfigSelection(choices=[
@@ -458,7 +459,7 @@ def InitLcd():
 		config.lcd.picon_pack.addNotifier(PiconPackChanged)
 		config.lcd.flip = ConfigYesNo(default=False)
 		config.lcd.flip.addNotifier(setLCDflipped)
-		LcdLiveTV = SystemInfo["LcdLiveTV"]
+		LcdLiveTV = BoxInfo.getItem("LcdLiveTV")
 		if LcdLiveTV:
 			def lcdLiveTvChanged(configElement):
 				if "live_enable" in LcdLiveTV:
@@ -474,7 +475,7 @@ def InitLcd():
 			config.lcd.showTv = ConfigYesNo(default=False)
 			config.lcd.showTv.addNotifier(lcdLiveTvChanged)
 
-		VFD_scroll_repeats = SystemInfo["VFD_scroll_repeats"]
+		VFD_scroll_repeats = BoxInfo.getItem("VFD_scroll_repeats")
 		if VFD_scroll_repeats:
 			def scroll_repeats(configElement):
 				eDBoxLCD.getInstance().set_VFD_scroll_repeats(int(configElement.value))
@@ -490,7 +491,7 @@ def InitLcd():
 			config.usage.vfd_scroll_repeats.addNotifier(scroll_repeats, immediate_feedback=False)
 		else:
 			config.usage.vfd_scroll_repeats = ConfigNothing()
-		VFD_scroll_delay = SystemInfo["VFD_scroll_delay"]
+		VFD_scroll_delay = BoxInfo.getItem("VFD_scroll_delay")
 		if VFD_scroll_delay:
 			def scroll_delay(configElement):
 				eDBoxLCD.getInstance().set_VFD_scroll_delay(int(configElement.value))
@@ -501,7 +502,7 @@ def InitLcd():
 		else:
 			config.lcd.hdd = ConfigNothing()
 			config.usage.vfd_scroll_delay = ConfigNothing()
-		VFD_initial_scroll_delay = SystemInfo["VFD_initial_scroll_delay"]
+		VFD_initial_scroll_delay = BoxInfo.getItem("VFD_initial_scroll_delay")
 		if VFD_initial_scroll_delay:
 			def initial_scroll_delay(configElement):
 				eDBoxLCD.getInstance().set_VFD_initial_scroll_delay(int(configElement.value))
@@ -517,7 +518,7 @@ def InitLcd():
 			config.usage.vfd_initial_scroll_delay.addNotifier(initial_scroll_delay, immediate_feedback=False)
 		else:
 			config.usage.vfd_initial_scroll_delay = ConfigNothing()
-		VFD_final_scroll_delay = SystemInfo["VFD_final_scroll_delay"]
+		VFD_final_scroll_delay = BoxInfo.getItem("VFD_final_scroll_delay")
 		if VFD_final_scroll_delay:
 			def final_scroll_delay(configElement):
 				eDBoxLCD.getInstance().set_VFD_final_scroll_delay(int(configElement.value))
@@ -565,7 +566,7 @@ def InitLcd():
 			config.lcd.showoutputresolution.addNotifier(setLCDshowoutputresolution)
 		else:
 			config.lcd.showoutputresolution = ConfigNothing()
-		if model == "vuultimo":
+		if MODEL == "vuultimo":
 			config.lcd.ledblinkingtime = ConfigSlider(default=5, increment=1, limits=(0, 15))
 			config.lcd.ledblinkingtime.addNotifier(setLEDblinkingtime)
 			config.lcd.ledbrightnessdeepstandby = ConfigSlider(default=1, increment=1, limits=(0, 15))

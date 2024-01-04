@@ -10,7 +10,7 @@ from Components.config import config
 from Components.AVSwitch import AVSwitch
 from Components.Console import Console
 from Components.ImportChannels import ImportChannels
-from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName
+from Components.SystemInfo import BoxInfo, getBoxDisplayName
 from Components.Sources.StreamService import StreamServiceList
 from Components.Task import job_manager
 from Tools.Directories import fileWriteLine, mediaFilesInUse
@@ -19,8 +19,7 @@ from time import time, localtime
 from GlobalActions import globalActionMap
 from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, quitMainloop, iRecordableService
 
-model = BoxInfo.getItem("model")
-AmlogicFamily = BoxInfo.getItem("AmlogicFamily")
+MODEL = BoxInfo.getItem("model")
 LCDMiniTV = BoxInfo.getItem("LCDMiniTV")
 
 inStandby = None
@@ -119,11 +118,11 @@ class StandbyScreen(Screen):
 			del self.session.pip
 		self.session.pipshown = False
 
-		if SystemInfo["ScartSwitch"]:
+		if BoxInfo.getItem("ScartSwitch"):
 			self.avswitch.setInput("SCART")
 		else:
 			self.avswitch.setInput("AUX")
-		if SystemInfo["HiSilicon"] or model in ("sfx6008", "sfx6018"):
+		if BoxInfo.getItem("HiSilicon") or MODEL in ("sfx6008", "sfx6018"):
 			output = "/proc/stb/hdmi/output"
 			if isfile(output):
 				with open(output, "w") as hdmi:
@@ -185,7 +184,7 @@ class StandbyScreen(Screen):
 
 	def Power(self):
 		print("[Standby] leave standby")
-		SystemInfo["StandbyState"] = False
+		BoxInfo.getItem("StandbyState", False)
 		self.close(True)
 
 		if isfile("/usr/script/StandbyLeave.sh"):
@@ -373,7 +372,7 @@ class TryQuitMainloop(MessageBox):
 				if not inStandby:
 					if isfile("/usr/script/standby_enter.sh"):
 						Console().ePopen("/usr/script/standby_enter.sh")
-					if SystemInfo["HasHDMI-CEC"] and config.hdmicec.enabled.value and config.hdmicec.control_tv_standby.value and config.hdmicec.next_boxes_detect.value:
+					if BoxInfo.getItem("HasHDMI-CEC") and config.hdmicec.enabled.value and config.hdmicec.control_tv_standby.value and config.hdmicec.next_boxes_detect.value:
 						import Components.HdmiCec
 						Components.HdmiCec.hdmi_cec.secondBoxActive()
 						if not hasattr(self, "quitScreen"):
@@ -386,13 +385,13 @@ class TryQuitMainloop(MessageBox):
 			elif not inStandby:
 				config.misc.RestartUI.value = True
 				config.misc.RestartUI.save()
-			if SystemInfo["Display"] and SystemInfo["LCDMiniTV"]:
+			if BoxInfo.getItem("Display") and BoxInfo.getItem("LCDMiniTV"):
 				mode = "/proc/stb/lcd/mode"
 				if isfile(mode):
 					print("[Standby] LCDminiTV off")
 					with open(mode, "w") as lcd:
 						lcd.write("0")
-			if model == "vusolo4k":
+			if MODEL == "vusolo4k":
 				oled_brightness = "/proc/stb/fp/oled_brightness"
 				if isfile(oled_brightness):
 					print("[Standby] Brightness OLED off")

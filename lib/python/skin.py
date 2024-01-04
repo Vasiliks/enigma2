@@ -7,7 +7,7 @@ from enigma import BT_ALPHABLEND, BT_ALPHATEST, BT_HALIGN_CENTER, BT_HALIGN_LEFT
 
 from Components.config import ConfigSubsection, ConfigText, config
 from Components.RcModel import rc_model
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo
 from Components.Sources.Source import ObsoleteSource
 from Tools.Directories import SCOPE_CONFIG, SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadLines, fileReadXML
 from Tools.Import import my_import
@@ -15,7 +15,7 @@ from Tools.LoadPixmap import LoadPixmap
 
 MODULE_NAME = __name__.split(".")[-1].capitalize()
 
-DEFAULT_SKIN = SystemInfo["HasFullHDSkinSupport"] and "PLi-FullHD/skin.xml" or "PLi-HD/skin.xml"  # SD hardware is no longer supported by the default skin.
+DEFAULT_SKIN = BoxInfo.getItem("HasFullHDSkinSupport") and "PLi-FullHD/skin.xml" or "PLi-HD/skin.xml"  # SD hardware is no longer supported by the default skin.
 EMERGENCY_SKIN = "skin_default/skin.xml"
 EMERGENCY_NAME = "Stone II"
 DEFAULT_DISPLAY_SKIN = "skin_default/skin_display.xml"

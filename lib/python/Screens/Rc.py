@@ -3,7 +3,7 @@ from Components.InputDevice import remoteControl
 from keyids import KEYIDS
 from Components.config import ConfigInteger, config
 from Components.Pixmap import MovingPixmap, Pixmap
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo
 from Tools.LoadPixmap import LoadPixmap
 
 config.misc.rcused = ConfigInteger(default=1)
@@ -80,7 +80,7 @@ class Rc:
 				pixmap.hide()
 
 	def initRemoteControl(self):
-		rc = LoadPixmap(SystemInfo["RCImage"])
+		rc = LoadPixmap(BoxInfo.getItem("RCImage"))
 		if rc:
 			self["rc"].instance.setPixmap(rc)
 			self.rcPosition = self["rc"].getPosition()

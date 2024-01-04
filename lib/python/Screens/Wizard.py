@@ -13,10 +13,10 @@ from Components.ActionMap import NumberActionMap
 from Components.MenuList import MenuList
 from Components.ConfigList import ConfigList
 from Components.Sources.List import List
-from Components.SystemInfo import BoxInfo, SystemInfo, DISPLAYMODEL
+from Components.SystemInfo import BoxInfo, DISPLAYMODEL
 from Tools.Directories import fileWriteLine
 
-brand = BoxInfo.getItem("brand")
+BRAND = BoxInfo.getItem("brand")
 
 
 class WizardSummary(Screen):
@@ -475,7 +475,7 @@ class Wizard(Screen):
 
 	def getTranslation(self, text):
 		text = _(text)
-		brandmodel = "%s %s" % (brand, DISPLAYMODEL)
+		brandmodel = "%s %s" % (BRAND, DISPLAYMODEL)
 		if "[TUNER]" in text and self.currStep and self.currStep in self.wizard:
 			currStep = self.wizard[self.currStep].get("id", "")
 			tuner = currStep[-1].upper() if len(currStep) == 4 and currStep.startswith("nim") else _("N/A")

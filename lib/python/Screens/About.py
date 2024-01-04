@@ -26,7 +26,7 @@ from Components.ScrollLabel import ScrollLabel
 from Components.ServiceEventTracker import ServiceEventTracker
 from Components.ProgressBar import ProgressBar
 from Components.GUIComponent import GUIComponent
-from Components.SystemInfo import BoxInfo, SystemInfo, getBoxDisplayName, getDemodVersion
+from Components.SystemInfo import BoxInfo, getBoxDisplayName, getDemodVersion
 from Screens.HelpMenu import HelpableScreen
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen, ScreenSummary
@@ -42,13 +42,10 @@ from Tools.Transponder import ConvertToHumanReadable
 
 MODULE_NAME = __name__.split(".")[-1]
 
-model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
-socfamily = BoxInfo.getItem("socfamily")
-displaytype = BoxInfo.getItem("displaytype")
-platform = BoxInfo.getItem("platform")
 DISPLAY_BRAND = BoxInfo.getItem("displaybrand")
 DISPLAY_MODEL = BoxInfo.getItem("displaymodel")
+MACHINE_BUILD = BoxInfo.getItem("machinebuild")
+MODEL = BoxInfo.getItem("model")
 rcname = BoxInfo.getItem("rcname")
 
 
@@ -494,7 +491,7 @@ class ImageInformation(InformationBase):
 
 	def displayInformation(self):
 		info = []
-		info.append(formatLine("H", _("Image information for %s %s") % getBoxDisplayName()))
+		info.append(formatLine("H", _("Image information for %s %s") % (DISPLAY_BRAND, DISPLAY_MODEL)))
 		info.append("")
 		if self.imageMessage:
 			for line in self.imageMessage:
@@ -1174,11 +1171,11 @@ class ReceiverInformation(InformationBase):
 		info.append(formatLine("P1", _("Receiver name"), "%s %s" % getBoxDisplayName()))
 		info.append(formatLine("P1", _("Build Brand"), BoxInfo.getItem("brand")))
 		platform = BoxInfo.getItem("platform")
-		info.append(formatLine("P1", _("Build Model"), model))
-		if platform != model:
+		info.append(formatLine("P1", _("Build Model"), MODEL))
+		if platform != MODEL:
 			info.append(formatLine("P1", _("Platform"), platform))
 		procModel = getBoxProc()
-		if procModel != model:
+		if procModel != MODEL:
 			info.append(formatLine("P1", _("Proc model"), procModel))
 		procModelType = getBoxProcTypeName()
 		if procModelType and procModelType != "unknown":

@@ -5,10 +5,10 @@ from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
 from Components.config import config, configfile
 from Components.Pixmap import Pixmap
 from Components.Sources.StaticText import StaticText
-from Components.SystemInfo import BoxInfo, SystemInfo
+from Components.SystemInfo import BoxInfo
 from Tools.Directories import SCOPE_PLUGINS, resolveFilename
 
-brand = BoxInfo.getItem("brand")
+BRAND = BoxInfo.getItem("brand")
 
 
 class VideoWizard(WizardLanguage, ShowRemoteControl):
@@ -128,7 +128,7 @@ class VideoWizard(WizardLanguage, ShowRemoteControl):
 	def modeSelect(self, mode):
 		rates = self.listRates(mode)
 		# print("[WizardVideo] modeSelect DEBUG: rates=%s." % rates)
-		if self.port == "HDMI" and mode in ("720p", "1080i", "1080p") and brand != "Amlogic":
+		if self.port == "HDMI" and mode in ("720p", "1080i", "1080p") and BRAND != "Amlogic":
 			self.rate = "multi"
 			self.videoSwitch.setMode(port=self.port, mode=mode, rate="multi")
 		else:
