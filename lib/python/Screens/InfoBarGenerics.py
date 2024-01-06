@@ -61,10 +61,6 @@ from Screens.Menu import MainMenu, mdom
 
 MODULE_NAME = __name__.split(".")[-1]
 
-model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
-platform = BoxInfo.getItem("platform")
-
 
 def isStandardInfoBar(self):
 	return self.__class__.__name__ == "InfoBar"
@@ -1648,7 +1644,7 @@ class InfoBarSeek:
 	def __seekableStatusChanged(self):
 		# print("seekable status changed!")
 		if not self.isSeekable():
-			BoxInfo.getItem("SeekStatePlay", False)
+			BoxInfo.setMutableItem("SeekStatePlay", False)
 			if isfile("/proc/stb/lcd/symbol_hdd"):
 				print("[InfoBarGenerics] Write to /proc/stb/lcd/symbol_hdd")
 				open("/proc/stb/lcd/symbol_hdd", "w").write("0")

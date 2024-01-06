@@ -184,7 +184,7 @@ class StandbyScreen(Screen):
 
 	def Power(self):
 		print("[Standby] leave standby")
-		BoxInfo.getItem("StandbyState", False)
+		BoxInfo.setMutableItem("StandbyState", False)
 		self.close(True)
 
 		if isfile("/usr/script/StandbyLeave.sh"):
