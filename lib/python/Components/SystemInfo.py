@@ -206,9 +206,9 @@ def countFrontpanelLEDs():
 
 
 def getRCFile(ext):
-	filename = resolveFilename(SCOPE_SKIN, pathjoin("hardware", f"{BoxInfo.getItem('rcname')}.{ext}"))
+	filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", f"{BoxInfo.getItem('rcname')}.{ext}"))
 	if not isfile(filename):
-		filename = resolveFilename(SCOPE_SKIN, pathjoin("hardware", f"dmm1.{ext}"))
+		filename = resolveFilename(SCOPE_SKIN, pathjoin("rc_models", f"dmm1.{ext}"))
 	return filename
 
 
