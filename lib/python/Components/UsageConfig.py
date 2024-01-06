@@ -1949,7 +1949,7 @@ def showrotorpositionChoicesUpdate(update=False):
 		config.misc.showrotorposition = ConfigSelection(default="no", choices=choiceslist)
 	else:
 		config.misc.showrotorposition.setChoices(choiceslist, "no")
-	BoxInfo.setItem("isRotorTuner", count > 0)
+	BoxInfo.setMutableItem("isRotorTuner", count > 0)
 
 
 def preferredTunerChoicesUpdate(update=False):
@@ -2018,10 +2018,10 @@ def preferredTunerChoicesUpdate(update=False):
 	else:
 		config.usage.recording_frontend_priority_atsc.setChoices(atsc_nims, "-2")
 
-	BoxInfo.setItem("DVB-S_priority_tuner_available", len(dvbs_nims) > 3 and any(len(i) > 2 for i in (dvbt_nims, dvbc_nims, atsc_nims)))
-	BoxInfo.setItem("DVB-T_priority_tuner_available", len(dvbt_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbc_nims, atsc_nims)))
-	BoxInfo.setItem("DVB-C_priority_tuner_available", len(dvbc_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbt_nims, atsc_nims)))
-	BoxInfo.setItem("ATSC_priority_tuner_available", len(atsc_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbc_nims, dvbt_nims)))
+	BoxInfo.setMutableItem("DVB-S_priority_tuner_available", len(dvbs_nims) > 3 and any(len(i) > 2 for i in (dvbt_nims, dvbc_nims, atsc_nims)))
+	BoxInfo.setMutableItem("DVB-T_priority_tuner_available", len(dvbt_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbc_nims, atsc_nims)))
+	BoxInfo.setMutableItem("DVB-C_priority_tuner_available", len(dvbc_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbt_nims, atsc_nims)))
+	BoxInfo.setMutableItem("ATSC_priority_tuner_available", len(atsc_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbc_nims, dvbt_nims)))
 
 
 def patchTuxtxtConfFile(dummyConfigElement):
