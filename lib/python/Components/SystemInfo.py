@@ -93,11 +93,7 @@ class BoxInformation:  # To maintain data integrity class variables should not b
 		return sorted(list(self.boxInfo.keys()))
 
 	def getItem(self, item, default=None):
-		if item in self.boxInfo:
-			value = self.boxInfo[item]
-		else:
-			value = default
-		return value
+		return self.boxInfo.get(item, default)
 
 	def setItem(self, item, value, immutable=False):
 		if item in self.immutableList:
@@ -123,8 +119,28 @@ class BoxInformation:  # To maintain data integrity class variables should not b
 BoxInfo = BoxInformation()
 
 
-SystemInfo = BoxInfo.boxInfo
+class SystemInformation(dict):
 
+	def get(self, item, default=None):
+		return BoxInfo.boxInfo[item] if item in BoxInfo.boxInfo else default
+
+	def __getitem__(self, item):
+		return BoxInfo.boxInfo[item]
+
+	def __setitem__(self, item, value):
+		if item in BoxInfo.immutableList:
+			print(f"[SystemInfo] Error: Item '{item}' is immutable and can not be {'changed' if item in BoxInfo.boxInfo else 'added'}!")
+		else:
+			BoxInfo.boxInfo[item] = value
+
+	def __delitem__(self, item):
+		if item in BoxInfo.immutableList:
+			print(f"[SystemInfo] Error: Item '{item}' is immutable and can not be deleted!")
+		else:
+			del BoxInfo.boxInfo[item]
+
+
+SystemInfo = SystemInformation()
 
 ARCHITECTURE = BoxInfo.getItem("architecture")
 BRAND = BoxInfo.getItem("brand")
@@ -452,7 +468,7 @@ BoxInfo.setMutableItem("FCCactive", False)
 
 BoxInfo.setItem("CommonInterface", eDVBCIInterfaces.getInstance().getNumOfSlots())
 BoxInfo.setItem("CommonInterfaceCIDelay", fileCheck("/proc/stb/tsmux/rmx_delay"))
-for cislot in range(0, BoxInfo.getItem("CommonInterface")):
-	BoxInfo.setItem(f"CI{cislot}SupportsHighBitrates", fileCheck(f"/proc/stb/tsmux/ci{cislot}_tsclk"))
-	BoxInfo.setItem(f"CI{cislot}RelevantPidsRoutingSupport", fileCheck(f"/proc/stb/tsmux/ci{cislot}_relevant_pids_routing"))
+for ciSlot in range(BoxInfo.getItem("CommonInterface")):
+	BoxInfo.setItem(f"CI{ciSlot}SupportsHighBitrates", fileCheck(f"/proc/stb/tsmux/ci{ciSlot}_tsclk"))
+	BoxInfo.setItem(f"CI{ciSlot}RelevantPidsRoutingSupport", fileCheck(f"/proc/stb/tsmux/ci{ciSlot}_relevant_pids_routing"))
 
