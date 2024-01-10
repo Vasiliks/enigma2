@@ -318,7 +318,7 @@ class CaidInfo2(Poll, Converter, object):
 					else:
 						if source != "cache" and source == "net" and source.find("emu") == -1:
 							return True
-						# return (source != None and source == "net") or (source != None and source != "sci") or (source != None and source != "emu") or (reader != None and reader != "emu") or (source != None and source != "card") 
+						# return (source != None and source == "net") or (source != None and source != "sci") or (source != None and source != "emu") or (reader != None and reader != "emu") or (source != None and source != "card")
 
 				else:
 					return False
@@ -351,7 +351,7 @@ class CaidInfo2(Poll, Converter, object):
 				ecm_info = self.ecmfile()
 				if fileExists("/tmp/ecm.info"):
 					try:
-						caid = "%0.4X" % int(ecm_info.get("caid", ""),16)
+						caid = "%0.4X" % int(ecm_info.get("caid", ""), 16)
 						return "%s" % self.systemCaids.get(caid[:2])
 					except:
 						return '----'

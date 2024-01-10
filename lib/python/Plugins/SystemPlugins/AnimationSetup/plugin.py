@@ -91,15 +91,15 @@ class AnimationSetupConfig(ConfigListScreen, Screen):
 
 class AnimationSetupScreen(Screen):
 	animationSetupItems = [
-		{"idx":0, "name":_("Disable Animations")},
-		{"idx":1, "name":_("Simple fade")},
-		{"idx":2, "name":_("Grow drop")},
-		{"idx":3, "name":_("Grow from left")},
-		{"idx":4, "name":_("Popup")},
-		{"idx":5, "name":_("Slide drop")},
-		{"idx":6, "name":_("Slide left to right")},
-		{"idx":7, "name":_("Slide top to bottom")},
-		{"idx":8, "name":_("Stripes")},
+		{"idx": 0, "name": _("Disable Animations")},
+		{"idx": 1, "name": _("Simple fade")},
+		{"idx": 2, "name": _("Grow drop")},
+		{"idx": 3, "name": _("Grow from left")},
+		{"idx": 4, "name": _("Popup")},
+		{"idx": 5, "name": _("Slide drop")},
+		{"idx": 6, "name": _("Slide left to right")},
+		{"idx": 7, "name": _("Slide top to bottom")},
+		{"idx": 8, "name": _("Stripes")},
 	]
 
 	skin = """
@@ -115,7 +115,7 @@ class AnimationSetupScreen(Screen):
 			<widget source="key_blue" render="Label" position="420,0" zPosition="2" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" foregroundColor="#ffffff" backgroundColor="#18188b" transparent="1" />
 
 			<widget name="list" position="10,60" size="560,364" scrollbarMode="showOnDemand" />
-	                <widget source="introduction" render="Label" position="0,370" size="560,40" zPosition="10" font="Regular;20" verticalAlignment="center" backgroundColor="#25062748" transparent="1" />
+			<widget source="introduction" render="Label" position="0,370" size="560,40" zPosition="10" font="Regular;20" verticalAlignment="center" backgroundColor="#25062748" transparent="1" />
 		</screen>"""
 
 	def __init__(self, session):

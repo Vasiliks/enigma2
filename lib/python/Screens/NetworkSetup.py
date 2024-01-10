@@ -505,8 +505,8 @@ class NetworkMacSetup(Screen, ConfigListScreen, HelpableScreen):
 		config.macaddress.change.value = self.GenerateMacAddress()
 		self['config'].invalidateCurrent()
 
-	def GenerateMacAddress(self):        
-		random.choice('0123456789abcdef')  
+	def GenerateMacAddress(self):
+		random.choice('0123456789abcdef')
 		create_random_mac = "00:1d:ec:%02x:%02x:%02x" % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 		MAC = config.macaddress.change.value
 		MAC = create_random_mac

@@ -1204,7 +1204,7 @@ class NimManager:
 				if lastrotorposition == -1:
 					return number and -1 or _("undefined")
 				else:
-					from Tools.Transponder import orbpos as orbStr # imported here so doesn't cause a circular import
+					from Tools.Transponder import orbpos as orbStr  # imported here so doesn't cause a circular import
 					return number and lastrotorposition or orbStr(lastrotorposition)
 		else:
 			return number and 9999 or _("not valid frontend")
