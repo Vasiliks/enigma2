@@ -41,7 +41,7 @@ def InitOsd():
 				fileWriteLine(fileName, "1", source=MODULE_NAME)
 	elif BoxInfo.getItem("CanChangeOsdPositionAML"):
 		def setPositionParameter(parameter, configElement):
-			value = "%s %s %s %s" % (config.osd.dst_left.value, config.plugins.OSDPositionSetup.dst_top.value, config.plugins.OSDPositionSetup.dst_width.value, config.plugins.OSDPositionSetup.dst_height.value)
+			value = "%s %s %s %s" % (config.plugins.OSDPositionSetup.dst_left.value, config.plugins.OSDPositionSetup.dst_top.value, config.plugins.OSDPositionSetup.dst_width.value, config.plugins.OSDPositionSetup.dst_height.value)
 			fileWriteLine("/sys/class/graphics/fb0/window_axis", value, source=MODULE_NAME)
 			fileWriteLine("/sys/class/graphics/fb0/free_scale", "0x10001", source=MODULE_NAME)
 
@@ -73,14 +73,14 @@ def InitOsd():
 			print("[UserInterfacePositioner] Setting OSD alpha:%s" % str(configElement.value))
 			config.av.osd_alpha.setValue(configElement.value)
 			fileWriteLine("/proc/stb/video/alpha", str(configElement.value), source=MODULE_NAME)
-	config.plugins.OSDPositionSetup.alpha.addNotifier(setOSDAlpha)
+	config.osd.alpha.addNotifier(setOSDAlpha)
 
 	def setOSDPlaneAlpha(configElement):
 		if BoxInfo.getItem("CanChangeOsdPlaneAlpha"):
 			print("[UserInterfacePositioner] Setting OSD plane alpha:%s" % str(configElement.value))
 			config.av.osd_alpha.setValue(configElement.value)
 			fileWriteLine("/sys/class/graphics/fb0/osd_plane_alpha", hex(configElement.value), source=MODULE_NAME)
-	config.plugins.OSDPositionSetup.alpha.addNotifier(setOSDPlaneAlpha)
+	config.osd.alpha.addNotifier(setOSDPlaneAlpha)
 
 	def set3DMode(configElement):
 		if BoxInfo.getItem("CanChange3DOsd"):
@@ -101,13 +101,13 @@ def InitOsd():
 				fileWriteLine("/proc/stb/fb/3dmode", value, source=MODULE_NAME)
 			except OSError:
 				pass
-	config.plugins.OSDPositionSetup.threeDmode.addNotifier(set3DMode)
+	config.osd.threeDmode.addNotifier(set3DMode)
 
 	def set3DZnorm(configElement):
 		if BoxInfo.getItem("CanChange3DOsd"):
 			print("[UserInterfacePositioner] Setting 3D depth: %s" % str(configElement.value))
 			fileWriteLine("/proc/stb/fb/znorm", "%d" % int(configElement.value), source=MODULE_NAME)
-	config.plugins.OSDPositionSetup.threeDznorm.addNotifier(set3DZnorm)
+	config.osd.threeDznorm.addNotifier(set3DZnorm)
 
 
 class UserInterfacePositioner2(Screen, ConfigListScreen):
@@ -333,9 +333,9 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 			self.setPreviewPosition()
 
 	def keyDefault(self):
-		config.plugins.OSDPositionSetup.alpha.setValue(255)
-		config.plugins.OSDPositionSetup.alpha_teletext.setValue(255)
-		config.plugins.OSDPositionSetup.alpha_webbrowser.setValue(255)
+		config.osd.alpha.setValue(255)
+		config.osd.alpha_teletext.setValue(255)
+		config.osd.alpha_webbrowser.setValue(255)
 
 		if BoxInfo.getItem("CanChangeOsdPosition"):
 			config.plugins.OSDPositionSetup.dst_width.setValue(720)
@@ -476,9 +476,9 @@ class UserInterfacePositioner(Screen, ConfigListScreen):
 			self.setPreviewPosition()
 
 	def keyDefault(self):
-		config.plugins.OSDPositionSetup.alpha.setValue(255)
-		config.plugins.OSDPositionSetup.alpha_teletext.setValue(255)
-		config.plugins.OSDPositionSetup.alpha_webbrowser.setValue(255)
+		config.osd.alpha.setValue(255)
+		config.osd.alpha_teletext.setValue(255)
+		config.osd.alpha_webbrowser.setValue(255)
 
 		if BoxInfo.getItem("CanChangeOsdPosition"):
 			config.plugins.OSDPositionSetup.dst_width.setValue(720)
