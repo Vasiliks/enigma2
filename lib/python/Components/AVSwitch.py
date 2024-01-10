@@ -594,7 +594,7 @@ def InitAVSwitch():
 	if BoxInfo.getItem("CanAC3PlusTranscode"):
 		default = "force_ac3"
 		DreamBoxAudio = BoxInfo.getItem("DreamBoxAudio")
-		if not DreamBoxAudio and platform not in ("gb7252", "gb72604"):
+		if not DreamBoxAudio and PLATFORM not in ("gb7252", "gb72604"):
 			choices = [
 				(pChoice("use_hdmi_caps")),
 				(pChoice("force_ac3"))

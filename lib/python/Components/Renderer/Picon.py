@@ -76,24 +76,24 @@ def getPiconName(serviceRef):
 		info = eServiceCenter.getInstance().info(eServiceReference(serviceRef))
 		refstr = info and info.getInfoString(service, iServiceInformation.sServiceref)
 		serviceRef = refstr and eServiceReference(refstr).toCompareString()
-	#remove the path and name fields, and replace ':' by '_'
+	# remove the path and name fields, and replace ':' by '_'
 	fields = GetWithAlternative(serviceRef).split(':', 10)[:10]
 	if not fields or len(fields) < 10:
 		return ""
 	pngname = findPicon('_'.join(fields))
 	if not pngname and not fields[6].endswith("0000"):
-		#remove "sub-network" from namespace
+		# remove "sub-network" from namespace
 		fields[6] = fields[6][:-4] + "0000"
 		pngname = findPicon('_'.join(fields))
 	if not pngname and fields[0] != '1':
-		#fallback to 1 for IPTV streams
+		# fallback to 1 for IPTV streams
 		fields[0] = '1'
 		pngname = findPicon('_'.join(fields))
 	if not pngname and fields[2] != '2':
-		#fallback to 1 for TV services with non-standard service types
+		# fallback to 1 for TV services with non-standard service types
 		fields[2] = '1'
 		pngname = findPicon('_'.join(fields))
-	if not pngname: # picon by channel name
+	if not pngname:  # picon by channel name
 		name = sanitizeFilename(ServiceReference(serviceRef).getServiceName())
 		name = re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
 		if name:
@@ -178,7 +178,7 @@ class Picon(Renderer):
 						if self.visible:
 							self.instance.hide()
 					return
-				if not pngname: # no picon for service found
+				if not pngname:  # no picon for service found
 					pngname = self.defaultpngname
 				if self.pngname != pngname:
 					if pngname:

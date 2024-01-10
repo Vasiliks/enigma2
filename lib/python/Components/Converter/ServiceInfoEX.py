@@ -360,11 +360,11 @@ class ServiceInfoEX(Poll, Converter, object):
 			return audio and audio.getNumberOfTracks() > 1
 		elif self.type == self.SUBTITLES_AVAILABLE:
 			try:
-			       subtitle = service and service.subtitle()
-			       subtitlelist = subtitle and subtitle.getSubtitleList()
+					subtitle = service and service.subtitle()
+					subtitlelist = subtitle and subtitle.getSubtitleList()
 			except:
-			       subtitle = service and service.subtitleTracks()
-			       subtitlelist = subtitle and subtitle.getNumberOfSubtitleTracks()
+					subtitle = service and service.subtitleTracks()
+					subtitlelist = subtitle and subtitle.getNumberOfSubtitleTracks()
 			if subtitlelist:
 				return len(subtitlelist) > 0
 			return False

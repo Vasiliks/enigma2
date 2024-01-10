@@ -258,9 +258,9 @@ class RunningText(Renderer):
 			text_height = max(text_height, (text_height + self.lineHeight - 1) / self.lineHeight * self.lineHeight)
 
 
-#		self.type =		0 - NONE; 1 - RUNNING; 2 - SWIMMING; 3 - AUTO(???)
-#		self.direction =	0 - LEFT; 1 - RIGHT;   2 - TOP;      3 - BOTTOM
-#		self.halign =		0 - LEFT; 1 - RIGHT;   2 - CENTER;   3 - BLOCK
+		# self.type =		0 - NONE; 1 - RUNNING; 2 - SWIMMING; 3 - AUTO(???)
+		# self.direction =	0 - LEFT; 1 - RIGHT;   2 - TOP;      3 - BOTTOM
+		# self.halign =		0 - LEFT; 1 - RIGHT;   2 - CENTER;   3 - BLOCK
 
 		if self.direction in (LEFT, RIGHT):
 			if not self.mAlways and text_width <= self.W:
