@@ -257,7 +257,7 @@ class Network:
 		if x in self.friendlyNames.keys():
 			return self.friendlyNames.get(x, x)
 		self.friendlyNames[x] = self.getFriendlyAdapterNaming(x)
-		return self.friendlyNames.get(x, x) # when we have no friendly name, use adapter name
+		return self.friendlyNames.get(x, x)  # when we have no friendly name, use adapter name
 
 	def getFriendlyAdapterNaming(self, iface):
 		name = None

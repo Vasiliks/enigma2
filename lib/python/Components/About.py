@@ -43,6 +43,7 @@ def getIfConfig(ifname):
 		for k, v in infos.items():
 			ifreq[k] = _ifinfo(sock, v, ifname)
 	except Exception as ex:
+		print("[About] getIfConfig Ex: %s" % str(ex))
 		pass
 	sock.close()
 	return ifreq

@@ -200,7 +200,7 @@ class HdmiCec:
 			cmd = 0x90
 			data = struct.pack('B', 0x01)
 		elif message == "reportaddress":
-			address = 0x0f # use broadcast address
+			address = 0x0f  # use broadcast address
 			cmd = 0x84
 			data = self.setData(True)
 		elif message == "vendorid":
