@@ -1621,6 +1621,11 @@ def InitUsageConfig():
 		})
 		config.av.sync_mode.addNotifier(setSyncMode)
 
+	config.usage.zaphistorysort = ConfigSelection(default=0, choices=[
+		(0, _("Top")),
+		(1, _("Bottom"))
+	])
+
 	config.subtitles = ConfigSubsection()
 	config.subtitles.show = ConfigYesNo(default=True)
 	config.subtitles.ttx_subtitle_colors = ConfigSelection(default="1", choices=[

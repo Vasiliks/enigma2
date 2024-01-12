@@ -5030,6 +5030,9 @@ msgstr "Настройка интервала время при нажатии �
 msgid "Configure the slow motion speeds."
 msgstr "Настройка низких скоростей перемотки."
 
+msgid "Configure the sort order of the zap history channels."
+msgstr "Настройте порядок сортировки каналов истории zap."
+
 msgid "Configure the source of the frontend data as shown on the infobars. 'Settings' is as stored on the settings. 'Tuner' is as reported by the tuner."
 msgstr "Настройка для получения источника данных интерфейса в инфобарах. 'Установки' - данные берутся из файла lamedb.'Тюнер' - непосредственно из данных опрашиваемого тюнера."
 
@@ -17394,6 +17397,9 @@ msgstr "Tonga"
 msgid "Top and bottom"
 msgstr "Сверху и снизу"
 
+msgid "Top"
+msgstr "Верх"
+
 msgid "Total"
 msgstr "Всего"
 
@@ -19469,6 +19475,9 @@ msgstr "Переключать каналы в главном окне"
 
 msgid "Zap focused channel on full screen"
 msgstr "Канал, ориентированный на Zap, в полноэкранном режиме"
+
+msgid "Zap history sort order"
+msgstr "Порядок сортировки истории Zap"
 
 msgid "Zap key delay for channel number input"
 msgstr "Задержка клавиши Zap для ввода номера канала"
