@@ -9,16 +9,16 @@ from Tools.LoadPixmap import LoadPixmap
 icons = None
 
 
-def SelectionEntryComponent(description, value, index, selected):
-	dx, dy, dw, dh = parameters.get("SelectionListDescr", (45, 0, 650, 30))
+def SelectionEntryComponent(description, value, index, selected, selectionListDescr=parameters.get("SelectionListDescr", (45, 0, 650, 30))):
+	dx, dy, dw, dh = selectionListDescr
 	res = [
 		(description, value, index, selected),
 		(eListboxPythonMultiContent.TYPE_TEXT, dx, dy, dw, dh, 0, RT_HALIGN_LEFT | RT_VALIGN_CENTER, description)
 	]
 	global icons
 	icon = icons[0] if selected else icons[1]
-# Do we really we need SelectionListLockOff
-# ix, iy, iw, ih = parameters.get("SelectionListLock" if selected else "SelectionListLockOff", (0, 2, 25, 24))
+# 	Do we really we need SelectionListLockOff
+#	ix, iy, iw, ih = parameters.get("SelectionListLock" if selected else "SelectionListLockOff", (0, 2, 25, 24))
 	ix, iy, iw, ih = parameters.get("SelectionListLock", (0, 2, 25, 24))
 	res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHABLEND, ix, iy, iw, ih, icon, None, None, BT_SCALE | BT_KEEP_ASPECT_RATIO))
 	return res
@@ -30,6 +30,7 @@ class SelectionList(MenuList):
 		font = fonts.get("SelectionList", ("Regular", 25, 30))
 		self.l.setFont(0, gFont(font[0], font[1]))
 		self.l.setItemHeight(font[2])
+		self.selectionListDescr = parameters.get("SelectionListDescr", (45, 3, 650, 30))
 		global icons
 		icons = [
 			LoadPixmap(path=resolveFilename(SCOPE_GUISKIN, "icons/lock_on.png")),
@@ -37,14 +38,14 @@ class SelectionList(MenuList):
 		]
 
 	def addSelection(self, description, value, index, selected=True):
-		self.list.append(SelectionEntryComponent(description, value, index, selected))
+		self.list.append(SelectionEntryComponent(description, value, index, selected, self.selectionListDescr))
 		self.setList(self.list)
 
 	def toggleSelection(self):
 		if len(self.list):
 			index = self.getSelectedIndex()
 			item = self.list[index][0]
-			self.list[index] = SelectionEntryComponent(item[0], item[1], item[2], not item[3])
+			self.list[index] = SelectionEntryComponent(item[0], item[1], item[2], not item[3], self.selectionListDescr)
 			self.setList(self.list)
 
 	def getSelectionsList(self):
@@ -53,7 +54,7 @@ class SelectionList(MenuList):
 	def toggleAllSelection(self):
 		for index, item in enumerate(self.list):
 			item = self.list[index][0]
-			self.list[index] = SelectionEntryComponent(item[0], item[1], item[2], not item[3])
+			self.list[index] = SelectionEntryComponent(item[0], item[1], item[2], not item[3], self.selectionListDescr)
 		self.setList(self.list)
 
 	def removeSelection(self, selection):
@@ -67,7 +68,7 @@ class SelectionList(MenuList):
 		for index, item in enumerate(self.list):
 			if item[0] == selection:
 				selection = self.list[index][0]
-				self.list[index] = SelectionEntryComponent(selection[0], selection[1], selection[2], not selection[3])
+				self.list[index] = SelectionEntryComponent(selection[0], selection[1], selection[2], not selection[3], self.selectionListDescr)
 				self.setList(self.list)
 				return
 
@@ -79,3 +80,17 @@ class SelectionList(MenuList):
 		# 	3 - selected
 		self.list.sort(key=lambda x: x[0][sortType], reverse=flag)
 		self.setList(self.list)
+
+	def applySkin(self, desktop, parent):
+
+		def selectionListDescr(value):
+			self.selectionListDescr = value.split(",")
+
+		for (attrib, value) in self.skinAttributes[:]:
+			try:
+				locals().get(attrib)(value)
+			except:
+				pass
+			else:
+				self.skinAttributes.remove((attrib, value))
+		return MenuList.applySkin(self, desktop, parent)
