@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from Tools.Profile import profile
-from enigma import eServiceReference
+from enigma import eServiceReference, eProfileWrite
 from Tools.StbHardware import getBoxProc
 from os.path import splitext
 from glob import glob
@@ -12,33 +11,29 @@ from Screens.MessageBox import MessageBox
 from Components.Label import Label
 from Components.Pixmap import MultiPixmap
 
-profile("LOAD:enigma")
+eProfileWrite("LOAD:enigma")
 import enigma
 
-profile("LOAD:InfoBarGenerics")
+eProfileWrite("LOAD:InfoBarGenerics")
 from Screens.InfoBarGenerics import InfoBarShowHide, \
 	InfoBarNumberZap, InfoBarChannelSelection, InfoBarMenu, InfoBarRdsDecoder, InfoBarResolutionSelection, InfoBarAspectSelection, \
 	InfoBarEPG, InfoBarSeek, InfoBarInstantRecord, InfoBarRedButton, InfoBarTimerButton, InfoBarVmodeButton, InfoBarHandleBsod, \
 	InfoBarAudioSelection, InfoBarAdditionalInfo, InfoBarNotifications, InfoBarDish, InfoBarUnhandledKey, \
-	InfoBarSubserviceSelection, InfoBarShowMovies, InfoBarTimeshift,  \
+	InfoBarSubserviceSelection, InfoBarShowMovies, InfoBarTimeshift, \
 	InfoBarServiceNotifications, InfoBarPVRState, InfoBarCueSheetSupport, InfoBarBuffer, \
 	InfoBarSummarySupport, InfoBarMoviePlayerSummarySupport, InfoBarTimeshiftState, InfoBarTeletextPlugin, InfoBarExtensions, \
 	InfoBarSubtitleSupport, InfoBarPiP, InfoBarPlugins, InfoBarServiceErrorPopupSupport, InfoBarJobman, InfoBarPowersaver, \
 	InfoBarHDMI, InfoBarHdmi2, setResumePoint, delResumePoint
 from Screens.Hotkey import InfoBarHotkey
 
-profile("LOAD:InitBar_Components")
+eProfileWrite("LOAD:InitBar_Components")
 from Components.ActionMap import HelpableActionMap
 from Components.config import config
 from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
 
-profile("LOAD:HelpableScreen")
+eProfileWrite("LOAD:HelpableScreen")
 from Screens.HelpMenu import HelpableScreen
 from Components.SystemInfo import BoxInfo
-
-model = BoxInfo.getItem("model")
-brand = BoxInfo.getItem("brand")
-procmodel = getBoxProc()
 
 
 class InfoBar(InfoBarBase, InfoBarShowHide,
