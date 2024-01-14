@@ -433,7 +433,7 @@
 		<item level="0" text="Show time elapsed as positive" description="This option allows you choose how to display elapsed time as + or -">config.usage.elapsed_time_positive_osd</item>
 		<item level="0" text="Show transponder remaining/elapsed as" description="This option allows you to choose how to display the remaining/elapsed time for live TV.">config.usage.swap_time_display_on_osd</item>
 		<item level="1" text="Show Media playback Remaining/Elapsed as" description="This option allows you to choose how to display the remaining/elapsed time for media playback.">config.usage.swap_media_time_display_on_osd</item>
-		<item level="0" text="Zap history sort order" description="Configure the sort order of the zap history channels.">config.usage.zaphistorysort</item>
+		<item level="0" text="Zap history sequence" description="Select the display sequence of previously visited services.">config.usage.zapHistorySort</item>
 		<item level="2" text="Hide zap errors" description="When enabled, error messages related to zapping will not be shown.">config.usage.hide_zap_errors</item>
 		<item level="2" text="Show crypto info in infobar" description="When enabled, encryption info will be shown in the infobar (when supported by the skin).">config.usage.show_cryptoinfo</item>
 		<item level="2" text="Hide softcam servername" description="Select 'Yes' to hide the server name and IP address of the server.">config.oscaminfo.hideServerName</item>

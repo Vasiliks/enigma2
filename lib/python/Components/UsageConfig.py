@@ -1629,9 +1629,9 @@ def InitUsageConfig():
 		})
 		config.av.sync_mode.addNotifier(setSyncMode)
 
-	config.usage.zaphistorysort = ConfigSelection(default=0, choices=[
-		(0, _("Top")),
-		(1, _("Bottom"))
+	config.usage.zapHistorySort = ConfigSelection(default=0, choices=[
+		(0, _("Most recent first")),
+		(1, _("Most recent last"))
 	])
 
 	config.subtitles = ConfigSubsection()

@@ -3956,6 +3956,9 @@ msgstr "Отменить исполнение?"
 msgid "Cancel the selection"
 msgstr "Отмена выбора"
 
+msgid "Cancel the service history zap"
+msgstr "Отменить запись истории обслуживания"
+
 msgid "Cancel save time shift as movie"
 msgstr "Отменить сохранение таймшифта в виде записи"
 
@@ -5029,9 +5032,6 @@ msgstr "Настройка интервала время при нажатии �
 
 msgid "Configure the slow motion speeds."
 msgstr "Настройка низких скоростей перемотки."
-
-msgid "Configure the sort order of the zap history channels."
-msgstr "Настройте порядок сортировки каналов истории zap."
 
 msgid "Configure the source of the frontend data as shown on the infobars. 'Settings' is as stored on the settings. 'Tuner' is as reported by the tuner."
 msgstr "Настройка для получения источника данных интерфейса в инфобарах. 'Установки' - данные берутся из файла lamedb.'Тюнер' - непосредственно из данных опрашиваемого тюнера."
@@ -8641,6 +8641,9 @@ msgstr "История каналов - назад"
 msgid "History buttons mode"
 msgstr "Режим истории переключения"
 
+msgid "History Zap Actions"
+msgstr "Действия по истории Zap"
+
 msgid "History next"
 msgstr "История каналов - далее"
 
@@ -10201,6 +10204,12 @@ msgstr "Марокко"
 msgid "Mosquito noise reduction"
 msgstr "Понижение мелких шумов"
 
+msgid "Most recent first"
+msgstr "Самый недавний в начале"
+
+msgid "Most recent last"
+msgstr "Самый последний в конце"
+
 msgid "Motor command retries"
 msgstr "Повторные попытки команд мотора"
 
@@ -10252,6 +10261,15 @@ msgstr "Перейти к первому элементу текущей стр�
 msgid "Move to the first item on the first screen"
 msgstr "Перейти к первому элементу на первом экране"
 
+msgid "Move to the first line / screen"
+msgstr "Перейти на первую строку/экран"
+
+msgid "Move to the last line / screen"
+msgstr "Перейти к последней строке/экрану"
+
+msgid "Move down a line"
+msgstr "Переместиться вниз по строке"
+
 msgid "Move to the last item on the current line"
 msgstr "Перейти к последнему элементу текущей строки"
 
@@ -10284,9 +10302,6 @@ msgstr "Вверх/Вниз"
 
 msgid "Move Picture in Picture"
 msgstr "Переместить картинку в картинке"
-
-msgid "Move down a line"
-msgstr "Переместиться на строку вниз"
 
 msgid "Move down a line in the panel"
 msgstr "Переместить строку вниз на панели"
@@ -13962,6 +13977,12 @@ msgstr "Выбор способа сортировки:"
 
 msgid "Select target folder"
 msgstr "Выбрать целевую папку"
+
+msgid "Select the currently highlighted service"
+msgstr "Выберите выделенную услугу"
+
+msgid "Select the display sequence of previously visited services."
+msgstr "Выберите последовательность отображения ранее посещенных сервисов."
 
 msgid "Select the delay to use when closing a Stream Relay service before reallocating the tuner for another service. Using '0' is only recommended for boxes with multiple satellite tuners."
 msgstr "Выберите задержку, которая будет использоваться при закрытии службы Stream Relay перед перераспределением тюнера для другого канала. Использование '0' рекомендуется только для устройств с несколькими спутниковыми тюнерами."
@@ -19476,8 +19497,8 @@ msgstr "Переключать каналы в главном окне"
 msgid "Zap focused channel on full screen"
 msgstr "Канал, ориентированный на Zap, в полноэкранном режиме"
 
-msgid "Zap history sort order"
-msgstr "Порядок сортировки истории Zap"
+msgid "Zap history sequence"
+msgstr "Последовательность истории Zap"
 
 msgid "Zap key delay for channel number input"
 msgstr "Задержка клавиши Zap для ввода номера канала"
