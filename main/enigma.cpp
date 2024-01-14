@@ -31,6 +31,7 @@
 #include <lib/python/python.h>
 #include <lib/python/pythonconfig.h>
 #include <lib/service/servicepeer.h>
+#include <lib/base/profile.h>
 
 #include "bsod.h"
 #include "version_info.h"
@@ -222,9 +223,8 @@ int main(int argc, char **argv)
 	ePtr<gLCDDC> my_lcd_dc;
 	gLCDDC::getInstance(my_lcd_dc);
 
-
-	/* ok, this is currently hardcoded for arabic. */
-	/* some characters are wrong in the regular font, force them to use the replacement font */
+		/* ok, this is currently hardcoded for arabic. */
+			/* some characters are wrong in the regular font, force them to use the replacement font */
 	for (int i = 0x60c; i <= 0x66d; ++i)
 		eTextPara::forceReplacementGlyph(i);
 	eTextPara::forceReplacementGlyph(0xfdf2);
@@ -293,6 +293,8 @@ int main(int argc, char **argv)
 	eRCInput::getInstance()->keyEvent.connect(sigc::ptr_fun(&keyEvent));
 
 	eDebug("[Enigma] Executing StartEnigma.py");
+
+	eProfile::getInstance().write("StartPython");
 
 	bsodCatchSignals();
 	catchTermSignal();
