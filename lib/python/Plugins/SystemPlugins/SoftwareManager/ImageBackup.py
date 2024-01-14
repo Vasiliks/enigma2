@@ -737,8 +737,8 @@ class ImageBackup(Screen):
 
 	def imageInfo(self, settings, bouquetsTV, bouquetsRadio, isNotCurrent):
 		AboutText = _("Full Image Backup ")
-		AboutText += _("By openATV Image Team") + "\n"
-		AboutText += _("Support at") + " www.opena.tv\n\n"
+		AboutText += _("By OpenPLi Image Team") + "\n"
+		AboutText += _("Support at") + " https://github.com/68foxboris/enigma2\n\n"
 		AboutText += _("[Image Info]\n")
 		AboutText += "%s: %s %s\n" % (_("Model"), MACHINEBRAND, MACHINENAME)
 		AboutText += _("Backup Date: %s\n") % strftime("%Y-%m-%d", localtime(self.START))
