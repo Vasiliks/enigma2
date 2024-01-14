@@ -345,7 +345,6 @@ def runScreenTest():
 	enigma.eProfileWrite("RunReactor")
 	enigma.eProfileDone()
 	runReactor()
-	enigma.eProfileWrite("Wakeup")
 	from Screens.SleepTimerEdit import isNextWakeupTime
 	# get currentTime
 	nowTime = time()
@@ -374,11 +373,8 @@ def runScreenTest():
 	else:
 		config.misc.prev_wakeup_time.value = 0
 	config.misc.prev_wakeup_time.save()
-	enigma.eProfileWrite("StopService")
 	session.nav.stopService()
-	enigma.eProfileWrite("NavigationShutdown")
 	session.nav.shutdown()
-	enigma.eProfileWrite("SaveConfig")
 	configfile.save()
 	from Screens.InfoBarGenerics import saveResumePoints
 	saveResumePoints()
