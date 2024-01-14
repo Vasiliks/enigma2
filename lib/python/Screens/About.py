@@ -1856,6 +1856,7 @@ class SystemInformation(InformationBase):
 			("Kernel Modules", None, "/proc/modules"),
 			("Kernel Messages", ("/bin/dmesg", "/bin/dmesg"), None),
 			("System Messages", None, "/var/volatile/log/messages"),
+			("Enigma Info", None, "/usr/lib/enigma.info"),
 			("Network Interfaces", ("/sbin/ifconfig", "/sbin/ifconfig"), None),
 			("Disk Usage", ("/bin/df", "/bin/df", "-h"), None),
 			("Mounted Volumes", ("/bin/mount", "/bin/mount"), None),
