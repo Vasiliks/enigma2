@@ -4187,6 +4187,9 @@ msgstr "Выбор канала"
 msgid "Channel selection configuration"
 msgstr "Настройки селектора каналов"
 
+msgid "Channel Selection Setup"
+msgstr "Настройки списка каналов"
+
 msgid "Channel selection settings"
 msgstr "Список каналов"
 
