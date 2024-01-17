@@ -10,7 +10,7 @@ from Components.config import configfile
 from Components.PluginComponent import plugins
 from Components.NimManager import nimmanager
 from Components.config import config, ConfigDictionarySet, NoSave
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo
 from Tools.BoundFunction import boundFunction
 from skin import parameters, menus, menuicons
 from Plugins.Plugin import PluginDescriptor
@@ -163,9 +163,9 @@ class Menu(Screen, ProtectedScreen):
 		requires = node.get("requires")
 		if requires:
 			if requires[0] == '!':
-				if SystemInfo.get(requires[1:], False):
+				if BoxInfo.getItem(requires[1:], False):
 					return
-			elif not SystemInfo.get(requires, False):
+			elif not BoxInfo.getItem(requires, False):
 				return
 		MenuTitle = _(node.get("text", "??"))
 		entryID = node.get("entryID", "undefined")
@@ -199,9 +199,9 @@ class Menu(Screen, ProtectedScreen):
 		requires = node.get("requires")
 		if requires:
 			if requires[0] == '!':
-				if SystemInfo.get(requires[1:], False):
+				if BoxInfo.getItem(requires[1:], False):
 					return
-			elif not SystemInfo.get(requires, False):
+			elif not BoxInfo.getItem(requires, False):
 				return
 		conditional = node.get("conditional")
 		if conditional and not eval(conditional):

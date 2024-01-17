@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Components.config import config, ConfigSubsection, ConfigSlider, ConfigSelection, ConfigBoolean, ConfigNothing, NoSave
 import os
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo
 
 # The "VideoEnhancement" is the interface to /proc/stb/vmpeg/0.
 

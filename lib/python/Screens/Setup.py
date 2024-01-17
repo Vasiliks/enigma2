@@ -3,7 +3,6 @@ from Screens.Screen import Screen
 from Components.ActionMap import NumberActionMap
 from Components.config import config, ConfigNothing, ConfigBoolean, ConfigSelection
 from Components.Label import Label
-from Components.SystemInfo import SystemInfo
 from Components.ConfigList import ConfigListScreen
 from Components.Pixmap import Pixmap
 from Components.SystemInfo import BoxInfo
@@ -134,7 +133,7 @@ class Setup(ConfigListScreen, Screen):
 								print('[Setup] unknown "requires" config element:', requires)
 
 						if requires:
-							if not SystemInfo.get(requires, False):
+							if not BoxInfo.getItem(requires, False):
 								if not negate:
 									meets = False
 									break

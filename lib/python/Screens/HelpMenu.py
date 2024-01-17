@@ -10,7 +10,7 @@ from Components.config import config, ConfigInteger
 from Components.InputDevice import remoteControl
 from Components.Label import Label
 from Components.Pixmap import MovingPixmap, Pixmap
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo
 from Components.Sources.List import List
 from Components.Sources.StaticText import StaticText
 from Screens.Screen import Screen
@@ -108,7 +108,7 @@ class ShowRemoteControl:
 				pixmap.hide()
 
 	def initRemoteControl(self):
-		rc = LoadPixmap(SystemInfo["RCImage"])
+		rc = LoadPixmap(BoxInfo.getItem("RCImage"))
 		if rc:
 			self["rc"].instance.setPixmap(rc)
 			self.rcPosition = self["rc"].getPosition()
