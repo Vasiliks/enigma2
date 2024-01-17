@@ -5,7 +5,7 @@ from Components.config import config, ConfigNothing, ConfigBoolean, ConfigSelect
 from Components.Label import Label
 from Components.ConfigList import ConfigListScreen
 from Components.Pixmap import Pixmap
-from Components.SystemInfo import BoxInfo
+from Components.SystemInfo import SystemInfo
 from Components.Sources.StaticText import StaticText
 from Components.Sources.Boolean import Boolean
 from enigma import eEnv
@@ -133,7 +133,7 @@ class Setup(ConfigListScreen, Screen):
 								print('[Setup] unknown "requires" config element:', requires)
 
 						if requires:
-							if not BoxInfo.getItem(requires, False):
+							if not SystemInfo.get(requires, False):
 								if not negate:
 									meets = False
 									break
