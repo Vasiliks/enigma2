@@ -2,7 +2,6 @@
 from Plugins.Plugin import PluginDescriptor
 from Screens.Screen import Screen
 from Screens.InfoBar import InfoBar
-from Screens.InfoBarGenerics import whitelist
 from Components.config import config, ConfigSubsection, ConfigYesNo, ConfigSelection
 from Components.ConfigList import ConfigListScreen
 from Components.ActionMap import ActionMap
@@ -88,8 +87,8 @@ class FCCSupport:
 		self.onClose = []
 		self.changeEventTracker()
 		BoxInfo.setMutableItem("FCCactive", self.fccSetupActivate)
-#		from Screens.PictureInPicture import on_pip_start_stop
-#		on_pip_start_stop.append(self.FCCForceStopforPIP)
+		# from Screens.PictureInPicture import on_pip_start_stop
+		# on_pip_start_stop.append(self.FCCForceStopforPIP)
 
 	def setProcFCC(self, value):
 		procPath = "/proc/stb/frontend/fbc/fcc"
@@ -250,9 +249,6 @@ class FCCSupport:
 			playable = False
 
 		elif int(sref.getData(0)) in (2, 10):  # is RADIO?
-			playable = False
-
-		elif sref.toString() in whitelist.streamrelay:
 			playable = False
 
 		playable = playable and not streamrelay.checkService(sref)
