@@ -479,5 +479,5 @@ class VideoHardware:
 			config.av.videorate[mode].save()
 
 
-VIDEO = VideoHardware()
-VIDEO.setConfiguredMode()
+video_hw = VideoHardware()
+video_hw.setConfiguredMode()

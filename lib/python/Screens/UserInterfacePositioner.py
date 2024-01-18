@@ -343,7 +343,7 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 			config.osd.dst_left.setValue(0)
 			config.osd.dst_top.setValue(0)
 		elif BoxInfo.getItem("CanChangeOsdPositionAML"):
-			from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+			from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 			limits = [int(x) for x in iAVSwitch.getWindowsAxis().split()]
 			config.osd.dst_left.setValue(limits[0])
 			config.osd.dst_top.setValue(limits[1])
@@ -487,7 +487,7 @@ class UserInterfacePositioner(Screen, ConfigListScreen):
 			config.osd.dst_left.setValue(0)
 			config.osd.dst_top.setValue(0)
 		elif BoxInfo.getItem("CanChangeOsdPositionAML"):
-			from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+			from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 			limits = iAVSwitch.getWindowsAxis().split()
 			config.osd.dst_left.setValue(limits[0])
 			config.osd.dst_top.setValue(limits[1])

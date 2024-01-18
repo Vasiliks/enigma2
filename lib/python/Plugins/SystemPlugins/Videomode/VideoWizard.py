@@ -1,7 +1,7 @@
 from Screens.Wizard import WizardSummary
 from Screens.WizardLanguage import WizardLanguage
 from Screens.HelpMenu import ShowRemoteControl
-from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 from Components.config import config, configfile
 from Components.Pixmap import Pixmap
 from Components.Sources.StaticText import StaticText
@@ -17,7 +17,7 @@ class VideoWizard(WizardLanguage, ShowRemoteControl):
 		WizardLanguage.__init__(self, session, showSteps=False, showStepSlider=False)
 		ShowRemoteControl.__init__(self)
 		self.setTitle(_("Video Wizard"))
-		self.videoSwitch = VIDEO
+		self.videoSwitch = video_hw
 		self.hasJack = BoxInfo.getItem("avjack", False)
 		self.hasRCA = BoxInfo.getItem("rca", False)
 		self.hasSCART = BoxInfo.getItem("scart", False)

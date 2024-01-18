@@ -3351,7 +3351,7 @@ class InfoBarAspectSelection:
 		self.session.openWithCallback(self.aspectSelected, ChoiceBox, title=_("Please select an aspect ratio..."), list=aspectList, keys=keys, selection=selection)
 
 	def changeVideoMode(self, confirmed):
-		from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+		from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 		port = config.av.videoport.value
 		mode = config.av.videomode[port].value
 		rate = config.av.videorate[mode].value
@@ -3363,7 +3363,7 @@ class InfoBarAspectSelection:
 			VIDEO.setMode(*self.last_used_video_mode)
 
 	def switchTo720p(self):  # use 720p video mode recover signal on your video port
-		from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+		from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 		VIDEO.setMode("HDMI", "720p", "50Hz")
 		self.session.openWithCallback(self.changeVideoMode, MessageBox, _("This function recovers your video signal in case of loss. The video has been changed to 720p.\nIf this is your case, please keep the video at 720P and do the following:\nGo to Menu > Setup > Audio / Video > A/V settings and set the correct resolution.\nDo you want to keep the video at 720p?"), MessageBox.TYPE_YESNO, timeout=30, simple=True)
 

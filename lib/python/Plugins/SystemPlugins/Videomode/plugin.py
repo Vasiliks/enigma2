@@ -8,7 +8,7 @@ from Components.Sources.StaticText import StaticText
 from gettext import pgettext
 from Tools.Directories import isPluginInstalled
 
-from Plugins.SystemPlugins.Videomode.VideoHardware import VIDEO
+from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 
 config.misc.videowizardenabled = ConfigBoolean(default=True)
 
@@ -241,8 +241,8 @@ hotplug = None
 
 
 def startHotplug():
-	global hotplug, VIDEO
-	hotplug = VideomodeHotplug(VIDEO)
+	global hotplug, video_hw
+	hotplug = VideomodeHotplug(video_hw)
 	hotplug.start()
 
 
@@ -264,7 +264,7 @@ def autostart(reason, session=None, **kwargs):
 
 
 def videoSetupMain(session, **kwargs):
-	session.open(VideoSetup, VIDEO)
+	session.open(VideoSetup, video_hw)
 
 
 def startSetup(menuid):
