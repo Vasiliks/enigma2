@@ -117,10 +117,10 @@ AM_CONDITIONAL(LCD_FRAMEBUFFER_MODE, test "$BOXTYPE" == et8500 -o "$BOXTYPE" == 
 AS_IF([test "$BOXTYPE" == "dreamone"],[AC_DEFINE(HWDREAMONE, 1,[dreamone])])
 AS_IF([test "$BOXTYPE" == "dreamtwo"],[AC_DEFINE(HWDREAMTWO, 1,[dreamtwo])])
 AS_IF([test "$BOXTYPE" == "dm8000"],[AC_DEFINE(HWDM8000, 1,[dm8000])])
-AS_IF([test "$BOXTYPE" == "dm7020hd" -or "$BOXTYPE" == "dm7020hdv2"],[AC_DEFINE(HWDM7020HD, 1,[dm7020hd])])
+AS_IF([test "$BOXTYPE" == "dm7020hd" -o "$BOXTYPE" == "dm7020hdv2"],[AC_DEFINE(HWDM7020HD, 1,[dm7020hd])])
 AS_IF([test "$BOXTYPE" == "dm7080"],[AC_DEFINE(HWDM7080, 1,[dm7080])])
 AS_IF([test "$BOXTYPE" == "dm820"],[AC_DEFINE(HWDM820, 1,[dm820])])
-AS_IF([test "$BOXTYPE" == "dm520" -or "$BOXTYPE" == "dm525"],[AC_DEFINE(HWDM520, 1,[dm520])])
+AS_IF([test "$BOXTYPE" == "dm520" -o "$BOXTYPE" == "dm525"],[AC_DEFINE(HWDM520, 1,[dm520])])
 AS_IF([test "$BOXTYPE" == "dm900"],[AC_DEFINE(HWDM900, 1,[dm900])])
 AS_IF([test "$BOXTYPE" == "dm920"],[AC_DEFINE(HWDM920, 1,[dm920])])
 AS_IF([test "$BOXTYPE" == "dm800se"],[AC_DEFINE(HWDM800SE, 1,[dm800se])])
@@ -134,6 +134,11 @@ AS_IF([test "$BOXTYPE" == "pulse4k"],[AC_DEFINE(HWPULSE4K, 1,[pulse4k])])
 AS_IF([test "$BOXTYPE" == "pulse4kmini"],[AC_DEFINE(HWPULSE4KMINI, 1,[pulse4kmini])])
 AS_IF([test "$BOXBRAND" == "gbue4k"],[AC_DEFINE(HWGBUE4K, 1,[gbue4k])])
 AS_IF([test "$BOXBRAND" == "gbtrio4kpro"],[AC_DEFINE(HWGBTRIO4KPRO, 1,[gbtrio4kpro])])
+
+AS_IF([test "$BOXTYPE" == "classm" -o "$BOXTYPE" == "axodin" -o "$BOXTYPE" == "axodinc" -o "$BOXTYPE" == "starsatlx" -o "$BOXTYPE" == "evo" -o "$BOXTYPE" == "genius" -o "$BOXTYPE" == "galaxym6"],[AC_DEFINE(PROFILE1, 1,[profile1])])
+AS_IF([test "$BOXTYPE" == "gb800solo" -o "$BOXTYPE" == "gb800se" -o "$BOXTYPE" == "gb800seplus" -o "$BOXTYPE" == "gbultrase"],[AC_DEFINE(PROFILE2, 1,[profile2])])
+AS_IF([test "$BOXTYPE" == "osmini" -o "$BOXTYPE" == "spycatmini" -o "$BOXTYPE" == "osminiplus" -o "$BOXTYPE" == "spycatminiplus"],[AC_DEFINE(PROFILE3, 1,[profile3])])
+AS_IF([test "$BOXTYPE" == "xpeedlx3" -o "$BOXTYPE" == "sezammarvel" -o "$BOXTYPE" == "atemionemesis"],[AC_DEFINE(PROFILE4, 1,[profile4])])
 
 AC_ARG_WITH(stbplatform,
 	AS_HELP_STRING([--with-stbplatform],[build for STBPLATFORM, $withval]),
