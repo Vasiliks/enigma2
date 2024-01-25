@@ -19,13 +19,6 @@
 
 /************************************************/
 
-static const char *crash_emailaddr =
-#ifndef CRASH_EMAILADDR
-	"the OpenPLi forum";
-#else
-	CRASH_EMAILADDR;
-#endif
-
 /* Defined in bsod.cpp */
 void retrieveLogBuffer(const char **p1, unsigned int *s1, const char **p2, unsigned int *s2);
 
@@ -235,7 +228,6 @@ void bsodFatal(const char *component)
 			component);
 		eModelInformation &modelinformation = eModelInformation::getInstance();
 
-		std::ifstream in(eEnv::resolve("${libdir}/enigma.info").c_str());
 		const std::list<std::string> enigmainfovalues {
 			"model",
 			"imageversion",
