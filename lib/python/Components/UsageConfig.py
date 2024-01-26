@@ -1317,7 +1317,7 @@ def InitUsageConfig():
 	config.epg.replace_newlines = ConfigSelection(default="no", choices=choicelist)
 
 	def correctInvalidEPGDataChange(configElement):
-		eServiceEvent.setUTF8CorrectMode(int(configElement.value))
+		eServiceEvent.setUTF8CorrectMode(configElement.value)
 	config.epg.correct_invalid_epgdata = ConfigSelection(default="1", choices=[("0", _("Disabled")), ("1", _("Enabled")), ("2", _("Debug"))])
 	config.epg.correct_invalid_epgdata.addNotifier(correctInvalidEPGDataChange)
 
@@ -1917,7 +1917,7 @@ def InitUsageConfig():
 	config.logmanager.path = ConfigText(default="/")
 	config.logmanager.sentfiles = ConfigLocations(default='')
 
-	config.misc.useNTPminutes = ConfigSelection(default="30", choices=[("30", _("%d Minutes") % 30), ("60", _("%d Hour") % 1), ("1440", _("%d Hours") % 24)])
+	config.misc.useNTPminutes = ConfigSelection(default=30, choices=[(30, _("%d Minutes") % 30), (60, _("%d Hour") % 1), (1440, _("%d Hours") % 24)])
 
 def updateChoices(sel, choices):
 	if choices:
