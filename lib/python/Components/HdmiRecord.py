@@ -85,10 +85,9 @@ def InitHdmiRecord():
 		], default="0")
 
 	try:
-		f = open("/proc/stb/encoder/0/audio_codec_choices")
-		choices = f.read()[:-1]
-		choices = [(x, x) for x in choices.split(' ')]
-		f.close()
+		with open("/proc/stb/encoder/0/audio_codec_choices") as fd:
+			choices = fd.read()[:-1]
+			choices = [(x, x) for x in choices.split(' ')]
 	except OSError:
 		print("[InitHdmiRecord] couldn't read audio_codec_choices.")
 		choices = [("aac", "aac")]
@@ -96,10 +95,9 @@ def InitHdmiRecord():
 	config.hdmirecord.acodec = ConfigSelection(choices=choices, default="aac")
 
 	try:
-		f = open("/proc/stb/encoder/0/video_codec_choices")
-		choices = f.read()[:-1]
-		choices = [(x, x) for x in choices.split(' ')]
-		f.close()
+		with open("/proc/stb/encoder/0/video_codec_choices") as fd:
+			choices = fd.read()[:-1]
+			choices = [(x, x) for x in choices.split(' ')]
 	except OSError:
 		print("[InitHdmiRecord] couldn't read video_codec_choices.")
 		choices = [("h264", "h264")]
