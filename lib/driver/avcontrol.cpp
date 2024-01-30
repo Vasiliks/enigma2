@@ -42,7 +42,7 @@ eAVControl::eAVControl()
 {
 	struct stat buffer;
 
-#ifdef HAVE_HDMIIN_DREAMBOX
+#ifdef HAVE_HDMIIN_DM
 	m_b_has_proc_hdmi_rx_monitor = (stat(proc_hdmi_rx_monitor, &buffer) == 0);
 #else
 	m_b_has_proc_hdmi_rx_monitor = false;
@@ -164,10 +164,14 @@ eAVControl::~eAVControl()
 int eAVControl::getAspect(int defaultVal, int flags) const
 {
 	int value = 0;
-	CFile::parseIntHex(&value, proc_videoaspect_r, __MODULE__, flags);
-	if (flags & FLAGS_DEBUG)
+	int ret = CFile::parseIntHex(&value, proc_videoaspect_r, __MODULE__, flags);
+	if (ret != 0)
+	{
+		value = defaultVal;
+	}
+	else if (flags & FLAGS_DEBUG)
 		eDebug("[%s] %s: %d", __MODULE__, "getAspect", value);
-	return defaultVal;
+	return value;
 }
 
 /// @brief Get progressive
