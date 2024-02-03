@@ -24,8 +24,13 @@ class CurrentService(PerServiceBase, Source):
 				iPlayableService.evHBBTVInfo: self.serviceEvent
 			}, with_event=True)
 		self.navcore = navcore
+		self.srv = None
+		self.info = None
+		self.onManualNewService = []
 
 	def serviceEvent(self, event):
+		self.srv = None
+		self.info = None
 		self.changed((self.CHANGED_SPECIFIC, event))
 
 	@cached
@@ -37,10 +42,25 @@ class CurrentService(PerServiceBase, Source):
 	@cached
 	def getCurrentServiceRef(self):
 		if NavigationInstance.instance is not None:
-			return NavigationInstance.instance.getCurrentlyPlayingServiceOrGroup()
+			return self.srv or self.navcore.getCurrentService()
 		return None
 
 	serviceref = property(getCurrentServiceRef)
+
+
+	def newService(self, ref):
+		if ref and isinstance(ref, bool):
+			self.srv = None
+		elif ref:
+			self.srv = ref
+			self.info = eServiceCenter.getInstance().info(ref)
+		else:
+			self.srv = ref
+
+		for x in self.onManualNewService:
+			x()
+
+		self.changed((self.CHANGED_SPECIFIC, iPlayableService.evStart))
 
 	def destroy(self):
 		PerServiceBase.destroy(self)
