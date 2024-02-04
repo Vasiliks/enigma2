@@ -10,10 +10,7 @@ class GUIAddon(GUIComponent):
 	def connectRelatedElement(self, relatedElementName, container):
 		relatedElementNames = relatedElementName.split(",")
 		if len(relatedElementNames) == 1:
-			if relatedElementName == "session":
-				self.source = container.session
-			else:
-				self.source = container[relatedElementName]
+			self.source = container[relatedElementName]
 		elif len(relatedElementNames) > 1:
 			for x in relatedElementNames:
 				if x in container:
