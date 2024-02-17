@@ -2132,6 +2132,9 @@ msgstr "Указать окончание и паузу в таймшифте"
 msgid "Active"
 msgstr "Активный"
 
+msgid "Active only"
+msgstr "Только активный"
+
 msgid "Active clients"
 msgstr "Активные клиенты"
 
@@ -7269,6 +7272,9 @@ msgstr "Введите высокую частоту гетеродина низ
 msgid "Enter your low band local oscillator frequency. For more information consult the spec sheet of your LNB."
 msgstr "Введите низкую частоту гетеродина низкочастотного генератора. Для получения дополнительной информации смотрите спецификацию вашего LNB."
 
+msgid "Entitlements"
+msgstr "Права"
+
 msgid "Entertainment"
 msgstr "Разрешения"
 
@@ -11218,8 +11224,14 @@ msgstr "Информация OSCam"
 msgid "OSCam Information"
 msgstr "Информация OSCam"
 
+msgid "OSCamInfo: Information"
+msgstr "Информация OSCamInfo"
+
 msgid "OScamInfo Overview"
 msgstr "Обзор OScamInfo"
+
+msgid "OSCamInfo: Entitlements for '%s'"
+msgstr "OSCamInfo: права для '%s'"
 
 msgid "OScamOverview Log"
 msgstr "Журнал обзора OScam"
@@ -14988,6 +15000,9 @@ msgstr "Показать крипто данные эмулятора в инф�
 msgid "Show detailed event info"
 msgstr "Показать детально инфо события"
 
+msgid "Show details"
+msgstr "Показать детали"
+
 msgid "Show default on new line"
 msgstr "Показывать по умолчанию в новой строке"
 
@@ -17743,6 +17758,9 @@ msgstr "Отмена удаления"
 
 msgid "Unencrypted"
 msgstr "Открытый"
+
+msgid "Unexpected error accessing WebIF: %s"
+msgstr "Непредвиденная ошибка доступа к WebIF: %s"
 
 msgid "Unexpected error while retrieving fallback tuner's timer information"
 msgstr "Непредвиденная ошибка при получении информации о таймере резервного тюнера"
