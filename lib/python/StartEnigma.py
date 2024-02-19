@@ -39,6 +39,8 @@ MODULE_NAME = "StartEnigma"  # This is done here as "__name__.split(".")[-1]" re
 # Session.doClose:
 # * Destroy screen.
 #
+
+
 class Session:
 	def __init__(self, desktop=None, summaryDesktop=None, navigation=None):
 		self.desktop = desktop
@@ -218,13 +220,6 @@ class PowerKey:
 		globalActionMap.actions["deepstandby"] = self.shutdown  # Frontpanel long power button press.
 		globalActionMap.actions["discrete_off"] = self.standby
 
-	def shutdown(self):
-		print("[StartEnigma] Power off, now!")
-		if not Screens.Standby.inTryQuitMainloop and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND:
-			self.session.open(Screens.Standby.TryQuitMainloop, 1)
-		else:
-			return 0
-
 	def powerup(self):
 		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
 			self.doAction(config.misc.hotkey.power.value)
@@ -234,6 +229,19 @@ class PowerKey:
 	def powerlong(self):
 		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
 			self.doAction(config.misc.hotkey.power_long.value)
+		else:
+			return 0
+
+	def shutdown(self):
+		print("[StartEnigma] Power off, now!")
+		if not Screens.Standby.inTryQuitMainloop and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND:
+			self.session.open(Screens.Standby.TryQuitMainloop, 1)  # Shutdown
+		else:
+			return 0
+
+	def standby(self):
+		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
+			self.session.open(Screens.Standby.Standby)
 		else:
 			return 0
 
@@ -255,12 +263,6 @@ class PowerKey:
 						if id and id == selected[1]:
 							self.session.open(MainMenu, x)
 
-	def standby(self):
-		if not Screens.Standby.inStandby and self.session.current_dialog and self.session.current_dialog.ALLOW_SUSPEND and self.session.in_exec:
-			self.session.open(Screens.Standby.Standby)
-		else:
-			return 0
-
 
 if enigma.eAVControl.getInstance().hasScartSwitch():
 	enigma.eProfileWrite("Scart")
@@ -270,7 +272,7 @@ if enigma.eAVControl.getInstance().hasScartSwitch():
 
 class AutoScartControl:
 	def __init__(self, session):
-		self.hasScart = BoxInfo.getItem("scart")
+		self.hasScart = BoxInfo.getItem("SCART")
 		if self.hasScart:
 			self.force = False
 			self.current_vcr_sb = enigma.eAVControl.getInstance().getVCRSlowBlanking()
@@ -293,8 +295,6 @@ class AutoScartControl:
 					self.scartDialog.showMessageBox()
 				else:
 					self.scartDialog.switchToTV()
-
-
 def runScreenTest():
 	config.misc.startCounter.value += 1
 	config.misc.startCounter.save()
@@ -316,7 +316,6 @@ def runScreenTest():
 
 	def runNextScreen(session, screensToRun, *result):
 		if result:
-			print("[StartEnigma] Exiting via quitMainloop #3.")
 			enigma.quitMainloop(*result)
 			return
 		screen = screensToRun[0][1]
@@ -328,7 +327,7 @@ def runScreenTest():
 	runNextScreen(session, screensToRun)
 	enigma.eProfileWrite("VolumeControl")
 	vol = VolumeControl(session)
-	enigma.eProfileWrite("Processing")
+	enigma.eProfileWrite("Processing Screen")
 	processing = Processing(session)
 	enigma.eProfileWrite("PowerKey")
 	power = PowerKey(session)
@@ -341,7 +340,6 @@ def runScreenTest():
 	enigma.eProfileWrite("Trashcan")
 	import Tools.Trashcan
 	Tools.Trashcan.init(session)
-
 	enigma.eProfileWrite("RunReactor")
 	enigma.eProfileDone()
 	runReactor()
@@ -355,7 +353,6 @@ def runScreenTest():
 					(isNextWakeupTime(), 3))
 		if x[0] != -1
 	])
-
 	if wakeupList:
 		from time import strftime
 		startTime = wakeupList[0]
@@ -719,8 +716,8 @@ try:
 	parentalControl.save()  # Save parental control settings.
 except Exception:
 	print("Error: Exception in Python StartEnigma startup code:")
-	print("=" * 60)
+	print("=" * 52)
 	print_exc(file=sys.stdout)
 	print("[StartEnigma] Exiting via quitMainloop #4.")
 	enigma.quitMainloop(5)  # QUIT_ERROR_RESTART
-	print("-" * 60)
+	print("-" * 52)

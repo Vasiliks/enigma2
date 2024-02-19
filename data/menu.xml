@@ -28,7 +28,6 @@
 			<item entryID="autolanguage_setup" level="0" text="Automatic Language and Subtitles Setup" weight="10"><setup id="AutoLanguage" /></item>
 			<item entryID="hdmicec" level="0" text="HDMI-CEC Settings" weight="55" requires="HDMICEC"><screen module="HDMICEC" screen="HDMICECSetup" /></item>
 			<item entryID="osdsetup" level="1" text="OSD Position Settings" weight="50" requires="OsdMenu"><screen module="UserInterfacePositioner" screen="UserInterfacePositioner2" /></item>
-			<item entryID="setup_osd3d" level="2" text="OSD 3D Settings" weight="60" requires="CanChange3DOsd"><setup setupKey="OSD3D" /></item>
 		</menu>
 
 		<!-- Menu / Setup / Tuners and Scanning -->
@@ -93,11 +92,14 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 			<item entryID="user_interface" level="0" text="User Interface Setup" weight="5"><setup id="UserInterface" /></item>
 			<item entryID="channelselection_setup" level="0" text="Channel Selection Setup" weight="10"><setup id="ChannelSelection" /></item>
 			<item entryID="primary_skin_selector" level="0" text="Skin Setup" weight="10"><screen module="SkinSelector" screen="SkinSelector" /></item>
-			<menu entryID="display_selection" level="0" text="Front Panel Display">
-			<id val="lcd" />
-				<item entryID="display_skin_selector" level="0" text="Skin Setup" weight="5" requires="Display"><screen module="SkinSelector" screen="LcdSkinSelector" /></item>
-				<item entryID="lcd_setup" level="1" text="LCD Setup" weight="10" requires="Display"><setup id="FrontDisplay" /></item>
-				<item entryID="led_setup" level="1" text="LED Setup" weight="15"><setup id="LedDisplay" /></item>
+			<menu entryID="display_selection" level="0" text="Front Panel Display" weight="15">
+				<id val="lcd" />
+				<item entryID="display_skin_selector" level="0" text="LCD Skin Setup" weight="5"><screen module="SkinSelector" screen="LcdSkinSelector" /></item>
+				<item entryID="lcd_setup" level="1" text="LCD Setup" weight="10" requires="LCDSupport"><setup id="LCDDisplay" /></item>
+				<item entryID="led_setup" level="1" text="LED Setup" weight="15"><setup id="LEDDisplay" /></item>
+				<item entryID="vfd_setup" level="1" text="VFD Setup" weight="20"><setup id="VFDDisplay" /></item>
+				<item entryID="minitv_setup" level="1" text="MiniTV Setup" weight="25" requires="LCDMiniTV"><setup id="MiniTVDisplay" /></item>
+				<item entryID="symbol_setup" level="1" text="Display Icons and Symbols" weight="30"><setup id="SymbolDisplay" /></item>
 			</menu>
 			<item entryID="subtitle_setup" level="2" text="Subtitle Setup" weight="20"><setup id="Subtitle" /></item>
 			<item entryID="language_setup" level="0" text="Language Setup" weight="25"><screen module="LanguageSelection" /></item>
