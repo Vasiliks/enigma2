@@ -8,7 +8,6 @@ from Tools.Directories import SCOPE_HDD, SCOPE_TIMESHIFT, defaultRecordingLocati
 from enigma import setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, eDVBDB, Misc_Options, eBackgroundFileEraser, eServiceEvent, eDVBLocalTimeHandler, eEPGCache
 from Components.About import GetIPsFromNetworkInterfaces
 from Components.NimManager import nimmanager
-from Components.Renderer.FrontpanelLed import ledPatterns, PATTERN_ON, PATTERN_OFF, PATTERN_BLINK
 from Components.ServiceList import refreshServiceList
 from Components.SystemInfo import BoxInfo
 from os import makedirs
@@ -530,34 +529,7 @@ def InitUsageConfig():
 		("3", "DVB-C/-T/-S"),
 		("4", "DVB-T/-C/-S"),
 		("5", "DVB-T/-S/-C"),
-		("127", _("No priority"))])
-	config.usage.frontled_color = ConfigSelection(default="2", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledrec_color = ConfigSelection(default="3", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledstdby_color = ConfigSelection(default="0", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledrecstdby_color = ConfigSelection(default="3", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
+		("127", _("No priority"))
 	])
 
 	def remote_fallback_changed(configElement):
@@ -626,15 +598,33 @@ def InitUsageConfig():
 	config.usage.show_event_progress_in_servicelist.addNotifier(refreshServiceList)
 	config.usage.show_channel_numbers_in_servicelist.addNotifier(refreshServiceList)
 
-	config.usage.blinking_display_clock_during_recording = ConfigYesNo(default=False)
+	if BoxInfo.getItem("7segment"):
+		config.usage.blinking_display_clock_during_recording = ConfigSelection(default="Rec", choices=[
+			("Rec", _("REC")),
+			("RecBlink", _("Blinking REC")),
+			("Time", _("Time")),
+			("Nothing", _("Nothing"))
+		])
+		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Rec", choices=[
+			("Rec", _("REC")),
+			("RecBlink", _("Blinking REC")),
+			("Time", _("Time"))
+		])
+	else:
+		config.usage.blinking_display_clock_during_recording = ConfigYesNo(default=False)
+		config.usage.blinking_rec_symbol_during_recording = ConfigYesNo(default=True)
 
-	if DISPLAYTYPE == "textlcd" or "text" in DISPLAYTYPE:
+	if BoxInfo.getItem("textlcd"):
 		config.usage.blinking_rec_symbol_during_recording = ConfigSelection(default="Channel", choices=[
 			("Rec", _("REC symbol")),
 			("RecBlink", _("Blinking REC symbol")),
 			("Channel", _("Channel name"))
 		])
-	config.usage.blinking_rec_symbol_during_recording = ConfigYesNo(default=True)
+
+	config.usage.show_in_standby = ConfigSelection(default="time", choices=[
+		("time", _("Time")),
+		("nothing", _("Nothing"))
+	])
 
 	config.usage.show_message_when_recording_starts = ConfigYesNo(default=True)
 
@@ -694,6 +684,35 @@ def InitUsageConfig():
 		("3", _("Remaining & Elapsed"))
 	])
 	config.usage.elapsed_time_positive_vfd = ConfigYesNo(default=False)
+
+	config.usage.frontled_color = ConfigSelection(default="1", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking blue")),
+		("4", _("Blinking red"))
+	])
+	config.usage.frontledrec_color = ConfigSelection(default="2", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking blue")),
+		("4", _("Blinking red"))
+	])
+	config.usage.frontledstdby_color = ConfigSelection(default="2", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking violet")),
+		("4", _("Blinking red"))
+	])
+	config.usage.frontledrecstdby_color = ConfigSelection(default="4", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking blue")),
+		("4", _("Blinking red"))
+	])
 
 	config.usage.lcd_scroll_delay = ConfigSelection(default="10000", choices=[
 		("10000", _("%d seconds") % 10),
@@ -1078,42 +1097,6 @@ def InitUsageConfig():
 				fd.write(hex(configElement.value)[2:])
 		config.usage.fanspeed = ConfigSlider(default=127, increment=8, limits=(0, 255))
 		config.usage.fanspeed.addNotifier(fanSpeedChanged)
-
-	if BoxInfo.getItem("PowerLED"):
-		def powerLEDChanged(configElement):
-			if "fp" in BoxInfo.getItem("PowerLED"):
-				with open(BoxInfo.getItem("PowerLED"), "w") as fd:
-					fd.write(configElement.value and "1" or "0")
-				patterns = [PATTERN_ON, PATTERN_ON, PATTERN_OFF, PATTERN_ON] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
-				ledPatterns.setLedPatterns(1, patterns)
-			else:
-				with open(BoxInfo.getItem("PowerLED"), "w") as fd:
-					fd.write(configElement.value and "on" or "off")
-		config.usage.powerLED = ConfigYesNo(default=True)
-		config.usage.powerLED.addNotifier(powerLEDChanged)
-
-	if BoxInfo.getItem("StandbyLED"):
-		def standbyLEDChanged(configElement):
-			if "fp" in BoxInfo.getItem("StandbyLED"):
-				patterns = [PATTERN_OFF, PATTERN_BLINK, PATTERN_ON, PATTERN_BLINK] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
-				ledPatterns.setLedPatterns(0, patterns)
-			else:
-				with open(BoxInfo.getItem("StandbyLED"), "w") as fd:
-					fd.write(configElement.value and "on" or "off")
-		config.usage.standbyLED = ConfigYesNo(default=True)
-		config.usage.standbyLED.addNotifier(standbyLEDChanged)
-
-	if BoxInfo.getItem("SuspendLED"):
-		def suspendLEDChanged(configElement):
-			if "fp" in BoxInfo.getItem("SuspendLED"):
-				with open(BoxInfo.getItem("SuspendLED"), "w") as fd:
-					fd.write(configElement.value and "1" or "0")
-			else:
-				with open(BoxInfo.getItem("SuspendLED"), "w") as fd:
-					fd.write(configElement.value and "on" or "off")
-		config.usage.suspendLED = ConfigYesNo(default=True)
-		config.usage.suspendLED.addNotifier(suspendLEDChanged)
-
 	if BoxInfo.getItem("PowerOffDisplay"):
 		def powerOffDisplayChanged(configElement):
 			with open(BoxInfo.getItem("PowerOffDisplay"), "w") as fd:

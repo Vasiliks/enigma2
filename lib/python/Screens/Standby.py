@@ -17,9 +17,10 @@ from Tools.Directories import fileWriteLine, mediaFilesInUse
 from Tools.Notifications import AddNotification
 from time import time, localtime
 from GlobalActions import globalActionMap
-from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, quitMainloop, iRecordableService
+from enigma import eDVBVolumecontrol, eTimer, eDVBLocalTimeHandler, eServiceReference, eStreamServer, quitMainloop, iRecordableService, eDBoxLCD
 
 MODEL = BoxInfo.getItem("model")
+AmlogicFamily = BoxInfo.getItem("AmlogicFamily")
 LCDMiniTV = BoxInfo.getItem("LCDMiniTV")
 
 inStandby = None
@@ -37,7 +38,11 @@ QUIT_UPGRADE_PROGRAM = 42
 QUIT_IMAGE_RESTORE = 43
 
 def setLCDModeMinitTV(value):
-	eDBoxLCD.getInstance().setLCDMode(config.lcd.modeminitv.value)
+	try:
+		print("[Standby] Write to /proc/stb/lcd/mode")
+		open("/proc/stb/lcd/mode", "w").write(value)
+	except:
+		print("[Standby] Write to /proc/stb/lcd/mode failed.")
 
 
 def isInfoBarInstance():
@@ -61,6 +66,7 @@ class StandbyScreen(Screen):
 		self.avswitch = AVSwitch()
 
 		print("[Standby] enter standby")
+		BoxInfo.setMutableItem("StandbyState", True)
 
 		if isfile("/usr/script/standby_enter.sh"):
 			Console().ePopen("/usr/script/standby_enter.sh")
@@ -117,16 +123,27 @@ class StandbyScreen(Screen):
 		if hasattr(self.session, "pip"):
 			del self.session.pip
 		self.session.pipshown = False
+		#set input to vcr scart
+		self.avswitch.setInput("off")
 
-		if BoxInfo.getItem("ScartSwitch"):
-			self.avswitch.setInput("SCART")
-		else:
-			self.avswitch.setInput("AUX")
-		if BoxInfo.getItem("HiSilicon") or MODEL in ("sfx6008", "sfx6018"):
-			output = "/proc/stb/hdmi/output"
-			if isfile(output):
-				with open(output, "w") as hdmi:
-					hdmi.write("off")
+		if isfile("/proc/stb/hdmi/output"):
+			try:
+				print("[Standby] Write to /proc/stb/hdmi/output")
+				open("/proc/stb/hdmi/output", "w").write("off")
+			except:
+				print("[Standby] Write to /proc/stb/hdmi/output failed.")
+
+		if AmlogicFamily:
+			try:
+				print("[Standby] Write to /sys/class/leds/led-sys/brightness")
+				open("/sys/class/leds/led-sys/brightness", "w").write("0")
+			except:
+				print("[Standby] Write to /sys/class/leds/led-sys/brightness failed.")
+			try:
+				print("[Standby] Write to /sys/class/cec/cmd")
+				open("/sys/class/cec/cmd", "w").write("0f 36")
+			except:
+				print("[Standby] Write to /sys/class/cec/cmd failed.")
 
 		gotoShutdownTime = int(config.usage.standby_to_shutdown_timer.value)
 		if gotoShutdownTime:
@@ -172,6 +189,7 @@ class StandbyScreen(Screen):
 
 		if isfile("/usr/script/standby_leave.sh"):
 			Console().ePopen("/usr/script/standby_leave.sh")
+
 		if config.usage.remote_fallback_import_standby.value and not config.clientmode.enabled.value:
 			ImportChannels()
 
@@ -385,18 +403,15 @@ class TryQuitMainloop(MessageBox):
 			elif not inStandby:
 				config.misc.RestartUI.value = True
 				config.misc.RestartUI.save()
-			if BoxInfo.getItem("Display") and BoxInfo.getItem("LCDMiniTV"):
-				mode = "/proc/stb/lcd/mode"
-				if isfile(mode):
-					print("[Standby] LCDminiTV off")
-					with open(mode, "w") as lcd:
-						lcd.write("0")
-			if MODEL == "vusolo4k":
-				oled_brightness = "/proc/stb/fp/oled_brightness"
-				if isfile(oled_brightness):
-					print("[Standby] Brightness OLED off")
-					with open(oled_brightness, "w") as oled:
-						oled.write("0")
+			if LCDMiniTV:
+				# set LCDminiTV off / fix a deep-standby-crash on some boxes
+				print("[Standby] LCDminiTV off")
+				setLCDModeMinitTV("0")
+			if MODEL in ("vusolo4k", "pulse4k"):  # Workaround for white display flash.
+				try:
+					eDBoxLCD.getInstance().setLCDBrightness(0)
+				except:
+					print("[Standby] Write to oled_brightness failed.")
 			self.quitMainloop()
 		else:
 			MessageBox.close(self, True)
