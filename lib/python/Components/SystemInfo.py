@@ -407,7 +407,7 @@ BoxInfo.setItem("LCDsymbol_circle_recording", fileCheck("/proc/stb/lcd/symbol_ci
 BoxInfo.setItem("LCDsymbol_timeshift", fileCheck("/proc/stb/lcd/symbol_timeshift"))
 BoxInfo.setItem("LCDshow_symbols", MODEL == "et9x00" or PLATFORM == "gfuturesbcmarm" and fileCheck("/proc/stb/lcd/show_symbols"))
 BoxInfo.setItem("LCDsymbol_hdd", PLATFORM == "gfuturesbcmarm" and fileCheck("/proc/stb/lcd/symbol_hdd"))
-BoxInfo.setItem("LCDSupport", ("lcd" in DISPLAYTYPE or "lcd" in model) and not BoxInfo.getItem("textlcd"))
+BoxInfo.setItem("LCDSupport", ("lcd" in DISPLAYTYPE or "lcd" in MODEL) and not BoxInfo.getItem("textlcd"))
 BoxInfo.setItem("PowerLED", fileCheck("/proc/stb/power/powerled"))
 BoxInfo.setItem("PowerLED2", fileCheck("/proc/stb/power/powerled2"))
 BoxInfo.setItem("StandbyLED", fileCheck("/proc/stb/power/standbyled") or MODEL in ("gbue4k", "gbquad4k") and fileCheck("/proc/stb/fp/led0_pattern"))
