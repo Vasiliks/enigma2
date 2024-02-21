@@ -567,12 +567,12 @@ def parseParameter(value):
 		return parseScale2(value)
 
 
-def parsePixmap(path, desktop):
+def parsePixmap(path, desktop, width=0, height=0):
 	option = path.find("#")
 	if option != -1:
 		path = path[:option]
 	if isfile(path):
-		pixmap = LoadPixmap(path, desktop=desktop)
+		pixmap = LoadPixmap(path, desktop, None, width, height)
 		if pixmap is None:
 			skinError(f"Pixmap file '{path}' could not be loaded")
 	else:
@@ -1016,7 +1016,9 @@ class AttributeParser:
 		self.guiObject.setPadding(eRect(self.applyHorizontalScale(leftPadding), self.applyVerticalScale(topPadding), self.applyHorizontalScale(rightPadding), self.applyVerticalScale(bottomPadding)))
 
 	def pixmap(self, value):
-		self.guiObject.setPixmap(parsePixmap(value, self.desktop))
+		if value.endswith(".svg"): # if graphic is svg force alphatest to "blend"
+			self.guiObject.setAlphatest(BT_ALPHABLEND)
+		self.guiObject.setPixmap(parsePixmap(value, self.desktop, self.guiObject.size().width(), self.guiObject.size().height()))
 
 	def pointer(self, value):
 		(name, pos) = [x.strip() for x in value.split(":", 1)]
