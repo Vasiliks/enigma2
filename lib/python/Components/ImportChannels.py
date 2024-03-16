@@ -99,8 +99,7 @@ class ImportChannels:
 						content = map(lambda l: l.decode('utf-8', 'replace'), content)
 					except Exception as e:
 						print("[Import Channels] Exception: %s" % str(e))
-						self.ImportChannelsDone(False, _("ERROR downloading file %s/%s") % (e2path, file))
-						return
+						continue
 				else:
 					with open('%s/%s' % (e2path, file)) as f:
 						content = f.readlines()
