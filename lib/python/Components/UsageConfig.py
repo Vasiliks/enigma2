@@ -529,7 +529,35 @@ def InitUsageConfig():
 		("3", "DVB-C/-T/-S"),
 		("4", "DVB-T/-C/-S"),
 		("5", "DVB-T/-S/-C"),
-		("127", _("No priority"))
+		("127", _("No priority"))])
+
+	config.usage.frontled_color = ConfigSelection(default="2", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking blue")),
+		("4", _("Blinking red"))
+	])
+	config.usage.frontledrec_color = ConfigSelection(default="3", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking blue")),
+		("4", _("Blinking red"))
+	])
+	config.usage.frontledstdby_color = ConfigSelection(default="0", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking blue")),
+		("4", _("Blinking red"))
+	])
+	config.usage.frontledrecstdby_color = ConfigSelection(default="3", choices=[
+		("0", _("Off")),
+		("1", _("Blue")),
+		("2", _("Red")),
+		("3", _("Blinking blue")),
+		("4", _("Blinking red"))
 	])
 
 	def remote_fallback_changed(configElement):
@@ -684,49 +712,6 @@ def InitUsageConfig():
 		("3", _("Remaining & Elapsed"))
 	])
 	config.usage.elapsed_time_positive_vfd = ConfigYesNo(default=False)
-
-	config.usage.frontled_color = ConfigSelection(default="1", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledrec_color = ConfigSelection(default="2", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledstdby_color = ConfigSelection(default="2", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking violet")),
-		("4", _("Blinking red"))
-	])
-	config.usage.frontledrecstdby_color = ConfigSelection(default="4", choices=[
-		("0", _("Off")),
-		("1", _("Blue")),
-		("2", _("Red")),
-		("3", _("Blinking blue")),
-		("4", _("Blinking red"))
-	])
-
-	config.usage.lcd_scroll_delay = ConfigSelection(default="10000", choices=[
-		("10000", _("%d seconds") % 10),
-		("20000", _("%d seconds") % 20),
-		("30000", _("%d seconds") % 30),
-		("60000", _("%d minute") % 1),
-		("300000", _("%d minutes") % 5),
-		("noscrolling", _("Off"))
-	])
-	config.usage.lcd_scroll_speed = ConfigSelection(default="300", choices=[
-		("500", _("Slow")),
-		("300", _("Normal")),
-		("100", _("Fast"))
-	])
 
 	def SpinnerOnOffChanged(configElement):
 		setSpinnerOnOff(int(configElement.value))
@@ -1097,6 +1082,42 @@ def InitUsageConfig():
 				fd.write(hex(configElement.value)[2:])
 		config.usage.fanspeed = ConfigSlider(default=127, increment=8, limits=(0, 255))
 		config.usage.fanspeed.addNotifier(fanSpeedChanged)
+
+	if BoxInfo.getItem("PowerLED"):
+		def powerLEDChanged(configElement):
+			if "fp" in BoxInfo.getItem("PowerLED"):
+				with open(BoxInfo.getItem("PowerLED"), "w") as fd:
+					fd.write(configElement.value and "1" or "0")
+				patterns = [PATTERN_ON, PATTERN_ON, PATTERN_OFF, PATTERN_ON] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
+				ledPatterns.setLedPatterns(1, patterns)
+			else:
+				with open(BoxInfo.getItem("PowerLED"), "w") as fd:
+					fd.write(configElement.value and "on" or "off")
+		config.usage.powerLED = ConfigYesNo(default=True)
+		config.usage.powerLED.addNotifier(powerLEDChanged)
+
+	if BoxInfo.getItem("StandbyLED"):
+		def standbyLEDChanged(configElement):
+			if "fp" in BoxInfo.getItem("StandbyLED"):
+				patterns = [PATTERN_OFF, PATTERN_BLINK, PATTERN_ON, PATTERN_BLINK] if configElement.value else [PATTERN_OFF, PATTERN_OFF, PATTERN_OFF, PATTERN_OFF]
+				ledPatterns.setLedPatterns(0, patterns)
+			else:
+				with open(BoxInfo.getItem("StandbyLED"), "w") as fd:
+					fd.write(configElement.value and "on" or "off")
+		config.usage.standbyLED = ConfigYesNo(default=True)
+		config.usage.standbyLED.addNotifier(standbyLEDChanged)
+
+	if BoxInfo.getItem("SuspendLED"):
+		def suspendLEDChanged(configElement):
+			if "fp" in BoxInfo.getItem("SuspendLED"):
+				with open(BoxInfo.getItem("SuspendLED"), "w") as fd:
+					fd.write(configElement.value and "1" or "0")
+			else:
+				with open(BoxInfo.getItem("SuspendLED"), "w") as fd:
+					fd.write(configElement.value and "on" or "off")
+		config.usage.suspendLED = ConfigYesNo(default=True)
+		config.usage.suspendLED.addNotifier(suspendLEDChanged)
+
 	if BoxInfo.getItem("PowerOffDisplay"):
 		def powerOffDisplayChanged(configElement):
 			with open(BoxInfo.getItem("PowerOffDisplay"), "w") as fd:
