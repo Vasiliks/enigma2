@@ -43,7 +43,8 @@ class QuadPipChannelEntry:
 		self.channel = {"1": ch1, "2": ch2, "3": ch1, "4": ch1, }
 
 	def __str__(self):
-		return "idx : %d, name : %s, ch0 : %s, ch1 : %s, ch2 : %s, ch3 : %s" % (self.idx, self.name, self.channel.get("1"), self.channel.get("2"), self.channel.get("3"), self.channel.get("4"))
+		return "idx : %d, name : %s, ch0 : %s, ch1 : %s, ch2 : %s, ch3 : %s"\
+					% (self.idx, self.name, self.channel.get("1"), self.channel.get("2"), self.channel.get("3"), self.channel.get("4"))
 
 	def __lt__(self, other):
 		return self.idx - other.idx
@@ -181,53 +182,53 @@ quad_pip_channel_list_instance = QuadPipChannelList()
 class CreateQuadPipChannelEntry(ChannelSelectionBase):
 	skin_default_1080p = """
 		<screen name="CreateQuadPipChannelEntry" position="center,center" size="1500,850" flags="wfNoBorder">
-			<widget source="Title" render="Label" position="100,60" size="1300,60" zPosition="3" font="Semiboldit;52" horizontalAlignment="left" verticalAlignment="center" backgroundColor="#25062748" transparent="1" />
-			<ePixmap pixmap="skin_default/buttons/red.png" position="137,140" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/green.png" position="492,140" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/yellow.png" position="837,140" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/blue.png" position="1192,140" size="140,40" alphaTest="blend" />
-			<widget name="key_red" position="137,140" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_green" position="492,140" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_yellow" position="837,140" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#a08500" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_blue" position="1192,140" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#18188b" foregroundColor="#ffffff" transparent="1" />
+			<widget source="Title" render="Label" position="100,60" size="1300,60" zPosition="3" font="Semiboldit;52" halign="left" valign="center" backgroundColor="#25062748" transparent="1" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="137,140" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="492,140" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="837,140" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/blue.png" position="1192,140" size="140,40" alphatest="blend" />
+			<widget name="key_red" position="137,140" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#9f1313" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_green" position="492,140" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#1f771f" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_yellow" position="837,140" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#a08500" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_blue" position="1192,140" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#18188b" foregroundColor="#ffffff" transparent="1" />
 			<widget name="list" position="100,200" size="1250,365" serviceItemHeight="40" serviceNumberFont="Regular;28" serviceNameFont="Regular;28" serviceInfoFont="Semibold;24" foregroundColorServiceNotAvail="#58595b" transparent="1" scrollbarMode="showOnDemand" />
 			<widget name="textChannels" position="100,580" size="1250,30" font="Regular;33" transparent="1" />
 			<widget name="selectedList" position="110,620" size="700,160" font="Regular;28" itemHeight="40" transparent="1" />
-			<widget name="description" position="860,630" size="650,160" font="Regular;28" horizontalAlignment="left" transparent="1" />
+			<widget name="description" position="860,630" size="650,160" font="Regular;28" halign="left" transparent="1" />
 		</screen>
 		"""
 	skin_default_720p = """
 		<screen name="CreateQuadPipChannelEntry" position="center,center" size="1000,610" flags="wfNoBorder">
 			<widget source="Title" render="Label" position="40,40" size="910,40" zPosition="3" font="Semiboldit;32" backgroundColor="#25062748" transparent="1" />
-			<ePixmap pixmap="skin_default/buttons/red.png" position="75,80" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/green.png" position="325,80" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/yellow.png" position="575,80" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/blue.png" position="825,80" size="140,40" alphaTest="blend" />
-			<widget name="key_red" position="75,80" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_green" position="325,80" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_yellow" position="575,80" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#a08500" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_blue" position="825,80" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#18188b" foregroundColor="#ffffff" transparent="1" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="75,80" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="325,80" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="575,80" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/blue.png" position="825,80" size="140,40" alphatest="blend" />
+			<widget name="key_red" position="75,80" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#9f1313" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_green" position="325,80" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#1f771f" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_yellow" position="575,80" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#a08500" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_blue" position="825,80" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#18188b" foregroundColor="#ffffff" transparent="1" />
 			<widget name="list" position="60,130" size="700,255" transparent="1" scrollbarMode="showOnDemand" foregroundColorServiceNotAvail="#58595b" />
 			<widget name="textChannels" position="60,400" size="850,20" font="Regular;24" transparent="1" />
 			<widget name="selectedList" position="70,430" size="480,150" font="Regular;22" itemHeight="25" transparent="1" />
-			<widget name="description" position="590,460" size="350,150" font="Regular;22" horizontalAlignment="left" transparent="1" />
+			<widget name="description" position="590,460" size="350,150" font="Regular;22" halign="left" transparent="1" />
 		</screen>
 		"""
 	skin_default_576p = """
 		<screen name="CreateQuadPipChannelEntry" position="center,center" size="680,520" flags="wfNoBorder">
 			<widget source="Title" render="Label" position="30,20" size="600,30" zPosition="3" font="Regular;22" backgroundColor="#25062748" transparent="1" />
-			<ePixmap pixmap="skin_default/buttons/red.png" position="15,60" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/green.png" position="185,60" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/yellow.png" position="355,60" size="140,40" alphaTest="blend" />
-			<ePixmap pixmap="skin_default/buttons/blue.png" position="525,60" size="140,40" alphaTest="blend" />
-			<widget name="key_red" position="15,60" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#9f1313" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_green" position="185,60" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_yellow" position="355,60" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#a08500" foregroundColor="#ffffff" transparent="1" />
-			<widget name="key_blue" position="525,60" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#18188b" foregroundColor="#ffffff" transparent="1" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="15,60" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="185,60" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="355,60" size="140,40" alphatest="blend" />
+			<ePixmap pixmap="skin_default/buttons/blue.png" position="525,60" size="140,40" alphatest="blend" />
+			<widget name="key_red" position="15,60" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#9f1313" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_green" position="185,60" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#1f771f" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_yellow" position="355,60" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#a08500" foregroundColor="#ffffff" transparent="1" />
+			<widget name="key_blue" position="525,60" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#18188b" foregroundColor="#ffffff" transparent="1" />
 			<widget name="list" position="50,115" size="580,230" transparent="1" scrollbarMode="showOnDemand" foregroundColorServiceNotAvail="#58595b" />
 			<widget name="textChannels" position="45,360" size="295,20" font="Regular;22" transparent="1" />
 			<widget name="selectedList" position="50,385" size="290,100" font="Regular;20" itemHeight="22" transparent="1" />
-			<widget name="description" position="360,390" size="310,140" font="Regular;20" horizontalAlignment="left" transparent="1" />
+			<widget name="description" position="360,390" size="310,140" font="Regular;20" halign="left" transparent="1" />
 		</screen>
 		"""
 
@@ -235,7 +236,7 @@ class CreateQuadPipChannelEntry(ChannelSelectionBase):
 		ChannelSelectionBase.__init__(self, session)
 
 		self["actions"] = ActionMap(["OkCancelActions", "DirectionActions", "QuadPipChannelEditActions"],
-			{
+		{
 			"cancel": self.Exit,
 			"ok": self.channelSelected,
 			"toggleList": self.toggleCurrList,
@@ -394,14 +395,14 @@ class CreateQuadPipChannelEntry(ChannelSelectionBase):
 class QuadPiPChannelSelection(Screen, HelpableScreen):
 	skin = """
 		<screen position="%s,%s" size="%d,%d">
-			<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="skin_default/buttons/yellow.png" position="%d,%d" size="140,40" alphaTest="on" />
-			<ePixmap pixmap="skin_default/buttons/blue.png" position="%d,%d" size="140,40" alphaTest="on" />
-			<widget name="key_red" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" foregroundColor="#ffffff" backgroundColor="#9f1313" transparent="1" />
-			<widget name="key_green" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" foregroundColor="#ffffff" backgroundColor="#1f771f" transparent="1" />
-			<widget name="key_yellow" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" foregroundColor="#ffffff" backgroundColor="#a08500" transparent="1" />
-			<widget name="key_blue" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" horizontalAlignment="center" verticalAlignment="center" foregroundColor="#ffffff" backgroundColor="#18188b" transparent="1" />
+			<ePixmap pixmap="skin_default/buttons/red.png" position="%d,%d" size="140,40" alphatest="on" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="%d,%d" size="140,40" alphatest="on" />
+			<ePixmap pixmap="skin_default/buttons/yellow.png" position="%d,%d" size="140,40" alphatest="on" />
+			<ePixmap pixmap="skin_default/buttons/blue.png" position="%d,%d" size="140,40" alphatest="on" />
+			<widget name="key_red" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#9f1313" transparent="1" />
+			<widget name="key_green" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#1f771f" transparent="1" />
+			<widget name="key_yellow" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#a08500" transparent="1" />
+			<widget name="key_blue" position="%d,%d" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" foregroundColor="#ffffff" backgroundColor="#18188b" transparent="1" />
 			<widget source="ChannelList" render="Listbox" position="%d,%d" size="%d,%d" scrollbarMode="showOnDemand">
 				<convert type="TemplatedMultiContent">
 				{"template":
@@ -434,23 +435,23 @@ class QuadPiPChannelSelection(Screen, HelpableScreen):
 		list_y = 40 + button_margin * 3
 		self.fontSize = {1080: (28, 24), 720: (24, 20), 576: (20, 18)}.get(dh, (28, 24))
 		self.skin = QuadPiPChannelSelection.skin % (pw, ph,
-			sw, sh + list_y,
-			sw / 8 - 70, button_margin,
-			sw / 8 - 70 + sw / 4, button_margin,
-			sw / 8 - 70 + sw / 4 * 2, button_margin,
-			sw / 8 - 70 + sw / 4 * 3, button_margin,
-			sw / 8 - 70, button_margin,
-			sw / 8 - 70 + sw / 4, button_margin,
-			sw / 8 - 70 + sw / 4 * 2, button_margin,
-			sw / 8 - 70 + sw / 4 * 3, button_margin,
-			0, list_y, sw, sh,
-			sw / 16, 1, sw - sw / 16 * 2, sh / 13,
-			sw / 11, 1 + sh / 13, sw - sw / 16 * 2 - sw / 8, sh / 18,
-			sw / 11, 1 + sh / 13 + sh / 18, sw - sw / 16 * 2 - sw / 8, sh / 18,
-			sw / 11, 1 + sh / 13 + sh / 18 * 2, sw - sw / 16 * 2 - sw / 8, sh / 18,
-			sw / 11, 1 + sh / 13 + sh / 18 * 3, sw - sw / 16 * 2 - sw / 8, sh / 18,
-			self.fontSize[0], self.fontSize[1],
-			sh / 3)
+														sw, sh + list_y,
+														sw / 8 - 70, button_margin,
+														sw / 8 - 70 + sw / 4, button_margin,
+														sw / 8 - 70 + sw / 4 * 2, button_margin,
+														sw / 8 - 70 + sw / 4 * 3, button_margin,
+														sw / 8 - 70, button_margin,
+														sw / 8 - 70 + sw / 4, button_margin,
+														sw / 8 - 70 + sw / 4 * 2, button_margin,
+														sw / 8 - 70 + sw / 4 * 3, button_margin,
+														0, list_y, sw, sh,
+														sw / 16, 1, sw - sw / 16 * 2, sh / 13,
+														sw / 11, 1 + sh / 13, sw - sw / 16 * 2 - sw / 8, sh / 18,
+														sw / 11, 1 + sh / 13 + sh / 18, sw - sw / 16 * 2 - sw / 8, sh / 18,
+														sw / 11, 1 + sh / 13 + sh / 18 * 2, sw - sw / 16 * 2 - sw / 8, sh / 18,
+														sw / 11, 1 + sh / 13 + sh / 18 * 3, sw - sw / 16 * 2 - sw / 8, sh / 18,
+														self.fontSize[0], self.fontSize[1],
+														sh / 3)
 		self["key_red"] = Label(_("Select"))
 		self["key_green"] = Label(_("Add"))
 		self["key_yellow"] = Label(_("Remove"))
@@ -460,18 +461,18 @@ class QuadPiPChannelSelection(Screen, HelpableScreen):
 		self["ChannelList"] = List(self.PipChannelListApply)
 
 		self["qpipActions"] = HelpableActionMap(self, "QuadPipSetupActions",
-			{
-				"red": (self.keyRed, _("Select Quad Channels")),
-				"green": (self.keyGreen, _("Add New Quad Channel Entry")),
-				"yellow": (self.keyYellow, _("Remove Quad Channel Entry")),
-				"blue": (self.keyBlue, _("Edit Quad Channel Entry")),
-			}, -2)
+		{
+			"red": (self.keyRed, _("Select Quad Channels")),
+			"green": (self.keyGreen, _("Add New Quad Channel Entry")),
+			"yellow": (self.keyYellow, _("Remove Quad Channel Entry")),
+			"blue": (self.keyBlue, _("Edit Quad Channel Entry")),
+		}, -2)
 
 		self["OkCancelActions"] = HelpableActionMap(self, "OkCancelActions",
-			{
-				"ok": (self.keyOk, _("Select Quad Channels")),
-				"cancel": (self.keyCancel, _("Exit Quad Channel Selection")),
-			}, -2)
+		{
+			"ok": (self.keyOk, _("Select Quad Channels")),
+			"cancel": (self.keyCancel, _("Exit Quad Channel Selection")),
+		}, -2)
 
 		self.oldPosition = None
 
@@ -626,14 +627,13 @@ class FocusShowHide:
 class QuadPipScreen(Screen, FocusShowHide, HelpableScreen):
 	skin = """
 		<screen position="0,0" size="%d,%d" backgroundColor="transparent" flags="wfNoBorder">
-			<widget name="ch1" position="240,240" zPosition="1" size="480,60" font="Regular; %d" horizontalAlignment="center" verticalAlignment="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
-			<widget name="ch2" position="1200,240" zPosition="1" size="480,60" font="Regular; %d" horizontalAlignment="center" verticalAlignment="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
-			<widget name="ch3" position="240,780" zPosition="1" size="480,60" font="Regular; %d" horizontalAlignment="center" verticalAlignment="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
-			<widget name="ch4" position="1200,780" zPosition="1" size="480,60" font="Regular; %d" horizontalAlignment="center" verticalAlignment="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
-			<widget name="text1" position="%d,%d" zPosition="2" size="%d,%d" font="Regular; %d" horizontalAlignment="left" verticalAlignment="center" borderWidth="2"/>
-			<widget name="text2" position="%d,%d" zPosition="2" size="%d,%d" font="Regular; %d" horizontalAlignment="left" verticalAlignment="center" borderWidth="2"/>
-			<widget name="text3" conditional="text3" position="1000,550" zPosition="2" size="900,40" font="Regular; 30" foregroundColor="yellow" horizontalAlignment="left" verticalAlignment="center" borderWidth="2"/>
-			<widget name="focus" position="0,0" zPosition="-1" size="960,540" backgroundColor="#ffffffff" borderWidth="5" borderColor="#e61616" alphaTest="on" />
+			<widget name="ch1" position="240,240" zPosition="1" size="480,60" font="Regular; %d" halign="center" valign="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
+			<widget name="ch2" position="1200,240" zPosition="1" size="480,60" font="Regular; %d" halign="center" valign="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
+			<widget name="ch3" position="240,780" zPosition="1" size="480,60" font="Regular; %d" halign="center" valign="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
+			<widget name="ch4" position="1200,780" zPosition="1" size="480,60" font="Regular; %d" halign="center" valign="center" foregroundColor="white" backgroundColor="#ffffffff" borderWidth="2"/>
+			<widget name="text1" position="%d,%d" zPosition="2" size="%d,%d" font="Regular; %d" halign="left" valign="center" borderWidth="2"/>
+			<widget name="text2" position="%d,%d" zPosition="2" size="%d,%d" font="Regular; %d" halign="left" valign="center" borderWidth="2"/>
+			<widget name="focus" position="0,0" zPosition="-1" size="960,540" backgroundColor="#ffffffff" borderWidth="5" borderColor="#e61616" alphatest="on" />
 		</screen>
 		"""
 
@@ -644,22 +644,21 @@ class QuadPipScreen(Screen, FocusShowHide, HelpableScreen):
 		FocusShowHide.__init__(self)
 		HelpableScreen.__init__(self)
 		self.setTitle(_("Quad PiP Screen"))
-
 		self["actions"] = HelpableActionMap(self, "QuadPipSetupActions",
-			{
-				"cancel": (self.keyExit, _("Exit quad PiP")),
-				"ok": (self.keyOk, _("Zap focused channel on full screen")),
-				"left": (self.keyLeft, _("Select channel audio")),
-				"right": (self.keyRight, _("Select channel audio")),
-				"up": (self.keyUp, _("Select channel audio")),
-				"down": (self.keyDown, _("Select channel audio")),
-				"channelup": (self.KeyChannel, _("Show channel selection")),
-				"channeldown": (self.KeyChannel, _("Show channel selection")),
-				"menu": (self.KeyChannel, _("Show channel selection")),
-				"channelPrev": (self.KeyPrev, _("Prev quad PiP channel")),
-				"channelNext": (self.KeyNext, _("Next quad PiP channel")),
-				"red": (self.KeyRed, _("Show/Hide focus bar")),
-			}, -1)
+		{
+			"cancel": (self.keyExit, _("Exit quad PiP")),
+			"ok": (self.keyOk, _("Zap focused channel on full screen")),
+			"left": (self.keyLeft, _("Select channel audio")),
+			"right": (self.keyRight, _("Select channel audio")),
+			"up": (self.keyUp, _("Select channel audio")),
+			"down": (self.keyDown, _("Select channel audio")),
+			"channelup": (self.KeyChannel, _("Show channel selection")),
+			"channeldown": (self.KeyChannel, _("Show channel selection")),
+			"menu": (self.KeyChannel, _("Show channel selection")),
+			"channelPrev": (self.KeyPrev, _("Prev quad PiP channel")),
+			"channelNext": (self.KeyNext, _("Next quad PiP channel")),
+			"red": (self.KeyRed, _("Show/Hide focus bar")),
+		}, -1)
 
 		self["ch1"] = Label(_(" "))
 		self["ch2"] = Label(_(" "))
@@ -673,9 +672,9 @@ class QuadPipScreen(Screen, FocusShowHide, HelpableScreen):
 		self.updatePositionList()
 
 		self.skin = QuadPipScreen.skin % (self.session.desktop.size().width(), self.session.desktop.size().height(),
-			self.fontSize, self.fontSize, self.fontSize, self.fontSize,
-			self.text1Pos[0], self.text1Pos[1], self.text1Pos[2], self.text1Pos[3], self.fontSize,
-			self.text2Pos[0], self.text2Pos[1], self.text2Pos[2], self.text2Pos[3], self.fontSize)
+												self.fontSize, self.fontSize, self.fontSize, self.fontSize,
+												self.text1Pos[0], self.text1Pos[1], self.text1Pos[2], self.text1Pos[3], self.fontSize,
+												self.text2Pos[0], self.text2Pos[1], self.text2Pos[2], self.text2Pos[3], self.fontSize)
 		self.oldService = None
 		self.curChannel = None
 		self.curPlayAudio = -1
