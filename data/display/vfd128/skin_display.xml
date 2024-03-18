@@ -101,7 +101,7 @@
 		</widget>
 		<widget source="parent.Event" render="Label" position="58,25" size="70,12" font="FdLcD;12" horizontalAlignment="right" verticalAlignment="bottom" noWrap="1" zPosition="1" >
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 	</screen>
 
@@ -197,7 +197,7 @@
 		</widget>
 		<widget source="parent.ServiceEvent" render="Label" position="58,25" size="70,12" font="FdLcD;12" horizontalAlignment="right" verticalAlignment="bottom" noWrap="1" zPosition="1" >
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 	</screen>
 

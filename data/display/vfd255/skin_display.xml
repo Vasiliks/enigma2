@@ -87,7 +87,7 @@
 		</widget>
 		<widget source="parent.Event" render="Label" position="186,48" size="53,17" font="FdLcD;18" noWrap="1">
 			 <convert type="EventTime">Remaining</convert>
-			 <convert type="RemainingToText">VFDNoSeconds</convert>
+			 <convert type="RemainingToText"></convert>
 		</widget>
 	</screen>
 
@@ -111,7 +111,7 @@
 		</widget>
 		<widget source="session.Event_Now" render="Label" position="0,5" size="65,26" font="FdLcD;25" noWrap="1">
 			 <convert type="EventTime">Remaining</convert>
-			 <convert type="RemainingToText">NoSeconds</convert>
+			 <convert type="RemainingToText"></convert>
 		</widget>
 		<panel name="SummaryTunerStatusPanel"/>
 		<panel name="SummaryIconsPanel"/>

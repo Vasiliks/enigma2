@@ -100,7 +100,7 @@
 		</widget>
 		<widget source="parent.Event" render="Label" position="140,40" size="70,12" font="FdLcD;10" horizontalAlignment="left" verticalAlignment="bottom">
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<widget source="parent.Event" render="Progress" position="0,43" size="120,5" borderWidth="1">
 			<convert type="EventTime">Progress</convert>
@@ -120,7 +120,7 @@
 		</widget>
 		<widget source="session.Event_Now" render="Label" position="140,40" size="70,12" font="FdLcD;10" >
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<widget source="session.Event_Now" render="Progress" position="0,43" size="120,5" borderWidth="1">
 			<convert type="EventTime">Progress</convert>
@@ -184,7 +184,7 @@
 		</widget>
 		<widget source="parent.ServiceEvent" render="Label" position="140,40" size="70,12" font="FdLcD;10" horizontalAlignment="left" verticalAlignment="bottom">
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<widget source="parent.ServiceEvent" render="Progress" position="0,43" size="120,5" borderWidth="1">
 			<convert type="EventTime">Progress</convert>

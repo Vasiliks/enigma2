@@ -126,7 +126,7 @@
 		<eLabel position="0,168" size="400,2" backgroundColor="#BDBDBD" zPosition="3" />
 		<widget source="session.Event_Now" render="Label" position="300,173" size="100,40" font="FdLcD;40" zPosition="0" foregroundColor="#A9E2F3" transparent="1">
 			<convert type="EventTime">Remaining</convert>
-			<convert type="RemainingToText">OnlyMinute</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<panel name="MeinRecordingPanel" />
 		<panel name="SummaryClockPanel" />

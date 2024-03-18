@@ -32,7 +32,7 @@
 	<screen name="InfoBarSummary" position="0,0" size="132,64">
 		<widget source="session.Event_Now" render="Label" position="0,0" size="132,64" zPosition="0" transparent="1">
 			<convert type="EventTime">Remaining</convert>
-			<convert type="RemainingToText">OnlyMinute2</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<widget source="session.RecordState" render="FixedLabel" text=" " position="0,30" zPosition="1" size="120,34">
 			<convert type="ConfigEntryTest">config.usage.blinking_display_clock_during_recording,True,CheckSourceBoolean</convert>

@@ -839,7 +839,7 @@ self.autoResize()
 		</widget>
 		<widget source="session.Event_Now" render="Label" position="585,73" size="85,24" font="Regular;20" backgroundColor="#34406f" shadowColor="#1d354c" shadowOffset="-1,-1" horizontalAlignment="right" transparent="1">
 			<convert type="EventTime">Remaining</convert>
-			<convert type="RemainingToText">InMinutes</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<!-- Event (next) -->
 		<widget source="session.Event_Next" render="Label" position="205,97" size="60,24" font="Regular;20" backgroundColor="#071f38" foregroundColor="#c3c3c9" transparent="1">
@@ -1744,7 +1744,7 @@ self.instance.move(ePoint(orgpos.x() + (orgwidth - newwidth) // 2, orgpos.y() + 
 		</widget>
 		<widget source="session.Event_Now" render="Label" position="465,25" size="90,22" font="Regular;20" horizontalAlignment="right" transparent="1">
 			<convert type="EventTime">Remaining</convert>
-			<convert type="RemainingToText">InMinutes</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<widget source="session.Event_Next" render="Label" position="5,47" size="60,22" font="Regular;20" transparent="1">
 			<convert type="EventTime">StartTime</convert>

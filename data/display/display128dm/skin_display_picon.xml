@@ -49,7 +49,7 @@
 		</widget>
 		<widget source="session.Event_Now" render="Label" position="64,50" size="64,16" font="FdLcD;18" horizontalAlignment="right" >
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 
 	</screen>

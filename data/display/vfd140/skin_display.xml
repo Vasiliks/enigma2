@@ -106,7 +106,7 @@
 		</widget>
 		<widget source="parent.Event" render="Label" position="70,23" size="70,12" font="FdLcD;12" horizontalAlignment="right" verticalAlignment="bottom" noWrap="1" zPosition="1" >
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 	</screen>
 
@@ -120,7 +120,7 @@
 		</widget>
 		<widget source="session.Event_Now" render="Label" position="70,23" size="70,12" font="FdLcD;12" noWrap="1" zPosition="1" >
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 		<panel name="SummaryIconsPanel" />
 		<!-- <panel name="SummaryTunerStatusPanel" /> -->
@@ -175,7 +175,7 @@
 		</widget>
 		<widget source="parent.ServiceEvent" render="Label" position="70,23" size="70,12" font="FdLcD;12" horizontalAlignment="right" verticalAlignment="bottom" noWrap="1" zPosition="1" >
 			<convert type="EventTime">VFDRemaining</convert>
-			<convert type="RemainingToText">VFDNoSeconds</convert>
+			<convert type="RemainingToText"></convert>
 		</widget>
 	</screen>
 
