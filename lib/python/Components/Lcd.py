@@ -37,8 +37,8 @@ def IconCheck(session=None, **kwargs):
 
 class IconCheckPoller:
 	def __init__(self):
-		self.symbolNetwork = exists("/proc/stb/lcd/symbol_network")
-		self.symbolUsb = exists("/proc/stb/lcd/symbol_usb")
+		self.symbolNetwork = isfile("/proc/stb/lcd/symbol_network")
+		self.symbolUsb = isfile("/proc/stb/lcd/symbol_usb")
 		self.lcdMode = config.lcd.mode.value
 		config.lcd.mode.addNotifier(self.setLCDmode)
 		self.timer = eTimer()
