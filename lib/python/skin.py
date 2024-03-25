@@ -561,7 +561,7 @@ def parseParameter(value):
 	elif value in colors:  # Named color.
 		return colors[value].argb()
 	elif value.find(";") != -1:  # Font.
-		(font, size) = [x.strip() for x in value.split(";", 1)]
+		(font, size) = (x.strip() for x in value.split(";", 1))
 		return [font, parseScale2(size)]
 	else:  # Integer.
 		return parseScale2(value)
@@ -836,7 +836,6 @@ class AttributeParser:
 		return int(parseInteger(value) * self.scaleTuple[1][0] / self.scaleTuple[1][1])
 
 	def alphaTest(self, value):
-		# value = "blend" if value == "on" else value  workaround for renderer with transparent borders C++ does not use now BT_ALPHATEST for pixmap
 		self.guiObject.setAlphatest(parseAlphaTest(value))
 
 	def alphatest(self, value):  # This legacy definition uses an inconsistent name, use 'alphaTest' instead!
@@ -851,6 +850,9 @@ class AttributeParser:
 
 	def backgroundColor(self, value):
 		self.guiObject.setBackgroundColor(parseColor(value, 0x00000000))
+
+	def backgroundColorRows(self, value):
+		self.guiObject.setBackgroundColorRows(parseColor(value, 0x00000000))
 
 	def backgroundColorSelected(self, value):
 		self.guiObject.setBackgroundColorSelected(parseColor(value, 0x00000000))
@@ -1021,7 +1023,7 @@ class AttributeParser:
 		self.guiObject.setPixmap(parsePixmap(value, self.desktop, self.guiObject.size().width(), self.guiObject.size().height()))
 
 	def pointer(self, value):
-		(name, pos) = [x.strip() for x in value.split(":", 1)]
+		(name, pos) = (x.strip() for x in value.split(":", 1))
 		ptr = parsePixmap(name, self.desktop)
 		pos = parsePosition(pos, self.scaleTuple)
 		self.guiObject.setPointer(0, ptr, pos)
@@ -1122,7 +1124,7 @@ class AttributeParser:
 		attribDeprecationWarning("seek_pointer", "seekPointer")
 
 	def seekPointer(self, value):
-		(name, pos) = [x.strip() for x in value.split(":", 1)]
+		(name, pos) = (x.strip() for x in value.split(":", 1))
 		ptr = parsePixmap(name, self.desktop)
 		pos = parsePosition(pos, self.scaleTuple)
 		self.guiObject.setPointer(1, ptr, pos)
@@ -1194,13 +1196,13 @@ class AttributeParser:
 	def transparent(self, value):
 		self.guiObject.setTransparent(1 if parseBoolean("transparent", value) else 0)
 
+	def vAlign(self, value):  # This typo catcher definition uses an inconsistent name, use 'verticalAlignment' instead!
+		self.verticalAlignment(value)
+		# attribDeprecationWarning("vAlign", "verticalAlignment")
+
 	def valign(self, value):  # This legacy definition uses an inconsistent name, use 'verticalAlignment' instead!
 		self.verticalAlignment(value)
 		# attribDeprecationWarning("valign", "verticalAlignment")
-
-	def vAlign(self, value):  # This typo catcher definition uses an inconsistent name, use 'verticalAlignment' instead!
-		self.verticalAlignment(value)
-		attribDeprecationWarning("vAlign", "verticalAlignment")
 
 	def valueFont(self, value):
 		self.guiObject.setValueFont(parseFont(value, self.scaleTuple))
@@ -1709,6 +1711,7 @@ class SkinContextHorizontal(SkinContext):
 		super().__init__(parent, pos, size, font)
 		self.rx = self.w
 		self.rw = self.w
+
 	def parse(self, pos, size, font):
 		if size in variables:
 			size = variables[size]
@@ -2012,6 +2015,7 @@ def readSkin(screen, skin, names, desktop):
 				processor(widget, context)
 			except SkinError as err:
 				print(f"[Skin] Error: Screen '{myName}' widget '{widget.tag}' {str(err)}!")
+				print_exc()
 
 	def processPanel(widget, context):
 		name = widget.attrib.get("name")
