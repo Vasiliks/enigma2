@@ -8,6 +8,7 @@ from Components.MultiContent import MultiContentEntryText
 from Components.Sources.StaticText import StaticText
 
 
+
 class ScreenHeader(GUIAddon):
 	def __init__(self):
 		GUIAddon.__init__(self)
@@ -49,9 +50,9 @@ class ScreenHeader(GUIAddon):
 			if isOneItem:
 				itemHeight = self.instance.size().height()
 			if not isOneItem and idx == 0:
-				itemHeight = self.instance.size().height() * 2 // 3
+				itemHeight = self.instance.size().height()*2 // 3
 			elif idx == 1:
-				yPos = self.instance.size().height() * 2 // 3 - 3
+				yPos = self.instance.size().height()*2 // 3 - 3
 				itemHeight = self.instance.size().height() // 3
 			res.append(MultiContentEntryText(
 					pos=(0, yPos),
