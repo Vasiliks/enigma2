@@ -188,7 +188,7 @@ eConsolePy_write(eConsolePy* self, PyObject *args)
 {
 	char *data;
 	int len = -1;
-if (!PyArg_ParseTuple(args, "s|i", &data, &len))
+	if (!PyArg_ParseTuple(args, "s|i", &data, &len))
 	{
 		PyErr_SetString(PyExc_TypeError,
 			"1st arg must be a string, optionaly 2nd arg can be the string length");
