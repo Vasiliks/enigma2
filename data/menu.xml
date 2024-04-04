@@ -90,7 +90,7 @@ self.session.openWithCallback(msgClosed, EpgDeleteMsg)
 		<menu entryID="osd_setup" level="0" text="User Interface" weight="20">
 			<id val="osd_menu" />
 			<item entryID="user_interface" level="0" text="User Interface Setup" weight="5"><setup id="UserInterface" /></item>
-			<item entryID="channelselection_setup" level="0" text="Channel Selection Setup" weight="10"><setup id="ChannelSelection" /></item>
+			<item entryID="channelselection_setup" level="0" text="Channel Selection Setup" weight="10"><setup id="channelselection" /></item>
 			<item entryID="primary_skin_selector" level="0" text="Skin Setup" weight="10"><screen module="SkinSelector" screen="SkinSelector" /></item>
 			<menu entryID="display_selection" level="0" text="Front Panel Display" weight="15">
 				<id val="lcd" />
