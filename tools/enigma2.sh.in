@@ -20,6 +20,11 @@ if [ -e /usr/bin/ciplushelper ]; then
 	sleep 3
 fi
 
+#Workaround for aspect ratio issue
+if [ -e /proc/stb/video/avshutdown ]; then
+	echo "down" > /proc/stb/video/avshutdown && echo "up" > /proc/stb/video/avshutdown
+fi
+
 if [ -f "/proc/stb/fp/led_color" ]; then
 	echo "00ffffff" > /proc/stb/fp/led_color
 elif [ -f "/proc/stb/fp/led_brightness" ]; then
