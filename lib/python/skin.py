@@ -7,7 +7,6 @@ from xml.etree.ElementTree import Element, ElementTree, fromstring
 from enigma import BT_ALPHABLEND, BT_ALPHATEST, BT_HALIGN_CENTER, BT_HALIGN_LEFT, BT_HALIGN_RIGHT, BT_KEEP_ASPECT_RATIO, BT_SCALE, BT_VALIGN_BOTTOM, BT_VALIGN_CENTER, BT_VALIGN_TOP, addFont, eLabel, eListbox, ePixmap, ePoint, eRect, eRectangle, eSize, eSlider, eSubtitleWidget, eWidget, eWindow, eWindowStyleManager, eWindowStyleSkinned, getDesktop, gFont, getFontFaces, gMainDC, gRGB
 
 from Components.config import ConfigSubsection, ConfigText, config
-from Components.RcModel import rc_model
 from Components.SystemInfo import BoxInfo
 from Components.Sources.Source import ObsoleteSource
 from Tools.Directories import SCOPE_CONFIG, SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadLines, fileReadXML
@@ -129,7 +128,7 @@ def InitSkins():
 		print(f"[Skin] Error: Adding {name} display skin '{config.skin.display_skin.value}' has failed!")
 		result.append(skin)
 	# Add the activated optional skin parts.
-	if currentPrimarySkin != None:
+	if currentPrimarySkin is not None:
 		partsDir = resolveFilename(SCOPE_GUISKIN, pathjoin(dirname(currentPrimarySkin), "mySkin", ""))
 		if pathExists(partsDir) and currentPrimarySkin != DEFAULT_SKIN:
 			for file in sorted(listdir(partsDir)):
@@ -1773,7 +1772,7 @@ def readSkin(screen, skin, names, desktop):
 				myName = name  # Use this name for debug output.
 				break
 			else:
-				widgetList = ", ".join(screen.mandatoryWidgets)
+				widgetList = "', '".join(screen.mandatoryWidgets)
 				print(f"[Skin] Warning: Skin screen '{name}' rejected as it does not offer all the mandatory widgets '{widgetList}'!")
 				myScreen = None
 	else:
@@ -1781,7 +1780,7 @@ def readSkin(screen, skin, names, desktop):
 	if myScreen is None:  # Otherwise try embedded skin.
 		myScreen = getattr(screen, "parsedSkin", None)
 	if myScreen is None and getattr(screen, "skin", None):  # Try uncompiled embedded skin.
-		if isinstance(screen.skin, list):
+		if isinstance(screen.skin, list):  # This mode of skin scaling is deprecated!
 			print(f"[Skin] Resizable embedded skin template found in '{myName}'.")
 			skin = screen.skin[0] % tuple([int(x * getSkinFactor()) for x in screen.skin[1:]])
 		else:
@@ -1931,7 +1930,7 @@ def readSkin(screen, skin, names, desktop):
 				raise SkinError(f"Renderer '{widgetRenderer}' not found")
 			renderer = rendererClass()  # Instantiate renderer.
 			renderer.connect(source)  # Connect to source.
-			renderer.label_name = widgetSource or widgetName  # Allows that it can be checked a label exists in the skin.
+			renderer.label_name = widgetSource or widgetName #allows that it can be checked a label exists in the skin
 			attributes = renderer.skinAttributes = []
 			collectAttributes(attributes, widget, context, skinPath, ignore=("render", "source"))
 			screen.renderer.append(renderer)
@@ -1952,8 +1951,8 @@ def readSkin(screen, skin, names, desktop):
 
 			usedComponents.add(wclassname)
 
-			screen[wclassname] = addonClass()  # init the addon
-			screen[wclassname].connectRelatedElement(wconnection, screen)  # connect it to related ellement
+			screen[wclassname] = addonClass() #init the addon
+			screen[wclassname].connectRelatedElement(wconnection, screen) #connect it to related ellement
 			attributes = screen[wclassname].skinAttributes = []
 			collectAttributes(attributes, widget, context, skinPath, ignore=("addon",))
 
@@ -2054,12 +2053,12 @@ def readSkin(screen, skin, names, desktop):
 	}
 
 	try:
-		msg = f" from list '{', '.join(names)}'" if len(names) > 1 else ""
+		msg = f", from list '{', '.join(names)}'," if len(names) > 1 else ""
 		posX = "?" if context.x is None else str(context.x)
 		posY = "?" if context.y is None else str(context.y)
 		sizeW = "?" if context.w is None else str(context.w)
 		sizeH = "?" if context.h is None else str(context.h)
-		print(f"[Skin] Processing screen '{myName}'{msg}, position=({posX}, {posY}), size=({sizeW}x{sizeH}) for module '{screen.__class__.__name__}'.")
+		print(f"[Skin] Processing screen '{myName}'{msg} position=({posX},{posY}), size=({sizeW},{sizeH}) for module '{screen.__class__.__name__}'.")
 		context.x = 0  # Reset offsets, all components are relative to screen coordinates.
 		context.y = 0
 		processScreen(myScreen, context)
