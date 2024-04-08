@@ -1,5 +1,5 @@
 <wizard>
-	<step id="inputselection" nextstep="modesdetection" timeout="20" timeoutaction="selectnext">
+	<step id="inputselection" nextstep="modesdetection" timeout="10" timeoutaction="selectnext">
 		<condition>
 self.portCount = len(self.listPorts())
 self.condition = self.portCount > 1
@@ -57,7 +57,7 @@ config.av.edid_override.save()
 		</code>
 	</step>
 
-	<step id="modeselection" nextstep="rateselection" timeout="20" timeoutaction="selectnext">
+	<step id="modeselection" nextstep="rateselection" timeout="10" timeoutaction="selectnext">
 		<text value="Select the video mode to be used on the TV.\n\nThe following video modes will automatically change in 20 seconds.\n\nWARNING: If a video mode causes signal loss, hold the EXIT button to return to the mode video list." />
 		<displaytext value="Select video mode" />
 		<list type="dynamic" source="listModes" evaluation="modeSelectionMade" onselect="modeSelectionMoved" />
@@ -68,7 +68,7 @@ self.selectKey("DOWN")
 		</code>
 	</step>
 
-	<step id="rateselection" nextstep="end" timeout="20" timeoutaction="selectnext">
+	<step id="rateselection" nextstep="end" timeout="10" timeoutaction="selectnext">
 		<condition>
 self.condition = (self.port != "DVI" or self.mode == "PC")
 		</condition>

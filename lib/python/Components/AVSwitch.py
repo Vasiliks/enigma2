@@ -1,9 +1,11 @@
 from Components.config import config, ConfigSlider, ConfigSelection, ConfigYesNo, ConfigEnableDisable, ConfigSubsection, ConfigBoolean, ConfigSelectionNumber, ConfigNothing, NoSave
-from enigma import eAVControl, eDVBVolumecontrol, getDesktop
+from enigma import eAVSwitch, eAVControl, eDVBVolumecontrol, getDesktop
 from Components.SystemInfo import BoxInfo
 from os.path import isfile
 from Tools.AVHelper import pChoice, readChoices
 from Tools.Directories import fileWriteLine
+
+iAVSwitch = None # will be initialized later, allows to import name 'iAVSwitch' from 'Components.AVSwitch'
 
 MODULE_NAME = __name__.split(".")[-1]
 
@@ -35,13 +37,13 @@ class AVSwitch:
 			eAVControl.getInstance().setVideoSize(newtop, 0, newwidth, newheight)
 
 	def setColorFormat(self, value):
-		eAVControl.getInstance().setColorFormat(value)
+		eAVSwitch.getInstance().setColorFormat(value)
 
 	def setInput(self, input):
 		eAVControl.getInstance().setInput(input, 1)
 
 	def setSystem(self, value):
-		eAVControl.getInstance().setVideoMode(MODEL)
+		eAVSwitch.getInstance().setVideomode(value)
 
 	def getOutputAspect(self):
 		valstr = config.av.aspectratio.value
@@ -94,10 +96,7 @@ class AVSwitch:
 			value = 2  # auto(4:3_off)
 		else:
 			value = 1  # auto
-		eAVControl.getInstance().setWSS(value)
-
-
-iAVSwitch = AVSwitch()
+		eAVSwitch.getInstance().setWSS(value)
 
 
 def InitAVSwitch():
@@ -213,6 +212,7 @@ def InitAVSwitch():
 		else:
 			map = {"cvbs": 0, "rgb": 1, "svideo": 2, "yuv": 3}
 		iAVSwitch.setColorFormat(map[configElement.value])
+	config.av.colorformat.addNotifier(setColorFormat)
 
 	def setAspectRatio(configElement):
 		map = {"4_3_letterbox": 0, "4_3_panscan": 1, "16_9": 2, "16_9_always": 3, "16_10_letterbox": 4, "16_10_panscan": 5, "16_9_letterbox": 6}
@@ -231,10 +231,6 @@ def InitAVSwitch():
 	config.av.wss.addNotifier(setWSS)
 
 	iAVSwitch.setInput("ENCODER")  # init on startup
-	if MODEL in ("gb7356", "et5x00", "et6x00", "ixussone", "ixusszero", "axodin", "axase3", "optimussos1", "optimussos2", "gb800seplus", "gb800ueplus", "gbultrase", "gbultraue", "gbultraueh", "twinboxlcd"):
-		detected = False
-	else:
-		detected = eAVControl.getInstance().hasScartSwitch()
 
 	BoxInfo.setItem("ScartSwitch", eAVControl.getInstance().hasScartSwitch())
 
@@ -868,3 +864,6 @@ def InitAVSwitch():
 		("50", _("Force 50Hz")),
 		("60", _("Force 60Hz"))
 	])
+
+
+iAVSwitch = AVSwitch()
