@@ -425,7 +425,6 @@ public:
 	gFont *getEntryFont() { return m_style.m_font; }
 	gFont *getValueFont() { return m_style.m_valuefont; }
 	gFont *getHeaderFont() { return m_style.m_headerfont; }
-	int getMaxItemTextWidth() { return m_content->getMaxItemTextWidth(); }
 	int getItemsPerPage() {
 		if (m_orientation == orHorizontal)
 			return m_max_columns;
@@ -434,6 +433,42 @@ public:
 		else
 			return m_max_rows;
 		}
+
+	int getCurrentPage()
+	{
+		if (m_content)
+		{
+			int max = 0;
+			if (m_orientation == orGrid)
+				max = m_max_columns * m_max_rows;
+			else
+				max = (m_orientation == orHorizontal) ? m_max_columns : m_max_rows;
+			if (max > 0)
+			{
+				return (m_content->cursorGet() / max) + 1;
+			}
+		}
+		return 0;
+	}
+
+	int getPageCount()
+	{
+		if (m_content)
+		{
+			int max = 0;
+			if (m_orientation == orGrid)
+				max = m_max_columns * m_max_rows;
+			else
+				max = (m_orientation == orHorizontal) ? m_max_columns : m_max_rows;
+			if (max > 0)
+			{
+				return (int)std::ceil((float)m_content->size() / (float)max);
+			}
+		}
+		return 0;
+	}
+
+	int getMaxItemTextWidth() { return m_content->getMaxItemTextWidth(); }
 
 #ifndef SWIG
 	struct eListboxStyle *getLocalStyle(void);
